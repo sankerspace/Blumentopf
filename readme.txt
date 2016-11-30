@@ -1,0 +1,1 @@
+Hier ist ein Spannungsmess-Testprogramm (VoltageCheck) sowie der ganze restliche Code (noch in Entwicklung) vom Messknoten (SensorNode) und dem Controller (RF_Receiver).
