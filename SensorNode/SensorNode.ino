@@ -12,48 +12,98 @@
   by Bernhard Fritz
 */
 
-#include <JeeLib.h>
-#include <dht11.h>
+#include <JeeLib.h>   // For sleeping
+#include <dht11.h>    // Termperature and humidity sensor
 #include <SPI.h>
-#include "nRF24L01.h"
-#include "RF24.h"
+#include "nRF24L01.h" // radio
+#include "RF24.h"     // radio
+#include <EEPROM.h>
 
+// For RTC:
+#include <Time.h>
+#include <TimeLib.h>
+#include <DS1302RTC.h>
+
+// Comment this line for the release version:
 #define DEBUG 1
 
-#define DHT11PIN 5
-#define MOISTURE_THRESHOLD (1000)
-#define LIGHT_THRESHOLD (512)
-#define SLEEPDURATION (500)
-#define BAUD (9600)
-#define PRE_SLEEP_DELAY (100)
-#define BREAK_DURATION (200)
-#define IREF  (1.1)
-#define RF_STAQRTUP_TIME (2000)
+// For getting rid of serial communication in the release version:
+#ifdef DEBUG
+  #define DEBUG_PRINT(x)        Serial.print(x)
+  #define DEBUG_PRINTSTR(x)     Serial.print(F(x))
+  #define DEBUG_PRINTDIG(x, c)  Serial.print (x, c)
+  #define DEBUG_PRINTLN(x)      Serial.println (x)
+  #define DEBUG_PRINTLNSTR(x)   Serial.println(F(x))
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTSTR(x)
+  #define DEBUG_PRINT(x, c)
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINTLNSTR(x)
+#endif 
+
+
+
+#define DHT11PIN 5                // Pin number for temperature/humidity sensor
+#define MOISTURE_THRESHOLD (1000) // wet/dry threshold
+#define LIGHT_THRESHOLD (512)     // day/nigth threshold
+#define BAUD (9600)               // serial BAUD rate
+#define PRE_SLEEP_DELAY (100)     // time to finish serial communication before sleep
+#define IREF  (1.1)               // 1V1 voltage of the ADC
+#define EEPROM_ID_ADDRESS (0)     // ADDRESS of init data within the EEPROM
+#define RTC_SYNC_THRESHOLD (3)    // How many seconds the Controller and Node clocks can drift apart before resynchronization
+
+
+/*
+ * The following defines are for node status bit operations
+ */
+#define RTC_RUNNING_BIT (0)       // RTC_RUNNING_BIT:       0...no RTC, 1...RTC okay
+#define MSG_TYPE_BIT (1)          // MSG_TYPE_BIT:          0...init, 1...data
+#define NEW_NODE_BIT (2)          // NEW_NODE_BIT:          0...known node, 1...new node
+#define EEPROM_DATA_AVAILABLE (3) // EEPROM_DATA_AVAILABLE: 0...no data, 1...data available
+#define EEPROM_DATA_PACKED (4)    // EEPROM_DATA_PACKED:    0...live data, 1...EEPROM data
+
+
+/*
+ * The following defines are for controller status bit operations
+ */
+#define REGISTER_ACK_BIT (0)
+#define FETCH_EEPROM_DATA1 (1)
+#define FETCH_EEPROM_DATA2 (2)
+
 
 /*
  * stores all measurment data in 12 bytes. 32 bytes are available in a message.
 */
 struct sensorData
 {
+  uint16_t ID;
   float temperature;
   float humidity;
   int moisture;
   int brightness;
-  int interval = 2;
   float voltage;
+  uint8_t state;
+  time_t realTime;
+  uint16_t interval = 2;
 };
 struct sensorData myData;
 
+struct responseData
+{
+  uint16_t ID;
+  time_t ControllerTime;
+  uint16_t interval;
+  uint8_t state;
+};
+struct responseData myResponse;
+
 struct EEPROM_Data
 {
-  int ID;
+  uint16_t ID;
 };
 
-struct Registration_Data
-{
-  int ID;
-  long real_time;
-};
+
 /*
 // Hardware configuration for RF
 //
@@ -77,6 +127,10 @@ struct Registration_Data
 RF24 radio(9,10);
 
 
+// Init the DS1302
+// Set pins:  CE, IO,CLK
+DS1302RTC RTC(2, 3, 4);
+
 // Setting the Sensor Pins
 int moisturePin = A0;
 int lightPin = A1;
@@ -93,13 +147,12 @@ const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
  
 dht11 DHT11;
 
-
+    
 
 
 void setup_RF();
 int readDHT11();
 void printValues(int DHT11_State, struct sensorData);
-
 
 ISR(WDT_vect)
 {
@@ -109,135 +162,253 @@ ISR(WDT_vect)
 // the setup function runs once when you press reset or power the board
 void setup()
 {
-   struct EEPROM_Data myEEPROMData;
-   struct Registration_Data myRegistration;
-   int eeAddress;
 
-   eeAddress = 0;
-   
+   int nRet;
+   int nDelay;    // transmission duration in ms
+   struct EEPROM_Data myEEPROMData;
+
+   myData.state = 0;
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(moisturePin, INPUT);
   pinMode(lightPin, INPUT);
   pinMode(sensorPower, OUTPUT);
 
-  myData.interval = 20;  // at default repeat measurement every 2 seconds
+  myResponse.interval = 20;  // at default repeat measurement every 2 seconds
 
 //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
   delay(100);
+  delay(400);     // RTC needs 500ms startup time in total
 
+  setup_RF();       // initialize the RF24L01+ module
+  
 // In debug mode, output some stuff
-#if DEBUG
-  Serial.begin(BAUD);
-  Serial.println("Sensor Check Application 0.1");
-  Serial.print("DHT11 LIBRARY VERSION: ");
-  Serial.println(DHT11LIB_VERSION);
-  Serial.println("----------------");
+  #if DEBUG
+    Serial.begin(BAUD);
+  #endif
 
+  DEBUG_PRINTSTR("SensorNode 0.1, ");
+  DEBUG_PRINTSTR("DHT11 LIBRARY VERSION: ");
+  DEBUG_PRINTLN(DHT11LIB_VERSION);
+  DEBUG_PRINTLNSTR("----------------");
+
+
+  
   if (sizeof(struct sensorData) > 32)
   {
-    Serial.println("Fatal error - too much sensor data. Restructure message protocol\n");
+    DEBUG_PRINTLNSTR("Fatal error - too much sensor data. Restructure message protocol\n");
   }
-#endif
+  
+  // setup the RTC
+  setupRTC();
+
+  // read EEPROM
+
+  EEPROM.get(EEPROM_ID_ADDRESS,myEEPROMData);   // reading a struct, so it is flexible...
+  myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
 
 
-// read EEPROM
-
-  EEPROM.get(eeAddress,myEEPROMData);
-  if (myEEPROMData.ID > 0)
+  nRet = registerNode(&nDelay);
+  while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
   {
-    Serial.print("EEPROM-ID found: ");
-    Serial.print(myEEPROMData.ID);
-    Serial.print(". Registering at the server... ");
-  }
-  else
-  {
-    Serial.print("No EEPROM-ID found. Registering at server...");
-    myRegistration.ID = myEEPROMData.ID;
-//      myRegistration.real_time = getRealTime();
-//    requestID(&myRegistration);
+    Sleepy::loseSomeTime(10000);
+    nRet = registerNode(&nDelay);
   }
 
-// initialice the NRF24L01
-//  setup_RF();
+  adjustRTC(nDelay);
  
 }
 
-/* Sendet eine Nachricht zum Server, dass eine neue ID benötigt wird. Das wird nur einmal für jeden neuen Knoten ausgeführt.
-* Der Server antwortet mit einer Zufalls-ID und speichert sie in einer Tabelle. Der Client spechert die ID auch in seinemm EPROM und verwendet für zukünftige starts diese ID.
+/*
+ * The aim of this function is to adjust the real time clock that it is synchronized with the Controller clock.
+ * The Transmission duration and the controller real time at previous transmission is known.
+ * So one can calculate the current time of the controller within some hundred milliseconds.
+ * Adjusting the delay with a manual measurement (Synchronized LED blinking) also would be possible. But not stable if router nodes are used.
+ * The RC1302 doesn't support direct subsecond synchronisation. So I just the real time second and also do not transmit milliseconds between the nodes.
+ * If the difference between the real time clocks is bigger than a certain threshold, the SensorNode clock gets updated.
 */
-requestID(struct* Registration_Data myRegistration)
+void adjustRTC(int nDelay)
 {
-   long request_Real_time;
-  request_Real_time = myRegistration.real_time;
-  digitalWrite(sensorPower, HIGH);   // turn on the sensor power and wait some time to stabilize
+// (nDelay - 110)     / eigentliche Laufzeit. Server und Node machen in Summe 110ms Pause
+// (nDelay - 110) /2  / Laufzeit pro Richtung
+//  (myResponse.ControllerTime + nDelay/2 - 55) // ungefähre aktuelle Zeit. Die Verarbeitungszeit am Node hat das etwas verzögert, aber der Algorithmus kann angepasst werden, wenn wir die RTCs haben.
+// since the RC1302  doesn't have easy ways to set it to milliseconds and I don't want spent too much time with synchronizing, we are happy with a resolution of a second and don't adjust the time...
+  time_t tLocalTime;
 
-
-  RF24 radio(9,10);
-  setup_RF(&radio);
-  delay(RF_STAQRTUP_TIME);    // RF24 needs time to start up
-
-
-
-// has to be revised:
-  radio->write(&myRegistration, sizeof(struct Registration_Data));
-  
-  delay(10);   
-    // Now, continue listening
-    radio->startListening();
-
-
-    // Wait here until we get a response, or timeout (250ms)
-    unsigned long started_waiting_at = millis();
-    bool timeout = false;
-    while ( (radio->available() == false) && ! timeout )
+  if ((myData.state & (1 << RTC_RUNNING_BIT))  == true)     // only sync if the clock is working.
+  {
+    tLocalTime = RTC.get();
+    if (abs(tLocalTime - myResponse.ControllerTime) > RTC_SYNC_THRESHOLD)
     {
-      if (millis() - started_waiting_at > 200 )
-      {
-        timeout = true;
-      }
+      RTC.set(myResponse.ControllerTime);
     }
+  }
+}
+
+void setupRTC()
+{
+  if (RTC.haltRTC())
+  {
+    DEBUG_PRINTSTR("Real time clock stopped.");
+  }
+  else
+  {
+    DEBUG_PRINTSTR("Real time clock running.");
+  }
+
+  if (RTC.writeEN())
+  {
+    DEBUG_PRINTLNSTR("   -   Write allowed.");
+  }
+  else
+  {
+    DEBUG_PRINTLNSTR("   -   Write protected.");
+  }
+
+
+  { // Muss ich das überhaupt synchronisieren?? Schließlich les ich die RTC ja immer neu aus...sollte ich probieren, wenn ich die RTC hab!
+    
+    setSyncProvider(RTC.get); // the function to get the time from the RTC
   
-    // Describe the results
-    if ( timeout )
+    if(timeStatus() == timeSet)
     {
-      Serial.println("Failed, response timed out.");
+      DEBUG_PRINTLNSTR("RTC sync...okay!");
+      myData.state |= (1 << RTC_RUNNING_BIT); // sets the RTC bit indicating the RTC is running.
     }
     else
     {
-      // Grab the response, compare, and send to debugging spew
-      unsigned long got_time;
-      got_time = millis();
-      radio->read(&myRegistration, sizeof(struct Registration_Data));
-      
-      // Show response
-      Serial.print("Got registration response from Server. ID is ");
-      Serial.println(myRegistration.ID);
-      Serial.print("Current time: ");
-      Serial.println(myRegistration.real_time);
-      // Hier sollte man sich eine Synchronisation überlegen...zB so:
-//      set_real_time(myRegistration.real_time + (myRegistration.real_time - request_Real_time));
+      DEBUG_PRINTLNSTR("RTC sync...FAIL!");
+      myData.state &= ~(1 << RTC_RUNNING_BIT); // clears the RTC bit indicating a problem with the RTC.
     }
-    
   }
+}
+
+int registerNode(int *pnDelay)
+{
+  struct EEPROM_Data myEEPROMData;
+  
+  int nRet;
+   
+  if (myData.ID > 0)                        // this is a known node
+  {
+    DEBUG_PRINTSTR("EEPROM-ID found: ");
+    DEBUG_PRINT(myData.ID);                // Persistent ID
+    DEBUG_PRINTLNSTR(". Registering at the server with this persistent ID... ");
+
+    myData.state &= ~(1 << NEW_NODE_BIT);    // this is a known node
+  }
+  else                                      // this is a new node
+  {
+    DEBUG_PRINTSTR("No EEPROM-ID found. Registering at server with this ");
+    myData.state |= (1 << NEW_NODE_BIT);    // this is a new node
+    
+// works well as a random pattern generator:
+    myData.temperature = (analogRead(17) % 100);
+
+    DEBUG_PRINTSTR("random session ID: ");
+    DEBUG_PRINT(myData.temperature);
+    DEBUG_PRINTLNSTR("...");
+  }
+
+  myData.state &= ~(1 << MSG_TYPE_BIT);     // set message type to init
+
+
+  
+  myData.humidity = 0;
+  myData.moisture = 0;
+  myData.brightness = 0;
+  myData.voltage = 0;
+
+
+
+// send the request:
+  nRet = RF_action(pnDelay);
+  
+  if (nRet == 0)          // There was a response
+  {
+
+      if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
+      {
+
+        DEBUG_PRINTLNSTR("Got response!");
+        DEBUG_PRINTSTR("  Received Session ID: ");
+        DEBUG_PRINT((int)(myResponse.interval/100));
+        
+        if (((int)(myResponse.interval/100)) == (int) (myData.temperature))      // is the response for us? (yes, we stored the session ID in the temperature to keep the message small and reception easy...it could be changed to a struct in a "struct payload" which can be casted in the receiver depending on the status flags)
+        {
+          myData.ID = myResponse.ID;
+          myData.interval = (myResponse.interval % 100);
+          myEEPROMData.ID = myResponse.ID;
+          EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // writing the data (ID) back to EEPROM...
+
+          DEBUG_PRINTLNSTR("...ID matches");
+          DEBUG_PRINTSTR("  Persistent ID: ");
+          DEBUG_PRINT(myResponse.ID);
+          DEBUG_PRINTSTR(", Interval: ");
+          DEBUG_PRINTLN(myData.interval);
+          DEBUG_PRINTSTR("Stored Persistent ID in EEPROM...");
+        }
+        else                                                  // not our response
+        {
+          DEBUG_PRINTLNSTR("ID missmatch! Ignore response...");
+          return 11;
+        }
+
+
+      }
+      else                                              // this is a known node
+      {
+        if (myResponse.ID == myData.ID)                     // is the response for us?
+        {
+          myData.interval = myResponse.interval;
+
+          DEBUG_PRINTSTR("Got response for ID: ");
+          DEBUG_PRINT(myResponse.ID);
+          DEBUG_PRINTSTR("...ID matches, registration successful! Interval: ");
+          DEBUG_PRINTLN(myData.interval);
+        }
+        else                                                  // not our response
+        {
+          DEBUG_PRINTSTR("Got response for ID: ");
+          DEBUG_PRINT(myResponse.ID);
+          DEBUG_PRINTLNSTR("...ID missmatch! Ignore response...");
+          return 12;
+        }
+      }
+      
+  }
+  else      // there was no response
+  {
+    return nRet;
+  }
+
+      
+
+  myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
+  
+  return 0;   // all okay
+}
+
 
 
 // the loop function runs over and over again forever
 void loop()
 {
   int nDHT_Status;
+  int nRet;
+  int nDelay;
   
-
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on to indicate action
   
   digitalWrite(sensorPower, HIGH);   // turn on the sensor power and wait some time to stabilize
 
 
-  RF24 radio(9,10);
-  setup_RF(&radio);
-  delay(2000);    // DHT needs 1s to settle, RF24 also needs time
 
+  delay(1000);    // DHT needs 1s to settle
+
+
+// The accuracy of the ADCs should be improved as in https://www.youtube.com/watch?v=E8GqHvOK4DI&feature=youtu.be
 // read the input on analog pin 0 (moisture):
   myData.moisture = analogRead(moisturePin);
     
@@ -251,37 +422,97 @@ void loop()
   myData.temperature  = DHT11.temperature;
   myData.humidity = DHT11.humidity;
 
-// getting the battery status:
-  myData.voltage = getBatteryVoltage();
+// getting the battery state:
+  myData.voltage = getBatteryVoltage();   // sollten wir diese Methode verwenden, muss sie adaptiert werden. Sie verändert die ADC-Einstellungen
 
 
-#if DEBUG
-  printValues(nDHT_Status, myData);
-#endif
+  #if DEBUG
+    printValues(nDHT_Status, myData);
+  #endif
 
-  RF_action(&radio);
-  delay(2000);       // transmission needs some time
+  myData.state &= ~(1 << EEPROM_DATA_PACKED); // this is live data
+
+  
+// reads the current real time value
+  myData.realTime = RTC.get();
+
   digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
-//  digitalWrite(sensorPower, HIGH);   // when we finished measuring, turn the sensor power off again
+  
+  nRet = RF_action(&nDelay);
+  
+  if (nRet == 0)  // got a response
+  {
+    if (myResponse.ID == myData.ID)     // response is for us
+    {
+      if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
+      {
+        DEBUG_PRINTSTR("Response is valid, next measurement in ");
+        DEBUG_PRINT(myResponse.interval / 10);
+        DEBUG_PRINTLNSTR(" seconds.");
+      }
+      if (EEPROM_data_available() == true)
+      {
+//        if (myResponse.state & (1 << FETCH_EEPROM_DATA1))     // controller wants EEPROM data
+        if ((myResponse.state & ((1 << FETCH_EEPROM_DATA1) | (1 << FETCH_EEPROM_DATA2) )) == 0)     // controller doesn't want EEPROM data
+        {
+          DEBUG_PRINTLNSTR("\tThe controller doesn't want EEPROM data now");
+        }
+        else          // maybe process EEPROM data
+        {
+          
+        }
+      }
+
+    }
+    else      // the response is for another node
+    {
+      store_DATA_to_EEPROM();
+    }
+
+    // Todo : Check whether data is stored in EEPROM and send it if requested
+    
+  }
+  else            // no response or transmission failed. Store data in EEPROM and try again later.
+  {
+    store_DATA_to_EEPROM();
+   // todo : find a replacement strategy and write the data to EEPROM.
+  }
 
   delay(PRE_SLEEP_DELAY);                       // finish the serial communication and RF communication
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off for sleeping
-  Sleepy::loseSomeTime(myData.interval * 100);
-//delay(BREAK_DURATION);
+  Sleepy::loseSomeTime(myResponse.interval * 100);
+//delay(myResponse.interval * 100);
 
 }
 
 
+/*
+ * Stores data which could not be sent to the EEPROM.
+ * It would be good to have an algorithm which evenly uses the EEPROM storage. (Maybe there are simple arduino solutions online...)
+ * For example:
+ *  Possible addresses for data information headers: 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000
+ *  The headers are browsed, always just one header is valid. After the EEPROM data is requested from the controller, the next header is used.
+ *  Address blocks of the actual data is stored in the header.
+ */
+void store_DATA_to_EEPROM()
+{
+  
+}
 
 
-void setup_RF(RF24* radio)
+/*
+ * setup_RF initializes the RF24L01+ for the application.
+*/
+
+//void setup_RF(RF24* radio)
+void setup_RF()
 {
  
  //
  // Setup and configure rf radio
  //
 
- radio->begin();
+ radio.begin();
 
  // optionally, increase the delay between retries & # of retries
  // radio.setRetries(15,15);
@@ -292,7 +523,7 @@ void setup_RF(RF24* radio)
 
   // transmission settings:
 //  radio.setPALevel(RF24_PA_MIN);
-  radio->setChannel(108);  // Above most Wifi Channels
+  radio.setChannel(108);  // Above most Wifi Channels
 
  //
  // Open pipes to other nodes for communication
@@ -304,8 +535,8 @@ void setup_RF(RF24* radio)
  // Open the 'other' pipe for reading, in position #1 (we can have up to 5 pipes open for reading)
 
  
- radio->openWritingPipe(pipes[1]);
- radio->openReadingPipe(1,pipes[0]);
+ radio.openWritingPipe(pipes[1]);
+ radio.openReadingPipe(1,pipes[0]);
  
  //
  // Start listening
@@ -317,7 +548,7 @@ void setup_RF(RF24* radio)
  // Dump the configuration of the rf unit for debugging
  //
 
- radio->printDetails();
+ radio.printDetails();
 
 }
 
@@ -331,6 +562,7 @@ float getBatteryVoltage()
 {
   analogReference(EXTERNAL); //set the ADC reference to AVCC 
   burn8Readings(A0); //make 8 readings but don't use them to ensure good reading after ADC reference change 
+  int buffer = ADMUX;
   ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
   unsigned long start = millis(); //get timer value
   while ( (start + 3) > millis()); //delay for 3 milliseconds
@@ -339,8 +571,10 @@ float getBatteryVoltage()
   int result = ADCL; //get first half of result
   result |= ADCH<<8; //get rest of the result
   float batVolt = (IREF / result)*1024; //Use the known iRef to calculate battery voltage
-  analogReference(INTERNAL); //set the ADC reference back to internal
+  ADMUX = buffer;
+  analogReference(DEFAULT); //set the ADC reference back to internal
   burn8Readings(A0); //make 8 readings but don't use them to ensure good reading after ADC reference change 
+  burn8Readings(A1); //make 8 readings but don't use them to ensure good reading after ADC reference change 
   return batVolt;
 }
 
@@ -365,17 +599,16 @@ int readDHT11()
   switch (chk)
   {
     case DHTLIB_OK: 
-//    Serial.println("OK");
-    return 0;
+      return 0;
     case DHTLIB_ERROR_CHECKSUM: 
-    Serial.println("DHT11 - Checksum error"); 
-    return 1;
+      DEBUG_PRINTLNSTR("DHT11 - Checksum error"); 
+      return 1;
     case DHTLIB_ERROR_TIMEOUT: 
-    Serial.println("DHT11 - Time out error"); 
-    return 2;
+      DEBUG_PRINTLNSTR("DHT11 - Time out error");
+      return 2;
     default: 
-    Serial.println("DHT11 - Unknown error"); 
-    return 3;
+      DEBUG_PRINTLNSTR("DHT11 - Unknown error"); 
+      return 3;
   }
 
   return 4;
@@ -384,19 +617,19 @@ int readDHT11()
 void printValues(int DHT11_State, struct sensorData myData)
 {
   char cDegreeSymbol = 176;
-  Serial.println("\n");
+  DEBUG_PRINTLN("\n");
 
 // Print the Temperature and Humidity values:
   if (DHT11_State == 0)
   {
-    Serial.print("Humidity:    ");
-    Serial.print((float) myData.humidity , 2);
-    Serial.println("%");
+    DEBUG_PRINTSTR("Humidity:    ");
+    DEBUG_PRINTDIG((float) myData.humidity , 2);
+    DEBUG_PRINTLN("%");
   
-    Serial.print("Temperature: ");
-    Serial.print((float) myData.temperature , 2);
-    Serial.print(cDegreeSymbol);
-    Serial.println("C");
+    DEBUG_PRINTSTR("Temperature: ");
+    DEBUG_PRINTDIG((float) myData.temperature , 2);
+    DEBUG_PRINT(cDegreeSymbol);
+    DEBUG_PRINTLN("C");
     
   }
   else
@@ -404,82 +637,92 @@ void printValues(int DHT11_State, struct sensorData myData)
     switch (DHT11_State)
     {
     case DHTLIB_ERROR_CHECKSUM: 
-      Serial.println("No Humidity and Temperature data - Checksum error"); 
+      DEBUG_PRINTLNSTR("No Humidity and Temperature data - Checksum error"); 
     case DHTLIB_ERROR_TIMEOUT: 
-      Serial.println("No Humidity and Temperature data - Time out error"); 
+      DEBUG_PRINTLNSTR("No Humidity and Temperature data - Time out error"); 
     default: 
-      Serial.println("No Humidity and Temperature data - Unknown error"); 
+      DEBUG_PRINTLNSTR("No Humidity and Temperature data - Unknown error"); 
     }
   }
 
 // Print the light value
   if(myData.brightness < LIGHT_THRESHOLD)
   {
-    Serial.print("It is night (");
-    Serial.print(myData.brightness);
-    Serial.print(")\n");
+    DEBUG_PRINTSTR("It is night (");
+    DEBUG_PRINT(myData.brightness);
+    DEBUG_PRINT(")\n");
   }
   else
   {
-    Serial.print("It is day   (");
-    Serial.print(myData.brightness);
-    Serial.print(")\n");
+    DEBUG_PRINTSTR("It is day   (");
+    DEBUG_PRINT(myData.brightness);
+    DEBUG_PRINT(")\n");
   }
 
 
   // Print the moisture value
   if(myData.moisture < MOISTURE_THRESHOLD)
   {
-    Serial.print("The plant doesn't need watering (");
-    Serial.print(myData.moisture);
-    Serial.println(")");
+    DEBUG_PRINTSTR("The plant doesn't need watering (");
+    DEBUG_PRINT(myData.moisture);
+    DEBUG_PRINTLN(")");
   }
   else {
-    Serial.print("It is time to water the plant   (");
-    Serial.print(myData.moisture);
-    Serial.println(")");
+    DEBUG_PRINTSTR("It is time to water the plant   (");
+    DEBUG_PRINT(myData.moisture);
+    DEBUG_PRINTLN(")");
   }
 
-  Serial.print("Voltage: ");
-  Serial.println(myData.voltage);
+  DEBUG_PRINTSTR("Voltage:     ");
+  DEBUG_PRINT(myData.voltage);
+  DEBUG_PRINTLN("V");
   return;
 }
 
-
-
-void RF_action(RF24* radio)
+/*
+ * Checks whether there is unsent data waiting in the EEPROM
+*/
+bool EEPROM_data_available()
 {
-//    unsigned long time[8];
-    unsigned long time;
-//    int newIntervall;
+  return false;
+}
 
 
-  //
-  // Send the data
-  //
-time = 134;
-
+//void RF_action(RF24* radio)
+int RF_action(int* pnDelay)
+{
   
   // First, stop listening so we can talk.
-    radio->stopListening();
-  
-    // Take the time, and send it. This will block until complete
-    Serial.print("Sending measurement data...");
-//    radio.write( &time, sizeof(unsigned long) );
-    radio->write(&myData, sizeof(struct sensorData));
+    radio.stopListening();
+
+    if (EEPROM_data_available() == true)      // there is EEPROM data
+    {
+      myData.state |= (1 << EEPROM_DATA_AVAILABLE);
+    }
+    else                                    // no EEPROM data
+    {
+      myData.state &= ~(1 << EEPROM_DATA_AVAILABLE);
+    }
+    
+    
+    myData.realTime = RTC.get();
+    
+    // Send the measurement results
+    DEBUG_PRINTSTR("Sending data...");
+    radio.write(&myData, sizeof(struct sensorData));
     
   delay(10);   
     // Now, continue listening
-    radio->startListening();
+    radio.startListening();
 
 
     
     // Wait here until we get a response, or timeout (250ms)
     unsigned long started_waiting_at = millis();
     bool timeout = false;
-    while ( (radio->available() == false) && ! timeout )
+    while ( (radio.available() == 0 ) && ! timeout )
     {
-      if (millis() - started_waiting_at > 200 )
+      if (millis() - started_waiting_at > 500 )
       {
         timeout = true;
       }
@@ -488,25 +731,29 @@ time = 134;
     // Describe the results
     if ( timeout )
     {
-      Serial.println("Failed, response timed out.");
+      DEBUG_PRINTLNSTR("Failed, response timed out.");
+      return 1;
     }
-    else
+    else      // There was a response - read the new interval
     {
       // Grab the response, compare, and send to debugging spew
       unsigned long got_time;
       got_time = millis();
-      radio->read( &myData.interval, sizeof(int) );
+      radio.read( &myResponse, sizeof(myResponse) );
       
-      // Spew it
+      // Show response:
       //printf("Got response %lu, round-trip delay: %lu\n\r",got_time,millis()-got_time);
-      Serial.print("Got response ");
-      Serial.print(myData.interval);
-      Serial.print(", round-trip delay: ");
-      Serial.println(millis()-started_waiting_at);
-//      Serial.println("Got response %lu, round-trip delay: %lu",myData.interval,millis()-started_waiting_at);
+
+      DEBUG_PRINTSTR("Got response (Round-trip delay: ");
+      *pnDelay = millis()-started_waiting_at;
+      DEBUG_PRINT(*pnDelay);
+      DEBUG_PRINTLN(" ms)");
+
+      
     }
     
-  
-
+  radio.powerDown();
+    
+  return 0;
 }
 
