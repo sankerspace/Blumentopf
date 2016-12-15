@@ -54,7 +54,7 @@ RF24 radio(9,10);
 // Init the DS1302
 // Set pins:  CE, IO,CLK
 
-//RTC_DS1302 myRTC(2, 3, 4);
+//RTC_DS1302 myRTC(2, 3, 4);    // change as needed. The Idea is that only the constructors need to be changed as another RTC is connected. So the RTC calls below should stay as they are.
 RTC_DS3231 myRTC;
 
 // Setting the Sensor Pins
@@ -107,6 +107,7 @@ void setup()
   delay(100);
   delay(400);     // RTC needs 500ms startup time in total
 
+
   setup_RF();       // initialize the RF24L01+ module
   
 // In debug mode, output some stuff
@@ -114,12 +115,13 @@ void setup()
     Serial.begin(BAUD);
   #endif
 
+
   DEBUG_PRINTSTR("SensorNode 0.1, ");
   DEBUG_PRINTSTR("DHT11 LIBRARY VERSION: ");
   DEBUG_PRINTLN(DHT11LIB_VERSION);
   DEBUG_PRINTLNSTR("----------------");
 
-
+  findIndex();
   
   if (sizeof(struct sensorData) > 32)
   {
@@ -263,8 +265,7 @@ int registerNode(int *pnDelay)
 void loop()
 {
   int nDHT_Status;
-  int nRet;
-  int nDelay;
+  
   
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on to indicate action
   
@@ -304,48 +305,12 @@ void loop()
   myData.realTime = myRTC.getTime();
 
   digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
-  
-  nRet = RF_action(&nDelay);
-  
-  if (nRet == 0)  // got a response
-  {
-    if (myResponse.ID == myData.ID)     // response is for us
-    {
-      if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
-      {
-        DEBUG_PRINTSTR("Response is valid, next measurement in ");
-        DEBUG_PRINT(myResponse.interval / 10);
-        DEBUG_PRINTLNSTR(" seconds.");
 
-        myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
-      }
-      if (EEPROM_data_available() == true)
-      {
-//        if (myResponse.state & (1 << FETCH_EEPROM_DATA1))     // controller wants EEPROM data
-        if ((myResponse.state & ((1 << FETCH_EEPROM_DATA1) | (1 << FETCH_EEPROM_DATA2) )) == 0)     // controller doesn't want EEPROM data
-        {
-          DEBUG_PRINTLNSTR("\tThe controller doesn't want EEPROM data now");
-        }
-        else          // maybe process EEPROM data
-        {
-          
-        }
-      }
 
-    }
-    else      // the response is for another node
-    {
-      store_DATA_to_EEPROM();
-    }
 
-    // Todo : Check whether data is stored in EEPROM and send it if requested
-    
-  }
-  else            // no response or transmission failed. Store data in EEPROM and try again later.
-  {
-    store_DATA_to_EEPROM();
-   // todo : find a replacement strategy and write the data to EEPROM.
-  }
+  sendData();
+
+
 
   delay(PRE_SLEEP_DELAY);                       // finish the serial communication and RF communication
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off for sleeping
@@ -357,6 +322,79 @@ void loop()
 
 }
 
+void sendData()
+{
+  bool sending = true;
+  int nRet;
+  int nDelay;
+  
+  while (sending == true)
+  {
+    nRet = RF_action(&nDelay);
+    
+    if (nRet == 0)  // got a response
+    {
+      if (myResponse.ID == myData.ID)     // response is for us
+      {
+        if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
+        {
+          DEBUG_PRINTSTR("Response is valid, next measurement in ");
+          DEBUG_PRINT(myResponse.interval / 10);
+          DEBUG_PRINTLNSTR(" seconds.");
+  
+          myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
+        }
+        // in case EEPROM data has been transmitted, we skip the clock synchronisation. The synchronisation just has been checked.
+        
+        if (EEPROM_data_available() == true)
+        {
+          switch (myResponse.state &  FETCH_EEPROM_REG_MASK)
+          {
+            case FETCH_EEPROM_REG_SKIP :     // controller doesn't want EEPROM data..go to sleep
+              DEBUG_PRINTLNSTR("\tThe controller doesn't want EEPROM data now");
+              sending = false;
+              break;
+            case FETCH_EEPROM_REG_SEND :     // controller wants EEPROM data now
+              getEEPROMdata();
+              break;
+            case FETCH_EEPROM_REG_DELETE :     // controller doesn't want EEPROM data..delete them
+              deleteEEPROM();
+              sending = false;
+              break;
+            default:
+              break;
+          }
+        }
+        else
+        {
+          sending = false;
+        }
+  
+      }
+      else      // the response is for another node
+      {
+        if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
+        {
+          store_DATA_to_EEPROM();
+        }
+        sending = false;
+        // otherwise we do not care..start sleeping
+      }
+  
+      // Todo : Check whether data is stored in EEPROM and send it if requested
+      
+    }
+    else            // no response or transmission failed. Store data in EEPROM and try again later.
+    {
+      if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
+      {
+        store_DATA_to_EEPROM();
+      }
+      // otherwise we do not care..start sleeping anyway
+      sending = false;
+    }
+  }
+}
 
 /*
  * Stores data which could not be sent to the EEPROM.
@@ -367,10 +405,96 @@ void loop()
  *  Address blocks of the actual data is stored in the header.
  */
 void store_DATA_to_EEPROM()
+{   // todo : find a replacement strategy and write the data to EEPROM.
+  uint8_t nIndexBegin;
+  findIndex();
+  
+}
+
+  uint16_t nIndexBegin;
+  uint16_t nDataBlockBegin;
+
+/*
+ * This function looks for the EEPROM header. The header is located on a different address after each time the EEPROM data gets fully read by the controller.
+ * The purpose is to achieve euqal usage of the EEPROM and avoid defects.
+ * 
+*
+* It runs thorugh a predefined address space in the EEPROM and looks for the header information:
+*   INDEXBEGIN      is the start of the address space
+*   INDEXELEMENTS   is the number fo elements (the element size is defined by the struct. It is adapted automatically)
+*   EEPROM_data_start is the first address of the data address space. It is calculated automatically.
+*   DATARANGE_END   is the end of the data address space.
+*   The number of data elements is calculated automatically, although some more testing is adviced.
+*   
+*   Once found it stores this address. Also the current data address stored in the header is retrieved.
+*   If no header is found, one header address and one data address is randomly selected.
+*   The data address is stored in the EEPROM header at the selected address, so next time it will be found.
+*   
+*
+ */
+void findIndex()
+{
+  uint16_t i;
+  struct EEPROM_Header myEEPROMHeader;
+  uint16_t currentAddress;
+
+
+  for (i = 0; i < INDEXELEMENTS; i++)
+  {
+    currentAddress = INDEXBEGIN + sizeof(myEEPROMHeader) * i;
+    EEPROM.get(currentAddress, myEEPROMHeader);   // reading a struct, so it is flexible...
+    if ((myEEPROMHeader.DataStartPosition & (1<<EEPROM_HEADER_STATUS_VALID)) == true)   // this header is valid.
+    {
+      nIndexBegin = currentAddress;     // This is the Index Position
+      nDataBlockBegin = myEEPROMHeader.DataStartPosition & ~(1<<EEPROM_HEADER_STATUS_VALID);    // This is the position of the first EEPROM data
+      DEBUG_PRINTSTR("Found Header at ");
+      DEBUG_PRINT(nIndexBegin);
+      DEBUG_PRINTSTR(", first data block is at ");
+      DEBUG_PRINT(nDataBlockBegin);
+      return;
+    }
+  }
+
+  // if it reaches this point, no index was found. Set random header index:
+  nIndexBegin = INDEXBEGIN + sizeof(myEEPROMHeader) * (analogRead(17) % INDEXELEMENTS);
+
+  // if it reaches this point, no index was found. Set random index:
+  uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(myEEPROMHeader) * INDEXELEMENTS;
+  uint16_t modul = (DATARANGE_END - EEPROM_data_start) / sizeof(struct sensorData);
+
+
+
+  nDataBlockBegin = EEPROM_data_start + sizeof(struct sensorData) * (analogRead(17) % modul);     // This is the new index Position;
+  myEEPROMHeader.DataStartPosition =  nDataBlockBegin;
+  myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);    // Set this as the position of the first EEPROM data
+
+
+  EEPROM.put(nIndexBegin, myEEPROMHeader);   // writing the data (ID) back to EEPROM...
+  DEBUG_PRINTSTR("No header found - set Header at ");
+  DEBUG_PRINT(nIndexBegin);
+  DEBUG_PRINTSTR(", set first data block randomly at ");
+  DEBUG_PRINTLN(nDataBlockBegin);
+
+  DEBUG_PRINTLNSTR("Initializing data block..");
+
+  struct sensorData dummy;
+  dummy.state = 0;    // the EEPROM_DATA_AVAILABLE bit has to be zero
+  EEPROM.put(nDataBlockBegin, dummy);   // writing the data (ID) back to EEPROM...
+  
+}
+
+/*
+ * Deletes data stored in EEPROM
+ */
+void deleteEEPROM()
 {
   
 }
 
+void getEEPROMdata()
+{
+  
+}
 
 /*
  * setup_RF initializes the RF24L01+ for the application.
