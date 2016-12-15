@@ -11,6 +11,7 @@
   created 18 Nov 2016
   by Bernhard Fritz
 */
+#include "Blumentopf.h"
 
 #include <JeeLib.h>   // For sleeping
 #include <dht11.h>    // Termperature and humidity sensor
@@ -22,87 +23,10 @@
 // For RTC:
 #include <Time.h>
 #include <TimeLib.h>
-#include <DS1302RTC.h>
-
-// Comment this line for the release version:
-#define DEBUG 1
-
-// For getting rid of serial communication in the release version:
-#ifdef DEBUG
-  #define DEBUG_PRINT(x)        Serial.print(x)
-  #define DEBUG_PRINTSTR(x)     Serial.print(F(x))
-  #define DEBUG_PRINTDIG(x, c)  Serial.print (x, c)
-  #define DEBUG_PRINTLN(x)      Serial.println (x)
-  #define DEBUG_PRINTLNSTR(x)   Serial.println(F(x))
-#else
-  #define DEBUG_PRINT(x)
-  #define DEBUG_PRINTSTR(x)
-  #define DEBUG_PRINT(x, c)
-  #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINTLNSTR(x)
-#endif 
 
 
-
-#define DHT11PIN 5                // Pin number for temperature/humidity sensor
-#define MOISTURE_THRESHOLD (1000) // wet/dry threshold
-#define LIGHT_THRESHOLD (512)     // day/nigth threshold
-#define BAUD (9600)               // serial BAUD rate
-#define PRE_SLEEP_DELAY (100)     // time to finish serial communication before sleep
-#define IREF  (1.1)               // 1V1 voltage of the ADC
-#define EEPROM_ID_ADDRESS (0)     // ADDRESS of init data within the EEPROM
-#define RTC_SYNC_THRESHOLD (3)    // How many seconds the Controller and Node clocks can drift apart before resynchronization
-
-
-/*
- * The following defines are for node status bit operations
- */
-#define RTC_RUNNING_BIT (0)       // RTC_RUNNING_BIT:       0...no RTC, 1...RTC okay
-#define MSG_TYPE_BIT (1)          // MSG_TYPE_BIT:          0...init, 1...data
-#define NEW_NODE_BIT (2)          // NEW_NODE_BIT:          0...known node, 1...new node
-#define EEPROM_DATA_AVAILABLE (3) // EEPROM_DATA_AVAILABLE: 0...no data, 1...data available
-#define EEPROM_DATA_PACKED (4)    // EEPROM_DATA_PACKED:    0...live data, 1...EEPROM data
-
-
-/*
- * The following defines are for controller status bit operations
- */
-#define REGISTER_ACK_BIT (0)
-#define FETCH_EEPROM_DATA1 (1)
-#define FETCH_EEPROM_DATA2 (2)
-
-
-/*
- * stores all measurment data in 12 bytes. 32 bytes are available in a message.
-*/
-struct sensorData
-{
-  uint16_t ID;
-  float temperature;
-  float humidity;
-  int moisture;
-  int brightness;
-  float voltage;
-  uint8_t state;
-  time_t realTime;
-  uint16_t interval = 2;
-};
 struct sensorData myData;
-
-struct responseData
-{
-  uint16_t ID;
-  time_t ControllerTime;
-  uint16_t interval;
-  uint8_t state;
-};
 struct responseData myResponse;
-
-struct EEPROM_Data
-{
-  uint16_t ID;
-};
-
 
 /*
 // Hardware configuration for RF
@@ -129,7 +53,9 @@ RF24 radio(9,10);
 
 // Init the DS1302
 // Set pins:  CE, IO,CLK
-DS1302RTC RTC(2, 3, 4);
+
+//RTC_DS1302 myRTC(2, 3, 4);
+RTC_DS3231 myRTC;
 
 // Setting the Sensor Pins
 int moisturePin = A0;
@@ -152,7 +78,7 @@ dht11 DHT11;
 
 void setup_RF();
 int readDHT11();
-void printValues(int DHT11_State, struct sensorData);
+void printValues(int DHT11_State);
 
 ISR(WDT_vect)
 {
@@ -201,7 +127,8 @@ void setup()
   }
   
   // setup the RTC
-  setupRTC();
+//  setupRTC();
+  myRTC.init(&myData.state);
 
   // read EEPROM
 
@@ -212,77 +139,17 @@ void setup()
   nRet = registerNode(&nDelay);
   while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
   {
+    #ifdef DEBUG
+      Serial.flush();
+    #endif
     Sleepy::loseSomeTime(10000);
     nRet = registerNode(&nDelay);
   }
 
-  adjustRTC(nDelay);
+  myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
  
 }
 
-/*
- * The aim of this function is to adjust the real time clock that it is synchronized with the Controller clock.
- * The Transmission duration and the controller real time at previous transmission is known.
- * So one can calculate the current time of the controller within some hundred milliseconds.
- * Adjusting the delay with a manual measurement (Synchronized LED blinking) also would be possible. But not stable if router nodes are used.
- * The RC1302 doesn't support direct subsecond synchronisation. So I just the real time second and also do not transmit milliseconds between the nodes.
- * If the difference between the real time clocks is bigger than a certain threshold, the SensorNode clock gets updated.
-*/
-void adjustRTC(int nDelay)
-{
-// (nDelay - 110)     / eigentliche Laufzeit. Server und Node machen in Summe 110ms Pause
-// (nDelay - 110) /2  / Laufzeit pro Richtung
-//  (myResponse.ControllerTime + nDelay/2 - 55) // ungefähre aktuelle Zeit. Die Verarbeitungszeit am Node hat das etwas verzögert, aber der Algorithmus kann angepasst werden, wenn wir die RTCs haben.
-// since the RC1302  doesn't have easy ways to set it to milliseconds and I don't want spent too much time with synchronizing, we are happy with a resolution of a second and don't adjust the time...
-  time_t tLocalTime;
-
-  if ((myData.state & (1 << RTC_RUNNING_BIT))  == true)     // only sync if the clock is working.
-  {
-    tLocalTime = RTC.get();
-    if (abs(tLocalTime - myResponse.ControllerTime) > RTC_SYNC_THRESHOLD)
-    {
-      RTC.set(myResponse.ControllerTime);
-    }
-  }
-}
-
-void setupRTC()
-{
-  if (RTC.haltRTC())
-  {
-    DEBUG_PRINTSTR("Real time clock stopped.");
-  }
-  else
-  {
-    DEBUG_PRINTSTR("Real time clock running.");
-  }
-
-  if (RTC.writeEN())
-  {
-    DEBUG_PRINTLNSTR("   -   Write allowed.");
-  }
-  else
-  {
-    DEBUG_PRINTLNSTR("   -   Write protected.");
-  }
-
-
-  { // Muss ich das überhaupt synchronisieren?? Schließlich les ich die RTC ja immer neu aus...sollte ich probieren, wenn ich die RTC hab!
-    
-    setSyncProvider(RTC.get); // the function to get the time from the RTC
-  
-    if(timeStatus() == timeSet)
-    {
-      DEBUG_PRINTLNSTR("RTC sync...okay!");
-      myData.state |= (1 << RTC_RUNNING_BIT); // sets the RTC bit indicating the RTC is running.
-    }
-    else
-    {
-      DEBUG_PRINTLNSTR("RTC sync...FAIL!");
-      myData.state &= ~(1 << RTC_RUNNING_BIT); // clears the RTC bit indicating a problem with the RTC.
-    }
-  }
-}
 
 int registerNode(int *pnDelay)
 {
@@ -427,14 +294,14 @@ void loop()
 
 
   #if DEBUG
-    printValues(nDHT_Status, myData);
+    printValues(nDHT_Status);
   #endif
 
   myData.state &= ~(1 << EEPROM_DATA_PACKED); // this is live data
 
   
 // reads the current real time value
-  myData.realTime = RTC.get();
+  myData.realTime = myRTC.getTime();
 
   digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
   
@@ -449,6 +316,8 @@ void loop()
         DEBUG_PRINTSTR("Response is valid, next measurement in ");
         DEBUG_PRINT(myResponse.interval / 10);
         DEBUG_PRINTLNSTR(" seconds.");
+
+        myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
       }
       if (EEPROM_data_available() == true)
       {
@@ -480,6 +349,9 @@ void loop()
 
   delay(PRE_SLEEP_DELAY);                       // finish the serial communication and RF communication
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off for sleeping
+#ifdef DEBUG
+  Serial.flush();
+#endif
   Sleepy::loseSomeTime(myResponse.interval * 100);
 //delay(myResponse.interval * 100);
 
@@ -614,7 +486,7 @@ int readDHT11()
   return 4;
 }
 
-void printValues(int DHT11_State, struct sensorData myData)
+void printValues(int DHT11_State)
 {
   char cDegreeSymbol = 176;
   DEBUG_PRINTLN("\n");
@@ -705,7 +577,7 @@ int RF_action(int* pnDelay)
     }
     
     
-    myData.realTime = RTC.get();
+    myData.realTime = myRTC.getTime();
     
     // Send the measurement results
     DEBUG_PRINTSTR("Sending data...");
