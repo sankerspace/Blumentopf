@@ -2,18 +2,108 @@
 #include <Time.h>
 #include <TimeLib.h>
 #include <DS1302RTC.h>
+#include <EEPROM.h>
 
 #include <dht11.h>
 #include "Blumentopf.h"
 
 /*
-* This scetion deals with the RTC and time conversations
+* This scetion deals with the RTC and time conversions
 *
 */
 
-
  
-//RTC_DS3231::RTC_DS3231() {}
+/*
+*  DS1302
+*/
+
+RTC_DS1302::RTC_DS1302(uint8_t CE_pin, uint8_t IO_pin, uint8_t SCLK_pin)
+	: RTC(CE_pin, IO_pin, SCLK_pin) {}
+
+int RTC_DS1302::init(uint8_t* state)
+{
+  if (RTC.haltRTC())
+  {
+    DEBUG_PRINTSTR("Real time clock stopped.");
+  }
+  else
+  {
+    DEBUG_PRINTSTR("Real time clock running.");
+  }
+
+  if (RTC.writeEN())
+  {
+    DEBUG_PRINTLNSTR("   -   Write allowed.");
+  }
+  else
+  {
+    DEBUG_PRINTLNSTR("   -   Write protected.");
+  }
+
+
+  { // Muss ich das überhaupt synchronisieren?? Schließlich les ich die RTC ja immer neu aus...sollte ich probieren, wenn ich die RTC hab!
+    
+    setSyncProvider(RTC.get); // the function to get the time from the RTC
+  
+    if(timeStatus() == timeSet)
+    {
+      DEBUG_PRINTLNSTR("RTC sync...okay!");
+      *state |= (1 << RTC_RUNNING_BIT); // sets the RTC bit indicating the RTC is running.
+    }
+    else
+    {
+      DEBUG_PRINTLNSTR("RTC sync...FAIL!");
+      *state &= ~(1 << RTC_RUNNING_BIT); // clears the RTC bit indicating a problem with the RTC.
+    }
+  }
+}
+uint8_t RTC_DS1302::setTime(time_t newTime)
+{
+	return RTC.set(newTime);
+}
+
+time_t RTC_DS1302::getTime()
+{
+	return RTC.get();
+}
+int RTC_DS1302::setAlarm(time_t)
+{
+}
+
+/*
+ * The aim of this function is to adjust the real time clock that it is synchronized with the Controller clock, 
+ * but only if a certain deviation has been reached.
+ * The Transmission duration and the controller real time at previous transmission is known.
+ * So one can calculate the current time of the controller within some hundred milliseconds.
+ * Adjusting the delay with a manual measurement (Synchronized LED blinking) also would be possible. But not stable if router nodes are used.
+ * The RC1302 doesn't support direct subsecond synchronisation. So I just the real time second and also do not transmit milliseconds between the nodes.
+ * If the difference between the real time clocks is bigger than a certain threshold, the SensorNode clock gets updated.
+*/
+int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
+{
+// (nDelay - 110)     / eigentliche Laufzeit. Server und Node machen in Summe 110ms Pause
+// (nDelay - 110) /2  / Laufzeit pro Richtung
+//  (controllerTime + nDelay/2 - 55) // ungefähre aktuelle Zeit. Die Verarbeitungszeit am Node hat das etwas verzögert, aber der Algorithmus kann angepasst werden, wenn wir die RTCs haben.
+// since the RC1302  doesn't have easy ways to set it to milliseconds and I don't want spent too much time with synchronizing, we are happy with a resolution of a second and don't adjust the time...
+
+
+  time_t tLocalTime;
+
+  if ((*state & (1 << RTC_RUNNING_BIT))  == true)     // only sync if the clock is working.
+  {
+    tLocalTime = RTC.get();
+    if (abs(tLocalTime - controllerTime) > RTC_SYNC_THRESHOLD)
+    {
+      RTC.set(controllerTime);
+    }
+  }
+  
+}
+
+
+/*
+*  DS3231
+*/
 	
 /* 
 *	Initialises the TWI communication and turns off unnecessary stuff at the RTC.
@@ -99,92 +189,10 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 
 
 
-RTC_DS1302::RTC_DS1302(uint8_t CE_pin, uint8_t IO_pin, uint8_t SCLK_pin)
-	: RTC(CE_pin, IO_pin, SCLK_pin) {}
-
-int RTC_DS1302::init(uint8_t* state)
-{
-  if (RTC.haltRTC())
-  {
-    DEBUG_PRINTSTR("Real time clock stopped.");
-  }
-  else
-  {
-    DEBUG_PRINTSTR("Real time clock running.");
-  }
-
-  if (RTC.writeEN())
-  {
-    DEBUG_PRINTLNSTR("   -   Write allowed.");
-  }
-  else
-  {
-    DEBUG_PRINTLNSTR("   -   Write protected.");
-  }
-
-
-  { // Muss ich das überhaupt synchronisieren?? Schließlich les ich die RTC ja immer neu aus...sollte ich probieren, wenn ich die RTC hab!
-    
-    setSyncProvider(RTC.get); // the function to get the time from the RTC
-  
-    if(timeStatus() == timeSet)
-    {
-      DEBUG_PRINTLNSTR("RTC sync...okay!");
-      *state |= (1 << RTC_RUNNING_BIT); // sets the RTC bit indicating the RTC is running.
-    }
-    else
-    {
-      DEBUG_PRINTLNSTR("RTC sync...FAIL!");
-      *state &= ~(1 << RTC_RUNNING_BIT); // clears the RTC bit indicating a problem with the RTC.
-    }
-  }
-}
-uint8_t RTC_DS1302::setTime(time_t newTime)
-{
-	return RTC.set(newTime);
-}
-
-time_t RTC_DS1302::getTime()
-{
-	return RTC.get();
-}
-int RTC_DS1302::setAlarm(time_t)
-{
-}
-
 
 /*
- * The aim of this function is to adjust the real time clock that it is synchronized with the Controller clock, 
- * but only if a certain deviation has been reached.
- * The Transmission duration and the controller real time at previous transmission is known.
- * So one can calculate the current time of the controller within some hundred milliseconds.
- * Adjusting the delay with a manual measurement (Synchronized LED blinking) also would be possible. But not stable if router nodes are used.
- * The RC1302 doesn't support direct subsecond synchronisation. So I just the real time second and also do not transmit milliseconds between the nodes.
- * If the difference between the real time clocks is bigger than a certain threshold, the SensorNode clock gets updated.
+* DS3231 helper functions from Eric Ayars:
 */
-int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
-{
-// (nDelay - 110)     / eigentliche Laufzeit. Server und Node machen in Summe 110ms Pause
-// (nDelay - 110) /2  / Laufzeit pro Richtung
-//  (controllerTime + nDelay/2 - 55) // ungefähre aktuelle Zeit. Die Verarbeitungszeit am Node hat das etwas verzögert, aber der Algorithmus kann angepasst werden, wenn wir die RTCs haben.
-// since the RC1302  doesn't have easy ways to set it to milliseconds and I don't want spent too much time with synchronizing, we are happy with a resolution of a second and don't adjust the time...
-
-
-  time_t tLocalTime;
-
-  if ((*state & (1 << RTC_RUNNING_BIT))  == true)     // only sync if the clock is working.
-  {
-    tLocalTime = RTC.get();
-    if (abs(tLocalTime - controllerTime) > RTC_SYNC_THRESHOLD)
-    {
-      RTC.set(controllerTime);
-    }
-  }
-  
-}
-
-
-
 
 void writeControlByte(byte control, bool which)
 {
@@ -244,13 +252,13 @@ void getUNIXtime(time_t * currentUNIXtime, tmElements_t* tm)
   *currentUNIXtime = makeTime(*tm);
 }
   
-void displayTime()
+void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
 {
-  byte second, minute, hour, dayOfWeek, dayOfMonth, month, year;
+//  byte second, minute, hour, dayOfWeek, dayOfMonth, month, year;
   // retrieve data from DS3231
-  readDS3231time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);
+//  readDS3231time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);
   // send it to the serial monitor
-  Serial.println(".");
+//  Serial.println(".");
   Serial.print(hour, DEC);
   // convert the byte variable to a decimal number when displayed
   Serial.print(":");
@@ -301,6 +309,13 @@ void displayTime()
 
 }
 
+void displayTimeFromUNIX(time_t showTime)
+{
+	tmElements_t tm;
+	breakTime(showTime, tm);
+	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year);
+
+}
 // Convert normal decimal numbers to binary coded decimal
 byte decToBcd(byte val)
 {
@@ -312,3 +327,319 @@ byte bcdToDec(byte val)
 {
   return( (val/16*10) + (val%16) );
 }
+
+/*
+*	End of DS3231 helper functions
+*/
+
+/*
+*	EEPROM storage class
+*/
+
+/*
+* This function looks for the EEPROM header. The header is located on a different address after each time the EEPROM data gets fully read by the controller.
+* The purpose is to achieve euqal usage of the EEPROM and avoid defects.
+* 
+*
+* It runs thorugh a predefined address space in the EEPROM and looks for the header information:
+*   INDEXBEGIN      	is the start of the address space
+*   INDEXELEMENTS   	is the number of elements (the element size is defined by the struct. It is adapted automatically)
+*   EEPROM_data_start	is the first address of the data address space. It is calculated automatically.
+*   DATARANGE_END   	is the end of the data address space.
+*   The number of data elements is calculated automatically, although some more testing is advised.
+*   
+*   Once found it stores the address of the active index. Also the current data address stored.
+*   If no header is found, one header address and one data address is randomly selected.
+*   The data address is stored in the EEPROM header at the selected address, so next time it will be found.
+*   
+*
+ */
+uint8_t DataStorage::init()
+{
+  uint16_t i;
+
+  uint16_t currentAddress;
+  struct EEPROM_Header myEEPROMHeader;
+
+  for (i = 0; i < INDEXELEMENTS; i++)
+  {
+    currentAddress = INDEXBEGIN + sizeof(myEEPROMHeader) * i;
+    EEPROM.get(currentAddress, myEEPROMHeader);   // reading a struct, so it is flexible...
+    DEBUG_PRINTSTR("Header ");
+    DEBUG_PRINT(i);
+    DEBUG_PRINTSTR(" - Address ");
+    DEBUG_PRINT(currentAddress);
+    DEBUG_PRINTSTR(": ");
+    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+    
+    if ((myEEPROMHeader.DataStartPosition & (1<<EEPROM_HEADER_STATUS_VALID)) > 0)   // this header is valid.
+    {
+      mnIndexBegin = currentAddress;     // This is the Index Position
+      mnDataBlockBegin = myEEPROMHeader.DataStartPosition & ~(1<<EEPROM_HEADER_STATUS_VALID);    // This is the position of the first EEPROM data
+      DEBUG_PRINTSTR("Found Header at ");
+      DEBUG_PRINT(mnIndexBegin);
+      DEBUG_PRINTSTR(", first data block is at ");
+      DEBUG_PRINTLN(mnDataBlockBegin);
+	  
+// find next usable data block
+		findQueueEnd();
+      return 0;
+    }
+  }
+
+  // if it reaches this point, no index was found. Set random header index:
+  mnIndexBegin = INDEXBEGIN + sizeof(myEEPROMHeader) * (analogRead(17) % INDEXELEMENTS);
+
+  // if it reaches this point, no index was found. Set random index:
+  uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(myEEPROMHeader) * INDEXELEMENTS;
+  uint16_t modul = (DATARANGE_END - EEPROM_data_start) / sizeof(struct sensorData);
+
+
+
+  mnDataBlockBegin = EEPROM_data_start + sizeof(struct sensorData) * (analogRead(17) % modul);     // This is the new index Position;
+  myEEPROMHeader.DataStartPosition =  mnDataBlockBegin;
+  myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);    // Set this as the position of the first EEPROM data
+
+
+  EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the data (ID) back to EEPROM...
+  DEBUG_PRINTSTR("No header found.\nHeader adress range:  ");
+  DEBUG_PRINT(INDEXBEGIN);
+  DEBUG_PRINTSTR(" until ");
+  DEBUG_PRINTLN(EEPROM_data_start - sizeof(myEEPROMHeader));
+  DEBUG_PRINTSTR("Data adress range:    ");
+  DEBUG_PRINT(EEPROM_data_start);
+  DEBUG_PRINTSTR(" until ");
+  DEBUG_PRINTLN(DATARANGE_END);
+
+  
+  DEBUG_PRINTSTR("Randomly set header at ");
+  DEBUG_PRINT(mnIndexBegin);
+  DEBUG_PRINTSTR(" and first data block at ");
+  DEBUG_PRINTLN(mnDataBlockBegin);
+
+  struct sensorData dummy;
+  EEPROM.get(mnDataBlockBegin, dummy);   // reading a struct, so it is flexible...
+  DEBUG_PRINTSTR("Initializing data block at address ");
+  DEBUG_PRINT(mnDataBlockBegin);
+  DEBUG_PRINTSTR(" - last_data bit is ");
+  DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_LAST)) > 0);
+  
+
+  dummy.state = (1<< EEPROM_DATA_LAST);    // the EEPROM_DATA_AVAILABLE bit has to be zero
+
+  EEPROM.put(mnDataBlockBegin, dummy);   // writing the data (ID) back to EEPROM...
+  DEBUG_PRINTSTR("Done");
+
+  EEPROM.get(mnDataBlockBegin, dummy);   // reading a struct, so it is flexible...
+  DEBUG_PRINTSTR(" - data_available bit is ");
+  DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_AVAILABLE)) > 0);
+  mnLastData = mnDataBlockBegin;		// the address of the last item is the address we have been looking for
+//  mnNextData = mnDataBlockBegin;
+  empty = true;
+		
+  return 0;
+}
+
+
+/*
+* go through the queue and find the last item
+*/
+uint8_t DataStorage::findQueueEnd()
+{
+	uint16_t nCurrentAddress;
+	uint16_t nPreviousAddress;
+	time_t firstItemTimestamp;
+	nCurrentAddress = mnDataBlockBegin;
+	uint16_t nAddressOfOldestElement;
+	uint16_t nAddressBeforeOldestElement;
+	struct sensorData currentElement;
+	
+	firstItemTimestamp = 0;
+	firstItemTimestamp--;
+	do
+	{
+		nPreviousAddress = nCurrentAddress;
+		DEBUG_PRINTLN(nCurrentAddress);
+		EEPROM.get(nCurrentAddress, currentElement);   // reading the current data item
+
+		nCurrentAddress += sizeof(currentElement);
+		if (nCurrentAddress >= DATARANGE_END)		// exceeded the data range...go to the beginning of the range
+		{
+			nCurrentAddress = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
+		}
+		if (firstItemTimestamp > currentElement.realTime)		// store current realtime
+		{
+			firstItemTimestamp = currentElement.realTime;
+			nAddressOfOldestElement = nCurrentAddress;
+			nAddressBeforeOldestElement = nPreviousAddress;
+		}
+	}
+	while (((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (nCurrentAddress != mnDataBlockBegin));
+	
+	if (nCurrentAddress == mnDataBlockBegin)		// flag is not set in any element...there was an overflow!
+	{
+		DEBUG_PRINTSTR("No 'last-item'-flag found! --> Overflow. All elements have to be transmitted. Oldest element is: ");
+		DEBUG_PRINTLN(nAddressOfOldestElement);
+		nCurrentAddress = nAddressOfOldestElement;
+		mnLastData = nAddressBeforeOldestElement;
+		mbOverflow = true;
+	}
+	else										// no overflow
+	{
+	//	mnLastData = nCurrentAddress - sizeof(currentElement);		// the address of the last item is the address we have been looking for
+		mnLastData = nPreviousAddress;
+	}
+	
+	DEBUG_PRINTSTR("Next: ");
+	DEBUG_PRINTLN(nCurrentAddress);
+	empty = true;	// per default we assume there was no data
+	if (nCurrentAddress != (mnDataBlockBegin + sizeof(currentElement)))	// there was at least one data block
+	{
+		empty = false;
+	}
+		
+	DEBUG_PRINTSTR("Last Address: ");
+	DEBUG_PRINTLN(mnLastData);
+}
+
+/*
+*	storing new data:
+*/
+uint8_t DataStorage::add(struct sensorData currentData)
+{
+	struct sensorData lastElement;
+	uint16_t nNextData;
+
+// calculate next data address, once we arrive at the end of the memory, wrap around..
+// for an empty queue mnLastData equals the begin of the list.
+	if (empty == false)
+	{
+	// getting the next usable address:
+		nNextData = mnLastData + sizeof(currentData);
+
+		uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
+		if (nNextData >= DATARANGE_END)	// if the address is outside of the address range, start from the beginning of the data block
+		{
+			nNextData = EEPROM_data_start;
+		}
+		
+		if (nNextData == mnDataBlockBegin)		// if we arrive again at the start address...
+		{
+			mbOverflow = 1;		// set overflow flag
+		}
+	}
+	else				// the queue is empty
+	{
+		nNextData = mnLastData;
+	}
+
+	DEBUG_PRINTSTR("Adding ");
+	DEBUG_PRINT(currentData.realTime);
+	DEBUG_PRINTSTR(" at address ");
+	DEBUG_PRINTLN(nNextData);
+
+	// storing the new data and mark it as last data. In case of an overflow, skip this flag.
+	// In this case there will be no "last" element, but the timestamps will be checked.
+	if (mbOverflow == false)
+	{
+		currentData.state |= (1<<EEPROM_DATA_LAST);
+	}
+	EEPROM.put(nNextData, currentData);   // writing the data (ID) back to EEPROM...	
+		
+		
+	// If the list was not empty: mark the previous element as "not last".
+	// If the list was empty, we do not need to do anything
+	if (empty == false)
+	{
+	// adjusting the flags of the previous data element	
+		EEPROM.get(mnLastData, lastElement);   			// reading the previous element
+		lastElement.state &= ~(1<<EEPROM_DATA_LAST);	// previous data is not the last.
+		EEPROM.put(mnLastData, lastElement);   			// writing the state back to the previous element.
+		
+		DEBUG_PRINTSTR("Deleting flag for ");
+		DEBUG_PRINTLN(mnLastData);
+	}
+
+
+	empty = false;
+	mnLastData = nNextData;
+}
+
+void DataStorage::delIndex()
+{
+  struct EEPROM_Header myEEPROMHeader;
+  
+  EEPROM.get(mnIndexBegin, myEEPROMHeader);   // reading a struct, so it is flexible...
+  myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);
+  EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
+}
+
+void DataStorage::getNext(struct sensorData * currentData)
+{
+  
+}
+
+void DataStorage::stashData()
+{
+  struct EEPROM_Header myEEPROMHeader;
+  
+  EEPROM.get(mnIndexBegin, myEEPROMHeader);   // reading a struct, so it is flexible...
+  DEBUG_PRINTSTR("Resetting index ");
+  DEBUG_PRINT(myEEPROMHeader.DataStartPosition);
+  DEBUG_PRINTSTR(" - at address ");
+  DEBUG_PRINT(mnIndexBegin);
+  myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);
+  EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
+  DEBUG_PRINTSTR(" to ");
+  DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+  
+  
+  myEEPROMHeader.DataStartPosition = mnNextDataBlock;	// the next data block is the new start address
+  myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);	// set the index valid
+  mnIndexBegin += sizeof(myEEPROMHeader);
+  if (mnIndexBegin >= INDEXBEGIN + INDEXELEMENTS * sizeof(myEEPROMHeader))
+  {
+	mnIndexBegin = INDEXBEGIN;
+  }
+  
+  DEBUG_PRINTSTR("Setting next index at address ");
+  DEBUG_PRINT(mnIndexBegin);
+  DEBUG_PRINTSTR(" to the next data address ");
+  DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+  
+  EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
+  mbOverflow = false;	// no overflow happened so far
+  empty = true;			// Queue is empty now
+}
+
+
+void DataStorage::printElements()
+{
+	uint16_t currentDataAddress;
+	struct sensorData currentElement;
+	
+	currentDataAddress = mnDataBlockBegin;
+	
+	do
+	{
+		EEPROM.get(currentDataAddress, currentElement);   // reading a struct, so it is flexible...
+		DEBUG_PRINTSTR("Address: ");
+		DEBUG_PRINT(currentDataAddress);
+		DEBUG_PRINTSTR(" - time: ");
+		DEBUG_PRINT(currentElement.realTime);
+		DEBUG_PRINTSTR(" - overflow: ");
+		DEBUG_PRINTLN(mbOverflow);
+		currentDataAddress += sizeof(currentElement);
+		if (currentDataAddress >= DATARANGE_END)		// reached the end -- start from the beginning of the data block.
+		{
+			currentDataAddress = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
+		}
+
+	}
+	// As long as the current element is not the last or in case of an overflow not all data has been transmitted
+//	while((((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (mbOverflow == false)) || ((mbOverflow == true) && (currentDataAddress == mnDataBlockBegin)));
+	while((((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (mbOverflow == false)) || ((mbOverflow == true) && (currentDataAddress != mnDataBlockBegin)));
+	
+	
+}
+

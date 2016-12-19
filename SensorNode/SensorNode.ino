@@ -49,7 +49,7 @@ struct responseData myResponse;
 // Set up nRF24L01 radio on SPI bus plus pins 9 & 10 
 
 RF24 radio(9,10);
-
+DataStorage myEEPROM;
 
 // Init the DS1302
 // Set pins:  CE, IO,CLK
@@ -99,6 +99,7 @@ void setup()
   pinMode(moisturePin, INPUT);
   pinMode(lightPin, INPUT);
   pinMode(sensorPower, OUTPUT);
+  pinMode(BATTERY_SENSE_PIN, INPUT);
 
   myResponse.interval = 20;  // at default repeat measurement every 2 seconds
 
@@ -121,8 +122,13 @@ void setup()
   DEBUG_PRINTLN(DHT11LIB_VERSION);
   DEBUG_PRINTLNSTR("----------------");
 
-  findIndex();
-  
+  myEEPROM.init();
+//  myEEPROM.init();
+//  findIndex();
+//  findIndex();
+//  delIndex();
+//    myEEPROM.delIndex();
+    
   if (sizeof(struct sensorData) > 32)
   {
     DEBUG_PRINTLNSTR("Fatal error - too much sensor data. Restructure message protocol\n");
@@ -138,14 +144,15 @@ void setup()
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
 
 
+
   nRet = registerNode(&nDelay);
-  while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
+//  while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
   {
     #ifdef DEBUG
       Serial.flush();
     #endif
-    Sleepy::loseSomeTime(10000);
-    nRet = registerNode(&nDelay);
+//    Sleepy::loseSomeTime(10000);
+//    nRet = registerNode(&nDelay);
   }
 
   myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
@@ -344,7 +351,7 @@ void sendData()
   
           myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
         }
-        // in case EEPROM data has been transmitted, we skip the clock synchronisation. The synchronisation just has been checked.
+        // in case EEPROM data has been transmitted, we skip the clock synchronisation. The synchronisation has been checked some seconds ago.
         
         if (EEPROM_data_available() == true)
         {
@@ -358,7 +365,8 @@ void sendData()
               getEEPROMdata();
               break;
             case FETCH_EEPROM_REG_DELETE :     // controller doesn't want EEPROM data..delete them
-              deleteEEPROM();
+//              deleteEEPROM();
+              myEEPROM.stashData();
               sending = false;
               break;
             default:
@@ -406,14 +414,15 @@ void sendData()
  */
 void store_DATA_to_EEPROM()
 {   // todo : find a replacement strategy and write the data to EEPROM.
-  uint8_t nIndexBegin;
-  findIndex();
-  
+//  uint8_t nIndexBegin;
+//  findIndex();
+//  myEEPROM.init();
+  myEEPROM.add(myData);
+  myEEPROM.printElements();
 }
 
-  uint16_t nIndexBegin;
-  uint16_t nDataBlockBegin;
-
+//  uint16_t nIndexBegin;
+//  uint16_t nDataBlockBegin;
 /*
  * This function looks for the EEPROM header. The header is located on a different address after each time the EEPROM data gets fully read by the controller.
  * The purpose is to achieve euqal usage of the EEPROM and avoid defects.
@@ -432,18 +441,26 @@ void store_DATA_to_EEPROM()
 *   
 *
  */
+/*
 void findIndex()
 {
   uint16_t i;
-  struct EEPROM_Header myEEPROMHeader;
-  uint16_t currentAddress;
 
+  uint16_t currentAddress;
+  struct EEPROM_Header myEEPROMHeader;
 
   for (i = 0; i < INDEXELEMENTS; i++)
   {
     currentAddress = INDEXBEGIN + sizeof(myEEPROMHeader) * i;
     EEPROM.get(currentAddress, myEEPROMHeader);   // reading a struct, so it is flexible...
-    if ((myEEPROMHeader.DataStartPosition & (1<<EEPROM_HEADER_STATUS_VALID)) == true)   // this header is valid.
+    DEBUG_PRINTSTR("Header ");
+    DEBUG_PRINT(i);
+    DEBUG_PRINTSTR(" - Address ");
+    DEBUG_PRINT(currentAddress);
+    DEBUG_PRINTSTR(": ");
+    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+    
+    if ((myEEPROMHeader.DataStartPosition & (1<<EEPROM_HEADER_STATUS_VALID)) > 0)   // this header is valid.
     {
       nIndexBegin = currentAddress;     // This is the Index Position
       nDataBlockBegin = myEEPROMHeader.DataStartPosition & ~(1<<EEPROM_HEADER_STATUS_VALID);    // This is the position of the first EEPROM data
@@ -470,26 +487,62 @@ void findIndex()
 
 
   EEPROM.put(nIndexBegin, myEEPROMHeader);   // writing the data (ID) back to EEPROM...
-  DEBUG_PRINTSTR("No header found - set Header at ");
+  DEBUG_PRINTSTR("No header found.\nHeader adress range:  ");
+  DEBUG_PRINT(INDEXBEGIN);
+  DEBUG_PRINTSTR(" until ");
+  DEBUG_PRINTLN(EEPROM_data_start - sizeof(myEEPROMHeader));
+  DEBUG_PRINTSTR("Data adress range:    ");
+  DEBUG_PRINT(EEPROM_data_start);
+  DEBUG_PRINTSTR(" until ");
+  DEBUG_PRINTLN(DATARANGE_END);
+
+  
+  DEBUG_PRINTSTR("Randomly set header at ");
   DEBUG_PRINT(nIndexBegin);
-  DEBUG_PRINTSTR(", set first data block randomly at ");
+  DEBUG_PRINTSTR(" and first data block at ");
   DEBUG_PRINTLN(nDataBlockBegin);
 
-  DEBUG_PRINTLNSTR("Initializing data block..");
-
   struct sensorData dummy;
-  dummy.state = 0;    // the EEPROM_DATA_AVAILABLE bit has to be zero
+  EEPROM.get(nDataBlockBegin, dummy);   // reading a struct, so it is flexible...
+  DEBUG_PRINTSTR("Initializing data block at address ");
+  DEBUG_PRINT(nDataBlockBegin);
+  DEBUG_PRINTSTR(" - last_data bit is ");
+  DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_LAST)) > 0);
+  
+
+  dummy.state = (1<< EEPROM_DATA_LAST);    // the EEPROM_DATA_AVAILABLE bit has to be zero
+
   EEPROM.put(nDataBlockBegin, dummy);   // writing the data (ID) back to EEPROM...
+  DEBUG_PRINTSTR("Done");
+
+  EEPROM.get(nDataBlockBegin, dummy);   // reading a struct, so it is flexible...
+  DEBUG_PRINTSTR(" - data_available bit is ");
+  DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_AVAILABLE)) > 0);
   
 }
+*/
+
+
+/*
+ * deletes only the index
+ */
+/*void delIndex()
+{
+  struct EEPROM_Header myEEPROMHeader;
+  
+  EEPROM.get(nIndexBegin, myEEPROMHeader);   // reading a struct, so it is flexible...
+  myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);
+  EEPROM.put(nIndexBegin, myEEPROMHeader);   // writing the new header with removed index
+}
+*/
 
 /*
  * Deletes data stored in EEPROM
  */
-void deleteEEPROM()
+/*void deleteEEPROM()
 {
   
-}
+}*/
 
 void getEEPROMdata()
 {
@@ -550,27 +603,70 @@ void setup_RF()
 
 
 
+uint16_t averageADC(uint8_t ADCpin, uint8_t cycles)
+{
+  uint8_t i;
+  uint32_t nValue;
+  for (i = 0; i < 8; i++)  // burn some readings
+  {
+    analogRead(ADCpin);
+  }
+
+  for (i = 0; i < cycles; i++)
+  {
+    nValue += analogRead(ADCpin);
+  }
+
+  return (nValue / cycles);
+}
+
+
+uint16_t getBatteryVoltage()
+{
+
+  analogReference(INTERNAL); //set the ADC reference to 1.1V
+  burn8Readings(BATTERY_SENSE_PIN); //make 8 readings but don't use them to ensure good reading after ADC reference change
+  delay(20);
+//  uint16_t nResult = analogRead(BATTERY_SENSE_PIN);
+  uint16_t nResult = averageADC(BATTERY_SENSE_PIN, 5);
+  
+  
+  analogReference(DEFAULT); //set the ADC reference back to internal
+  burn8Readings(BATTERY_SENSE_PIN); //make 8 readings but don't use them to ensure good reading after ADC reference change
+  delay(20);
+
+
+  DEBUG_PRINTSTR("\n nResult: ");
+  DEBUG_PRINTLN(nResult);
+  DEBUG_PRINTDIG(V_ADC_max, 2);
+  DEBUG_PRINTLNSTR("");
+
+  float fVoltage = 100.0 * nResult * VOLTAGE_DIVIDER_FACTOR * V_ADC_max / (1024);
+
+  
+  return (uint16_t) fVoltage;
+}
 
 // From https://github.com/ForceTronics/nRF24L01_Wireless_Sensor_Dev_Board/blob/master/WSNode.cpp :
 //This function uses the known internal reference value of the 328p (~1.1V) to calculate the VCC value which comes from a battery
 //This was leveraged from a great tutorial found at https://code.google.com/p/tinkerit/wiki/SecretVoltmeter?pageId=110412607001051797704
-float getBatteryVoltage()
+uint16_t getVCCVoltage()
 {
-  analogReference(EXTERNAL); //set the ADC reference to AVCC 
-  burn8Readings(A0); //make 8 readings but don't use them to ensure good reading after ADC reference change 
+  analogReference(EXTERNAL); //set the ADC reference to AVCC
+  burn8Readings(A0); //make 8 readings but don't use them to ensure good reading after ADC reference change
   int buffer = ADMUX;
   ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
   unsigned long start = millis(); //get timer value
   while ( (start + 3) > millis()); //delay for 3 milliseconds
   ADCSRA |= _BV(ADSC); // Start ADC conversion
-  while (bit_is_set(ADCSRA,ADSC)); //wait until conversion is complete
+  while (bit_is_set(ADCSRA, ADSC)); //wait until conversion is complete
   int result = ADCL; //get first half of result
-  result |= ADCH<<8; //get rest of the result
-  float batVolt = (IREF / result)*1024; //Use the known iRef to calculate battery voltage
+  result |= ADCH << 8; //get rest of the result
+  uint16_t batVolt = (IREF / result) * 102400; //Use the known iRef to calculate battery voltage [in 0.01V]
   ADMUX = buffer;
   analogReference(DEFAULT); //set the ADC reference back to internal
-  burn8Readings(A0); //make 8 readings but don't use them to ensure good reading after ADC reference change 
-  burn8Readings(A1); //make 8 readings but don't use them to ensure good reading after ADC reference change 
+  burn8Readings(A0); //make 8 readings but don't use them to ensure good reading after ADC reference change
+  //  burn8Readings(A1); //make 8 readings but don't use them to ensure good reading after ADC reference change
   return batVolt;
 }
 
