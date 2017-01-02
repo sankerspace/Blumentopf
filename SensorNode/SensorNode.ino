@@ -101,7 +101,7 @@ void setup()
   pinMode(sensorPower, OUTPUT);
   pinMode(BATTERY_SENSE_PIN, INPUT);
 
-  myResponse.interval = 20;  // at default repeat measurement every 2 seconds
+  myResponse.interval = 200;  // at default repeat measurement every 2 seconds
 
 //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
@@ -364,7 +364,7 @@ void sendData()
             case FETCH_EEPROM_REG_SEND :     // controller wants EEPROM data now
               getEEPROMdata();
               break;
-            case FETCH_EEPROM_REG_DELETE :     // controller doesn't want EEPROM data..delete them
+            case FETCH_EEPROM_REG_DELETE :     // controller doesn't want EEPROM data..delete it
 //              deleteEEPROM();
               myEEPROM.stashData();
               sending = false;
@@ -383,7 +383,7 @@ void sendData()
       {
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
         {
-          store_DATA_to_EEPROM();
+//          store_DATA_to_EEPROM();
         }
         sending = false;
         // otherwise we do not care..start sleeping
@@ -396,7 +396,7 @@ void sendData()
     {
       if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
       {
-        store_DATA_to_EEPROM();
+//        store_DATA_to_EEPROM();
       }
       // otherwise we do not care..start sleeping anyway
       sending = false;
@@ -544,9 +544,15 @@ void findIndex()
   
 }*/
 
+/*
+ * Get last EEPROM data item
+ * In case of non-overflow this is  the item at the end of the chain.
+ * In the overflow-situation this means the oldest item will be retrieved.
+ */
 void getEEPROMdata()
 {
-  
+  struct sensorData nextData;
+  myEEPROM.readNextItem(&nextData);
 }
 
 /*
@@ -824,6 +830,7 @@ int RF_action(int* pnDelay)
     if ( timeout )
     {
       DEBUG_PRINTLNSTR("Failed, response timed out.");
+      radio.powerDown();
       return 1;
     }
     else      // There was a response - read the new interval
