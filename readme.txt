@@ -13,7 +13,11 @@ X	Sensoren auslesen (Implementiert und getestet. Geht sehr gut)
 		Todo:
 			Speichern der Daten im EEPROM bei RF Ausfall ist noch nicht implementiert
 X	RTC synchronisieren
-?	Interrupt Alarm von RTC
+-	Interrupt Alarm von RTC
+
+** Known problems: **
+
+	If RTC is unplugged, sketch will hang due to a bug in the I2C library.
 
 
 ###### Controller  ######
