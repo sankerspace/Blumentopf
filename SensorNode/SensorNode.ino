@@ -101,7 +101,7 @@ void setup()
   pinMode(sensorPower, OUTPUT);
   pinMode(BATTERY_SENSE_PIN, INPUT);
 
-  myResponse.interval = 20;  // at default repeat measurement every 2 seconds
+  myResponse.interval = 200;  // at default repeat measurement every 2 seconds
 
 //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
@@ -137,9 +137,9 @@ void setup()
   // setup the RTC
 //  setupRTC();
   myRTC.init(&myData.state);
-
+  myData.realTime = myRTC.getTime();
+  
   // read EEPROM
-
   EEPROM.get(EEPROM_ID_ADDRESS,myEEPROMData);   // reading a struct, so it is flexible...
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
 
@@ -277,7 +277,8 @@ void loop()
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on to indicate action
   
   digitalWrite(sensorPower, HIGH);   // turn on the sensor power and wait some time to stabilize
-
+// initialises the RTC to save power
+  myRTC.init(&myData.state);
 
 
   delay(1000);    // DHT needs 1s to settle
@@ -310,7 +311,7 @@ void loop()
   
 // reads the current real time value
   myData.realTime = myRTC.getTime();
-
+Serial.println("reading done");
   digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
 
 
@@ -324,9 +325,23 @@ void loop()
 #ifdef DEBUG
   Serial.flush();
 #endif
+
+  turnOffOutputs();
   Sleepy::loseSomeTime(myResponse.interval * 100);
 //delay(myResponse.interval * 100);
 
+}
+
+/*
+ * If the RTC pins are not turned off, they will consume 170µA during sleep
+ */
+ 
+void turnOffOutputs()
+{
+//  digitalWrite(A4, LOW);
+  pinMode(A4, INPUT);
+//  digitalWrite(A5, LOW);
+  pinMode(A5, INPUT);
 }
 
 void sendData()
@@ -364,7 +379,7 @@ void sendData()
             case FETCH_EEPROM_REG_SEND :     // controller wants EEPROM data now
               getEEPROMdata();
               break;
-            case FETCH_EEPROM_REG_DELETE :     // controller doesn't want EEPROM data..delete them
+            case FETCH_EEPROM_REG_DELETE :     // controller doesn't want EEPROM data..delete it
 //              deleteEEPROM();
               myEEPROM.stashData();
               sending = false;
@@ -383,7 +398,7 @@ void sendData()
       {
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
         {
-          store_DATA_to_EEPROM();
+//          store_DATA_to_EEPROM();
         }
         sending = false;
         // otherwise we do not care..start sleeping
@@ -396,7 +411,7 @@ void sendData()
     {
       if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
       {
-        store_DATA_to_EEPROM();
+//        store_DATA_to_EEPROM();
       }
       // otherwise we do not care..start sleeping anyway
       sending = false;
@@ -544,9 +559,15 @@ void findIndex()
   
 }*/
 
+/*
+ * Get last EEPROM data item
+ * In case of non-overflow this is  the item at the end of the chain.
+ * In the overflow-situation this means the oldest item will be retrieved.
+ */
 void getEEPROMdata()
 {
-  
+  struct sensorData nextData;
+  myEEPROM.readNextItem(&nextData);
 }
 
 /*
@@ -783,7 +804,7 @@ bool EEPROM_data_available()
 //void RF_action(RF24* radio)
 int RF_action(int* pnDelay)
 {
-  
+
   // First, stop listening so we can talk.
     radio.stopListening();
 
@@ -797,7 +818,7 @@ int RF_action(int* pnDelay)
     }
     
     
-    myData.realTime = myRTC.getTime();
+//    myData.realTime = myRTC.getTime();  // darf hier nicht aufgerufen werden, weil RTC abgedreht ist.
     
     // Send the measurement results
     DEBUG_PRINTSTR("Sending data...");
@@ -824,6 +845,7 @@ int RF_action(int* pnDelay)
     if ( timeout )
     {
       DEBUG_PRINTLNSTR("Failed, response timed out.");
+      radio.powerDown();
       return 1;
     }
     else      // There was a response - read the new interval

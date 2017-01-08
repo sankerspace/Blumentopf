@@ -579,6 +579,20 @@ void DataStorage::getNext(struct sensorData * currentData)
   
 }
 
+void DataStorage::readNextItem(struct sensorData* dataElement)
+{
+  struct sensorData lastElement;
+  if (mbOverflow == false)   				// non-overflow situation
+  {
+    EEPROM.get(mnLastData, lastElement);   // reading the last data
+	*dataElement = lastElement;
+  }
+  else                      				// overflow situation - read
+  {
+    
+  }
+}
+
 void DataStorage::stashData()
 {
   struct EEPROM_Header myEEPROMHeader;

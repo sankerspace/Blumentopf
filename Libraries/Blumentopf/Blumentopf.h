@@ -144,6 +144,7 @@ public:
 	void delIndex();
 	void printElements();
 	void stashData();
+	void readNextItem(struct sensorData*);
 private:
 	uint16_t mnIndexBegin;
 	uint16_t mnDataBlockBegin;
