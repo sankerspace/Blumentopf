@@ -101,7 +101,7 @@ void setup()
   pinMode(sensorPower, OUTPUT);
   pinMode(BATTERY_SENSE_PIN, INPUT);
 
-  myResponse.interval = 200;  // at default repeat measurement every 2 seconds
+  myResponse.interval = 600;  // at default repeat measurement every 2 seconds
 
 //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
@@ -366,8 +366,12 @@ void sendData()
   
           myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
         }
-        // in case EEPROM data has been transmitted, we skip the clock synchronisation. The synchronisation has been checked some seconds ago.
-        
+        // in case EEPROM data has been transmitted, we skip the clock synchronisation. The synchronisation has been checked some milliseconds ago.
+        // However the transmitted data element has to be removed from the EEPROM
+        else
+        {
+            freeEEPROMdata();         // remove data from the memory
+        }
         if (EEPROM_data_available() == true)
         {
           switch (myResponse.state &  FETCH_EEPROM_REG_MASK)
@@ -377,14 +381,19 @@ void sendData()
               sending = false;
               break;
             case FETCH_EEPROM_REG_SEND :     // controller wants EEPROM data now
-              getEEPROMdata();
+              fetchEEPROMdata(&myData);           // get data for retransmission       // hsould only be called when there is data to transmit
+              sending = true;
+
+              myData.state |= (1 << EEPROM_DATA_PACKED); // this is EEPROM data
+              
               break;
             case FETCH_EEPROM_REG_DELETE :     // controller doesn't want EEPROM data..delete it
 //              deleteEEPROM();
               myEEPROM.stashData();
               sending = false;
               break;
-            default:
+            default:  // shouldn't happen!!
+              sending = false;
               break;
           }
         }
@@ -398,7 +407,7 @@ void sendData()
       {
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
         {
-//          store_DATA_to_EEPROM();
+          store_DATA_to_EEPROM();
         }
         sending = false;
         // otherwise we do not care..start sleeping
@@ -411,7 +420,7 @@ void sendData()
     {
       if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
       {
-//        store_DATA_to_EEPROM();
+        store_DATA_to_EEPROM();
       }
       // otherwise we do not care..start sleeping anyway
       sending = false;
@@ -564,10 +573,24 @@ void findIndex()
  * In case of non-overflow this is  the item at the end of the chain.
  * In the overflow-situation this means the oldest item will be retrieved.
  */
-void getEEPROMdata()
+void fetchEEPROMdata(struct sensorData* nextData)
 {
-  struct sensorData nextData;
-  myEEPROM.readNextItem(&nextData);
+  DEBUG_PRINTLNSTR("Getting a data element for transmission..");
+//  struct sensorData nextData;
+  myEEPROM.readNextItem(nextData);
+  DEBUG_PRINTLNSTR("done");
+}
+
+/*
+ * Get last EEPROM data item
+ * In case of non-overflow this is  the item at the end of the chain.
+ * In the overflow-situation this means the oldest item will be retrieved.
+ */
+void freeEEPROMdata()
+{
+  DEBUG_PRINTLNSTR("Deleting the transmitted data element from EEPROM..");
+  myEEPROM.freeNextItem();
+  DEBUG_PRINTLNSTR("done");
 }
 
 /*
