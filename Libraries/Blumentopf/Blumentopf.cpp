@@ -122,7 +122,9 @@ int RTC_DS3231::init(uint8_t* state)
 	//turn off 32kHz pin:
 	  byte temp_buffer = temp_buffer & 0b11110111;
 	  writeControlByte(temp_buffer, 1);
-	  
+
+    DEBUG_PRINT("...");
+    
 	  //turn of the SQW signal
 	  temp_buffer =   0b01111111;
 	  writeControlByte(temp_buffer, 0);
@@ -375,7 +377,7 @@ uint8_t DataStorage::init()
     if ((myEEPROMHeader.DataStartPosition & (1<<EEPROM_HEADER_STATUS_VALID)) > 0)   // this header is valid.
     {
       mnIndexBegin = currentAddress;     // This is the Index Position
-      mnDataBlockBegin = myEEPROMHeader.DataStartPosition & ~(1<<EEPROM_HEADER_STATUS_VALID);    // This is the position of the first EEPROM data
+      mnDataBlockBegin = myEEPROMHeader.DataStartPosition & ~(1<<EEPROM_HEADER_STATUS_VALID);    // Calculate the position of the first EEPROM data
       DEBUG_PRINTSTR("Found Header at ");
       DEBUG_PRINT(mnIndexBegin);
       DEBUG_PRINTSTR(", first data block is at ");
@@ -425,7 +427,7 @@ uint8_t DataStorage::init()
   DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_LAST)) > 0);
   
 
-  dummy.state = (1<< EEPROM_DATA_LAST);    // the EEPROM_DATA_AVAILABLE bit has to be zero
+  dummy.state = (1 << EEPROM_DATA_LAST);    // the EEPROM_DATA_AVAILABLE bit has to be zero
 
   EEPROM.put(mnDataBlockBegin, dummy);   // writing the data (ID) back to EEPROM...
   DEBUG_PRINTSTR("Done");
@@ -440,6 +442,21 @@ uint8_t DataStorage::init()
   return 0;
 }
 
+void DataStorage::unsetHeaders()
+{
+  uint8_t i;
+  uint16_t nAddress;
+  struct EEPROM_Header dummyHeader;
+  dummyHeader.DataStartPosition = 0;
+  
+  for (i = 0; i < INDEXELEMENTS; i++)
+  {
+    nAddress = INDEXBEGIN + i*sizeof(dummyHeader);
+    Serial.print("X: ");
+    Serial.println(nAddress);
+    EEPROM.put(nAddress, dummyHeader);
+  }
+}
 
 /*
 * go through the queue and find the last item
@@ -453,7 +470,12 @@ uint8_t DataStorage::findQueueEnd()
 	uint16_t nAddressOfOldestElement;
 	uint16_t nAddressBeforeOldestElement;
 	struct sensorData currentElement;
-	
+ uint16_t nPreviousOldestElement;
+
+  DEBUG_PRINT("Rocks: ");
+  DEBUG_PRINTLN(EEPROM_OVERFLOW_OFFSET_BIT);
+  
+  
 	firstItemTimestamp = 0;
 	firstItemTimestamp--;
 	do
@@ -467,14 +489,15 @@ uint8_t DataStorage::findQueueEnd()
 		{
 			nCurrentAddress = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
 		}
-		if (firstItemTimestamp > currentElement.realTime)		// store current realtime
+		if (firstItemTimestamp > currentElement.realTime)		// remember the timestamp and address of the oldest element
 		{
 			firstItemTimestamp = currentElement.realTime;
+      nPreviousOldestElement = firstItemTimestamp;
 			nAddressOfOldestElement = nCurrentAddress;
 			nAddressBeforeOldestElement = nPreviousAddress;
 		}
 	}
-	while (((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (nCurrentAddress != mnDataBlockBegin));
+	while (((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (nCurrentAddress != mnDataBlockBegin));   // until we find the last stored element or we recognize it's an overflow
 	
 	if (nCurrentAddress == mnDataBlockBegin)		// flag is not set in any element...there was an overflow!
 	{
@@ -488,6 +511,11 @@ uint8_t DataStorage::findQueueEnd()
 	{
 	//	mnLastData = nCurrentAddress - sizeof(currentElement);		// the address of the last item is the address we have been looking for
 		mnLastData = nPreviousAddress;
+
+    if (nPreviousOldestElement & EEPROM_OVERFLOW_OFFSET_BIT)    // offset reached!
+    {
+      
+    }
 	}
 	
 	DEBUG_PRINTSTR("Next: ");
@@ -508,28 +536,38 @@ uint8_t DataStorage::findQueueEnd()
 uint8_t DataStorage::add(struct sensorData currentData)
 {
 	struct sensorData lastElement;
-	uint16_t nNextData;
+	uint16_t nNextData;   // at this address the data will be inserted
 
 // calculate next data address, once we arrive at the end of the memory, wrap around..
 // for an empty queue mnLastData equals the begin of the list.
 	if (empty == false)
 	{
+    DEBUG_PRINTSTR("Not empty. Previous address: ");
+    DEBUG_PRINT(mnLastData);
+    DEBUG_PRINTSTR(", next usuable address: ");
 	// getting the next usable address:
-		nNextData = mnLastData + sizeof(currentData);
+		nNextData = mnLastData;
+   
+		incrementDataAddress(&nNextData);             // go to the next data address
+//		+ sizeof(currentData);
+   DEBUG_PRINTLN(nNextData);
+   DEBUG_PRINTSTR("Begin of the data: ");
+   DEBUG_PRINT(mnDataBlockBegin);
 
-		uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
-		if (nNextData >= DATARANGE_END)	// if the address is outside of the address range, start from the beginning of the data block
-		{
-			nNextData = EEPROM_data_start;
-		}
+//		uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
+//		if (nNextData >= DATARANGE_END)	// if the address is outside of the address range, start from the beginning of the data block
+//		{
+//			nNextData = EEPROM_data_start;
+//		}
 		
 		if (nNextData == mnDataBlockBegin)		// if we arrive again at the start address...
 		{
-			mbOverflow = 1;		// set overflow flag
+			mbOverflow = true;		// set overflow flag
 		}
 	}
 	else				// the queue is empty
 	{
+    DEBUG_PRINTSTR("Empty. ");
 		nNextData = mnLastData;
 	}
 
@@ -579,19 +617,215 @@ void DataStorage::getNext(struct sensorData * currentData)
   
 }
 
+/*
+ * This function reads one element from the storage and removes it.
+ * If it was the last element in the storage, it will unset the valid flag 
+ * of the current EEPROM header and set the next EEPROM header valid.
+ * 
+ * The next element to read always is the element previously put into the storage.
+ * 
+ * empty
+ * mnLastData
+ * mbOverflow
+ * 
+ */
 void DataStorage::readNextItem(struct sensorData* dataElement)
 {
-  struct sensorData lastElement;
+  // kann man das einfach anhand der Pointer zurückdrehen? :-O
+
   if (mbOverflow == false)   				// non-overflow situation
   {
-    EEPROM.get(mnLastData, lastElement);   // reading the last data
-	*dataElement = lastElement;
+//    DEBUG_PRINTSTR("\tNo overflow - retrieving data...");
+    DEBUG_PRINTSTR("\tNo overflow - retrieving data from address ");
+    DEBUG_PRINT(mnLastData);
+    DEBUG_PRINTSTR("...");
+    EEPROM.get(mnLastData, *dataElement);   // reading the data we want to transmit
+    DEBUG_PRINTLNSTR("done");
   }
   else                      				// overflow situation - read
   {
+
+    // easy way:
+    //  transmit the data before the mnLastData address. This way the normal no-overflow-algorithm can handle the rest
     
+    // probably better but more complicated:
+    // check all elements for the newest and the second newest timestamp.
+    // Return the element with the newest timestamp and mark the second newest as the newest.
+
+  // delete one element and:
+  //    -) set its previous element as last element
+  //    -) unset overflow
+
+    uint16_t currentDataAddress = mnDataBlockBegin;
+    DEBUG_PRINTSTR("\tOverflow - current address: ");
+    DEBUG_PRINT(currentDataAddress);
+    decrementDataAddress(&currentDataAddress);       // get the address of the data to send
+    DEBUG_PRINTSTR(", increased address: ");
+    DEBUG_PRINT(currentDataAddress);
+    DEBUG_PRINT(" - retrieving data...");
+    EEPROM.get(currentDataAddress, *dataElement);    // reading out the data
+    DEBUG_PRINTLNSTR("done");
   }
 }
+
+/*
+ * After the data was transmitted successfully, the data element has to be removed.
+ */
+void DataStorage::freeNextItem()
+{
+  struct EEPROM_Header myEEPROMHeader;
+
+  if (mbOverflow == false)           // non-overflow situation
+  {
+    if (mnLastData == mnDataBlockBegin)   // is this the only element?  set the header index to the next element. The EEPROM_DATA_LAST bit doesn't have to be deleted, since the block will be ignored afterwards anyway
+    {
+      DEBUG_PRINTSTR("\tNo overflow..only element - unsetting validity bit of current header (address: ");
+      DEBUG_PRINT(mnIndexBegin);
+  // unsetting the header valid bit:
+      EEPROM.get(mnIndexBegin, myEEPROMHeader);   // reading the currently valid header
+      DEBUG_PRINT(" - data address: ");
+      DEBUG_PRINT(myEEPROMHeader.DataStartPosition);
+      DEBUG_PRINT(" --> ");
+      myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);     // unsetting its validity bit
+      EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing back the header to invalidate it.
+      DEBUG_PRINT(myEEPROMHeader.DataStartPosition);
+      DEBUG_PRINTLN(")");
+      
+      
+  // moving the header index forward:
+      incrementHeaderAddress(&mnIndexBegin);
+
+
+    
+  // set the next data address into the new header field:
+      incrementDataAddress(&myEEPROMHeader.DataStartPosition);
+      mnDataBlockBegin = myEEPROMHeader.DataStartPosition;                    // Store the new data start address
+      myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);    // Set this as the valid position of the first EEPROM data. It is important to also set the empty flag, so it is clear this data is not valid.
+      EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header
+
+
+    DEBUG_PRINTSTR("\tNew header address: ");
+    DEBUG_PRINTLN(mnIndexBegin);
+    DEBUG_PRINTSTR("\tNew data address: ");
+    DEBUG_PRINTLN(mnDataBlockBegin);
+    DEBUG_PRINTSTR("\tAdding validity bit: ");
+    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+    DEBUG_PRINTLNSTR("\tDone");
+    
+    mnLastData = mnDataBlockBegin;    // wird evtl nicht richtig gesetzt!?
+  // resetting the storage:
+      mbOverflow = false;   // no overflow happened so far
+      empty = true;         // Queue is empty now
+    }
+    else              // it is not the only element
+    {
+
+    // mark the previous element as the last one...
+    DEBUG_PRINTSTR("\tNo overflow... multiple elements left - current data address: ");
+    DEBUG_PRINTLN(mnLastData);
+      decrementDataAddress(&mnLastData);
+    DEBUG_PRINTSTR("\tsetting data element at address ");
+    DEBUG_PRINT(mnLastData);
+    DEBUG_PRINTLNSTR("\tas last element.");
+      
+      setDataAsLast(mnLastData);           // mark it as last
+//      EEPROM.get(mnLastData, currentData);  // reading the previous data
+//      setDataAsLast(currentData);           // mark it as last
+//      EEPROM.put(mnLastData, currentData);  // write back the previous data
+    DEBUG_PRINTLNSTR("\tDone");
+    }
+  }
+  else              // overflow situation - read
+  {
+    uint16_t currentData = mnDataBlockBegin;
+
+  DEBUG_PRINTSTR("\tOverflow... next data address: ");
+  DEBUG_PRINTLN(currentData);
+
+
+    decrementDataAddress(&currentData);       // get the address of the sent data
+  DEBUG_PRINTSTR("\tPrevious data address: ");
+  DEBUG_PRINTLN(currentData);
+    decrementDataAddress(&currentData);       // get the address of the now last element in the storage
+    setDataAsLast(currentData);               // mark it as last
+  DEBUG_PRINTSTR("\tAddress of the now last element: ");
+  DEBUG_PRINTLN(currentData);
+    
+    mbOverflow = false;   // reset overflow
+  }
+}
+
+
+/*
+ * Find the next Data Element, even if there was a wrap around.
+ * 
+ * The size of the header data element also is considered by the INDEXELEMENTS '- 1' term.
+ */
+void DataStorage::incrementHeaderAddress(uint16_t* headerAddress)
+{
+  *headerAddress += sizeof(struct EEPROM_Header);  // go one element forward
+  if (*headerAddress > INDEXBEGIN + sizeof(struct EEPROM_Header) * (INDEXELEMENTS - 1) )          // is it out of the header address range?
+  {
+    *headerAddress = INDEXBEGIN;   // go to the beginning of the header address range
+  }
+}
+
+
+/*
+ * Find the next Data Element, even if there was a wrap around.
+ * 
+ * The DATARANGE_END check has to be adapted by the size of the data element
+ */
+void DataStorage::incrementDataAddress(uint16_t* dataAddress)
+{
+  *dataAddress += sizeof(struct sensorData);  // go one element forward
+  if (*dataAddress >= DATARANGE_END)          // is it out of the address range?
+  {
+    *dataAddress = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;   // go to the beginning of the address range
+  }
+}
+
+/*
+ * Find the previous Data Element, even if there was a wrap around.
+ * 
+ * The DATARANGE_END check has to be adapted by the size of the data element
+ */
+void DataStorage::decrementDataAddress(uint16_t* dataAddress)
+{
+  *dataAddress -= sizeof(struct sensorData);  // go one element back
+  if (*dataAddress < INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS)          // is it out of the address range?
+  {
+    // find the last possible address in the range:
+    do
+    {
+      *dataAddress += sizeof(struct sensorData);
+    }
+    while(*dataAddress < DATARANGE_END);
+    *dataAddress -= sizeof(struct sensorData);
+  }
+}
+
+void DataStorage::setDataAsLast(uint16_t dataAddress)   // wie sind die flags gesetzt, wenn kein element valid ist??
+{
+  struct sensorData data;
+  EEPROM.get(dataAddress, data);   // reading the data
+  data.state |= (1 << EEPROM_DATA_LAST);
+  EEPROM.put(dataAddress, data);   // writing the data back
+}
+
+void DataStorage::setDataAsNotLast(uint16_t dataAddress)
+{
+  struct sensorData data;
+  EEPROM.get(dataAddress, data);   // reading the data
+  data.state &= ~(1 << EEPROM_DATA_LAST);
+  EEPROM.put(dataAddress, data);   // writing the data back
+}
+
+bool DataStorage::getEmpty()
+{
+  return empty;
+}
+
 
 void DataStorage::stashData()
 {
@@ -652,7 +886,7 @@ void DataStorage::printElements()
 	}
 	// As long as the current element is not the last or in case of an overflow not all data has been transmitted
 //	while((((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (mbOverflow == false)) || ((mbOverflow == true) && (currentDataAddress == mnDataBlockBegin)));
-	while((((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (mbOverflow == false)) || ((mbOverflow == true) && (currentDataAddress != mnDataBlockBegin)));
+	while((((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (mbOverflow == false)) || ((mbOverflow == true) && (currentDataAddress != mnDataBlockBegin)));      // as long as it's no overflow and more data to come or if it's an overflow until all data has been written
 	
 	
 }
