@@ -13,6 +13,7 @@
 */
 #include "Blumentopf.h"
 
+
 #include <JeeLib.h>   // For sleeping
 #include <dht11.h>    // Termperature and humidity sensor
 #include <SPI.h>
@@ -92,7 +93,6 @@ void setup()
    int nRet;
    int nDelay;    // transmission duration in ms
    struct EEPROM_Data myEEPROMData;
-
    myData.state = 0;
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
@@ -101,7 +101,7 @@ void setup()
   pinMode(sensorPower, OUTPUT);
   pinMode(BATTERY_SENSE_PIN, INPUT);
 
-  myResponse.interval = 200;  // at default repeat measurement every 2 seconds
+  myResponse.interval = 100;  // at default repeat measurement every 2 seconds
 
 //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
@@ -122,6 +122,7 @@ void setup()
   DEBUG_PRINTLN(DHT11LIB_VERSION);
   DEBUG_PRINTLNSTR("----------------");
 
+//myEEPROM.unsetHeaders();
   myEEPROM.init();
 //  myEEPROM.init();
 //  findIndex();
@@ -155,7 +156,7 @@ void setup()
 //    nRet = registerNode(&nDelay);
   }
 
-  myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
+//  myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
  
 }
 
@@ -165,8 +166,9 @@ int registerNode(int *pnDelay)
   struct EEPROM_Data myEEPROMData;
   
   int nRet;
-   
-  if (myData.ID > 0)                        // this is a known node
+  
+//  if (myData.ID > 0)                        // this is a known node - 20170110...I guess this was the case on an old arduino. a new one showed 0xff in the EEPROM...
+  if (myData.ID < 0xff)                        // this is a known node - 20170110... this is the new check..
   {
     DEBUG_PRINTSTR("EEPROM-ID found: ");
     DEBUG_PRINT(myData.ID);                // Persistent ID
@@ -210,6 +212,10 @@ int registerNode(int *pnDelay)
         DEBUG_PRINTLNSTR("Got response!");
         DEBUG_PRINTSTR("  Received Session ID: ");
         DEBUG_PRINT((int)(myResponse.interval/100));
+
+        DEBUG_PRINTSTR(",  expected: ");
+        DEBUG_PRINTLN(myData.temperature);
+
         
         if (((int)(myResponse.interval/100)) == (int) (myData.temperature))      // is the response for us? (yes, we stored the session ID in the temperature to keep the message small and reception easy...it could be changed to a struct in a "struct payload" which can be casted in the receiver depending on the status flags)
         {
@@ -277,9 +283,10 @@ void loop()
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on to indicate action
   
   digitalWrite(sensorPower, HIGH);   // turn on the sensor power and wait some time to stabilize
+  delay(10);
 // initialises the RTC to save power
   myRTC.init(&myData.state);
-
+  
 
   delay(1000);    // DHT needs 1s to settle
 
@@ -349,27 +356,46 @@ void sendData()
   bool sending = true;
   int nRet;
   int nDelay;
-  
+  myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
   while (sending == true)
   {
+    DEBUG_PRINT("-");
+    DEBUG_PRINTLN(myData.state);
     nRet = RF_action(&nDelay);
     
     if (nRet == 0)  // got a response
     {
+      Serial.print(":");
+      Serial.println(myResponse.state);
+      Serial.print(" / ResponseID: ");
+      Serial.println(myResponse.ID);
+      Serial.print(" / myID: ");
+      Serial.println(myData.ID);
+      
       if (myResponse.ID == myData.ID)     // response is for us
       {
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
         {
           DEBUG_PRINTSTR("Response is valid, next measurement in ");
           DEBUG_PRINT(myResponse.interval / 10);
+          myResponse.interval = 100;
           DEBUG_PRINTLNSTR(" seconds.");
-  
+          digitalWrite(sensorPower, HIGH);   // when we finished measuring, turn the sensor power off again
+          delay(10);
           myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
+          delay(10);
+          digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
         }
-        // in case EEPROM data has been transmitted, we skip the clock synchronisation. The synchronisation has been checked some seconds ago.
-        
+        // in case EEPROM data has been transmitted, we skip the clock synchronisation. The synchronisation has been checked some milliseconds ago.
+        // However the transmitted data element has to be removed from the EEPROM
+        else
+        {
+            freeEEPROMdata();         // remove data from the memory
+        }
         if (EEPROM_data_available() == true)
         {
+          DEBUG_PRINTLNSTR("\tData available in EEPROM");
+          Serial.println(myResponse.state);
           switch (myResponse.state &  FETCH_EEPROM_REG_MASK)
           {
             case FETCH_EEPROM_REG_SKIP :     // controller doesn't want EEPROM data..go to sleep
@@ -377,28 +403,38 @@ void sendData()
               sending = false;
               break;
             case FETCH_EEPROM_REG_SEND :     // controller wants EEPROM data now
-              getEEPROMdata();
+              DEBUG_PRINTLNSTR("\tThe controller wants the EEPROM data now");
+              fetchEEPROMdata(&myData);           // get data for retransmission       // hsould only be called when there is data to transmit
+              myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
+              sending = true;
+
+              myData.state |= (1 << EEPROM_DATA_PACKED); // this is EEPROM data
+              
               break;
             case FETCH_EEPROM_REG_DELETE :     // controller doesn't want EEPROM data..delete it
+              DEBUG_PRINTLNSTR("\tThe controller wants the EEPROM data to be deleted");
 //              deleteEEPROM();
               myEEPROM.stashData();
               sending = false;
               break;
-            default:
+            default:  // shouldn't happen!!
+              sending = false;
               break;
           }
         }
         else
         {
+          DEBUG_PRINTLNSTR("\tNo data available in EEPROM");
           sending = false;
         }
   
       }
       else      // the response is for another node
       {
+        DEBUG_PRINTLNSTR("\tResponse is for another node.");
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
         {
-//          store_DATA_to_EEPROM();
+          store_DATA_to_EEPROM();
         }
         sending = false;
         // otherwise we do not care..start sleeping
@@ -411,7 +447,7 @@ void sendData()
     {
       if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
       {
-//        store_DATA_to_EEPROM();
+        store_DATA_to_EEPROM();
       }
       // otherwise we do not care..start sleeping anyway
       sending = false;
@@ -456,86 +492,6 @@ void store_DATA_to_EEPROM()
 *   
 *
  */
-/*
-void findIndex()
-{
-  uint16_t i;
-
-  uint16_t currentAddress;
-  struct EEPROM_Header myEEPROMHeader;
-
-  for (i = 0; i < INDEXELEMENTS; i++)
-  {
-    currentAddress = INDEXBEGIN + sizeof(myEEPROMHeader) * i;
-    EEPROM.get(currentAddress, myEEPROMHeader);   // reading a struct, so it is flexible...
-    DEBUG_PRINTSTR("Header ");
-    DEBUG_PRINT(i);
-    DEBUG_PRINTSTR(" - Address ");
-    DEBUG_PRINT(currentAddress);
-    DEBUG_PRINTSTR(": ");
-    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
-    
-    if ((myEEPROMHeader.DataStartPosition & (1<<EEPROM_HEADER_STATUS_VALID)) > 0)   // this header is valid.
-    {
-      nIndexBegin = currentAddress;     // This is the Index Position
-      nDataBlockBegin = myEEPROMHeader.DataStartPosition & ~(1<<EEPROM_HEADER_STATUS_VALID);    // This is the position of the first EEPROM data
-      DEBUG_PRINTSTR("Found Header at ");
-      DEBUG_PRINT(nIndexBegin);
-      DEBUG_PRINTSTR(", first data block is at ");
-      DEBUG_PRINT(nDataBlockBegin);
-      return;
-    }
-  }
-
-  // if it reaches this point, no index was found. Set random header index:
-  nIndexBegin = INDEXBEGIN + sizeof(myEEPROMHeader) * (analogRead(17) % INDEXELEMENTS);
-
-  // if it reaches this point, no index was found. Set random index:
-  uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(myEEPROMHeader) * INDEXELEMENTS;
-  uint16_t modul = (DATARANGE_END - EEPROM_data_start) / sizeof(struct sensorData);
-
-
-
-  nDataBlockBegin = EEPROM_data_start + sizeof(struct sensorData) * (analogRead(17) % modul);     // This is the new index Position;
-  myEEPROMHeader.DataStartPosition =  nDataBlockBegin;
-  myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);    // Set this as the position of the first EEPROM data
-
-
-  EEPROM.put(nIndexBegin, myEEPROMHeader);   // writing the data (ID) back to EEPROM...
-  DEBUG_PRINTSTR("No header found.\nHeader adress range:  ");
-  DEBUG_PRINT(INDEXBEGIN);
-  DEBUG_PRINTSTR(" until ");
-  DEBUG_PRINTLN(EEPROM_data_start - sizeof(myEEPROMHeader));
-  DEBUG_PRINTSTR("Data adress range:    ");
-  DEBUG_PRINT(EEPROM_data_start);
-  DEBUG_PRINTSTR(" until ");
-  DEBUG_PRINTLN(DATARANGE_END);
-
-  
-  DEBUG_PRINTSTR("Randomly set header at ");
-  DEBUG_PRINT(nIndexBegin);
-  DEBUG_PRINTSTR(" and first data block at ");
-  DEBUG_PRINTLN(nDataBlockBegin);
-
-  struct sensorData dummy;
-  EEPROM.get(nDataBlockBegin, dummy);   // reading a struct, so it is flexible...
-  DEBUG_PRINTSTR("Initializing data block at address ");
-  DEBUG_PRINT(nDataBlockBegin);
-  DEBUG_PRINTSTR(" - last_data bit is ");
-  DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_LAST)) > 0);
-  
-
-  dummy.state = (1<< EEPROM_DATA_LAST);    // the EEPROM_DATA_AVAILABLE bit has to be zero
-
-  EEPROM.put(nDataBlockBegin, dummy);   // writing the data (ID) back to EEPROM...
-  DEBUG_PRINTSTR("Done");
-
-  EEPROM.get(nDataBlockBegin, dummy);   // reading a struct, so it is flexible...
-  DEBUG_PRINTSTR(" - data_available bit is ");
-  DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_AVAILABLE)) > 0);
-  
-}
-*/
 
 
 /*
@@ -564,10 +520,24 @@ void findIndex()
  * In case of non-overflow this is  the item at the end of the chain.
  * In the overflow-situation this means the oldest item will be retrieved.
  */
-void getEEPROMdata()
+void fetchEEPROMdata(struct sensorData* nextData)
 {
-  struct sensorData nextData;
-  myEEPROM.readNextItem(&nextData);
+  DEBUG_PRINTLNSTR("Getting a data element for transmission..");
+//  struct sensorData nextData;
+  myEEPROM.readNextItem(nextData);
+  DEBUG_PRINTLNSTR("done");
+}
+
+/*
+ * Get last EEPROM data item
+ * In case of non-overflow this is  the item at the end of the chain.
+ * In the overflow-situation this means the oldest item will be retrieved.
+ */
+void freeEEPROMdata()
+{
+  DEBUG_PRINTLNSTR("Deleting the transmitted data element from EEPROM..");
+  myEEPROM.freeNextItem();
+  DEBUG_PRINTLNSTR("done");
 }
 
 /*
@@ -797,7 +767,8 @@ void printValues(int DHT11_State)
 */
 bool EEPROM_data_available()
 {
-  return false;
+//  return false;
+  return !myEEPROM.getEmpty();
 }
 
 
@@ -822,6 +793,7 @@ int RF_action(int* pnDelay)
     
     // Send the measurement results
     DEBUG_PRINTSTR("Sending data...");
+    DEBUG_PRINT(myData.state);
     radio.write(&myData, sizeof(struct sensorData));
     
   delay(10);   

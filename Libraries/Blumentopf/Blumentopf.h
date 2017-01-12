@@ -43,6 +43,7 @@
 #define VOLTS_PER_SCALE (IREF / 1024.0)
 #define SCALE_OFFSET (VOLTAGE_GAP / VOLTS_PER_SCALE)
 #define VOLTAGE_DIVIDER_FACTOR ((R1+R2)/R1)	// division factor by the resistors
+#define REMAINING_FLAG_SPACE (5)    // number of flags left in the EEPROM settings (6 bit max, because we want to merge some addresses in future)
 
 
 // SCALE_OFFSET = ((IREF - (R1*V_max / ((R1+R2)))) / (IREF / 1024.0))
@@ -71,6 +72,8 @@
 #define REGISTER_ACK_BIT (0)
 #define FETCH_EEPROM_DATA1 (1)
 #define FETCH_EEPROM_DATA2 (2)
+//#define EEPROM_OVERFLOW_OFFSET_BIT (1<<5*6-5)
+#define EEPROM_OVERFLOW_OFFSET_BIT (1L<<5*REMAINING_FLAG_SPACE)
 #define FETCH_EEPROM_REG_MASK (6)
 
 #define FETCH_EEPROM_REG_SKIP 	(0)
@@ -144,14 +147,22 @@ public:
 	void delIndex();
 	void printElements();
 	void stashData();
-	void readNextItem(struct sensorData*);
+  void readNextItem(struct sensorData*);
+  void freeNextItem();
+  void unsetHeaders();
+  bool getEmpty();
 private:
+  void incrementHeaderAddress(uint16_t*);
+  void incrementDataAddress(uint16_t*);
+  void decrementDataAddress(uint16_t*);
+  void setDataAsLast(uint16_t);
+  void setDataAsNotLast(uint16_t);
 	uint16_t mnIndexBegin;
 	uint16_t mnDataBlockBegin;
 	uint16_t mnNextDataBlock;		// Block where next data is stored to. If equal mnDataBlockBegin then it's the first data element.
-	uint16_t mnLastData;		// Block where next data is stored to. If equal mnDataBlockBegin then it's the first data element.
+	uint16_t mnLastData;		// Block where previous data has been stored to.
 //	uint16_t mnNextData;
-	byte mbOverflow;		// Block where next data is stored to. If equal mnDataBlockBegin then it's the first data element.
+	bool mbOverflow;		// signals there were more failed transmissions than memory available
 	bool empty;
 };
 
