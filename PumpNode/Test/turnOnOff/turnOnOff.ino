@@ -7,7 +7,7 @@ const int transistorPin = 3;    // connected to the base of the transistor
  
  void loop() {
    digitalWrite(transistorPin, HIGH);
-   delay(3000);
+   delay(2000);
    digitalWrite(transistorPin, LOW);
-   delay(1000);
+   delay(5000);
  }
