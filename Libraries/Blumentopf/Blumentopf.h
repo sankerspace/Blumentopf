@@ -45,6 +45,10 @@
 #define VOLTAGE_DIVIDER_FACTOR ((R1+R2)/R1)	// division factor by the resistors
 #define REMAINING_FLAG_SPACE (5)    // number of flags left in the EEPROM settings (6 bit max, because we want to merge some addresses in future)
 
+#define NODELIST_FILENAME "nodelist.txt"
+#define NODELISTSIZE (100)            // this defines how many nodes can be stored in the node list. So this limits the maximum number of nodes that can be controlled.
+                                      // in case it is not big enough, it can be increased, but keep in mind that it will use up a lot of space, even if just few nodes are connected!
+                                      // If there is time, a list can be implemented...
 
 // SCALE_OFFSET = ((IREF - (R1*V_max / ((R1+R2)))) / (IREF / 1024.0))
 
@@ -65,6 +69,7 @@
 #define EEPROM_DATA_AVAILABLE (3) // EEPROM_DATA_AVAILABLE: 0...no data,					1...data available
 #define EEPROM_DATA_PACKED (4)    // EEPROM_DATA_PACKED:    0...live data,					1...EEPROM data
 #define EEPROM_DATA_LAST (5)	  // EEPROM_DATA_LAST:		0...this is not the last data,	1...this is the last data
+#define NODE_TYPE (6)             // NODE_TYPE:             0...this is a SensorNode,       1...this is a MotorNode
 
 /*
  * The following defines are for controller status bit operations
@@ -72,6 +77,7 @@
 #define REGISTER_ACK_BIT (0)
 #define FETCH_EEPROM_DATA1 (1)
 #define FETCH_EEPROM_DATA2 (2)
+#define ID_INEXISTENT (3)       // there is no such ID
 //#define EEPROM_OVERFLOW_OFFSET_BIT (1<<5*6-5)
 #define EEPROM_OVERFLOW_OFFSET_BIT (1L<<5*REMAINING_FLAG_SPACE)
 #define FETCH_EEPROM_REG_MASK (6)
@@ -93,6 +99,11 @@
 
 #define EEPROM_HEADER_STATUS_VALID 15	// indicates this data is valid. Unset when the EEPROM header is initialized
 //#define EEPROM_DATA_STATUS_LAST 14		// indicates this is the last data element in the list.
+
+
+#define INTERACTIVE_COMMAND_AVAILABLE 1;
+#define NO_INTERACTIVE_COMMAND_AVAILABLE 2;
+
 /*
  * stores all measurment data in 12 bytes. 32 bytes are available in a message.
 */
@@ -165,6 +176,45 @@ private:
 	bool mbOverflow;		// signals there were more failed transmissions than memory available
 	bool empty;
 };
+
+/*
+ * This handler manages everything related to the IOT and watering schedule.
+ * It checks whether there are realtime requests available or if watering is scheduled somewhere.
+ * Also it cares about connecting the SensorNodes to MotorNodes.
+ */
+
+class CommandHandler
+{
+  public:
+    CommandHandler();
+    uint8_t getInteractiveCommands();
+    uint8_t checkSchedule();
+  private:
+};
+
+
+/*
+ * In this struct all information about the nodes is stored.
+ * It lists the node IDs, whether it is a sensor or motor node, 
+ * which sensorNode controls which motorNode and it can be extended by
+ * the node specific settings for the control algorithm.
+ */
+struct nodeListElement
+{
+  uint16_t ID;
+  uint8_t nodeType;     // NODE_TYPE:             0...this is a SensorNode,       1...this is a MotorNode
+  uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
+};
+
+class nodeList
+{
+public:
+  struct nodeListElement myNodes[NODELISTSIZE];
+  uint16_t mnNodeCount;
+  void getNodeList();
+  uint8_t addNode(struct nodeListElement);
+  uint8_t findNodeByID(uint16_t);         // checks if the node exists
+} myNodeList;
 
 /*
 * to be able to deal with multiple kinds of RTCs, we implement an abstraction layer.

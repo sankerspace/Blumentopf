@@ -4,14 +4,13 @@ Hier ist ein Spannungsmess-Testprogramm (VoltageCheck) sowie der ganze restliche
 ###### Sensor Node ######
 
 X	Sensoren auslesen (Implementiert und getestet. Geht sehr gut)
-~	Protokoll
+X	Protokoll
 		implementiert und getestet:
 			Beim Startup beim Controller registrieren 
 			ID beziehen, falls noch keine vorhanden
 			Daten übertragen
 			Schlafdauer empfangen und schlafen gehen
-		Todo:
-			Speichern der Daten im EEPROM bei RF Ausfall ist noch nicht implementiert
+			Speichern der Daten im EEPROM bei RF Ausfall und auslesen der Daten, wenn vom Server angefordert
 X	RTC synchronisieren
 -	Interrupt Alarm von RTC
 
@@ -23,10 +22,21 @@ X	RTC synchronisieren
 ###### Controller  ######
 
 Ist ein simpler Controller, der zeigt wie man die Funktionen von dem Protokoll verwendet.
-Es fehlt:
-	ID-verwaltung.
-	Ein Konzept wann die Sensoren ausgelesen und wann die Pumpen wie gesteuert werden.
-	Data logging Konzept
+Features:
+	ID-verwaltung:
+		-) Hat der Node noch keine ID wird eine vom Controller vergeben.
+		-) Der Controller führt eine Liste mit den ihm bekannten Nodes.
+	Kommunikationsprotokoll:
+		-) Der Controller antwortet auf Registrations und Messdaten-Nachrichten.
+		   Dabei schickt er Instruktionen mit.
+	Data Logging:
+		-) Alle Nachrichten werden auf die SD Karte geloggt.
+		   Den Teil kann man dann auf dem Pie übernehmen und ein Datenbankinterface basteln
+
+Fehlt:
+	Die Möglichkeit über ein Front-End die Messintervalle eizustellen und Messknoten mit Pumpknoten zu verknüpfen.
+	Ein Algorithmus wann welche Pumpen aktiviert werden und ggf. ein Frontend für die Parameter des Algorithmus
+
 
 
 
