@@ -7,9 +7,37 @@
 #include <dht11.h>
 #include "Blumentopf.h"
 
+
+/*
+ * ---------------- Blumentopf - Library ---------------
+ * 
+ * This library provides all functions to the network protocol,
+ * real time clock and memory management.
+ * It is seperated into two parts which are not split 
+ * into different files, because Arduino and Git don't match well.
+ * Further the header provides all kind of constants to adjust the program.
+ * 
+ *    Part I
+ * The first part deals with the real time clocks and time conversions.
+ * It is an abstraction layer over the RTC libraries, so when 
+ * changing the RTC, only the object class has to be changed 
+ * in the sketch. The rest of the code can stay untouched.
+ * The relevant RTC functions are implemented in the abstraction 
+ * layer within this file. These functions can, of course, be 
+ * based on other libraries.
+ * 
+ *    Part II
+ * The second part manages the EEPROM accesses.
+ * It's main task is to evenly distribute accesses to
+ * the EEPROM to ensure even usage. It implements the 
+ * whole storage logic, so it is very easy to use in the main sketch.
+ * 
+ */
+
+
+
 /*
 * This scetion deals with the RTC and time conversions
-*
 */
 
  
@@ -334,6 +362,20 @@ byte bcdToDec(byte val)
 *	End of DS3231 helper functions
 */
 
+
+
+
+
+
+
+/*
+ *          Part II       --  EEPROM management
+ */
+
+
+
+
+
 /*
 *	EEPROM storage class
 */
@@ -472,8 +514,6 @@ uint8_t DataStorage::findQueueEnd()
 	struct sensorData currentElement;
  uint16_t nPreviousOldestElement;
 
-  DEBUG_PRINT("Rocks: ");
-  DEBUG_PRINTLN(EEPROM_OVERFLOW_OFFSET_BIT);
   
   
 	firstItemTimestamp = 0;
@@ -512,9 +552,11 @@ uint8_t DataStorage::findQueueEnd()
 	//	mnLastData = nCurrentAddress - sizeof(currentElement);		// the address of the last item is the address we have been looking for
 		mnLastData = nPreviousAddress;
 
-    if (nPreviousOldestElement & EEPROM_OVERFLOW_OFFSET_BIT)    // offset reached!
+    if (nPreviousOldestElement & EEPROM_OVERFLOW_OFFSET_BIT)    // offset reached, reset it!
     {
-      
+      struct EEPROM_Data myEEPROMData;    // reset the ID, since the offset is reached
+      myEEPROMData.ID = 1;
+      EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // writing the data (ID) back to EEPROM...
     }
 	}
 	
@@ -889,5 +931,112 @@ void DataStorage::printElements()
 	while((((currentElement.state & (1 << EEPROM_DATA_LAST)) == 0) && (mbOverflow == false)) || ((mbOverflow == true) && (currentDataAddress != mnDataBlockBegin)));      // as long as it's no overflow and more data to come or if it's an overflow until all data has been written
 	
 	
+}
+
+
+
+
+
+
+
+
+
+uint8_t CommandHandler::getInteractiveCommands();
+
+uint8_t CommandHandler::checkSchedule();
+
+
+
+/*
+ * This function reads the list of all known nodes from a memory.
+ */
+void nodeList::getNodeList()
+{
+  myNodeList.nNodeCount = 0;
+/*
+ * For now we read it from an SD card...
+ */
+  File nodeListFile;
+  if (SD.exists(NODELIST_FILENAME))    // node list file exists. good!
+  {
+    DEBUG_PRINTSTR(NODELIST_FILENAME);
+    DEBUG_PRINTLNSTR(" exists."); 
+  }
+  else          // file doesn't exist..creating file
+  {
+    DEBUG_PRINTSTR(NODELIST_FILENAME);
+    DEBUG_PRINTLNSTR(" doesn't exist..creating file."); 
+    nodeListFile = SD.open(NODELIST_FILENAME, FILE_WRITE);
+    nodeListFile.close();
+  }
+
+
+  nodeListFile = SD.open(NODELIST_FILENAME, FILE_READ);
+  if (nodeListFile)         // if the file is available, read it:
+  {
+    DEBUG_PRINTLN("Reading from file...");
+    while (nodeListFile.available())    // there is data in the file
+    {
+      DEBUG_PRINTLN("Reading one node");
+      myNodeList.myNodes[myNodeList.nNodeCount] = nodeListFile.read((uint8_t *)&nodeListElement, sizeof(nodeListElement)/sizeof(uint8_t));      // read one node
+      myNodeList.nNodeCount++;      // keep track of the number of nodes read so far
+    }
+// now all nodes should be read
+  }
+  // if the file isn't open, pop up an error:
+  else
+  {
+    DEBUG_PRINTSTR("error opening ");
+    DEBUG_PRINTLNSTR(NODELIST_FILENAME);
+  }
+}
+
+/* checks whether a node with a specific ID exists
+ *  
+ */
+uint8_t findNodeByID(uint16_t ID);
+{
+  uint8_t i;
+  for(i = 0; i < NODELISTSIZE; i++)
+  {
+    if (myNodeList.myNodes[i].ID == newElement.ID)    // element exists already
+    {
+      return i;
+    }
+  }
+
+  return 0xff;    // node does not exist
+}
+
+
+/*
+ * Adds a node to the node list.
+ * If it a node with this ID already exists, it will not be able to connect.
+ */
+uint8_t::addNode(struct nodeListElement newElement)
+{
+  uint8_t nodeIndex = 0xff;
+  
+// check if node exists already:
+  nodeIndex = findNodeByID(newElement.ID);
+  if (nodeIndex != 0xff)        // // element exists already
+  {
+    DEBUG_PRINTLN("Node exists already! Node cannot be added!");
+    return 1;
+  }
+  
+
+// otherwise add the node to the list:
+  if (mnNodeCount < NODELISTSIZE)
+  {
+    myNodeList.myNodes[mnNodeCount] = newElement;      // copy new element
+    mnNodeCount++;                          // keep track of the number of elements
+  }
+  else
+  {
+    DEBUG_PRINTLN("Node list is full! Node cannot be added!");
+    return 2;
+  }
+  return 0;
 }
 

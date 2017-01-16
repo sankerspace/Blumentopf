@@ -357,6 +357,7 @@ void sendData()
   int nRet;
   int nDelay;
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
+  myData.state &= ~(1 << NODE_TYPE);      // set node type to sensor
   while (sending == true)
   {
     DEBUG_PRINT("-");
