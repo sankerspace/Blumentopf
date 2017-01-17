@@ -55,7 +55,8 @@ unsigned int OnOff=0,previousTime=0,interval=0,dif=0;
 const int pumpPin = 3;    // connected to the base of the transistor
 unsigned int  answer=0;
 byte addresses[][6] = {"Pump","Contr"};
-rf24_crclength_e crc_len;                                                       
+                                                       // A single byte to keep track of the data being sent back and forth
+
 
 void setup(){
 
@@ -81,8 +82,6 @@ void setup(){
   //Print debug info
   radio.printDetails();
 
-  crc_len=radio.getCRCLength();
-  Serial.print(F("CRClength:")) ;Serial.println(crc_len);  
   interval=0;
 }
 
@@ -120,6 +119,8 @@ void loop(void) {
   }
   
  }
+
+   radio.printDetails(); 
 }
 
 

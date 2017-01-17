@@ -29,18 +29,28 @@ Features:
 	Kommunikationsprotokoll:
 		-) Der Controller antwortet auf Registrations und Messdaten-Nachrichten.
 		   Dabei schickt er Instruktionen mit.
-	Data Logging:
-		-) Alle Nachrichten werden auf die SD Karte geloggt.
-		   Den Teil kann man dann auf dem Pie übernehmen und ein Datenbankinterface basteln
+
 
 Fehlt:
 	Die Möglichkeit über ein Front-End die Messintervalle eizustellen und Messknoten mit Pumpknoten zu verknüpfen.
 	Ein Algorithmus wann welche Pumpen aktiviert werden und ggf. ein Frontend für die Parameter des Algorithmus
 
+###### Raspberry Pi  ######
 
+    fehlt noch!!!
 
-
+	Data Logging:
+		-) Alle Nachrichten werden passiv geloggt.
+		   Den Teil kann man dann auf dem Pie übernehmen und ein Datenbankinterface basteln
 
 ###### PumpNode ######
 
-Fehlt völlig
+Hardware fertig
+
+Software:
+    Pumpe ansteuerbar
+    RF Kommunikation
+
+fehlt noch:
+    Interrupt/Sleep vom Pump-Node
+    Protokoll Implementierung
