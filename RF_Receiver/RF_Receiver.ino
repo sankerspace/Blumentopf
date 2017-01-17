@@ -13,6 +13,9 @@
 #include <SD.h>
 
 #define INTERVAL (100)
+#define HW_ARDUINO (1)
+#define HW_PHOTON (2)
+#define HW HW_ARDUINO   // tells whether to compile for Arduino or Photon
 
 const int chipSelect = 4;
 
@@ -48,18 +51,42 @@ void setup(void)
 
   myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
 
-  Serial.print("Initializing SD card...");
 
-  // see if the card is present and can be initialized:
-  if (!SD.begin(chipSelect))
+  if (initStorage() == false)
   {
-    Serial.println("Card failed, or not present");
-    // don't do anything more:
     return;
   }
+  
   digitalWrite(12,HIGH);
   SPI.transfer(0xAA);
   Serial.println("card initialized.");
+}
+
+/*
+ * Initializes the storage for data logging
+ * The Arduino writes to an SD card for debugging purposes, 
+ * the particle will either write to his internal memory or not log the data at all.
+ * 
+ */
+bool initStorage()
+{
+  if (HW == HW_ARDUINO)             // using arduino
+  {
+    Serial.print("Initializing SD card...");
+
+    // see if the card is present and can be initialized:
+    if (!SD.begin(chipSelect))
+    {
+      Serial.println("Card failed, or not present");
+      // don't do anything more:
+      return false;
+    }
+  }
+  else if (HW == HW_PHOTON)         // using photon
+  {
+    // #toimplement
+  }
+  return true;
 }
 
 void loop(void)
@@ -80,7 +107,7 @@ void loop(void)
 //    getUNIXtime(&myResponse.ControllerTime);    // gets current timestamp
 
 // log the data to the SD card:
-    writeSD();
+    logData();
       
     myResponse.state  = 0;
     if ((myData.state&(1<<MSG_TYPE_BIT)) == false)  // this is a registration request. Send ack-message
@@ -136,9 +163,10 @@ void loop(void)
 
 
 /*
- * This function writes the data to the SD card
+ * This function logs the data to the storage.
+ * The Arduino writes the data to the SD card, the photon to its flash.
  */
-void writeSD()
+void logData()
 {
   String currentData = "";
 
@@ -163,22 +191,29 @@ void writeSD()
   currentData += ",";
   currentData += String(myData.interval);
 
-  File dataFile = SD.open("datalog.txt", FILE_WRITE);
-//int dataFile;
-
-    // if the file is available, write to it:
-  if (dataFile)
+  if (HW == HW_ARDUINO)
   {
-    dataFile.println(currentData);
-    dataFile.close();
-    // print to the serial port too:
-    DEBUG_PRINTLN("Writing to SD...");
-    DEBUG_PRINTLN(currentData);
+    File dataFile = SD.open("datalog.txt", FILE_WRITE);
+  //int dataFile;
+  
+      // if the file is available, write to it:
+    if (dataFile)
+    {
+      dataFile.println(currentData);
+      dataFile.close();
+      // print to the serial port too:
+      DEBUG_PRINTLN("Writing to SD...");
+      DEBUG_PRINTLN(currentData);
+    }
+    // if the file isn't open, pop up an error:
+    else
+    {
+      Serial.println("error opening datalog.txt");
+    }
   }
-  // if the file isn't open, pop up an error:
-  else
+  else if(HW == HW_PHOTON)    // on case of a particle, the data might be logged to the flash or not at all.
   {
-    Serial.println("error opening datalog.txt");
+    // #toimplement
   }
 }
 
@@ -280,6 +315,7 @@ void handleDataMessage()
  * This function deals with motor node messages.
  * They can either be state messages (for example when watering is done)
  * or responses to a instruction message.
+ * See the state diagram in the repository for details.
  */
 void handleMotorMessage(uint16_t ID)
 {
@@ -294,9 +330,11 @@ void handleMotorMessage(uint16_t ID)
   }
 
 
+
   // handle the motor message stuff:
+  // Tha actual controller logic should be inserted here.
   /*
-  * todo
+  * #toimplement
   */
   
 }
