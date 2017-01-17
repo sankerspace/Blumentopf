@@ -1,0 +1,18 @@
+SimpleRF:
+Minimum communication, test if my hardware is ok.
+
+turnOnOff:
+A basic software whic tests to turn on the motor pump by switching the relay
+
+turnOnOff_RF:
+
+
+turnOnOff_RFv2:
+Controller sends an integer variable beginnig from 1 , every cycle
+the pump node takes the received integer variable and turns the pump on.
+The integer variable are the amount of time to turn on the pump.
+
+
+turnOnOff_RFv3:
+Same as turnOnOff_RFv2, but the PumpNode goes into sleep mode and wakes up 
+if a message arrives, so we care about interrupts
