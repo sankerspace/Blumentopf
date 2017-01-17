@@ -121,13 +121,16 @@ void loop(void) {
      Serial.print(F("ElapseTime["));Serial.print(dif);Serial.print(F("] greater than Interval["));Serial.print(interval);Serial.println(F("]"));
     radio.stopListening();
     answer=OnOff;
+    Serial.println(F("Turn off the pump "));delay(50);
     digitalWrite(pumpPin, LOW);
     delay(1000);
+    Serial.print(F("Send answer to the controller: "));Serial.println(answer);delay(50);
     radio.write(&answer,sizeof(unsigned int));
+     Serial.println(F("Start listening again...: "));delay(50);
     radio.startListening();
     
     interval=0;
-     Serial.println(F("Intervall reset:"));
+     Serial.println(F("Intervall reseted, we are finished one pump cycle..........................."));
   }
   
  }else{
