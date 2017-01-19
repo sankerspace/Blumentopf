@@ -54,8 +54,9 @@ RF24 radio(9, 10);
 /***      Set this radio as radio number 0 or 1         ***/
 const int interruptPin=2;
 unsigned int OnOff=0,previousTime=0,interval=0,dif=0;
-const int pumpPin = 3;    // connected to the base of the transistor
+const int pumpPin = 3,criticalTime=60000;   
 unsigned int  answer=0;
+int status;
 byte addresses[][6] = {"Pump","Contr"};
                                                        // A single byte to keep track of the data being sent back and forth
 
@@ -67,7 +68,7 @@ volatile short sleep_cycles_remaining = sleep_cycles_per_transmission;
 
 void setup_watchdog(uint8_t prescalar);
 void do_sleep(void);
-
+void checkRF_Failure(void);
 
 
 void setup(){
@@ -95,53 +96,63 @@ void setup(){
   radio.printDetails();
 
   interval=0;
-
-   setup_watchdog(wdt_8s);
+  status=0;
+   //setup_watchdog(wdt_8s);
 }
 
 
 void loop(void) {   
- unsigned long currentTime=millis();    
- if(radio.available())
+ unsigned long currentTime=millis();  
+   
+ if(radio.available() && status==0)
  {
-  Serial.println(F("Available radio "));
-  while (radio.available()) {                                   // While there is data ready
+    
+    Serial.println(F("Available radio "));
     radio.read( &OnOff, sizeof(unsigned int) );             // Get the payload
-  }
-  Serial.print(F("Received payload "));Serial.println(OnOff,DEC);
-  digitalWrite(pumpPin, HIGH);
-  interval=OnOff*1000L;
-  previousTime=millis();
-  Serial.print(F("Calculated interval is "));Serial.print(interval);Serial.println(F("ms"));
-  //delay(OnOff*1000);
- }else if(interval>0 ){
+  /*while (radio.available()) {                                   // While there is data ready
+    radio.read( &OnOff, sizeof(unsigned int) );             // Get the payload
+  }*/
+    Serial.print(F("Received payload "));Serial.println(OnOff,DEC);
+    if(OnOff>0){
+      status=1;
+      digitalWrite(pumpPin, HIGH);
+      interval=OnOff*1000L;
+      previousTime=millis();
+      Serial.print(F("Calculated interval is "));Serial.print(interval);Serial.println(F("ms"));
+    }
+    Serial.flush();
+ 
+ }else if(status==1){
     dif=(currentTime-previousTime);
-    
+    //printCounter(interval,dif);
    if((dif> interval)){
-     Serial.print(F("ElapseTime["));Serial.print(dif);Serial.print(F("] greater than Interval["));Serial.print(interval);Serial.println(F("]"));
-    radio.stopListening();
-    answer=OnOff;
-    Serial.println(F("Turn off the pump "));delay(50);
-    digitalWrite(pumpPin, LOW);
-    delay(1000);
-    Serial.print(F("Send answer to the controller: "));Serial.println(answer);delay(50);
-    radio.write(&answer,sizeof(unsigned int));
-     Serial.println(F("Start listening again...: "));delay(50);
-    radio.startListening();
-    
-    interval=0;
-     Serial.println(F("Intervall reseted, we are finished one pump cycle..........................."));
+      int state=0;
+      Serial.print(F("ElapseTime["));Serial.print(dif);Serial.print(F("] greater than Interval["));Serial.print(interval);Serial.println(F("]"));
+      radio.stopListening();
+      state=radio.flush_tx();   
+      answer=OnOff;
+      Serial.println(F("Turn off the pump "));delay(50);
+      digitalWrite(pumpPin, LOW);
+      delay(1000);
+      Serial.print(F("Send answer to the controller: "));Serial.println(answer);delay(50);
+      
+      radio.write(&answer,sizeof(unsigned int));
+      
+      Serial.println(F("Start listening again...: "));delay(50);
+      radio.startListening();
+      status=0;
+      Serial.println(F("Intervall reseted, we are finished one pump cycle..........................."));
   }
   
- }else{
+ }/*else{
    Serial.println(F("Sleeping"));
    delay(50); 
   do_sleep();
- }
-
+ }*/
+ 
+  
    radio.printDetails(); 
 }
-
 
 
 
@@ -183,4 +194,20 @@ void do_sleep(void)
   WDTCSR &= ~_BV(WDIE);  
 
 }
+/*
+*Only works when
+*/
+void checkRF_Failure(void)
+{
+  if(radio.failureDetected){ 
+    Serial.println("[ERROR:]Rf chip failure detected, try to reset.....");
+    radio.begin();                       // Attempt to re-configure the radio with defaults
+    radio.failureDetected = 0;           // Reset the detection value
+    radio.openWritingPipe(addresses[1]); // Re-configure pipe addresses
+    radio.openReadingPipe(1,addresses[0]);
+    
+  }
+
+}
+
 
