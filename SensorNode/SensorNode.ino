@@ -17,7 +17,7 @@
 #include <JeeLib.h>   // For sleeping
 #include <dht11.h>    // Termperature and humidity sensor
 #include <SPI.h>
-#include "nRF24L01.h" // radio
+//#include "nRF24L01.h" // radio
 #include "RF24.h"     // radio
 #include <EEPROM.h>
 
@@ -28,6 +28,7 @@
 
 struct sensorData myData;
 struct responseData myResponse;
+class nodeList myNodeList;
 
 /*
 // Hardware configuration for RF
@@ -147,13 +148,16 @@ void setup()
 
 
   nRet = registerNode(&nDelay);
-//  while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
+  while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
   {
     #ifdef DEBUG
       Serial.flush();
     #endif
-//    Sleepy::loseSomeTime(10000);
-//    nRet = registerNode(&nDelay);
+    digitalWrite(sensorPower, LOW);   // turn off the sensor power
+    Sleepy::loseSomeTime(myResponse.interval*100);
+    digitalWrite(sensorPower, HIGH);   // turn on the sensor power
+    delay(500);     // RTC needs 500ms startup time in total
+    nRet = registerNode(&nDelay);
   }
 
 //  myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
@@ -181,8 +185,9 @@ int registerNode(int *pnDelay)
     DEBUG_PRINTSTR("No EEPROM-ID found. Registering at server with this ");
     myData.state |= (1 << NEW_NODE_BIT);    // this is a new node
     
-// works well as a random pattern generator:
-    myData.temperature = (analogRead(17) % 100);
+// worked well as a random pattern generator, has some problems now:
+    myData.temperature = (analogRead(randomPIN) % 100);
+    
 
     DEBUG_PRINTSTR("random session ID: ");
     DEBUG_PRINT(myData.temperature);

@@ -22,9 +22,16 @@
   #define DEBUG_PRINTLNSTR(x)
 #endif 
 
+// sets Particle or photon:
+#define HW_ARDUINO (1)
+#define HW_PHOTON (2)
+#define HW HW_ARDUINO   // tells whether to compile for Arduino or Photon
+
+
 // DS3231 TWI communication address:
 #define DS3231_I2C_ADDRESS 0x68
 
+#define randomPIN A6
 #define BATTERY_SENSE_PIN A3      // Pin for Battery voltage
 #define DHT11PIN 5                // Pin number for temperature/humidity sensor
 #define MOISTURE_THRESHOLD (1000) // wet/dry threshold
@@ -46,9 +53,14 @@
 #define REMAINING_FLAG_SPACE (5)    // number of flags left in the EEPROM settings (6 bit max, because we want to merge some addresses in future)
 
 #define NODELIST_FILENAME "nodelist.txt"
-#define NODELISTSIZE (100)            // this defines how many nodes can be stored in the node list. So this limits the maximum number of nodes that can be controlled.
+#if (HW == HW_ARDUINO)
+#define NODELISTSIZE (20)            // this defines how many nodes can be stored in the node list. So this limits the maximum number of nodes that can be controlled.
                                       // in case it is not big enough, it can be increased, but keep in mind that it will use up a lot of space, even if just few nodes are connected!
                                       // If there is time, a list can be implemented...
+#endif
+#if (HW == HW_PHOTON)
+#define NODELISTSIZE (255)            // The photon has a bigger memory
+#endif
 
 // SCALE_OFFSET = ((IREF - (R1*V_max / ((R1+R2)))) / (IREF / 1024.0))
 
@@ -101,8 +113,10 @@
 //#define EEPROM_DATA_STATUS_LAST 14		// indicates this is the last data element in the list.
 
 
-#define INTERACTIVE_COMMAND_AVAILABLE 1;
-#define NO_INTERACTIVE_COMMAND_AVAILABLE 2;
+#define INTERACTIVE_COMMAND_AVAILABLE 1
+#define NO_INTERACTIVE_COMMAND_AVAILABLE 2
+#define SCHEDULED_WATERING 1
+#define NO_SCHEDULED_WATERING 2
 
 /*
  * stores all measurment data in 12 bytes. 32 bytes are available in a message.
@@ -186,7 +200,7 @@ private:
 class CommandHandler
 {
   public:
-    CommandHandler();
+//    CommandHandler();
     uint8_t getInteractiveCommands();
     uint8_t checkSchedule();
   private:
@@ -214,7 +228,7 @@ public:
   void getNodeList();
   uint8_t addNode(struct nodeListElement);
   uint8_t findNodeByID(uint16_t);         // checks if the node exists
-} myNodeList;
+};
 
 /*
 * to be able to deal with multiple kinds of RTCs, we implement an abstraction layer.

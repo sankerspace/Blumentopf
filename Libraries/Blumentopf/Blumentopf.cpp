@@ -4,6 +4,8 @@
 #include <DS1302RTC.h>
 #include <EEPROM.h>
 
+#include <SD.h>
+
 #include <dht11.h>
 #include "Blumentopf.h"
 
@@ -939,11 +941,21 @@ void DataStorage::printElements()
 
 
 
+/*
+ * checks whether there was an interactive command from the APP
+ */
+uint8_t CommandHandler::getInteractiveCommands()
+{
+  
+}
 
-
-uint8_t CommandHandler::getInteractiveCommands();
-
-uint8_t CommandHandler::checkSchedule();
+/*
+ * Checks whether a watering was scheduled for this time
+ */
+uint8_t CommandHandler::checkSchedule()
+{
+  
+}
 
 
 
@@ -952,7 +964,9 @@ uint8_t CommandHandler::checkSchedule();
  */
 void nodeList::getNodeList()
 {
-  myNodeList.nNodeCount = 0;
+  int nRet;
+  
+  mnNodeCount = 0;
 /*
  * For now we read it from an SD card...
  */
@@ -978,8 +992,13 @@ void nodeList::getNodeList()
     while (nodeListFile.available())    // there is data in the file
     {
       DEBUG_PRINTLN("Reading one node");
-      myNodeList.myNodes[myNodeList.nNodeCount] = nodeListFile.read((uint8_t *)&nodeListElement, sizeof(nodeListElement)/sizeof(uint8_t));      // read one node
-      myNodeList.nNodeCount++;      // keep track of the number of nodes read so far
+//      myNodeList.myNodes[myNodeList.mnNodeCount] = nodeListFile.read((uint8_t *)&nodeListElement, sizeof(nodeListElement)/sizeof(uint8_t));      // read one node
+       nRet = nodeListFile.read((uint8_t *)&myNodes[mnNodeCount], sizeof(myNodes[mnNodeCount])/sizeof(uint8_t));      // read one node
+       if (nRet == 0)
+       {
+          DEBUG_PRINTLN("Reading error..");
+       }
+      mnNodeCount++;      // keep track of the number of nodes read so far
     }
 // now all nodes should be read
   }
@@ -994,12 +1013,12 @@ void nodeList::getNodeList()
 /* checks whether a node with a specific ID exists
  *  
  */
-uint8_t findNodeByID(uint16_t ID);
+uint8_t nodeList::findNodeByID(uint16_t ID)
 {
   uint8_t i;
   for(i = 0; i < NODELISTSIZE; i++)
   {
-    if (myNodeList.myNodes[i].ID == newElement.ID)    // element exists already
+    if (myNodes[i].ID == ID)    // element exists already
     {
       return i;
     }
@@ -1013,7 +1032,7 @@ uint8_t findNodeByID(uint16_t ID);
  * Adds a node to the node list.
  * If it a node with this ID already exists, it will not be able to connect.
  */
-uint8_t::addNode(struct nodeListElement newElement)
+uint8_t nodeList::addNode(struct nodeListElement newElement)
 {
   uint8_t nodeIndex = 0xff;
   
@@ -1029,7 +1048,7 @@ uint8_t::addNode(struct nodeListElement newElement)
 // otherwise add the node to the list:
   if (mnNodeCount < NODELISTSIZE)
   {
-    myNodeList.myNodes[mnNodeCount] = newElement;      // copy new element
+    myNodes[mnNodeCount] = newElement;      // copy new element
     mnNodeCount++;                          // keep track of the number of elements
   }
   else
