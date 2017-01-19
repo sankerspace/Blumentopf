@@ -172,7 +172,7 @@ int registerNode(int *pnDelay)
   int nRet;
   
 //  if (myData.ID > 0)                        // this is a known node - 20170110...I guess this was the case on an old arduino. a new one showed 0xff in the EEPROM...
-  if (myData.ID < 0xff)                        // this is a known node - 20170110... this is the new check..
+  if (myData.ID < 0xffff)                        // this is a known node - 20170110... this is the new check..
   {
     DEBUG_PRINTSTR("EEPROM-ID found: ");
     DEBUG_PRINT(myData.ID);                // Persistent ID
@@ -800,6 +800,8 @@ int RF_action(int* pnDelay)
     // Send the measurement results
     DEBUG_PRINTSTR("Sending data...");
     DEBUG_PRINT(myData.state);
+    DEBUG_PRINTSTR("ID: ");
+    DEBUG_PRINT(myData.ID);
     radio.write(&myData, sizeof(struct sensorData));
     
   delay(10);   

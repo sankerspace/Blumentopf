@@ -27,6 +27,8 @@
 #define HW_PHOTON (2)
 #define HW HW_ARDUINO   // tells whether to compile for Arduino or Photon
 
+#define SD_AVAILABLE 0
+
 
 // DS3231 TWI communication address:
 #define DS3231_I2C_ADDRESS 0x68
@@ -54,12 +56,16 @@
 
 #define NODELIST_FILENAME "nodelist.txt"
 #if (HW == HW_ARDUINO)
-#define NODELISTSIZE (20)            // this defines how many nodes can be stored in the node list. So this limits the maximum number of nodes that can be controlled.
+  #if (SD_AVAILABLE == 1)
+    #define NODELISTSIZE (20)            // this defines how many nodes can be stored in the node list. So this limits the maximum number of nodes that can be controlled.
                                       // in case it is not big enough, it can be increased, but keep in mind that it will use up a lot of space, even if just few nodes are connected!
                                       // If there is time, a list can be implemented...
+  #else
+    #define NODELISTSIZE (4)            // Only 4 nodes! Stored in EEPROM
+  #endif
 #endif
 #if (HW == HW_PHOTON)
-#define NODELISTSIZE (255)            // The photon has a bigger memory
+  #define NODELISTSIZE (255)            // The photon has a bigger memory
 #endif
 
 // SCALE_OFFSET = ((IREF - (R1*V_max / ((R1+R2)))) / (IREF / 1024.0))
@@ -108,6 +114,8 @@
 #define INDEXELEMENTS (10)
 //#define INDEXENDE  (INDEXBEGIN + INDEXELEMENTS * INDEX_ELEMENT_SIZE)
 #define DATARANGE_END (900)
+// EEPROM address for the node list
+#define NODELIST_ADDRESS (950)
 
 #define EEPROM_HEADER_STATUS_VALID 15	// indicates this data is valid. Unset when the EEPROM header is initialized
 //#define EEPROM_DATA_STATUS_LAST 14		// indicates this is the last data element in the list.
@@ -228,6 +236,7 @@ public:
   void getNodeList();
   uint8_t addNode(struct nodeListElement);
   uint8_t findNodeByID(uint16_t);         // checks if the node exists
+  void clearEEPROM_Nodelist();
 };
 
 /*
