@@ -4,7 +4,7 @@
 #include <RF24_config.h>
 
 #include <SPI.h>
-#include "nRF24L01.h"
+//#include "nRF24L01.h"
 #include "RF24.h"
 
 // For RTC:
@@ -13,9 +13,6 @@
 #include <SD.h>
 
 #define INTERVAL (100)
-#define HW_ARDUINO (1)
-#define HW_PHOTON (2)
-#define HW HW_ARDUINO   // tells whether to compile for Arduino or Photon
 
 const int chipSelect = 4;
 
@@ -27,6 +24,7 @@ struct sensorData myData;
 RF24 radio(9, 10);
 const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL}; // pipe[0] ist answer-channel
 RTC_DS3231 myRTC;
+nodeList myNodeList;
 
 void setup(void)
 {
@@ -46,20 +44,25 @@ void setup(void)
   DEBUG_PRINTLN(sizeof(struct sensorData));
 
   myRTC.init(&myData.state);
-
-  getNodeList();
+//  myNodeList.clearEEPROM_Nodelist();    // deletes the node list
+  myNodeList.getNodeList();
 
   myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
 
 
-  if (initStorage() == false)
+  if (SD_AVAILABLE == 1)
   {
-    return;
+    if (initStorage() == false)
+    {
+      return;
+    }
+    
+    DEBUG_PRINTLN("card initialized.");
   }
   
   digitalWrite(12,HIGH);
   SPI.transfer(0xAA);
-  Serial.println("card initialized.");
+
 }
 
 /*
@@ -72,12 +75,12 @@ bool initStorage()
 {
   if (HW == HW_ARDUINO)             // using arduino
   {
-    Serial.print("Initializing SD card...");
+    DEBUG_PRINTLN("Initializing SD card...");
 
     // see if the card is present and can be initialized:
     if (!SD.begin(chipSelect))
     {
-      Serial.println("Card failed, or not present");
+      DEBUG_PRINTLN("Card failed, or not present");
       // don't do anything more:
       return false;
     }
@@ -91,6 +94,7 @@ bool initStorage()
 
 void loop(void)
 {
+    uint8_t nPipenum;
   class CommandHandler myCommandHandler;
     uint8_t nICA;   // Interactive Command Answer
     uint8_t nSCA;   // Scheduled Command Answer
@@ -98,9 +102,11 @@ void loop(void)
   myResponse.interval = INTERVAL;
   
 //  if (radio.available() == true)
-  if (radio.available(pipes[1]) == true)    // 15.12.2016   checks only the receive pipe..otherwise it will react to also other pipes and that can lead to problems
+//  if (radio.available(pipes[1]) == true)    // 15.12.2016   checks only the receive pipe..otherwise it will react to also other pipes and that can lead to problems
+  if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
   {
-    DEBUG_PRINTLNSTR("\nMessage available");
+    DEBUG_PRINTSTR("\nMessage available at pipe ");
+    DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
 
 //      myResponse.ControllerTime = 1481803260;    
@@ -112,16 +118,19 @@ void loop(void)
     myResponse.state  = 0;
     if ((myData.state&(1<<MSG_TYPE_BIT)) == false)  // this is a registration request. Send ack-message
     {
+      DEBUG_PRINTLNSTR("Registration request");
       handleRegistration();                 // answer the registration request. There is no difference between sensor nodes and motor nodes.
     }
     else                                    // This is a data message
     {
-      if (myData.state & (1 << NODE_TYPE) == false) // it is a sensor node
+      if ((myData.state & (1 << NODE_TYPE)) == false) // it is a sensor node
       {
+        DEBUG_PRINTLNSTR("Sensor Data");
         handleDataMessage();
       }
       else                                  // it is a motor node message
       {
+        DEBUG_PRINTLNSTR("Motor Message");
         handleMotorMessage(0);
       }
     }
@@ -148,7 +157,7 @@ void loop(void)
   {
     nICA = myCommandHandler.getInteractiveCommands();        // checks whether the user requested watering with its app.
     nSCA = myCommandHandler.checkSchedule();                        // checks whether there is watering scheduled now.
-    if ((nICA == INTERACTIVE_COMMAND_AVAILABLE || ()))                                     // some watering needs to be done
+    if ((nICA == INTERACTIVE_COMMAND_AVAILABLE || (nSCA == SCHEDULED_WATERING)))                                     // some watering needs to be done
     {
         doWateringTasks();
     }
@@ -158,7 +167,9 @@ void loop(void)
   }
 }
 
-
+void doWateringTasks()
+{
+}
 
 
 
@@ -208,7 +219,9 @@ void logData()
     // if the file isn't open, pop up an error:
     else
     {
-      Serial.println("error opening datalog.txt");
+      DEBUG_PRINTLN("error opening datalog.txt");
+      DEBUG_PRINTLN("data:");
+      DEBUG_PRINTLN(currentData);
     }
   }
   else if(HW == HW_PHOTON)    // on case of a particle, the data might be logged to the flash or not at all.
@@ -229,7 +242,7 @@ void handleRegistration()
   DEBUG_PRINTLNSTR("Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
 //  if (myData.ID > 0)                      // known node
-  if (myData.ID < 0xff)                      // known node
+  if (myData.ID < 0xffff)                      // known node
   {
     myResponse.ID = myData.ID;
   }
@@ -240,18 +253,28 @@ void handleRegistration()
   }
 
 // store the node in the list if it doesn't exist yet.
+DEBUG_PRINTSTR("ID:");
+DEBUG_PRINTLN(myResponse.ID);
+DEBUG_PRINTSTR("state: ");
+DEBUG_PRINTLN(myData.state);
+
+
   currentNode.ID = myResponse.ID;
   currentNode.sensorID = 0;
-  if (myData.state&(1<<NODE_TYPE) == 0)
+  if ((myData.state&(1<<NODE_TYPE)) == 0)
   {
+    DEBUG_PRINTLNSTR("SensorNode");
     currentNode.nodeType = 0;    // SensorNode
   }
   else
   {
+    DEBUG_PRINTLNSTR("PumpNode");
     currentNode.nodeType = 1;    // MotorNode
   }
+  DEBUG_PRINTLNSTR("Storing node..");
+  
   nRet = myNodeList.addNode(currentNode);
-  if (nRet > 0)       // there was a serious problem when adding the node. Node has not been added
+  if (nRet > 1)       // there was a serious problem when adding the node. Node has not been added
   {
     DEBUG_PRINTLNSTR("Node registration aborted!");
   }

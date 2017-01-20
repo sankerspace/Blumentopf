@@ -4,6 +4,8 @@
 #include <DS1302RTC.h>
 #include <EEPROM.h>
 
+#include <SD.h>
+
 #include <dht11.h>
 #include "Blumentopf.h"
 
@@ -939,67 +941,150 @@ void DataStorage::printElements()
 
 
 
+/*
+ * checks whether there was an interactive command from the APP
+ */
+uint8_t CommandHandler::getInteractiveCommands()
+{
+  
+}
 
-
-uint8_t CommandHandler::getInteractiveCommands();
-
-uint8_t CommandHandler::checkSchedule();
+/*
+ * Checks whether a watering was scheduled for this time
+ */
+uint8_t CommandHandler::checkSchedule()
+{
+  
+}
 
 
 
 /*
  * This function reads the list of all known nodes from a memory.
+ * In case of a particle it should write/read to/from flash.
+ * 
+ * The arduino should use an external SD card (limited to 20 nodes) or flash (4)
  */
 void nodeList::getNodeList()
 {
-  myNodeList.nNodeCount = 0;
+  int nRet;
+  uint16_t nCurrentAddress;
+  
+  mnNodeCount = 0;
 /*
  * For now we read it from an SD card...
  */
-  File nodeListFile;
-  if (SD.exists(NODELIST_FILENAME))    // node list file exists. good!
+  if (HW == HW_ARDUINO)
   {
-    DEBUG_PRINTSTR(NODELIST_FILENAME);
-    DEBUG_PRINTLNSTR(" exists."); 
-  }
-  else          // file doesn't exist..creating file
-  {
-    DEBUG_PRINTSTR(NODELIST_FILENAME);
-    DEBUG_PRINTLNSTR(" doesn't exist..creating file."); 
-    nodeListFile = SD.open(NODELIST_FILENAME, FILE_WRITE);
-    nodeListFile.close();
-  }
-
-
-  nodeListFile = SD.open(NODELIST_FILENAME, FILE_READ);
-  if (nodeListFile)         // if the file is available, read it:
-  {
-    DEBUG_PRINTLN("Reading from file...");
-    while (nodeListFile.available())    // there is data in the file
+    if (SD_AVAILABLE == 1)
     {
-      DEBUG_PRINTLN("Reading one node");
-      myNodeList.myNodes[myNodeList.nNodeCount] = nodeListFile.read((uint8_t *)&nodeListElement, sizeof(nodeListElement)/sizeof(uint8_t));      // read one node
-      myNodeList.nNodeCount++;      // keep track of the number of nodes read so far
+      File nodeListFile;
+      if (SD.exists(NODELIST_FILENAME))    // node list file exists. good!
+      {
+        DEBUG_PRINTSTR(NODELIST_FILENAME);
+        DEBUG_PRINTLNSTR(" exists."); 
+      }
+      else          // file doesn't exist..creating file
+      {
+        DEBUG_PRINTSTR(NODELIST_FILENAME);
+        DEBUG_PRINTLNSTR(" doesn't exist..creating file."); 
+        nodeListFile = SD.open(NODELIST_FILENAME, FILE_WRITE);
+        nodeListFile.close();
+      }
+    
+    
+      nodeListFile = SD.open(NODELIST_FILENAME, FILE_READ);
+      if (nodeListFile)         // if the file is available, read it:
+      {
+        DEBUG_PRINTLN("Reading from file...");
+        while (nodeListFile.available())    // there is data in the file
+        {
+          DEBUG_PRINTLN("Reading one node");
+    //      myNodeList.myNodes[myNodeList.mnNodeCount] = nodeListFile.read((uint8_t *)&nodeListElement, sizeof(nodeListElement)/sizeof(uint8_t));      // read one node
+           nRet = nodeListFile.read((uint8_t *)&myNodes[mnNodeCount], sizeof(myNodes[mnNodeCount])/sizeof(uint8_t));      // read one node
+           if (nRet == 0)
+           {
+              DEBUG_PRINTLN("Reading error..");
+           }
+          mnNodeCount++;      // keep track of the number of nodes read so far
+        }
+    // now all nodes should be read
+      }
+      // if the file isn't open, pop up an error:
+      else
+      {
+        DEBUG_PRINTSTR("error opening ");
+        DEBUG_PRINTLNSTR(NODELIST_FILENAME);
+      }
     }
-// now all nodes should be read
+    else      // read nodes from EEPROM
+    {
+      nCurrentAddress = NODELIST_ADDRESS;
+      
+      DEBUG_PRINTSTR("Maximum nodelist length: ");
+      DEBUG_PRINT(NODELISTSIZE);
+      DEBUG_PRINTSTR("Starting search at ");
+      DEBUG_PRINTLN(nCurrentAddress);
+      DEBUG_PRINTLNSTR("Nodes found: ");
+      
+      for(mnNodeCount = 0; mnNodeCount < NODELISTSIZE; mnNodeCount++)
+      {
+        EEPROM.get(nCurrentAddress, myNodes[mnNodeCount]);   // reading a struct, so it is flexible...
+        if (myNodes[mnNodeCount].ID == 0xffff) // this is an empty node --> reached end of the list
+        {
+          break;
+        }
+
+        DEBUG_PRINT(myNodes[mnNodeCount].ID);
+        DEBUG_PRINT(" - ");
+        if (myNodes[mnNodeCount].nodeType == 0)
+        {
+          DEBUG_PRINTLNSTR("SensorNode");
+        }
+        else
+        {
+          DEBUG_PRINTLNSTR("PumpNode");
+        }
+        nCurrentAddress += sizeof(struct nodeListElement);
+      }
+      DEBUG_PRINT(mnNodeCount);
+      DEBUG_PRINTLNSTR(" nodes found in total.");
+    }
   }
-  // if the file isn't open, pop up an error:
-  else
+
+ 
+
+}
+
+/*
+ * Clears the NodeList-EEPROM
+ */
+void nodeList::clearEEPROM_Nodelist()
+{
+  uint16_t nCurrentAddress;
+  
+  nCurrentAddress = NODELIST_ADDRESS;
+  myNodes[0].ID = 0xffff;
+  myNodes[0].nodeType = 0;
+  myNodes[0].sensorID = 0;
+  
+  for(mnNodeCount = 0; mnNodeCount < NODELISTSIZE; mnNodeCount++)
   {
-    DEBUG_PRINTSTR("error opening ");
-    DEBUG_PRINTLNSTR(NODELIST_FILENAME);
+    EEPROM.put(nCurrentAddress, myNodes[0]);   // reading a struct, so it is flexible...
+    nCurrentAddress += sizeof(struct nodeListElement);
   }
 }
+
 
 /* checks whether a node with a specific ID exists
  *  
  */
-uint8_t findNodeByID(uint16_t ID);
+uint8_t nodeList::findNodeByID(uint16_t ID)
 {
   uint8_t i;
   for(i = 0; i < NODELISTSIZE; i++)
   {
-    if (myNodeList.myNodes[i].ID == newElement.ID)    // element exists already
+    if (myNodes[i].ID == ID)    // element exists already
     {
       return i;
     }
@@ -1013,24 +1098,53 @@ uint8_t findNodeByID(uint16_t ID);
  * Adds a node to the node list.
  * If it a node with this ID already exists, it will not be able to connect.
  */
-uint8_t::addNode(struct nodeListElement newElement)
+uint8_t nodeList::addNode(struct nodeListElement newElement)
 {
   uint8_t nodeIndex = 0xff;
+  uint16_t nCurrentAddress;
   
 // check if node exists already:
+  DEBUG_PRINTLN("\tBrowsing list of existing nodes");
   nodeIndex = findNodeByID(newElement.ID);
   if (nodeIndex != 0xff)        // // element exists already
   {
-    DEBUG_PRINTLN("Node exists already! Node cannot be added!");
+    DEBUG_PRINTLN("\tNode exists already! Node cannot be added!");
     return 1;
   }
   
-
-// otherwise add the node to the list:
+  DEBUG_PRINT("\tNode does not exist within the list yet..");
+  
+// otherwise add the node to the list and to the memory:
   if (mnNodeCount < NODELISTSIZE)
   {
-    myNodeList.myNodes[mnNodeCount] = newElement;      // copy new element
+    DEBUG_PRINTLN("list isn't full yet.");
+    myNodes[mnNodeCount] = newElement;      // copy new element
     mnNodeCount++;                          // keep track of the number of elements
+
+    if (HW == HW_ARDUINO)
+    {
+      DEBUG_PRINT("\tArduino ");
+      if (SD_AVAILABLE == 1)          // write it to SD
+      {
+        DEBUG_PRINTLN("(SD version)");
+        // todo
+      }
+      else                            // write it to EEPROM
+      {
+        DEBUG_PRINTLN("(non SD version)");
+        nCurrentAddress = NODELIST_ADDRESS + (mnNodeCount-1) * sizeof(struct nodeListElement);    // calculating the next EEPROM node list address
+        EEPROM.put(nCurrentAddress, newElement);                                               // writing the node to EEPROM
+        DEBUG_PRINT("\tStored node to EEPROM at address ");
+        DEBUG_PRINTLN(nCurrentAddress);
+        
+      }
+    }
+    else            // on a particle: write it to the flash memory
+    {
+      DEBUG_PRINTLN("Particle");
+      // todo
+    }
+    
   }
   else
   {
