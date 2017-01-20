@@ -38,9 +38,7 @@
 /**************PUMP NODE SETTINGS****************************/
 
 #include <SPI.h>
-#include <printf.h>
-#include <avr/sleep.h>
-#include <avr/power.h>
+#include "printf.h"
 #include "nRF24L01.h"
 #include "RF24.h"
 #include "RF_tool.h"
@@ -52,24 +50,12 @@ RF24 radio(9, 10);
 
 /****************** User Config ***************************/
 /***      Set this radio as radio number 0 or 1         ***/
-const int interruptPin=2;
-unsigned int OnOff=0,previousTime=0,interval=0,dif=0;
-const int pumpPin = 3,criticalTime=60000;   
-unsigned int  answer=0;
+
+unsigned int OnOff=0, answer=0;
+unsigned long previousTime=0,interval=0,dif=0;
+const int pumpPin = 3;   
 int status;
 byte addresses[][6] = {"Pump","Contr"};
-                                                       // A single byte to keep track of the data being sent back and forth
-
-// Sleep declarations
-typedef enum { wdt_16ms = 0, wdt_32ms, wdt_64ms, wdt_128ms, wdt_250ms, wdt_500ms, wdt_1s, wdt_2s, wdt_4s, wdt_8s } wdt_prescalar_e;
-
-const short sleep_cycles_per_transmission = 4;
-volatile short sleep_cycles_remaining = sleep_cycles_per_transmission;
-
-void setup_watchdog(uint8_t prescalar);
-void do_sleep(void);
-void checkRF_Failure(void);
-
 
 void setup(){
 
@@ -82,22 +68,19 @@ void setup(){
 
   radio.setPALevel(RF24_PA_LOW);
   radio.setChannel(112);
-  
-  //radio.enableAckPayload();                     // Allow optional ack payloads
-  //radio.enableDynamicPayloads();                // Ack payloads are dynamic payloads
 
   radio.openWritingPipe(addresses[1]);        // Both radios listen on the same pipes by default, but opposite addresses
   radio.openReadingPipe(1,addresses[0]);      // Open a reading pipe on address 0, pipe 1
     
   radio.startListening();                       // Start listening
-  //radio.writeAckPayload(1,&counter,1);          // Pre-load an ack-paylod into the FIFO buffer for pipe 1
+  
 
   //Print debug info
   radio.printDetails();
 
   interval=0;
   status=0;
-   //setup_watchdog(wdt_8s);
+ 
 }
 
 
@@ -106,12 +89,8 @@ void loop(void) {
    
  if(radio.available() && status==0)
  {
-    
     Serial.println(F("Available radio "));
     radio.read( &OnOff, sizeof(unsigned int) );             // Get the payload
-  /*while (radio.available()) {                                   // While there is data ready
-    radio.read( &OnOff, sizeof(unsigned int) );             // Get the payload
-  }*/
     Serial.print(F("Received payload "));Serial.println(OnOff,DEC);
     if(OnOff>0){
       status=1;
@@ -119,6 +98,8 @@ void loop(void) {
       interval=OnOff*1000L;
       previousTime=millis();
       Serial.print(F("Calculated interval is "));Serial.print(interval);Serial.println(F("ms"));
+    }else{
+      status=2;  
     }
     Serial.flush();
  
@@ -126,88 +107,41 @@ void loop(void) {
     dif=(currentTime-previousTime);
     //printCounter(interval,dif);
    if((dif> interval)){
-      int state=0;
+      //int state=0;
       Serial.print(F("ElapseTime["));Serial.print(dif);Serial.print(F("] greater than Interval["));Serial.print(interval);Serial.println(F("]"));
-      radio.stopListening();
-      state=radio.flush_tx();   
+     
+      //state=radio.flush_tx();   
       answer=OnOff;
       Serial.println(F("Turn off the pump "));delay(50);
       digitalWrite(pumpPin, LOW);
-      delay(1000);
       Serial.print(F("Send answer to the controller: "));Serial.println(answer);delay(50);
-      
+      radio.stopListening();
       radio.write(&answer,sizeof(unsigned int));
-      
-      Serial.println(F("Start listening again...: "));delay(50);
       radio.startListening();
+      Serial.println(F("Start listening again...: "));
+     
       status=0;
       Serial.println(F("Intervall reseted, we are finished one pump cycle..........................."));
   }
   
- }/*else{
-   Serial.println(F("Sleeping"));
-   delay(50); 
-  do_sleep();
- }*/
- 
+ }else if(status==2)
+ {
+   answer=-1;
+   radio.stopListening();
+   radio.write(&answer,sizeof(unsigned int));
+   radio.startListening(); 
+   status=0;
+ }
   
-   radio.printDetails(); 
+   //radio.printDetails(); 
 }
 
 
 
-void wakeUp(){
-  Serial.println(F("Wake up by Interrupt."));
-   delay(50);
-  sleep_disable();
-}
-
-
-void setup_watchdog(uint8_t prescalar){
-
-  uint8_t wdtcsr = prescalar & 7;
-  if ( prescalar & 8 )
-    wdtcsr |= _BV(WDP3);
-  MCUSR &= ~_BV(WDRF);                      // Clear the WD System Reset Flag
-  WDTCSR = _BV(WDCE) | _BV(WDE);            // Write the WD Change enable bit to enable changing the prescaler and enable system reset
-  WDTCSR = _BV(WDCE) | wdtcsr | _BV(WDIE);  // Write the prescalar bits (how long to sleep, enable the interrupt to wake the MCU
-}
-
-ISR(WDT_vect)
-{
-  //--sleep_cycles_remaining;
-  Serial.println(F("WDT"));
-}
 
 
 
-void do_sleep(void)
-{
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
-  sleep_enable();
-  attachInterrupt(digitalPinToInterrupt(interruptPin),wakeUp,LOW);
-  WDTCSR |= _BV(WDIE);
-  sleep_mode();                        // System sleeps here
-                                       // The WDT_vect interrupt wakes the MCU from here
-  sleep_disable();                     // System continues execution here when watchdog timed out  
-  detachInterrupt(0);  
-  WDTCSR &= ~_BV(WDIE);  
 
-}
-/*
-*Only works when
-*/
-void checkRF_Failure(void)
-{
-  if(radio.failureDetected){ 
-    Serial.println("[ERROR:]Rf chip failure detected, try to reset.....");
-    radio.begin();                       // Attempt to re-configure the radio with defaults
-    radio.failureDetected = 0;           // Reset the detection value
-    radio.openWritingPipe(addresses[1]); // Re-configure pipe addresses
-    radio.openReadingPipe(1,addresses[0]);
-    
-  }
 
-}
 
 
