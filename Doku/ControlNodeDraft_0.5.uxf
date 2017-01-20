@@ -1,0 +1,937 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.3">
+  <zoom_level>8</zoom_level>
+  <element>
+    <type>com.baselet.element.old.element.InitialState</type>
+    <coordinates>
+      <x>440</x>
+      <y>8</y>
+      <w>16</w>
+      <h>16</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>424</x>
+      <y>0</y>
+      <w>40</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    </panel_attributes>
+    <additional_attributes>24;64;24;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>384</x>
+      <y>64</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Startup</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>424</x>
+      <y>88</y>
+      <w>40</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    </panel_attributes>
+    <additional_attributes>24;48;24;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>384</x>
+      <y>136</y>
+      <w>120</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>Check Pending Tasks</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>64</x>
+      <y>680</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Mark Command as
+Received</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>104</x>
+      <y>120</y>
+      <w>296</w>
+      <h>576</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>280;40;24;40;24;560</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>424</x>
+      <y>672</y>
+      <w>40</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>24;144;24;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>384</x>
+      <y>840</y>
+      <w>120</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+State Message
+</panel_attributes>
+    <additional_attributes>64;128;64;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>320</x>
+      <y>800</y>
+      <w>120</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+          
+</panel_attributes>
+    <additional_attributes>24;40;104;40</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>384</x>
+      <y>968</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Process State Message</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>424</x>
+      <y>992</y>
+      <w>248</w>
+      <h>272</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+
+</panel_attributes>
+    <additional_attributes>232;256;24;256;24;24</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>424</x>
+      <y>816</y>
+      <w>48</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>type=decision
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>424</x>
+      <y>328</y>
+      <w>40</w>
+      <h>184</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>24;168;24;24</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>424</x>
+      <y>496</y>
+      <w>48</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>type=decision
+layer=1
+
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>488</x>
+      <y>648</y>
+      <w>168</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>Message from SensorNode
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>304</x>
+      <y>728</y>
+      <w>152</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>Message from MotorNode/
+CheckMessageType()
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>424</x>
+      <y>520</y>
+      <w>40</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+
+
+</panel_attributes>
+    <additional_attributes>24;128;24;24</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>424</x>
+      <y>648</y>
+      <w>48</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>type=decision
+layer=1
+
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>448</x>
+      <y>480</y>
+      <w>536</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>520;40;24;40</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>448</x>
+      <y>632</y>
+      <w>240</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>224;40;24;40</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>456</x>
+      <y>576</y>
+      <w>152</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>[Data message] /
+checkMessageSource()
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>1064</x>
+      <y>496</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Generate Persistent ID
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>968</x>
+      <y>496</y>
+      <w>48</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>type=decision
+layer=1
+
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>872</x>
+      <y>520</y>
+      <w>136</w>
+      <h>720</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>24;704;120;704;120;24</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>1016</x>
+      <y>496</y>
+      <w>40</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>[No]
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>992</x>
+      <y>480</y>
+      <w>88</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>72;40;24;40</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>1000</x>
+      <y>576</y>
+      <w>48</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>[Yes]
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>656</x>
+      <y>1216</y>
+      <w>240</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>Respond
+(Persistent ID, Interval,
+[session ID], [EEPROM])
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>872</x>
+      <y>520</y>
+      <w>272</w>
+      <h>752</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>24;736;256;736;256;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>672</x>
+      <y>648</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Process Sensor Data
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>712</x>
+      <y>672</y>
+      <w>40</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>24;184;24;24</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>368</x>
+      <y>816</y>
+      <w>80</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>Response
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>712</x>
+      <y>856</y>
+      <w>48</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>type=decision
+layer=1
+
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>712</x>
+      <y>880</y>
+      <w>40</w>
+      <h>184</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>24;168;24;24</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>616</x>
+      <y>952</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>[Yes]/
+wantEEPROMData()
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>736</x>
+      <y>1032</y>
+      <w>112</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>96;184;96;40;24;40</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>712</x>
+      <y>1048</y>
+      <w>48</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>type=decision
+layer=1
+
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>760</x>
+      <y>1040</y>
+      <w>104</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>[Yes] /
+EEPROM = send
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>664</x>
+      <y>1032</y>
+      <w>64</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>24;184;24;40;48;40</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>584</x>
+      <y>1064</y>
+      <w>104</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>[Delete] / 
+EEPROM = delete
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>736</x>
+      <y>840</y>
+      <w>160</w>
+      <h>392</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>144;376;144;40;24;40</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>792</x>
+      <y>848</y>
+      <w>40</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>No
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>712</x>
+      <y>1072</y>
+      <w>40</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>24;144;24;24</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>736</x>
+      <y>1096</y>
+      <w>104</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>[No] /
+EEPROM = keep
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>480</x>
+      <y>128</y>
+      <w>904</w>
+      <h>1216</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    
+</panel_attributes>
+    <additional_attributes>24;24;888;24;888;1200;288;1200;288;1144</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>424</x>
+      <y>304</y>
+      <w>48</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>type=decision
+layer=1
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>256</x>
+      <y>248</y>
+      <w>200</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>24;24;24;64;184;64</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>424</x>
+      <y>192</y>
+      <w>40</w>
+      <h>128</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+    </panel_attributes>
+    <additional_attributes>24;112;24;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>160</x>
+      <y>224</y>
+      <w>144</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Send Watering Command
+to Motor Node</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>208</x>
+      <y>152</y>
+      <w>192</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>176;24;24;24;24;72</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>680</x>
+      <y>304</y>
+      <w>176</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Write Pump Node Timeout to Log</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>480</x>
+      <y>160</y>
+      <w>672</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>24;24;656;24;656;48</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>208</x>
+      <y>248</y>
+      <w>232</w>
+      <h>96</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>24;24;24;80;216;80</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>264</x>
+      <y>336</y>
+      <w>96</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>Interactive IOT Command (App)
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>304</x>
+      <y>288</y>
+      <w>120</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>Watering Scheduled
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>1112</x>
+      <y>304</y>
+      <w>48</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>type=decision
+layer=1
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>832</x>
+      <y>304</y>
+      <w>296</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>280;24;24;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>1208</x>
+      <y>304</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Send Error Notification
+to App</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>1136</x>
+      <y>304</y>
+      <w>88</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>72;24;24;24</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>1160</x>
+      <y>304</y>
+      <w>40</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>[Yes]
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>1144</x>
+      <y>272</y>
+      <w>32</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>[No]
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>1072</x>
+      <y>208</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Reschedule Watering</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>1112</x>
+      <y>232</y>
+      <w>40</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>24;24;24;72</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>480</x>
+      <y>144</y>
+      <w>800</w>
+      <h>176</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>24;24;784;24;784;160</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.State</type>
+    <coordinates>
+      <x>144</x>
+      <y>816</y>
+      <w>200</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Write Motor Node Response to Log File</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>584</x>
+      <y>480</y>
+      <w>168</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>[Registration request] /
+SenderIsAKnownNode()
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>104</x>
+      <y>704</y>
+      <w>56</w>
+      <h>152</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+          
+</panel_attributes>
+    <additional_attributes>24;24;24;136;40;136</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>448</x>
+      <y>304</y>
+      <w>248</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>232;24;24;24</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>504</x>
+      <y>296</y>
+      <w>192</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>Timeout for MotorNode Response
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>448</x>
+      <y>416</y>
+      <w>136</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Message received /
+checkMessageType()
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>752</x>
+      <y>752</y>
+      <w>232</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>/
+isDataInEEPROMOfSensorNode()
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>872</x>
+      <y>288</y>
+      <w>192</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>/
+wasCommandTriggeredByAPP()
+style=wordwrap
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
