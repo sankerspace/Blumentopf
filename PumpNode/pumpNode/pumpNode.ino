@@ -22,7 +22,8 @@ unsigned int OnOff = 0, answer = 0;
 unsigned long started_waiting_at = 0, previousTime = 0, interval = 0, dif = 0, criticalTime = 0;
 const int pumpPin = 3;
 int status; //normal states are positive numbers , erro states are negative
-byte addresses[][6] = {"Pump", "Contr"};
+//byte addresses[][6] = {"Pump", "Contr"};
+const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
 /******************************/
 struct sensorData myData;
 struct responseData myResponse;
@@ -44,8 +45,8 @@ void setup() {
   radio.setPALevel(RF24_PA_LOW);
   radio.setChannel(radio_channel);
 
-  radio.openWritingPipe(addresses[1]);        // Both radios listen on the same pipes by default, but opposite addresses
-  radio.openReadingPipe(1, addresses[0]);     // Open a reading pipe on address 0, pipe 1
+  radio.openWritingPipe(pipes[1]);        // Both radios listen on the same pipes by default, but opposite addresses
+  radio.openReadingPipe(1, pipes[0]);     // Open a reading pipe on address 0, pipe 1
 
   radio.startListening();                       // Start listening
 
