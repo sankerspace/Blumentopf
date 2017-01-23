@@ -68,13 +68,20 @@ void setup() {
   EEPROM.get(EEPROM_ID_ADDRESS, myEEPROMData);  // reading a struct, so it is flexible...
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
   myData.state = 0;
+<<<<<<< HEAD
   myResponse.interval=100;
   
   while (registerNode() > 0)                         //register PumpNode at the controller
+=======
+
+  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
+  while(registerNode() > 0)                          //register PumpNode at the controller
+>>>>>>> 67e1e0d8cfc266a621a35c97d8effe2c7b58181a
   {
     DEBUG_PRINTLNSTR("[Setup()]Registration failed,pause 2 seconds then start again.");
     delay(2000);
   }
+<<<<<<< HEAD
   //set standard values
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
@@ -84,6 +91,10 @@ void setup() {
   myData.voltage=0;
   myData.VCC=0;
   myData.realTime=0;
+=======
+
+
+>>>>>>> 67e1e0d8cfc266a621a35c97d8effe2c7b58181a
 }
 
 
