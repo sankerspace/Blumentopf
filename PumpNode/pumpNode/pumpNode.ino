@@ -63,7 +63,7 @@ void setup() {
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
   myData.state = 0;
 
-  while(!registerNode())                          //register PumpNode at the controller
+  while(registerNode() > 0)                          //register PumpNode at the controller
   {
     delay(2000);
   }
@@ -303,7 +303,25 @@ int registerNode(void)
   radio.write(&myData, sizeof(struct sensorData));
   radio.startListening();
 
-  while (!radio.available());
+//  while (!radio.available());   // pump node hangs here in case the registration request gets lost. That's why there should be a timeout check
+// Wait here until we get a response, or timeout (REGISTRATION_TIMEOUT_INTERVAL == ~500ms)
+  unsigned long started_waiting_at = millis();
+  bool timeout = false;
+  while ( (radio.available() == 0 ) && ! timeout )
+  {
+    if (millis() - started_waiting_at > REGISTRATION_TIMEOUT_INTERVAL )
+    {
+      timeout = true;
+    }
+  }
+  // Describe the results
+  if ( timeout )              // the controller did not answer. Abort registration and retry later.
+  {
+    DEBUG_PRINTLNSTR("Failed, response timed out.");
+    return 1;
+  }
+
+  // There was a response --> read the message
   radio.read(&myResponse , sizeof(myResponse));
 
 

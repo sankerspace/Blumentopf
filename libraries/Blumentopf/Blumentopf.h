@@ -33,6 +33,7 @@
 // DS3231 TWI communication address:
 #define DS3231_I2C_ADDRESS 0x68
 
+#define REGISTRATION_TIMEOUT_INTERVAL	500
 #define randomPIN A6
 #define BATTERY_SENSE_PIN A3      // Pin for Battery voltage
 #define DHT11PIN 5                // Pin number for temperature/humidity sensor
