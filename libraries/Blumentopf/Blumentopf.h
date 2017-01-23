@@ -126,7 +126,18 @@
 #define NO_INTERACTIVE_COMMAND_AVAILABLE 2
 #define SCHEDULED_WATERING 1
 #define NO_SCHEDULED_WATERING 2
+/*
+*  PumpNode defines
+*/
+#define PUMPNODE_STATE_0_PUMPREQUEST    0
+#define PUMPNODE_STATE_1_RESPONSE       1
+#define PUMPNODE_STATE_2_PUMPACTIVE     2
+#define PUMPNODE_STATE_3_RESPONSE       3
 
+#define PUMPNODE_STATE_ERROR_START      -1
+#define PUMPNODE_STATE_ERROR_END        -2
+#define PUMPNODE_STATE_3_RESP_FAILED    -3
+#define PUMPNODE_STATE_4_RESP_FAILED    -4      
 /*
  * stores all measurment data in 12 bytes. 32 bytes are available in a message.
 */
@@ -282,6 +293,42 @@ public:
 	int adjustRTC(int, uint8_t*, time_t);
 private:
 	DS1302RTC RTC;
+};
+
+/*
+*Class PumpNode_Handler
+*   Every PumpNode is controlled by its own PumpNode_Handler
+*   Processing of a pumpNode and the whole state machine , 
+*   including its necessary time monitoring, is handled 
+*   inside that class
+*/
+
+class PumpNode_Handler
+{
+public: 
+    PumpNode_Handler(uint16_t criticalTime):ID(0),OnOff(0),
+    pumpnode_status(0),pumpnode_response(0),pumpnode_started_waiting_at(0),pumpnode_previousTime(0),
+    pumpnode_dif(0)
+    {
+        pumpnode_criticalTime=criticalTime;  
+    }
+
+    void setPumpTime(uint16_t pumptime);
+    uint16_t getPumpTime(void);
+    void processPumpstate(struct sensorData IncomeData,struct responseData OutcomeData);
+     
+private:
+    /*state variable*/
+    uint16_t pumpnode_ID;
+    uint16_t OnOff;                     //duration of pumping[s]   
+    int pumpnode_status;                    //in which status is the PUMP Node
+    uint16_t pumpnode_criticalTime;     //maximum time to stay in a state[s]
+    uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
+    /*some timers for state observations*/
+    uint16_t pumpnode_started_waiting_at;//
+    uint16_t pumpnode_previousTime;
+    uint16_t pumpnode_dif; 
+    void resetState(void);
 };
 
 

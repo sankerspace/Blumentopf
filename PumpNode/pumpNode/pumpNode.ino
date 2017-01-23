@@ -31,7 +31,9 @@ struct responseData myResponse;
 
 
 
-
+/************************************************************************************************/
+/*********************************S E T U P*******************************************************/
+/***********************************************************************************************/
 void setup() {
 
   Serial.begin(115200);
@@ -54,23 +56,34 @@ void setup() {
   //Print debug info
   radio.printDetails();
 
-  struct EEPROM_Data myEEPROMData;
+
   interval = 0;
   status = 0;
   criticalTime = 60000; //software watchdog looks for freesing states
 
+  /*Blumentopf protocol specific**/
+  struct EEPROM_Data myEEPROMData;
+  myEEPROM.init();
   // read EEPROM
   EEPROM.get(EEPROM_ID_ADDRESS, myEEPROMData);  // reading a struct, so it is flexible...
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
   myData.state = 0;
-
-  while(registerNode() > 0)                          //register PumpNode at the controller
+  myResponse.interval=100;
+  
+  while (registerNode() > 0)                         //register PumpNode at the controller
   {
+    DEBUG_PRINTLNSTR("[Setup()]Registration failed,pause 2 seconds then start again.");
     delay(2000);
   }
-
+  //set standard values
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
-
+  myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
+  myData.humidity=0.0f;
+  myData.moisture=0;
+  myData.brightness=0;
+  myData.voltage=0;
+  myData.VCC=0;
+  myData.realTime=0;
 }
 
 
@@ -93,18 +106,15 @@ void setup() {
   STATE 3:
   recv() Response(by protocoll)   <--       send() Response(by Protocol of Blumentopf)
 
-  STATE -1:
+  STATE -1: error state
 
   STATE -2:
 
 
-  STATE 10: Registration request
-
-  STATE 11: registration fonfirmation
-
-
 **************************************************************************************************/
-
+/************************************************************************************************/
+/*********************************L O O P*******************************************************/
+/***********************************************************************************************/
 void loop(void) {
   unsigned long currentTime = millis();
   String out = "";
@@ -210,18 +220,13 @@ void loop(void) {
       }
 
     }
-
-  } else if (status == 10) {
-
-  } else if (status == 20) {
-
   }
 
 
 
-  /*********************************************************************************/
+
   /******************S O F T W A R E   W A T C H D O G *****************************/
-  /*********************************************************************************/
+
 
   //radio.printDetails();
   if ((millis() - previousTime) > (criticalTime + dif))
@@ -234,6 +239,13 @@ void loop(void) {
 
 
 }//LOOP
+
+
+
+
+/*********************************************************************************/
+
+/*********************************************************************************/
 
 /*Send data over RF:
   Every send operation concludes to an immediate response from controller
@@ -285,7 +297,7 @@ int registerNode(void)
 
     //randNumber = random(300);
     numb = random(50000000L, 100000000L);
-    myData.temperature = (float)numb;
+    myData.temperature = (float)(numb%100);
 
 
     DEBUG_PRINTSTR("random session ID: ");
@@ -295,17 +307,19 @@ int registerNode(void)
 
   myData.state &= ~(1 << MSG_TYPE_BIT);     // set message type to init
 
-  radio.stopListening();
+
   // Send the measurement results
   DEBUG_PRINTSTR("[registerNode()]:Sending data...");
   DEBUG_PRINT(myData.state);
   DEBUG_PRINTSTR("ID: ");
   DEBUG_PRINTLN(myData.ID);
+  /*********Sending registration request to the Controller***************************/
+  radio.stopListening();
   radio.write(&myData, sizeof(struct sensorData));
   radio.startListening();
-
-//  while (!radio.available());   // pump node hangs here in case the registration request gets lost. That's why there should be a timeout check
-// Wait here until we get a response, or timeout (REGISTRATION_TIMEOUT_INTERVAL == ~500ms)
+  /*********************************************************************************/
+  //  while (!radio.available());   // pump node hangs here in case the registration request gets lost. That's why there should be a timeout check
+  // Wait here until we get a response, or timeout (REGISTRATION_TIMEOUT_INTERVAL == ~500ms)
   unsigned long started_waiting_at = millis();
   bool timeout = false;
   while ( (radio.available() == 0 ) && ! timeout )
@@ -318,13 +332,14 @@ int registerNode(void)
   // Describe the results
   if ( timeout )              // the controller did not answer. Abort registration and retry later.
   {
-    DEBUG_PRINTLNSTR("Failed, response timed out.");
+    DEBUG_PRINTLNSTR("[registerNode()]:Failed, response timed out.");
     return 1;
   }
 
   // There was a response --> read the message
+  /*******************Registration Response from Controller*********************/
   radio.read(&myResponse , sizeof(myResponse));
-
+  /****************************************************************************/
 
 
   if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
@@ -337,11 +352,11 @@ int registerNode(void)
     DEBUG_PRINTSTR(",  expected: ");
     DEBUG_PRINTLN(myData.temperature);
 
-    /* is the response for us? (yes, we stored the session ID in the temperature to keep the message small 
-     *  and reception easy...it could be changed to a struct in a "struct payload" 
-     * which can be casted in the receiver depending on the status flags)
+    /* is the response for us? (yes, we stored the session ID in the temperature to keep the message small
+        and reception easy...it could be changed to a struct in a "struct payload"
+       which can be casted in the receiver depending on the status flags)
     */
-    if (((int)(myResponse.interval / 100)) == (int) (myData.temperature))    
+    if (((int)(myResponse.interval / 100)) == (int) (myData.temperature))
     {
       myData.ID = myResponse.ID;
       myData.interval = (myResponse.interval % 100);
@@ -382,8 +397,6 @@ int registerNode(void)
       return 12;
     }
   }////////
-
-  myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
 
   return 0;   // all okay
 }

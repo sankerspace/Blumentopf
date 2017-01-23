@@ -1154,3 +1154,112 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
   return 0;
 }
 
+
+/**
+* For a pumpNode setup an activation time
+*/
+ void PumpNode_Handler::setPumpTime(uint16_t pumptime){
+ 
+    if(pumptime>0)
+        this->OnOff = pumptime;   
+ }
+ 
+ 
+/**
+* For a pumpNode get the current Pump Time
+*/
+ uint16_t PumpNode_Handler::getPumpTime(void){
+ 
+    return this->OnOff;
+ }
+ 
+ /**
+* Reset State machine 
+*/
+ void PumpNode_Handler::resetState(void){
+    
+    this->OnOff=0; 
+ }
+ 
+ 
+ /**
+* That function controls the state machine of a Pump Node,
+* in such a way that it receives Responses from Pump by IncomeData
+* and send responses/actions to the PumpNode by OutcomeData
+*
+* IncomeData.ID is the ID of the pumpNode which should be processed
+* IncomeData.interval contains response from the PumpNode
+* OutcomeData.ID is the PumpNode ID copied from IncomeData.ID,controller sends action/response to that ID 
+* OutcomeData.interval contains action/response send from controller to PumpNode 
+*/
+void PumpNode_Handler::processPumpstate((struct sensorData)& IncomeData,(struct responseData)& OutcomeData){
+    
+  if(this->pumpnode_status == PUMPNODE_STATE_0_PUMPREQUEST){
+    OutcomeData.ID=IncomeData.ID;
+    this->pumpnode_ID=IncomeData.ID;
+    OutcomeData.interval=getPumpTime();  
+    
+ 
+    DEBUG_PRINTLNSTR("[PumpNode_Handler][State 0:]Pump time sended .");
+    this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
+    pumpnode_previousTime=millis();//A change of state occured here
+    pumpnode_started_waiting_at = millis();       
+    DEBUG_PRINTLNSTR("[PumpNode_Handler][State 0:]Start Listening first confirmation from the pump...");
+
+
+
+  }else if(this->pumpnode_status == PUMPNODE_STATE_1_RESPONSE){
+    dif=millis()-pumpnode_started_waiting_at;
+    if(dif>pumpnode_started_waiting_at)
+    {
+      
+    }
+    OutcomeData.ID=IncomeData.ID;
+    OutcomeData.interval=getPumpTime(); 
+
+
+
+  }else if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPACTIVE){
+
+
+
+  }else if(this->pumpnode_status == PUMPNODE_STATE_3_RESPONSE){
+      
+    
+  }else if(this->pumpnode_status == PUMPNODE_STATE_ERROR_START){
+      
+    
+  }else if(this->pumpnode_status == PUMPNODE_STATE_ERROR_END){
+      
+    
+  }
+
+
+
+  if((millis()-this->pumpnode_previousTime)>(this->pumpnode_criticalTime+dif)){
+     DEBUG_PRINTLNSTR"NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
+     delay(50);
+     resetState();
+     this->pumpnode_previousTime=0;
+     this->pumpnode_dif=0;
+     //setPumpTime(this->OnOff);
+
+  }    
+ }
+ 
+/*
+    uint16_t OnOff;                     //duration of pumping[s]   
+    int pumpnode_status;                    //in which status is the PUMP Node
+    uint16_t pumpnode_criticalTime;     //maximum time to stay in a state[s]
+    uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
+   
+    uint16_t pumpnode_started_waiting_at;//
+    uint16_t pumpnode_previousTime;
+    uint16_t pumpnode_dif; 
+
+*/
+
+
+
+
+

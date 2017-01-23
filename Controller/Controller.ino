@@ -19,12 +19,13 @@ const int chipSelect = 4;
 struct responseData myResponse;
 struct sensorData myData;
 
-
-
 RF24 radio(9, 10);
 const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL}; // pipe[0] ist answer-channel
 RTC_DS3231 myRTC;
 nodeList myNodeList;
+
+
+
 
 void setup(void)
 {
