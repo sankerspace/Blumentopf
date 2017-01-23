@@ -64,12 +64,12 @@ void setup() {
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
   myData.state = 0;
 
+  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
   while(registerNode() > 0)                          //register PumpNode at the controller
   {
     delay(2000);
   }
 
-  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
 
 }
 
