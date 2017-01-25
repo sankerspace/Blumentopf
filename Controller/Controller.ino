@@ -102,6 +102,7 @@ void loop(void)
   class CommandHandler myCommandHandler;
   uint8_t nICA;   // Interactive Command Answer
   uint8_t nSCA;   // Scheduled Command Answer
+  bool bResponseNeeded = true;    // not always a message needs to be sent
   //  struct interactiveCommand myInteractiveCommand;
   myResponse.interval = INTERVAL;
 
@@ -114,7 +115,8 @@ void loop(void)
     radio.read(&myData, sizeof(struct sensorData));
     DEBUG_PRINT("State: ");
    DEBUG_PRINTLN(myData.state);
-
+    DEBUG_PRINT("ID: ");
+   DEBUG_PRINTLN(myData.ID);
     //      myResponse.ControllerTime = 1481803260;
     //    getUNIXtime(&myResponse.ControllerTime);    // gets current timestamp
 
@@ -139,25 +141,29 @@ void loop(void)
       else                                  // it is a motor node message
       {
         DEBUG_PRINTLNSTR("Motor Message");
-        handleMotorMessage(0);
+        handleMotorMessage();
+        
+//        bResponseNeeded = false;
       }
     }
 
-    radio.stopListening();
-    delay(100);   // ist das delay notwendig?
-
-    DEBUG_PRINTLN(myResponse.ControllerTime);
-
-    // Send back response, controller real time and the next sleep interval:
-    DEBUG_PRINTSTR("Sending back response...");
-    radio.write(&myResponse, sizeof(myResponse));
-
-    DEBUG_PRINTLN("Done");
-    //delay(100);   // ist das delay notwendig?
-    radio.startListening();
-    delay(100);   // ist das delay notwendig?
-    DEBUG_PRINTLN("Listening...");
-
+    if (bResponseNeeded == true)          // If it is necessary to send an answer, send it.
+    {
+      radio.stopListening();
+      delay(100);   // ist das delay notwendig?
+  
+      DEBUG_PRINTLN(myResponse.ControllerTime);
+  
+      // Send back response, controller real time and the next sleep interval:
+      DEBUG_PRINTSTR("Sending back response...");
+      radio.write(&myResponse, sizeof(myResponse));
+  
+      DEBUG_PRINTLN("Done");
+      //delay(100);   // ist das delay notwendig?
+      radio.startListening();
+      delay(100);   // ist das delay notwendig?
+      DEBUG_PRINTLN("Listening...");
+    }
     digitalWrite(LED_BUILTIN, LOW);
     delay(10);
   }
@@ -168,7 +174,12 @@ void loop(void)
     nTestWatering++;
     if (nTestWatering == 100)
     {
-      doWateringTasks(1,10);//here a new order to a pump Node has to be planned
+      if (myNodeList.myNodes[0].nodeType == 1)    // it is a motor node
+      {
+        DEBUG_PRINT("Node list id: ");
+        DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
+        doWateringTasks(myNodeList.myNodes[0].ID,10);//here a new order to a pump Node has to be planned
+      }
     }
 /* Testing end */
       
@@ -183,9 +194,9 @@ void loop(void)
 
   }
   /*Most of the time the Controller waits for incoming messages from Pumpnodes
-     It is important that the Controller is not stucked in a state, because of waiting
+     It is important that the Controller is not stuck in a state, because of waiting
      for a message from a Node who is not able to send a message
-     Additional it is necessary to delete storage of handler which are not required anymore
+     Additionally it is necessary to delete storage of handler which are not required anymore
   */
   DEBUG_PRINT(PumpList.size());
   DEBUG_PRINTLNSTR(" pumps vailable!");
@@ -214,14 +225,14 @@ delay(100);
 
 void doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
 {
-  uint16_t pumptime=0;
+//  uint16_t pumptime=0;
   PumpNode_Handler *handler = new PumpNode_Handler(
     PumpNode_ID,
     pumpTime);
-  PumpList.add(handler);
+  PumpList.add(handler);          // todo in february: the handler should only add the pump node if it isn't in the list already.
   handler->processPumpstate(0);
   myResponse.ID=PumpNode_ID;
-  myResponse.interval=pumptime;
+  myResponse.interval=pumpTime;
   DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
   DEBUG_PRINT(PumpNode_ID);
   DEBUG_PRINTSTR(" with duration of ");DEBUG_PRINTLN(handler->getPumpTime());
@@ -407,11 +418,11 @@ void handleDataMessage()
    or responses to a instruction message.
    See the state diagram in the repository for details.
 */
-void handleMotorMessage(uint16_t ID)
+void handleMotorMessage()
 {
   // check if the node ID actually exists in the node table..
   uint8_t nodeIndex;
-  nodeIndex = myNodeList.findNodeByID(ID);   // or however the ID is called..
+  nodeIndex = myNodeList.findNodeByID(myData.ID);   // or however the ID is called..
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
   if (nodeIndex == 0xff)      // if the node does not exist
   {

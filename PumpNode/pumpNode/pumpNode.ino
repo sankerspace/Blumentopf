@@ -56,7 +56,6 @@ void setup() {
   //Print debug info
   radio.printDetails();
 
-
   interval = 0;
   status = 0;
   criticalTime = 60000; //software watchdog looks for freesing states
@@ -76,7 +75,6 @@ void setup() {
     delay(2000);
   }
   //set standard values
-  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
   myData.humidity = 0.0f;
   myData.moisture = 0;
@@ -185,9 +183,9 @@ void loop(void) {
       //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
       if (recvData() > 0) {//if message was not dedicated to this recvData returns -1
         digitalWrite(pumpPin, HIGH);
+        interval = OnOff * 1000L;
         out = "[Status 1]Pump will work for " + String(interval, DEC) + "ms";
         DEBUG_PRINTLN(out);
-        interval = OnOff * 1000L;
         started_waiting_at = millis();
         previousTime = millis();
         status = PUMPNODE_STATE_2_PUMPACTIVE;
@@ -288,14 +286,22 @@ void loop(void) {
 */
 void sendData(unsigned int answer_)
 {
+  DEBUG_PRINTSTR("state_1:");
+  DEBUG_PRINTLN(myData.state);
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
+  DEBUG_PRINTSTR("state_2:");
+  DEBUG_PRINTLN(myData.state);
+
   myData.interval = answer_;
 
   radio.stopListening();
-  DEBUG_PRINTLNSTR("\t\tSending data...........");
+  DEBUG_PRINTSTR("\t\tSending data...........");
+  DEBUG_PRINTSTR("state_after:");
+  DEBUG_PRINTLN(myData.state);
 //  radio.write(&answer_, sizeof(struct sensorData));
   radio.write(&myData, sizeof(struct sensorData));
+  DEBUG_PRINTLNSTR("done");
   radio.startListening();
 }
 
@@ -307,6 +313,9 @@ unsigned int recvData(void)
   //return -1 if message is not for us to keep state
 
   radio.read(&myResponse, sizeof(struct responseData) );          // Get the payload
+  DEBUG_PRINTLN(myResponse.interval);
+  DEBUG_PRINTLN(myResponse.ID);
+  DEBUG_PRINTLN(myData.ID);
   if (myResponse.ID == myData.ID)
   {
     return myResponse.interval;
@@ -320,6 +329,9 @@ int registerNode(void)
 
   struct EEPROM_Data myEEPROMData;
   long numb = 0;
+
+  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
+  
   if (myData.ID < 0xffff)                        // this is a known node - 20170110... this is the new check..
   {
     DEBUG_PRINTSTR("[registerNode()]:EEPROM-ID found: ");
@@ -344,7 +356,7 @@ int registerNode(void)
   }
 
   myData.state &= ~(1 << MSG_TYPE_BIT);     // set message type to init
-
+  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
 
   // Send the measurement results
   DEBUG_PRINTSTR("[registerNode()]:Sending data...");
