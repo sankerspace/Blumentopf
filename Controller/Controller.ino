@@ -48,7 +48,7 @@ void setup(void)
   DEBUG_PRINTLN(sizeof(struct sensorData));
 
   myRTC.init(&myData.state);
-  //  myNodeList.clearEEPROM_Nodelist();    // deletes the node list
+  //myNodeList.clearEEPROM_Nodelist();    // deletes the node list
   myNodeList.getNodeList();
 
   myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
@@ -249,6 +249,7 @@ void doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
 
 void handlePumpCommunications()
 {
+  myResponse.state=0;
   radio.stopListening();//!!!!!!!!!!!!!!!!! KEEP ATTENTION OF TIME SLOT, IAM ALLOWED TO SEND here??
   radio.write(&myResponse, sizeof(myResponse));
   radio.startListening();

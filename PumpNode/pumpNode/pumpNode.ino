@@ -297,8 +297,8 @@ void sendData(unsigned int answer_)
   myData.interval = answer_;
 
   radio.stopListening();
-  DEBUG_PRINTSTR("\t\tSending data...........");
-  DEBUG_PRINTSTR("state_after:");
+  DEBUG_PRINTSTR("\tSending data...........");
+  DEBUG_PRINTSTR("Data-state:");
   DEBUG_PRINTLN(myData.state);
   //  radio.write(&answer_, sizeof(struct sensorData));
   radio.write(&myData, sizeof(struct sensorData));
@@ -314,9 +314,9 @@ unsigned int recvData(void)
   //return -1 if message is not for us to keep state
 
   radio.read(&myResponse, sizeof(struct responseData) );          // Get the payload
-  DEBUG_PRINTLN(myResponse.interval);
-  DEBUG_PRINTLN(myResponse.ID);
-  DEBUG_PRINTLN(myData.ID);
+  DEBUG_PRINTLN("[recvData]: Resp-interval:"+String(myResponse.interval,DEC)+
+  ", Resp-ID:"+String(myResponse.ID,DEC)+", Data-ID:"+String(myData.ID,DEC)+", Resp-state:"+String(myResponse.state,BIN));
+
   if (myResponse.ID == myData.ID)
   {
     return myResponse.interval;
@@ -340,6 +340,7 @@ int registerNode(void)
     DEBUG_PRINTLNSTR(". Registering at the server with this persistent ID... ");
 
     myData.state &= ~(1 << NEW_NODE_BIT);    // this is a known node
+    
   }
   else                                      // this is a new node
   {
@@ -362,7 +363,7 @@ int registerNode(void)
   // Send the measurement results
   DEBUG_PRINTSTR("[registerNode()]:Sending data...");
   DEBUG_PRINT(myData.state);
-  DEBUG_PRINTSTR("ID: ");
+  DEBUG_PRINTSTR(" ID: ");
   DEBUG_PRINTLN(myData.ID);
   /*********Sending registration request to the Controller***************************/
   radio.stopListening();
@@ -391,14 +392,16 @@ int registerNode(void)
   /*******************Registration Response from Controller*********************/
   radio.read(&myResponse , sizeof(myResponse));
   /****************************************************************************/
-
+  DEBUG_PRINTLNSTR("[registerNode()]received: ID: ");
+  DEBUG_PRINT(String(myResponse.ID,DEC) +", Status: " + String(myResponse.state,BIN));
+  DEBUG_PRINTLNSTR("");
   if ((myResponse.state & (1 << ID_REGISTRATION_ERROR)) == false)
   {
     if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
     {
 
-      DEBUG_PRINTLNSTR("[registerNode()]:Got response!");
-      DEBUG_PRINTSTR("  Received Session ID: ");
+      DEBUG_PRINTLNSTR("  [registerNode()]:Got response!");
+      DEBUG_PRINTSTR("  [registerNode()]Received Session ID: ");
       DEBUG_PRINT((int)(myResponse.interval / 100));
 
       DEBUG_PRINTSTR(",  expected: ");
@@ -415,16 +418,16 @@ int registerNode(void)
         myEEPROMData.ID = myResponse.ID;
         EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);  // writing the data (ID) back to EEPROM...
 
-        DEBUG_PRINTLNSTR("...ID matches");
-        DEBUG_PRINTSTR("  Persistent ID: ");
+        DEBUG_PRINTLNSTR("  [registerNode()]...ID matches");
+        DEBUG_PRINTSTR("  [registerNode()]Persistent ID: ");
         DEBUG_PRINT(myResponse.ID);
         DEBUG_PRINTSTR(", Interval: ");
         DEBUG_PRINTLN(myData.interval);
-        DEBUG_PRINTLNSTR("Stored Persistent ID in EEPROM...");
+        DEBUG_PRINTLNSTR("  [registerNode()]Stored Persistent ID in EEPROM...");
       }
       else                                                  // not our response
       {
-        DEBUG_PRINTLNSTR("ID missmatch! Ignore response...");
+        DEBUG_PRINTLNSTR("  [registerNode()]ID missmatch! Ignore response...");
         return 11;
       }
 
@@ -436,16 +439,16 @@ int registerNode(void)
       {
         myData.interval = myResponse.interval;
 
-        DEBUG_PRINTSTR("[registerNode()]:Got response for ID: ");
+        DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
         DEBUG_PRINT(myResponse.ID);
         DEBUG_PRINTSTR("...ID matches, registration successful! Interval: ");
         DEBUG_PRINTLN(myData.interval);
       }
       else                                                  // not our response
       {
-        DEBUG_PRINTSTR("[registerNode()]:Got response for ID: ");
+        DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
         DEBUG_PRINT(myResponse.ID);
-        DEBUG_PRINTLNSTR("...ID missmatch! Ignore response...");
+        DEBUG_PRINTLNSTR("  ...ID missmatch! Ignore response...");
         return 12;
       }
     }
