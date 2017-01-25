@@ -36,7 +36,7 @@ struct responseData myResponse;
 /***********************************************************************************************/
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(BAUD);
   while (!Serial) {}
   pinMode(pumpPin, OUTPUT);
 
@@ -151,7 +151,7 @@ void loop(void) {
   unsigned long currentTime = millis();
   String out = "";
   /********STATE 0*******/
-  if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time tot turn on the pump
+  if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time to turn on the pump
     dif = 0;
     if (radio.available()) {
       DEBUG_PRINTLNSTR("------------------------------------------------------");
@@ -178,7 +178,7 @@ void loop(void) {
       Serial.flush();
     }
     /********STATE 1*******/
-  } else if (status == PUMPNODE_STATE_1_RESPONSE) { //In state 0 pumpNode send acknowledgment,now we get confirmation from controller
+  } else if (status == PUMPNODE_STATE_1_RESPONSE) { //In state 0 pumpNode send acknowledgment, now we get confirmation from controller
 
     if (radio.available()) {
       /********Receiving ACKNOWLEGMENT**************/
@@ -288,12 +288,14 @@ void loop(void) {
 */
 void sendData(unsigned int answer_)
 {
-  myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
+  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
+  myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
   myData.interval = answer_;
 
   radio.stopListening();
   DEBUG_PRINTLNSTR("\t\tSending data...........");
-  radio.write(&answer_, sizeof(struct sensorData));
+//  radio.write(&answer_, sizeof(struct sensorData));
+  radio.write(&myData, sizeof(struct sensorData));
   radio.startListening();
 }
 

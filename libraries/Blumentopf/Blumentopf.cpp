@@ -1155,6 +1155,15 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
 }
 
 
+
+
+
+
+/*
+ * PumpNode_Handler is a list of all nodes which have to pump at the moment
+ */
+
+
 /**
 * For a pumpNode setup an activation time
 */
@@ -1188,7 +1197,7 @@ uint16_t PumpNode_Handler::getID(void)
 /**
 * get Response for the pump Node
 */
- void PumpNode_Handler::getResponseData(void)
+ uint16_t PumpNode_Handler::getResponseData(void)
  {
   uint16_t tmp=this->pumpnode_response;
   //response will be consumed to pretend repeat sending
@@ -1218,12 +1227,12 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
         //[STATE 0]-----------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_0_PUMPREQUEST){
     this->pumpnode_response=this->OnOff; 
-    DEBUG_PRINTSTR("[PumpNode_Handler][State 0:]Pump time sended to PumPnode ");
+    DEBUG_PRINTSTR("[PumpNode_Handler][State 0:]Pump time sent to PumPnode ");
     DEBUG_PRINTLN(this->pumpnode_ID);
     this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
     this->pumpnode_previousTime=millis();//A change of state occured here
     this->pumpnode_started_waiting_at = millis();       
-    DEBUG_PRINTLNSTR("[PumpNode_Handler][State 0:]Start Listening first confirmation from the pump...");
+    DEBUG_PRINTLNSTR("[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...");
 
   }else //[STATE 1]----------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_1_RESPONSE){

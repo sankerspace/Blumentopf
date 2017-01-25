@@ -28,11 +28,11 @@ RTC_DS3231 myRTC;
 nodeList myNodeList;
 LinkedList<PumpNode_Handler*> PumpList = LinkedList<PumpNode_Handler*>();
 
-
+uint8_t nTestWatering = 0;
 
 void setup(void)
 {
-  Serial.begin(9600);
+  Serial.begin(BAUD);
   radio.begin();
 
   //  radio.setRetries(15,15);
@@ -112,12 +112,16 @@ void loop(void)
     DEBUG_PRINTSTR("\nMessage available at pipe ");
     DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
+    DEBUG_PRINT("State: ");
+   DEBUG_PRINTLN(myData.state);
 
     //      myResponse.ControllerTime = 1481803260;
     //    getUNIXtime(&myResponse.ControllerTime);    // gets current timestamp
 
     // log the data to the SD card:
     logData();
+    DEBUG_PRINT("State: ");
+   DEBUG_PRINTLN(myData.state);
 
     myResponse.state  = 0;
     if ((myData.state & (1 << MSG_TYPE_BIT)) == false) // this is a registration request. Send ack-message
@@ -152,14 +156,22 @@ void loop(void)
     //delay(100);   // ist das delay notwendig?
     radio.startListening();
     delay(100);   // ist das delay notwendig?
-
+    DEBUG_PRINTLN("Listening...");
 
     digitalWrite(LED_BUILTIN, LOW);
     delay(10);
   }
   else                                      // no message arrived. Checking the schedule
   {
-
+/* this is only for testing!! */
+    DEBUG_PRINTLN(nTestWatering);
+    nTestWatering++;
+    if (nTestWatering == 100)
+    {
+      doWateringTasks(1,10);//here a new order to a pump Node has to be planned
+    }
+/* Testing end */
+      
     nICA = myCommandHandler.getInteractiveCommands();        // checks whether the user requested watering with its app.
     nSCA = myCommandHandler.checkSchedule();                        // checks whether there is watering scheduled now.
     if ((nICA == INTERACTIVE_COMMAND_AVAILABLE || (nSCA == SCHEDULED_WATERING)))                                     // some watering needs to be done
@@ -175,9 +187,11 @@ void loop(void)
      for a message from a Node who is not able to send a message
      Additional it is necessary to delete storage of handler which are not required anymore
   */
+  DEBUG_PRINT(PumpList.size());
+  DEBUG_PRINTLNSTR(" pumps vailable!");
   if (PumpList.size() > 0)
   {
-
+    DEBUG_PRINTLN("Checking pump list");
     PumpNode_Handler *handler;
     for (int i = 0; i < PumpList.size(); i++) {
       handler = PumpList.get(i);
@@ -193,8 +207,8 @@ void loop(void)
 
     }
   }
-
-
+//  DEBUG_PRINTLNSTR("Finished loop");
+delay(100);
 
 }
 

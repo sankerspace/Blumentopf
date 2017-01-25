@@ -327,12 +327,12 @@ public:
     
     ~PumpNode_Handler(){}
 
-    void setPumpTime(uint16_t pumptime);
+    void     setPumpTime(uint16_t pumptime);
     uint16_t getPumpTime(void);
     int      getState(void);
     uint16_t getID(void);
-    void     getResponseData(void);
-    void processPumpstate(uint16_t IncomeData);
+    uint16_t getResponseData(void);
+    void     processPumpstate(uint16_t IncomeData);
      
 private:
     /*state variable*/
