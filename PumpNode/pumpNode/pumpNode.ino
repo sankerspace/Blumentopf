@@ -63,64 +63,85 @@ void setup() {
 
   /*Blumentopf protocol specific**/
   struct EEPROM_Data myEEPROMData;
-  myEEPROM.init();
+
   // read EEPROM
   EEPROM.get(EEPROM_ID_ADDRESS, myEEPROMData);  // reading a struct, so it is flexible...
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
   myData.state = 0;
-<<<<<<< HEAD
-  myResponse.interval=100;
-  
-  while (registerNode() > 0)                         //register PumpNode at the controller
-=======
+  myResponse.interval = 100;
 
-  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
-  while(registerNode() > 0)                          //register PumpNode at the controller
->>>>>>> 67e1e0d8cfc266a621a35c97d8effe2c7b58181a
+  while (registerNode() > 0)                         //register PumpNode at the controller
   {
     DEBUG_PRINTLNSTR("[Setup()]Registration failed,pause 2 seconds then start again.");
     delay(2000);
   }
-<<<<<<< HEAD
   //set standard values
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
-  myData.humidity=0.0f;
-  myData.moisture=0;
-  myData.brightness=0;
-  myData.voltage=0;
-  myData.VCC=0;
-  myData.realTime=0;
-=======
-
-
->>>>>>> 67e1e0d8cfc266a621a35c97d8effe2c7b58181a
+  myData.humidity = 0.0f;
+  myData.moisture = 0;
+  myData.brightness = 0;
+  myData.voltage = 0;
+  myData.VCC = 0;
+  myData.realTime = 0;
 }
 
 
 /***********************************S T A T E  M A C H I N E**************************************
    PUMPNode                                 Controller
+  ------------------------------------------------------------------------------------------
+  (PumpNode and Controller are performing tasks in the same state or divergent states
+  according the state plan below)
+  (criticalTime should be higher in Controller than in PumpNode)
+
   STATE 0:
-  recv() pump Time                <--        send() pumpTime
-  send() Acknowledgment           -->        recv() Acknowledgment(PumpNode confirms Pumptime
+  recv() pump Time                <--       send() pumpTime
+  (some delay)
+  send() Acknowledgment           -->
+                                      |
+  STATE 1:                            |     {if wait for response takes too long -> STATE -3}
+                                      -->   recv() Acknowledgment(PumpNode confirms Pumptime)
+                                      |
+                                      |
+                                      |
+  recv() Response(by protocoll)  <--     __send() Response(by Protocol of Blumentopf)
+  (possible error detection necessary)| |
+                                      | |
+       TURN ON PUMP                   | |
+                                      | |
+  STATE 2:                            | |
+                                      | |
+       Wait for pump period time      | |
+                                      | |
+       TURN OFF PUMP                  | |
+                                      |       (maximum wait time = pumptime + timeoff)
+  send() Confirmation(Pump off)          -->  recv() Controller knows that Pump is Off now
+                                      |       {if wait for response takes too long -> STATE -4}
+                                      | |  <--send() Response(by Protocol of Blumentopf)
+                                      | |  |
+  STATE 3:                            | |  |
+  recv() Response(by protocoll) <-- ____| _|      
+  (possible error detection necessary)| |
+                                      | |
+                                      | |
+                                      | |
+  STATE -1:                           | |
+  Bad Pump activation Time received   | |
+  in State 0,  send error message     | |
+  send()  Error Message           -->_| |
+                                        |
+                                        |
+  STATE -2:                             |
+                                        |
+  recv() confirmation               <--
 
-  STATE 1:
-  recv() Response(by protocoll)   <--       send() Response(by Protocol of Blumentopf)
-  -------------------------    TURN ON PUMP  -----------------------------------------------
+  STATE -3:(only controller)
+                                            We waited timeOFF ms for response in State 1
+                                            Restart  State 1
 
-  STATE 2:
-        ..................Wait for pump period time ................
-
-  -------------------------    TURN OFF PUMP  -----------------------------------------------
-  send() Confirmation(Pump off)   -->        recv() Controller knows that Pump is Off now
-
-  STATE 3:
-  recv() Response(by protocoll)   <--       send() Response(by Protocol of Blumentopf)
-
-  STATE -1: error state
-
-  STATE -2:
-
+  STATE -4:(only controller)
+                                            We waited timeOFF ms for response in State
+                                            Restart  State 2
 
 **************************************************************************************************/
 /************************************************************************************************/
@@ -130,7 +151,7 @@ void loop(void) {
   unsigned long currentTime = millis();
   String out = "";
   /********STATE 0*******/
-  if (status == 0) { //state: get new period time tot turn on the pump
+  if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time tot turn on the pump
     dif = 0;
     if (radio.available()) {
       DEBUG_PRINTLNSTR("------------------------------------------------------");
@@ -145,33 +166,35 @@ void loop(void) {
         answer = OnOff;
         DEBUG_PRINTLNSTR("[Status 0]Send acknowledgment to the pump request.");
         /********Sending acknowlegment,which is the same number as OnOff time request**************/
+        delay(100);//some time to wait
         sendData(answer);
         /*******************************************************************************************/
-        status = 1;
+        status = PUMPNODE_STATE_1_RESPONSE;
         previousTime = millis();
       } else {
-        status = -1;
+        status = PUMPNODE_STATE_ERROR_START;
         previousTime = millis();
       }
       Serial.flush();
     }
     /********STATE 1*******/
-  } else if (status == 1) { //In state 0 pumpNode send acknowledgment,now we get confirmation from controller
+  } else if (status == PUMPNODE_STATE_1_RESPONSE) { //In state 0 pumpNode send acknowledgment,now we get confirmation from controller
 
     if (radio.available()) {
       /********Receiving ACKNOWLEGMENT**************/
-      if (recvData() > 0) {
+      //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
+      if (recvData() > 0) {//if message was not dedicated to this recvData returns -1
         digitalWrite(pumpPin, HIGH);
         out = "[Status 1]Pump will work for " + String(interval, DEC) + "ms";
         DEBUG_PRINTLN(out);
         interval = OnOff * 1000L;
         started_waiting_at = millis();
         previousTime = millis();
-        status = 2;
+        status = PUMPNODE_STATE_2_PUMPACTIVE;
       }
     }
     /********STATE 2*******/
-  } else if (status == 2) {
+  } else if (status == PUMPNODE_STATE_2_PUMPACTIVE) {
     dif = (currentTime - started_waiting_at);
 
     if ((dif > interval)) {
@@ -188,26 +211,27 @@ void loop(void) {
       sendData(answer);
       /*******************************************************************************************/
 
-      status = 3;
+      status = PUMPNODE_STATE_3_RESPONSE;
       previousTime = millis();
       Serial.flush();
     }
     /********STATE 2*******/
-  } else if (status == 3) {
+  } else if (status == PUMPNODE_STATE_3_RESPONSE) {
     if (radio.available())
     {
       /********Receiving ACKNOWLEGMENT**************/
+      //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
       if (recvData() > 0)
-      {
+      {//if message was not dedicated to this pumpNode recvData returns -1
         DEBUG_PRINTLNSTR("[State 3]Received confirmation.");
         DEBUG_PRINTLNSTR("-------------------------------------------------------------");
-        status = 0;
+        status = PUMPNODE_STATE_0_PUMPREQUEST;
         dif = 0;
         previousTime = millis();
         Serial.flush();
       }
     }
-  } else if (status == -1)
+  } else if (status == PUMPNODE_STATE_ERROR_START)
   {
     /*There was a bad pump time request*/
     answer = -1;
@@ -218,15 +242,15 @@ void loop(void) {
     sendData(answer);
 
     previousTime = millis();
-    status = -2;
-  } else if (status == -2) {
+    status = PUMPNODE_STATE_ERROR_END;
+  } else if (status == PUMPNODE_STATE_ERROR_END) {
     if (radio.available())
     {
       if (recvData() > 0)
       {
         DEBUG_PRINTLNSTR("[State -2]Received confirmation.");
         DEBUG_PRINTLNSTR("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-        status = 0;
+        status = PUMPNODE_STATE_0_PUMPREQUEST;
         previousTime = millis();
       }
 
@@ -244,8 +268,9 @@ void loop(void) {
   {
     DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
     delay(50);
-    status = 0;
+    status = PUMPNODE_STATE_0_PUMPREQUEST;
     previousTime = millis(); //A change of state occured here
+    digitalWrite(pumpPin, LOW);//for security reasons
   }
 
 
@@ -308,7 +333,7 @@ int registerNode(void)
 
     //randNumber = random(300);
     numb = random(50000000L, 100000000L);
-    myData.temperature = (float)(numb%100);
+    myData.temperature = (float)(numb % 100);
 
 
     DEBUG_PRINTSTR("random session ID: ");

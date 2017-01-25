@@ -1172,13 +1172,36 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
  
     return this->OnOff;
  }
- 
+ /**
+* get current state of Interaction between Controller and PumpNode
+*/
+  int PumpNode_Handler::getState(void){
+    return this->pumpnode_status;
+  }
+/**
+* what is the ID of the PumpNode the controller is speaking to
+*/ 
+uint16_t PumpNode_Handler::getID(void)
+{
+  return this->pumpnode_ID;
+}
+/**
+* get Response for the pump Node
+*/
+ void PumpNode_Handler::getResponseData(void)
+ {
+  uint16_t tmp=this->pumpnode_response;
+  //response will be consumed to pretend repeat sending
+  this->pumpnode_response=0; 
+  return tmp;
+ }
+
  /**
 * Reset State machine 
 */
  void PumpNode_Handler::resetState(void){
     
-    this->OnOff=0; 
+    this->pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
  }
  
  
@@ -1187,57 +1210,108 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
 * in such a way that it receives Responses from Pump by IncomeData
 * and send responses/actions to the PumpNode by OutcomeData
 *
-* IncomeData.ID is the ID of the pumpNode which should be processed
-* IncomeData.interval contains response from the PumpNode
-* OutcomeData.ID is the PumpNode ID copied from IncomeData.ID,controller sends action/response to that ID 
-* OutcomeData.interval contains action/response send from controller to PumpNode 
+* IncomeData is the response Data from PumpNode if there is some data
+* 
 */
-void PumpNode_Handler::processPumpstate((struct sensorData)& IncomeData,(struct responseData)& OutcomeData){
-    
+void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
+  
+        //[STATE 0]-----------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_0_PUMPREQUEST){
-    OutcomeData.ID=IncomeData.ID;
-    this->pumpnode_ID=IncomeData.ID;
-    OutcomeData.interval=getPumpTime();  
-    
- 
-    DEBUG_PRINTLNSTR("[PumpNode_Handler][State 0:]Pump time sended .");
+    this->pumpnode_response=this->OnOff; 
+    DEBUG_PRINTSTR("[PumpNode_Handler][State 0:]Pump time sended to PumPnode ");
+    DEBUG_PRINTLN(this->pumpnode_ID);
     this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
-    pumpnode_previousTime=millis();//A change of state occured here
-    pumpnode_started_waiting_at = millis();       
+    this->pumpnode_previousTime=millis();//A change of state occured here
+    this->pumpnode_started_waiting_at = millis();       
     DEBUG_PRINTLNSTR("[PumpNode_Handler][State 0:]Start Listening first confirmation from the pump...");
 
-
-
-  }else if(this->pumpnode_status == PUMPNODE_STATE_1_RESPONSE){
-    dif=millis()-pumpnode_started_waiting_at;
-    if(dif>pumpnode_started_waiting_at)
+  }else //[STATE 1]----------------------------------------------
+  if(this->pumpnode_status == PUMPNODE_STATE_1_RESPONSE){
+    if(IncomeData==0){
+      this->pumpnode_response=0;
+      this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
+      if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
+       {
+       
+          this->pumpnode_status=PUMPNODE_STATE_3_RESP_FAILED;
+       }
+    }else
+    if(IncomeData<0)
     {
+      this->pumpnode_response=-1;
+         DEBUG_PRINTSTR("[PumpNode_Handler][State 1]-Bad message error from PumpNode-ID:");DEBUG_PRINT(this->pumpnode_ID); DEBUG_PRINTLNSTR(".");
+      //go back to state 0
+      this->pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
+      this->pumpnode_previousTime=millis();
+        
+    }else{
       
+      this->pumpnode_response=2*this->OnOff;//some usefull check
+      this->pumpnode_status=PUMPNODE_STATE_2_PUMPACTIVE;
+      this->pumpnode_previousTime=millis();//A change of state occured here
+      DEBUG_PRINTSTR("[PumpNode_Handler][State 1]-Send Response to Node-ID");
+      DEBUG_PRINT(this->pumpnode_ID); 
+      DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response); 
     }
-    OutcomeData.ID=IncomeData.ID;
-    OutcomeData.interval=getPumpTime(); 
+    
+
+  }else //[STATE 2]---------------------------------------------
+  if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPACTIVE){
+    if(IncomeData==0){
+      this->pumpnode_response=0;
+      this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
+      if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
+       {
+ 
+          this->pumpnode_status=PUMPNODE_STATE_3_RESP_FAILED;
+       }
+    }else
+    if(IncomeData<0)
+    {
+        DEBUG_PRINTSTR("[PumpNode_Handler][State 2:]Bad message error from PumpNode-ID:");DEBUG_PRINT(this->pumpnode_ID); DEBUG_PRINTLNSTR(".");
+      this->pumpnode_response=-1;
+      //go back to state 0
+      this->pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
+      this->pumpnode_previousTime=millis();
+        
+    }else{
+      this->pumpnode_response=2*this->OnOff;//some usefull check
+      this->pumpnode_status=PUMPNODE_STATE_3_RESPONSE;
+      this->pumpnode_previousTime=millis();//A change of state occured here
+      DEBUG_PRINTSTR("[PumpNode_Handler][State 2]-Send Response to Node-ID");
+      DEBUG_PRINT(this->pumpnode_ID); 
+      DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response);  
+    }
+    
 
 
-
-  }else if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPACTIVE){
-
-
-
-  }else if(this->pumpnode_status == PUMPNODE_STATE_3_RESPONSE){
+  }else //[STATE 3]-----------------------------------------------
+  if(this->pumpnode_status == PUMPNODE_STATE_3_RESPONSE){
       
     
-  }else if(this->pumpnode_status == PUMPNODE_STATE_ERROR_START){
-      
+  }else //[STATE -3]
+  if(this->pumpnode_status == PUMPNODE_STATE_3_RESP_FAILED){
+    DEBUG_PRINTSTR("[State -3:]Failed, response timed out[wait:");
+    DEBUG_PRINT(this->pumpnode_dif);
+    DEBUG_PRINTSTR(",ID:");DEBUG_PRINT(this->pumpnode_ID); 
+    DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff); 
+    this->pumpnode_started_waiting_at = millis();   
+    this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;       
     
-  }else if(this->pumpnode_status == PUMPNODE_STATE_ERROR_END){
-      
+  }else //[STATE -4]
+  if(this->pumpnode_status == PUMPNODE_STATE_4_RESP_FAILED){
+    DEBUG_PRINTSTR("[State -4:]Failed, response timed out[wait:");
+    DEBUG_PRINT(this->pumpnode_dif);
+    DEBUG_PRINTSTR(",ID:");DEBUG_PRINT(this->pumpnode_ID); 
+    DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff); 
+    this->pumpnode_started_waiting_at = millis();   
+    this->pumpnode_status=PUMPNODE_STATE_2_PUMPACTIVE;       
     
   }
-
-
-
-  if((millis()-this->pumpnode_previousTime)>(this->pumpnode_criticalTime+dif)){
-     DEBUG_PRINTLNSTR"NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
+  
+ /*Software Watch Dog*/
+  if((millis()-this->pumpnode_previousTime)>(PUMPNODE_CRITICAL_STATE_OCCUPATION+this->pumpnode_dif)){
+     DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
      delay(50);
      resetState();
      this->pumpnode_previousTime=0;
@@ -1247,17 +1321,7 @@ void PumpNode_Handler::processPumpstate((struct sensorData)& IncomeData,(struct 
   }    
  }
  
-/*
-    uint16_t OnOff;                     //duration of pumping[s]   
-    int pumpnode_status;                    //in which status is the PUMP Node
-    uint16_t pumpnode_criticalTime;     //maximum time to stay in a state[s]
-    uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
-   
-    uint16_t pumpnode_started_waiting_at;//
-    uint16_t pumpnode_previousTime;
-    uint16_t pumpnode_dif; 
 
-*/
 
 
 

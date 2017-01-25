@@ -1,0 +1,55 @@
+/***********************************S T A T E  M A C H I N E**************************************
+   PUMPNode                                 Controller
+  ------------------------------------------------------------------------------------------
+  (PumpNode and Controller are performing tasks in the same state or divergent states
+  according the state plan below)
+  (criticalTime should be higher in Controller than in PumpNode)
+
+  STATE 0:
+  recv() pump Time                <--       send() pumpTime
+  (some delay)
+  send() Acknowledgment           -->_
+                                      |
+  STATE 1:                            |     {if wait for response takes too long -> STATE -3}
+                                      |---> recv() Acknowledgment(PumpNode confirms Pumptime)
+                                      |
+                                      |
+                                      |
+  recv() Response(by protocoll)  <--     __send() Response(by Protocol of Blumentopf)
+  (possible error detection necessary)| |
+                                      | |
+       TURN ON PUMP                   | |
+                                      | |
+  STATE 2:                            | |
+                                      | |
+       Wait for pump period time      | |
+                                      | |
+       TURN OFF PUMP                  | |
+                                      |       (maximum wait time = pumptime + timeoff)
+  send() Confirmation(Pump off)          -->  recv() Controller knows that Pump is Off now
+                                      |       {if wait for response takes too long -> STATE -4}
+                                      | |  <--send() Response(by Protocol of Blumentopf)
+                                      | |  |
+  STATE 3:                            | |  |
+  recv() Response(by protocoll) <-- ____| _|      
+  (possible error detection necessary)| |
+                                      | |
+                                      | |
+                                      | |
+  STATE -1:                           | |
+  Bad Pump activation Time received   | |
+  in State 0,  send error message     | |
+  send()  Error Message           -->_| |
+                                        |
+                                        |
+  STATE -2:                             |
+                                        |
+  recv() confirmation               <---|
+
+  STATE -3:(only controller)
+                                            We waited timeOFF ms for response in State 1
+                                            Restart  State 1
+
+  STATE -4:(only controller)
+                                            We waited timeOFF ms for response in State
+                                            Restart  State 2

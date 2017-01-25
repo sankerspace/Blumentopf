@@ -29,11 +29,15 @@
 
 #define SD_AVAILABLE 0
 
+//Radio communication defines
+#define REGISTRATION_TIMEOUT_INTERVAL	500  // in Milliseconds   
+#define WAIT_RESPONSE_INTERVAL        2000 // in Milliseconds   
+
 
 // DS3231 TWI communication address:
 #define DS3231_I2C_ADDRESS 0x68
 
-#define REGISTRATION_TIMEOUT_INTERVAL	500
+
 #define randomPIN A6
 #define BATTERY_SENSE_PIN A3      // Pin for Battery voltage
 #define DHT11PIN 5                // Pin number for temperature/humidity sensor
@@ -128,16 +132,19 @@
 #define NO_SCHEDULED_WATERING 2
 /*
 *  PumpNode defines
-*/
-#define PUMPNODE_STATE_0_PUMPREQUEST    0
-#define PUMPNODE_STATE_1_RESPONSE       1
-#define PUMPNODE_STATE_2_PUMPACTIVE     2
-#define PUMPNODE_STATE_3_RESPONSE       3
+*/     
+                                   /*who uses these states*/
+#define PUMPNODE_STATE_0_PUMPREQUEST    0 //(pumpNode and Controller)
+#define PUMPNODE_STATE_1_RESPONSE       1 //(pumpNode and Controller)
+#define PUMPNODE_STATE_2_PUMPACTIVE     2 //(pumpNode and Controller)
+#define PUMPNODE_STATE_3_RESPONSE       3 //(pumpNode)
 
-#define PUMPNODE_STATE_ERROR_START      -1
-#define PUMPNODE_STATE_ERROR_END        -2
-#define PUMPNODE_STATE_3_RESP_FAILED    -3
-#define PUMPNODE_STATE_4_RESP_FAILED    -4      
+#define PUMPNODE_STATE_ERROR_START      -1 //(pumpNode and Controller)
+#define PUMPNODE_STATE_ERROR_END        -2 //(pumpNode)
+#define PUMPNODE_STATE_3_RESP_FAILED    -3 //(Controller) 
+#define PUMPNODE_STATE_4_RESP_FAILED    -4 //(Controller)  
+
+#define PUMPNODE_CRITICAL_STATE_OCCUPATION 60000 // in Milliseconds   
 /*
  * stores all measurment data in 12 bytes. 32 bytes are available in a message.
 */
@@ -306,30 +313,40 @@ private:
 class PumpNode_Handler
 {
 public: 
-    PumpNode_Handler(uint16_t criticalTime):ID(0),OnOff(0),
-    pumpnode_status(0),pumpnode_response(0),pumpnode_started_waiting_at(0),pumpnode_previousTime(0),
-    pumpnode_dif(0)
+    PumpNode_Handler(uint16_t pumpNodeID,uint16_t pumpTime)
     {
-        pumpnode_criticalTime=criticalTime;  
+        pumpnode_ID=pumpNodeID;
+        OnOff=pumpTime*1000;
+        pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
+        pumpnode_response=0;
+        pumpnode_started_waiting_at=0;
+        pumpnode_previousTime=0;
+        pumpnode_previousTime=0;
+        pumpnode_dif=0;
     }
+    
+    ~PumpNode_Handler(){}
 
     void setPumpTime(uint16_t pumptime);
     uint16_t getPumpTime(void);
-    void processPumpstate(struct sensorData IncomeData,struct responseData OutcomeData);
+    int      getState(void);
+    uint16_t getID(void);
+    void     getResponseData(void);
+    void processPumpstate(uint16_t IncomeData);
      
 private:
     /*state variable*/
     uint16_t pumpnode_ID;
-    uint16_t OnOff;                     //duration of pumping[s]   
-    int pumpnode_status;                    //in which status is the PUMP Node
-    uint16_t pumpnode_criticalTime;     //maximum time to stay in a state[s]
+    uint16_t OnOff;                     //duration of pumping[sec]   
+    int pumpnode_status;                //in which status is the PUMP Node
     uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
     /*some timers for state observations*/
     uint16_t pumpnode_started_waiting_at;//
-    uint16_t pumpnode_previousTime;
-    uint16_t pumpnode_dif; 
+    uint16_t pumpnode_previousTime;      //needed by the software watchdog
+    uint16_t pumpnode_dif;               //how many time passed is stored here,
+                                         //only STATE 1 and STATE 2 (controller)
     void resetState(void);
-};
+};//9*16byte
 
 
 
