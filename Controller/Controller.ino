@@ -104,6 +104,7 @@ void loop(void)
   uint8_t nSCA;   // Scheduled Command Answer
   bool bResponseNeeded = true;    // not always a message needs to be sent
   //  struct interactiveCommand myInteractiveCommand;
+  myResponse.state=0;
   myResponse.interval = INTERVAL;
 
   //  if (radio.available() == true)
@@ -114,18 +115,18 @@ void loop(void)
     DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
     DEBUG_PRINT("State: ");
-   DEBUG_PRINTLN(myData.state);
+    DEBUG_PRINTLN(myData.state);
     DEBUG_PRINT("ID: ");
-   DEBUG_PRINTLN(myData.ID);
+    DEBUG_PRINTLN(myData.ID);
     //      myResponse.ControllerTime = 1481803260;
     //    getUNIXtime(&myResponse.ControllerTime);    // gets current timestamp
 
     // log the data to the SD card:
     logData();
     DEBUG_PRINT("State: ");
-   DEBUG_PRINTLN(myData.state);
+    DEBUG_PRINTLN(myData.state);
 
-    myResponse.state  = 0;
+  
     if ((myData.state & (1 << MSG_TYPE_BIT)) == false) // this is a registration request. Send ack-message
     {
       DEBUG_PRINTLNSTR("Registration request");
@@ -142,22 +143,23 @@ void loop(void)
       {
         DEBUG_PRINTLNSTR("Motor Message");
         handleMotorMessage();
-        
-//        bResponseNeeded = false;
+
+        //        bResponseNeeded = false;
       }
     }
 
     if (bResponseNeeded == true)          // If it is necessary to send an answer, send it.
     {
       radio.stopListening();
-      delay(100);   // ist das delay notwendig?
-  
+      delay(200);   // A delay ensure that a node on receiver side, has enough time 
+                    //to make state changes and to turn on receiver mode, otherwise the message is lost
+
       DEBUG_PRINTLN(myResponse.ControllerTime);
-  
+
       // Send back response, controller real time and the next sleep interval:
       DEBUG_PRINTSTR("Sending back response...");
       radio.write(&myResponse, sizeof(myResponse));
-  
+
       DEBUG_PRINTLN("Done");
       //delay(100);   // ist das delay notwendig?
       radio.startListening();
@@ -169,8 +171,8 @@ void loop(void)
   }
   else                                      // no message arrived. Checking the schedule
   {
-/* this is only for testing!! */
-    DEBUG_PRINTLN(nTestWatering);
+    /* this is only for testing!! */
+    //DEBUG_PRINTLN(nTestWatering);
     nTestWatering++;
     if (nTestWatering == 100)
     {
@@ -178,16 +180,16 @@ void loop(void)
       {
         DEBUG_PRINT("Node list id: ");
         DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
-        doWateringTasks(myNodeList.myNodes[0].ID,10);//here a new order to a pump Node has to be planned
+        doWateringTasks(myNodeList.myNodes[0].ID, 10); //here a new order to a pump Node has to be planned
       }
     }
-/* Testing end */
-      
+    /* Testing end */
+
     nICA = myCommandHandler.getInteractiveCommands();        // checks whether the user requested watering with its app.
     nSCA = myCommandHandler.checkSchedule();                        // checks whether there is watering scheduled now.
     if ((nICA == INTERACTIVE_COMMAND_AVAILABLE || (nSCA == SCHEDULED_WATERING)))                                     // some watering needs to be done
     {
-      doWateringTasks(1,10);//here a new order to a pump Node has to be planned
+      //doWateringTasks(1, 10); //here a new order to a pump Node has to be planned
     }
     digitalWrite(LED_BUILTIN, LOW);
     //DEBUG_PRINTLN("nothing yet..");
@@ -198,47 +200,50 @@ void loop(void)
      for a message from a Node who is not able to send a message
      Additionally it is necessary to delete storage of handler which are not required anymore
   */
-  DEBUG_PRINT(PumpList.size());
-  DEBUG_PRINTLNSTR(" pumps vailable!");
+  
   if (PumpList.size() > 0)
   {
-    DEBUG_PRINTLN("Checking pump list");
+    DEBUG_PRINTLNSTR("Checking pump list");
     PumpNode_Handler *handler;
     for (int i = 0; i < PumpList.size(); i++) {
       handler = PumpList.get(i);
       DEBUG_PRINTLN("Processing PumpHandler for NODE-ID:" + String(handler->getID(), DEC));
-      handler->processPumpstate(0);
+      handler->processPumpstate(0);//there is no Income Data (0), only process the state machine
       if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
       {
         DEBUG_PRINTLN("Deleting PumpHandler Class because Watering finished " + String(handler->getID(), DEC));
         PumpList.remove(i); i--;
         delete handler;
       }
-       
 
     }
   }
-//  DEBUG_PRINTLNSTR("Finished loop");
-delay(100);
+  //  DEBUG_PRINTLNSTR("Finished loop");
+  delay(100);
 
 }
-
+/*A pumpNode must perform watering, so we decide to start this task by creating a new 
+* PumpNode_Handler Class which controls the state changes and the whole interaction betwen
+* Controller and PumpHandler
+*/
 void doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
 {
-//  uint16_t pumptime=0;
+  //  uint16_t pumptime=0;
   PumpNode_Handler *handler = new PumpNode_Handler(
     PumpNode_ID,
     pumpTime);
   PumpList.add(handler);          // todo in february: the handler should only add the pump node if it isn't in the list already.
   handler->processPumpstate(0);
-  myResponse.ID=PumpNode_ID;
-  myResponse.interval=pumpTime;
+  myResponse.ID = PumpNode_ID;
+  myResponse.interval = pumpTime;
   DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
   DEBUG_PRINT(PumpNode_ID);
-  DEBUG_PRINTSTR(" with duration of ");DEBUG_PRINTLN(handler->getPumpTime());
-  DEBUG_PRINTLNSTR("ms"); 
-  
+  DEBUG_PRINTSTR(" with duration of "); DEBUG_PRINTLN(handler->getPumpTime());
+  DEBUG_PRINTLNSTR("ms");
+  //the first communication with the pumpNode must be initiate here
   handlePumpCommunications();
+  DEBUG_PRINT(PumpList.size());
+  DEBUG_PRINTLNSTR(" pumps vailable which are pumping currently!");
 }
 
 
@@ -320,8 +325,8 @@ void handleRegistration()
   DEBUG_PRINTLNSTR("Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
   //  if (myData.ID > 0)                      // known node
-  if (myData.ID < 0xffff)                      // known node
-  {
+  if ((myData.state & (1 << NEW_NODE_BIT))==false)                      // known node
+  {   //a node with ID = 0x0 is valid????
     myResponse.ID = myData.ID;
   }
   else                                    // new node
@@ -352,8 +357,11 @@ void handleRegistration()
   DEBUG_PRINTLNSTR("Storing node..");
 
   nRet = myNodeList.addNode(currentNode);
-  if (nRet > 1)       // there was a serious problem when adding the node. Node has not been added
+  if (nRet > 0)       // there was a serious problem when adding the node. Node has not been added
   {
+    //introduced a new Flag, the registrating Node must be somehow informed about
+    //bad registration
+    myResponse.state |= (1 << ID_REGISTRATION_ERROR);
     DEBUG_PRINTLNSTR("Node registration aborted!");
   }
   else
@@ -420,23 +428,34 @@ void handleDataMessage()
 */
 void handleMotorMessage()
 {
+   DEBUG_PRINTLNSTR("[handleMotorMessage()]A new Motormessage received.....");
   // check if the node ID actually exists in the node table..
   uint8_t nodeIndex;
   nodeIndex = myNodeList.findNodeByID(myData.ID);   // or however the ID is called..
+  
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
   if (nodeIndex == 0xff)      // if the node does not exist
   {
-    DEBUG_PRINTLNSTR("Node does not exist - there seems to be a topology problem.");
+    DEBUG_PRINTLNSTR("[handleMotorMessage()]Node does not exist - there seems to be a topology problem.");
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
   }
 
-
-
-  // handle the motor message stuff:
-  // Tha actual controller logic should be inserted here.
-  /*
-    #toimplement
-  */
+  if (PumpList.size() > 0)
+  {
+    DEBUG_PRINTLNSTR("[handleMotorMessage()]Checking pump list");
+    PumpNode_Handler *handler;
+    for (int i = 0; i < PumpList.size(); i++) {
+      handler = PumpList.get(i);
+      //DEBUG_PRINTLN("Processing PumpHandler for NODE-ID:" + String(handler->getID(), DEC));
+      if(handler->getID()==myData.ID)
+      {
+        handler->processPumpstate(0);//there is no Income Data (0), only process the state machine 
+        myResponse.ID = myData.ID;
+        myResponse.interval = handler->getResponseData();
+        i=PumpList.size();//get out of the for lopp, we are finished   
+      }
+    }
+  }
 
 }
 

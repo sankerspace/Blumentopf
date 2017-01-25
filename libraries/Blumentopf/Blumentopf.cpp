@@ -1296,7 +1296,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
   }else //[STATE 3]-----------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESPONSE){
-      
+      //Nothing to do
     
   }else //[STATE -3]
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESP_FAILED){
@@ -1330,6 +1330,13 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   }    
  }
  
+ 
+ 
+int freeRam(void){
+ extern int  __heap_start,*__brkval;
+ int v;
+ return (int) &v-(__brkval==0?(int)&__heap_start:(int) __brkval);
+}
 
 
 

@@ -68,7 +68,8 @@ void setup() {
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
   myData.state = 0;
   myResponse.interval = 100;
-
+    
+    
   while (registerNode() > 0)                         //register PumpNode at the controller
   {
     DEBUG_PRINTLNSTR("[Setup()]Registration failed,pause 2 seconds then start again.");
@@ -118,7 +119,7 @@ void setup() {
                                       | |  <--send() Response(by Protocol of Blumentopf)
                                       | |  |
   STATE 3:                            | |  |
-  recv() Response(by protocoll) <-- ____| _|      
+  recv() Response(by protocoll) <-- ____| _|
   (possible error detection necessary)| |
                                       | |
                                       | |
@@ -220,7 +221,7 @@ void loop(void) {
       /********Receiving ACKNOWLEGMENT**************/
       //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
       if (recvData() > 0)
-      {//if message was not dedicated to this pumpNode recvData returns -1
+      { //if message was not dedicated to this pumpNode recvData returns -1
         DEBUG_PRINTLNSTR("[State 3]Received confirmation.");
         DEBUG_PRINTLNSTR("-------------------------------------------------------------");
         status = PUMPNODE_STATE_0_PUMPREQUEST;
@@ -299,7 +300,7 @@ void sendData(unsigned int answer_)
   DEBUG_PRINTSTR("\t\tSending data...........");
   DEBUG_PRINTSTR("state_after:");
   DEBUG_PRINTLN(myData.state);
-//  radio.write(&answer_, sizeof(struct sensorData));
+  //  radio.write(&answer_, sizeof(struct sensorData));
   radio.write(&myData, sizeof(struct sensorData));
   DEBUG_PRINTLNSTR("done");
   radio.startListening();
@@ -331,8 +332,8 @@ int registerNode(void)
   long numb = 0;
 
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
-  
-  if (myData.ID < 0xffff)                        // this is a known node - 20170110... this is the new check..
+  // A NODE WITH IDE=0 IS VALID????
+  if ((myData.ID < 0xffff) && (myData.ID > 0))                        // this is a known node - 20170110... this is the new check..
   {
     DEBUG_PRINTSTR("[registerNode()]:EEPROM-ID found: ");
     DEBUG_PRINT(myData.ID);                // Persistent ID
@@ -391,61 +392,66 @@ int registerNode(void)
   radio.read(&myResponse , sizeof(myResponse));
   /****************************************************************************/
 
-
-  if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
+  if ((myResponse.state & (1 << ID_REGISTRATION_ERROR)) == false)
   {
-
-    DEBUG_PRINTLNSTR("[registerNode()]:Got response!");
-    DEBUG_PRINTSTR("  Received Session ID: ");
-    DEBUG_PRINT((int)(myResponse.interval / 100));
-
-    DEBUG_PRINTSTR(",  expected: ");
-    DEBUG_PRINTLN(myData.temperature);
-
-    /* is the response for us? (yes, we stored the session ID in the temperature to keep the message small
-        and reception easy...it could be changed to a struct in a "struct payload"
-       which can be casted in the receiver depending on the status flags)
-    */
-    if (((int)(myResponse.interval / 100)) == (int) (myData.temperature))
+    if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
     {
-      myData.ID = myResponse.ID;
-      myData.interval = (myResponse.interval % 100);
-      myEEPROMData.ID = myResponse.ID;
-      EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);  // writing the data (ID) back to EEPROM...
 
-      DEBUG_PRINTLNSTR("...ID matches");
-      DEBUG_PRINTSTR("  Persistent ID: ");
-      DEBUG_PRINT(myResponse.ID);
-      DEBUG_PRINTSTR(", Interval: ");
-      DEBUG_PRINTLN(myData.interval);
-      DEBUG_PRINTLNSTR("Stored Persistent ID in EEPROM...");
-    }
-    else                                                  // not our response
+      DEBUG_PRINTLNSTR("[registerNode()]:Got response!");
+      DEBUG_PRINTSTR("  Received Session ID: ");
+      DEBUG_PRINT((int)(myResponse.interval / 100));
+
+      DEBUG_PRINTSTR(",  expected: ");
+      DEBUG_PRINTLN(myData.temperature);
+
+      /* is the response for us? (yes, we stored the session ID in the temperature to keep the message small
+          and reception easy...it could be changed to a struct in a "struct payload"
+         which can be casted in the receiver depending on the status flags)
+      */
+      if (((int)(myResponse.interval / 100)) == (int) (myData.temperature))
+      {
+        myData.ID = myResponse.ID;
+        myData.interval = (myResponse.interval % 100);
+        myEEPROMData.ID = myResponse.ID;
+        EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);  // writing the data (ID) back to EEPROM...
+
+        DEBUG_PRINTLNSTR("...ID matches");
+        DEBUG_PRINTSTR("  Persistent ID: ");
+        DEBUG_PRINT(myResponse.ID);
+        DEBUG_PRINTSTR(", Interval: ");
+        DEBUG_PRINTLN(myData.interval);
+        DEBUG_PRINTLNSTR("Stored Persistent ID in EEPROM...");
+      }
+      else                                                  // not our response
+      {
+        DEBUG_PRINTLNSTR("ID missmatch! Ignore response...");
+        return 11;
+      }
+
+
+    }//if (myData.state & (1 << NEW_NODE_BIT))
+    else                                              // this is a known node
     {
-      DEBUG_PRINTLNSTR("ID missmatch! Ignore response...");
-      return 11;
+      if (myResponse.ID == myData.ID)                     // is the response for us?
+      {
+        myData.interval = myResponse.interval;
+
+        DEBUG_PRINTSTR("[registerNode()]:Got response for ID: ");
+        DEBUG_PRINT(myResponse.ID);
+        DEBUG_PRINTSTR("...ID matches, registration successful! Interval: ");
+        DEBUG_PRINTLN(myData.interval);
+      }
+      else                                                  // not our response
+      {
+        DEBUG_PRINTSTR("[registerNode()]:Got response for ID: ");
+        DEBUG_PRINT(myResponse.ID);
+        DEBUG_PRINTLNSTR("...ID missmatch! Ignore response...");
+        return 12;
+      }
     }
-
-
-  }//if (myData.state & (1 << NEW_NODE_BIT))
-  else                                              // this is a known node
+  } else
   {
-    if (myResponse.ID == myData.ID)                     // is the response for us?
-    {
-      myData.interval = myResponse.interval;
-
-      DEBUG_PRINTSTR("[registerNode()]:Got response for ID: ");
-      DEBUG_PRINT(myResponse.ID);
-      DEBUG_PRINTSTR("...ID matches, registration successful! Interval: ");
-      DEBUG_PRINTLN(myData.interval);
-    }
-    else                                                  // not our response
-    {
-      DEBUG_PRINTSTR("[registerNode()]:Got response for ID: ");
-      DEBUG_PRINT(myResponse.ID);
-      DEBUG_PRINTLNSTR("...ID missmatch! Ignore response...");
-      return 12;
-    }
+    return 10;
   }////////
 
   return 0;   // all okay

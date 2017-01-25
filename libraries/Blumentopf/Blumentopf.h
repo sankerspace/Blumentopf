@@ -43,7 +43,7 @@
 #define DHT11PIN 5                // Pin number for temperature/humidity sensor
 #define MOISTURE_THRESHOLD (1000) // wet/dry threshold
 #define LIGHT_THRESHOLD (512)     // day/nigth threshold
-#define BAUD (9600)               // serial BAUD rate
+#define BAUD (115200)               // serial BAUD rate
 #define PRE_SLEEP_DELAY (100)     // time to finish serial communication before sleep
 #define IREF  (1.1)               // 1V1 voltage of the ADC
 #define RTC_SYNC_THRESHOLD (10)    // How many seconds the Controller and Node clocks can drift apart before resynchronization
@@ -104,6 +104,7 @@
 //#define EEPROM_OVERFLOW_OFFSET_BIT (1<<5*6-5)
 #define EEPROM_OVERFLOW_OFFSET_BIT (1L<<5*REMAINING_FLAG_SPACE)
 #define FETCH_EEPROM_REG_MASK (6)
+#define ID_REGISTRATION_ERROR (7)
 
 #define FETCH_EEPROM_REG_SKIP 	(0)
 #define FETCH_EEPROM_REG_SEND 	(2)
@@ -313,6 +314,7 @@ private:
 class PumpNode_Handler
 {
 public: 
+    /*pumpTime in seconds*/
     PumpNode_Handler(uint16_t pumpNodeID,uint16_t pumpTime)
     {
         pumpnode_ID=pumpNodeID;
@@ -374,3 +376,8 @@ byte decToBcd(byte);
 
 /* converts from binary decimal to decimal */
 byte bcdToDec(byte);
+
+/*show free space between heap and the stack*/
+/*https://cdn-learn.adafruit.com/downloads/pdf/memories-of-an-arduino.pdf*/
+int freeRam(void);
+
