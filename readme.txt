@@ -1,4 +1,11 @@
-Hier ist ein Spannungsmess-Testprogramm (VoltageCheck) sowie der ganze restliche Code (noch in Entwicklung) vom Messknoten (SensorNode) und einem Beispiel-Controller (RF_Receiver).
+Hier ist ein Spannungsmess-Testprogramm (VoltageCheck) sowie der ganze restliche 
+Code (noch in Entwicklung) vom Messknoten (SensorNode) und einem 
+Beispiel-Controller (RF_Receiver).
+###### Einrichtung Arduino IDE #########
+Im Ordner libraries sind sämtliche Bibliotheken die wir dür das Projekt 
+benötigen In der Arduino IDE muss der Standard Ordner für die installierten 
+Libraries geändert werden auf die Location von der Blumentopf Repository, damit 
+sind automatisch sämtlichen notwendigen Libraries für unser Projekt aufgenommen.
 
 
 ###### Sensor Node ######
@@ -10,7 +17,8 @@ X	Protokoll
 			ID beziehen, falls noch keine vorhanden
 			Daten übertragen
 			Schlafdauer empfangen und schlafen gehen
-			Speichern der Daten im EEPROM bei RF Ausfall und auslesen der Daten, wenn vom Server angefordert
+			Speichern der Daten im EEPROM bei RF Ausfall und auslesen der Daten, 
+			wenn vom Server angefordert
 X	RTC synchronisieren
 -	Interrupt Alarm von RTC
 
@@ -21,7 +29,8 @@ X	RTC synchronisieren
 
 ###### Controller  ######
 
-Ist ein simpler Controller, der zeigt wie man die Funktionen von dem Protokoll verwendet.
+Ist ein simpler Controller, der zeigt wie man die Funktionen von dem Protokoll 
+verwendet.
 Features:
 	ID-verwaltung:
 		-) Hat der Node noch keine ID wird eine vom Controller vergeben.
@@ -32,8 +41,9 @@ Features:
 
 
 Fehlt:
-	Die Möglichkeit über ein Front-End die Messintervalle eizustellen und Messknoten mit Pumpknoten zu verknüpfen.
-	Ein Algorithmus wann welche Pumpen aktiviert werden und ggf. ein Frontend für die Parameter des Algorithmus
+	Die Möglichkeit über ein Front-End die Messintervalle eizustellen und 
+	Messknoten mit Pumpknoten zu verknüpfen.	Ein Algorithmus wann welche Pumpen 
+	aktiviert werden und ggf. ein Frontend für die Parameter des Algorithmus
 
 ###### Raspberry Pi  ######
 
@@ -41,7 +51,8 @@ Fehlt:
 
 	Data Logging:
 		-) Alle Nachrichten werden passiv geloggt.
-		   Den Teil kann man dann auf dem Pie übernehmen und ein Datenbankinterface basteln
+		   Den Teil kann man dann auf dem Pie übernehmen und ein Datenbankinterface 
+		   basteln
 
 ###### PumpNode ######
 

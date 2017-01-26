@@ -104,9 +104,10 @@ void loop(void)
   uint8_t nSCA;   // Scheduled Command Answer
   bool bResponseNeeded = true;    // not always a message needs to be sent
   //  struct interactiveCommand myInteractiveCommand;
-  myResponse.state=0;
+  myResponse.state = 0;
   myResponse.interval = INTERVAL;
-
+  DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
+  DEBUG_PRINTLNSTR(" bytes available.");
   //  if (radio.available() == true)
   //  if (radio.available(pipes[1]) == true)    // 15.12.2016   checks only the receive pipe..otherwise it will react to also other pipes and that can lead to problems
   if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
@@ -126,7 +127,7 @@ void loop(void)
     DEBUG_PRINT("State: ");
     DEBUG_PRINTLN(myData.state);
 
-  
+
     if ((myData.state & (1 << MSG_TYPE_BIT)) == false) // this is a registration request. Send ack-message
     {
       DEBUG_PRINTLNSTR("Registration request");
@@ -151,8 +152,8 @@ void loop(void)
     if (bResponseNeeded == true)          // If it is necessary to send an answer, send it.
     {
       radio.stopListening();
-      delay(200);   // A delay ensure that a node on receiver side, has enough time 
-                    //to make state changes and to turn on receiver mode, otherwise the message is lost
+      delay(200);   // A delay ensure that a node on receiver side, has enough time
+      //to make state changes and to turn on receiver mode, otherwise the message is lost
 
       DEBUG_PRINTLN(myResponse.ControllerTime);
 
@@ -174,13 +175,14 @@ void loop(void)
     /* this is only for testing!! */
     //DEBUG_PRINTLN(nTestWatering);
     nTestWatering++;
-    if (nTestWatering == 100)
+    if (nTestWatering == 100 )
     {
-      if (myNodeList.myNodes[0].nodeType == 1)    // it is a motor node
+      if (myNodeList.getNodeType(0))    // it is a motor node
       {
         DEBUG_PRINT("Node list id: ");
         DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
-        doWateringTasks(myNodeList.myNodes[0].ID, 10); //here a new order to a pump Node has to be planned
+        if (myNodeList.isActive(0) == 1)
+          doWateringTasks(myNodeList.myNodes[0].ID, 10); //here a new order to a pump Node has to be planned
       }
     }
     /* Testing end */
@@ -200,7 +202,7 @@ void loop(void)
      for a message from a Node who is not able to send a message
      Additionally it is necessary to delete storage of handler which are not required anymore
   */
-  
+
   if (PumpList.size() > 0)
   {
     DEBUG_PRINTLNSTR("Checking pump list");
@@ -213,7 +215,9 @@ void loop(void)
       {
         DEBUG_PRINTLN("Deleting PumpHandler Class because Watering finished " + String(handler->getID(), DEC));
         PumpList.remove(i); i--;
+        myNodeList.setPumpInactive(handler->getID());
         delete handler;
+
       }
 
     }
@@ -222,34 +226,43 @@ void loop(void)
   delay(100);
 
 }
-/*A pumpNode must perform watering, so we decide to start this task by creating a new 
-* PumpNode_Handler Class which controls the state changes and the whole interaction betwen
-* Controller and PumpHandler
+/*A pumpNode must perform watering, so we decide to start this task by creating a new
+  PumpNode_Handler Class which controls the state changes and the whole interaction betwen
+  Controller and PumpHandler
 */
-void doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
+uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
 {
-  //  uint16_t pumptime=0;
-  PumpNode_Handler *handler = new PumpNode_Handler(
-    PumpNode_ID,
-    pumpTime);
-  PumpList.add(handler);          // todo in february: the handler should only add the pump node if it isn't in the list already.
-  handler->processPumpstate(0);
-  myResponse.ID = PumpNode_ID;
-  myResponse.interval = pumpTime;
-  DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
-  DEBUG_PRINT(PumpNode_ID);
-  DEBUG_PRINTSTR(" with duration of "); DEBUG_PRINTLN(handler->getPumpTime());
-  DEBUG_PRINTLNSTR("ms");
-  //the first communication with the pumpNode must be initiate here
-  handlePumpCommunications();
-  DEBUG_PRINT(PumpList.size());
-  DEBUG_PRINTLNSTR(" pumps vailable which are pumping currently!");
+  if (myNodeList.getNodeType(PumpNode_ID) == 1)
+  {
+    if (myNodeList.isActive(PumpNode_ID) == 0)
+    {
+      myNodeList.setPumpActive(PumpNode_ID);
+      //  uint16_t pumptime=0;
+      PumpNode_Handler *handler = new PumpNode_Handler(
+        PumpNode_ID,
+        pumpTime);
+      PumpList.add(handler);          // todo in february: the handler should only add the pump node if it isn't in the list already.
+      handler->processPumpstate(0);
+      myResponse.ID = PumpNode_ID;
+      myResponse.interval = pumpTime;
+      DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
+      DEBUG_PRINT(PumpNode_ID);
+      DEBUG_PRINTSTR(" with duration of "); DEBUG_PRINTLN(handler->getPumpTime());
+      DEBUG_PRINTLNSTR("ms");
+      //the first communication with the pumpNode must be initiate here
+      handlePumpCommunications();
+      DEBUG_PRINT(PumpList.size());
+      DEBUG_PRINTLNSTR(" pumps vailable which are pumping currently!");
+    }
+  }
+  return 0;
+
 }
 
 
 void handlePumpCommunications()
 {
-  myResponse.state=0;
+  myResponse.state = 0;
   radio.stopListening();//!!!!!!!!!!!!!!!!! KEEP ATTENTION OF TIME SLOT, IAM ALLOWED TO SEND here??
   radio.write(&myResponse, sizeof(myResponse));
   radio.startListening();
@@ -326,8 +339,8 @@ void handleRegistration()
   DEBUG_PRINTLNSTR("Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
   //  if (myData.ID > 0)                      // known node
-  if ((myData.state & (1 << NEW_NODE_BIT))==false)                      // known node
-  {   //a node with ID = 0x0 is valid????
+  if ((myData.state & (1 << NEW_NODE_BIT)) == false)                    // known node
+  { //a node with ID = 0x0 is valid????
     myResponse.ID = myData.ID;
   }
   else                                    // new node
@@ -348,12 +361,12 @@ void handleRegistration()
   if ((myData.state & (1 << NODE_TYPE)) == 0)
   {
     DEBUG_PRINTLNSTR("SensorNode");
-    currentNode.nodeType = 0;    // SensorNode
+    currentNode.state = 0;    // SensorNode
   }
   else
   {
     DEBUG_PRINTLNSTR("PumpNode");
-    currentNode.nodeType = 1;    // MotorNode
+    currentNode.state = 1;    // MotorNode
   }
   DEBUG_PRINTLNSTR("Storing node..");
 
@@ -429,31 +442,29 @@ void handleDataMessage()
 */
 void handleMotorMessage()
 {
-   DEBUG_PRINTLNSTR("[handleMotorMessage()]A new Motormessage received.....");
+  DEBUG_PRINTLNSTR("[handleMotorMessage()]A new Motormessage received.....");
   // check if the node ID actually exists in the node table..
   uint8_t nodeIndex;
   nodeIndex = myNodeList.findNodeByID(myData.ID);   // or however the ID is called..
-  
+
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
   if (nodeIndex == 0xff)      // if the node does not exist
   {
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Node does not exist - there seems to be a topology problem.");
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
-  }
-
-  if (PumpList.size() > 0)
+  } else if (PumpList.size() > 0)
   {
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Checking pump list");
     PumpNode_Handler *handler;
     for (int i = 0; i < PumpList.size(); i++) {
       handler = PumpList.get(i);
       //DEBUG_PRINTLN("Processing PumpHandler for NODE-ID:" + String(handler->getID(), DEC));
-      if(handler->getID()==myData.ID)
+      if (handler->getID() == myData.ID)
       {
-        handler->processPumpstate(0);//there is no Income Data (0), only process the state machine 
+        handler->processPumpstate(myData.interval);
         myResponse.ID = myData.ID;
         myResponse.interval = handler->getResponseData();
-        i=PumpList.size();//get out of the for lopp, we are finished   
+        i = PumpList.size(); //get out of the for lopp, we are finished
       }
     }
   }

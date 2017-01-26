@@ -111,6 +111,12 @@
 #define FETCH_EEPROM_REG_DELETE (4)
 //#define FETCH_EEPROM_REG_UNUSED (6)
 
+/*The following are defines for the nodeListElement state variable*/
+
+#define NODELIST_NODETYPE       (0)
+#define NODELIST_PUMPACTIVE     (1)
+
+
 /*
 *  EEPROM defines
 */
@@ -244,7 +250,9 @@ class CommandHandler
 struct nodeListElement
 {
   uint16_t ID;
-  uint8_t nodeType;     // NODE_TYPE:             0...this is a SensorNode,       1...this is a MotorNode
+  uint8_t state;        
+  // Bit 0: NODE_TYPE:0...this is a SensorNode,1...this is a MotorNode
+  // Bit 1: PUMPACTIVE:0...inactive ,1...active
   uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
 };
 
@@ -257,6 +265,22 @@ public:
   uint8_t addNode(struct nodeListElement);
   uint8_t findNodeByID(uint16_t);         // checks if the node exists
   void clearEEPROM_Nodelist();
+  
+  /*
+  *0xff .. Node doesnt exist
+  *0x00.. SensorNode
+  *0x01 .. PumpNode
+  */
+  uint8_t getNodeType(uint16_t ID); //Sensor or Pump Node
+  
+  /*
+  *0xff .. Node doesnt exist
+  *0x00 .. PumpNode not active , no WateringTask Send currently
+  *0x01 .. PumpNode active
+  */
+  uint8_t isActive(uint16_t ID); // PumpNode currently active or not
+  void setPumpActive(uint16_t ID);
+  void setPumpInactive(uint16_t ID); 
 };
 
 /*
