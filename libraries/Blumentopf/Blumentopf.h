@@ -7,25 +7,27 @@
 // Comment this line for the release version:
 #define DEBUG 1
 
-// For getting rid of serial communication in the release version:
-#ifdef DEBUG
-  #define DEBUG_PRINT(x)        Serial.print(x)
-  #define DEBUG_PRINTSTR(x)     Serial.print(F(x))
-  #define DEBUG_PRINTDIG(x, c)  Serial.print (x, c)
-  #define DEBUG_PRINTLN(x)      Serial.println (x)
-  #define DEBUG_PRINTLNSTR(x)   Serial.println(F(x))
-#else
-  #define DEBUG_PRINT(x)
-  #define DEBUG_PRINTSTR(x)
-  #define DEBUG_PRINT(x, c)
-  #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINTLNSTR(x)
-#endif 
+
+// watering policy:
+#define POL_WATERING_DEFAULT_DURATION (10)      // per default it should give water for 10 seconds every day after 19:00
+#define WATERING_START_HOUR    (23)    // Start of the watering (hour)
+#define WATERING_START_MINUTE  (24)    // Start of the watering (minute)
+
+
+/* Table 5 - watering policy flags 
+DO NOT CHANGE:
+*/
+#define POL_ACTIVE (0)            // POL_ACTIVE:            0...not active,                   1...active
+#define POL_USE_MOISTURE (1)      // POL_USE_MOISTURE:      0...don't user moisture data,     1...use moisture sensor data
+
 
 // sets Particle or photon:
 #define HW_ARDUINO (1)
 #define HW_PHOTON (2)
 #define HW HW_ARDUINO   // tells whether to compile for Arduino or Photon
+
+//#define HW_RTC (0)    // there is no RTC
+#define HW_RTC (1)      // use the RTC
 
 #define SD_AVAILABLE 0
 
@@ -58,6 +60,9 @@
 #define SCALE_OFFSET (VOLTAGE_GAP / VOLTS_PER_SCALE)
 #define VOLTAGE_DIVIDER_FACTOR ((R1+R2)/R1)	// division factor by the resistors
 #define REMAINING_FLAG_SPACE (5)    // number of flags left in the EEPROM settings (6 bit max, because we want to merge some addresses in future)
+
+// measurement policy
+#define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s]
 
 #define NODELIST_FILENAME "nodelist.txt"
 #if (HW == HW_ARDUINO)
@@ -93,6 +98,22 @@
 #define EEPROM_DATA_PACKED (4)    // EEPROM_DATA_PACKED:    0...live data,					1...EEPROM data
 #define EEPROM_DATA_LAST (5)	  // EEPROM_DATA_LAST:		0...this is not the last data,	1...this is the last data
 #define NODE_TYPE (6)             // NODE_TYPE:             0...this is a SensorNode,       1...this is a MotorNode
+
+// For getting rid of serial communication in the release version:
+#ifdef DEBUG
+  #define DEBUG_PRINT(x)        Serial.print(x)
+  #define DEBUG_PRINTSTR(x)     Serial.print(F(x))
+  #define DEBUG_PRINTDIG(x, c)  Serial.print (x, c)
+  #define DEBUG_PRINTLN(x)      Serial.println (x)
+  #define DEBUG_PRINTLNSTR(x)   Serial.println(F(x))
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTSTR(x)
+  #define DEBUG_PRINT(x, c)
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINTLNSTR(x)
+#endif 
+
 
 /*
  * The following defines are for controller status bit operations
@@ -228,10 +249,14 @@ private:
 class CommandHandler
 {
   public:
-//    CommandHandler();
+    CommandHandler();
     uint8_t getInteractiveCommands();
-    uint8_t checkSchedule();
+    uint8_t checkSchedule(struct nodeList, uint16_t*, uint16_t*, time_t);
   private:
+    bool bWateringNow = false;
+    uint8_t mnPreviousHour;
+    uint8_t mnPreviousMinute;
+    uint16_t mnCurrentIndex;
 };
 
 
@@ -246,7 +271,9 @@ struct nodeListElement
   uint16_t ID;
   uint8_t nodeType;     // NODE_TYPE:             0...this is a SensorNode,       1...this is a MotorNode
   uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
+  byte  watering_policy;
 };
+
 
 class nodeList
 {

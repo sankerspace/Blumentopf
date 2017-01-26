@@ -20,6 +20,9 @@ const int chipSelect = 4;
 
 struct responseData myResponse;
 struct sensorData myData;
+class CommandHandler myCommandHandler;
+
+uint16_t nDummyCount;
 
 RF24 radio(9, 10);
 //brauchen wir 3 pipes??
@@ -48,11 +51,13 @@ void setup(void)
   DEBUG_PRINTLN(sizeof(struct sensorData));
 
   myRTC.init(&myData.state);
-  //myNodeList.clearEEPROM_Nodelist();    // deletes the node list
+  //  myNodeList.clearEEPROM_Nodelist();    // deletes the node list
   myNodeList.getNodeList();
 
-  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
+//  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
+//  myRTC.setTime(1485362865);
 
+displayTimeFromUNIX(myRTC.getTime());
 
   if (SD_AVAILABLE == 1)
   {
@@ -61,7 +66,7 @@ void setup(void)
       return;
     }
 
-    DEBUG_PRINTLN("card initialized.");
+    DEBUG_PRINTLNSTR("card initialized.");
   }
 
   digitalWrite(12, HIGH);
@@ -79,12 +84,12 @@ bool initStorage()
 {
   if (HW == HW_ARDUINO)             // using arduino
   {
-    DEBUG_PRINTLN("Initializing SD card...");
+    DEBUG_PRINTLNSTR("Initializing SD card...");
 
     // see if the card is present and can be initialized:
     if (!SD.begin(chipSelect))
     {
-      DEBUG_PRINTLN("Card failed, or not present");
+      DEBUG_PRINTLNSTR("Card failed, or not present");
       // don't do anything more:
       return false;
     }
@@ -99,16 +104,25 @@ bool initStorage()
 void loop(void)
 {
   uint8_t nPipenum;
-  class CommandHandler myCommandHandler;
   uint8_t nICA;   // Interactive Command Answer
   uint8_t nSCA;   // Scheduled Command Answer
   bool bResponseNeeded = true;    // not always a message needs to be sent
-  //  struct interactiveCommand myInteractiveCommand;
-  myResponse.state=0;
-  myResponse.interval = INTERVAL;
+  static uint8_t nTestWatering = 0;
+  uint16_t nDuration;
+  uint16_t nID;
+  time_t currentTime;
 
-  //  if (radio.available() == true)
-  //  if (radio.available(pipes[1]) == true)    // 15.12.2016   checks only the receive pipe..otherwise it will react to also other pipes and that can lead to problems
+  
+  
+  
+
+  
+  
+  myResponse.state=0;		// ist das getestet?
+  myResponse.interval = INTERVAL;  
+  
+
+
   if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
   {
     DEBUG_PRINTSTR("\nMessage available at pipe ");
@@ -144,7 +158,7 @@ void loop(void)
         DEBUG_PRINTLNSTR("Motor Message");
         handleMotorMessage();
 
-        //        bResponseNeeded = false;
+//        bResponseNeeded = false;
       }
     }
 
@@ -160,11 +174,11 @@ void loop(void)
       DEBUG_PRINTSTR("Sending back response...");
       radio.write(&myResponse, sizeof(myResponse));
 
-      DEBUG_PRINTLN("Done");
+      DEBUG_PRINTLNSTR("Done");
       //delay(100);   // ist das delay notwendig?
       radio.startListening();
       delay(100);   // ist das delay notwendig?
-      DEBUG_PRINTLN("Listening...");
+      DEBUG_PRINTLNSTR("Listening...");
     }
     digitalWrite(LED_BUILTIN, LOW);
     delay(10);
@@ -185,12 +199,20 @@ void loop(void)
     }
     /* Testing end */
 
+    currentTime = getCurrentTime();
     nICA = myCommandHandler.getInteractiveCommands();        // checks whether the user requested watering with its app.
-    nSCA = myCommandHandler.checkSchedule();                        // checks whether there is watering scheduled now.
-    if ((nICA == INTERACTIVE_COMMAND_AVAILABLE || (nSCA == SCHEDULED_WATERING)))                                     // some watering needs to be done
+// The following is the actual scheduling algorithm, but commented out as the above test section tests the pump communication for now. Afterwards the scheduling can be tested, debugged and implementation finished:
+//    nSCA = myCommandHandler.checkSchedule(myNodeList, &nID, &nDuration, currentTime);
+    nSCA = NO_SCHEDULED_WATERING;                                                             // for communication tests just pretend there is nothing to schedule
+    if (nSCA == SCHEDULED_WATERING)
+    {
+      doWateringTasks(nID, nDuration);                    //  the node is added to the "active pumps"-list and the pump is notified
+    }
+/*    if (nICA == INTERACTIVE_COMMAND_AVAILABLE )                                     // some IOT watering needs to be done
     {
       //doWateringTasks(1, 10); //here a new order to a pump Node has to be planned
     }
+*/
     digitalWrite(LED_BUILTIN, LOW);
     //DEBUG_PRINTLN("nothing yet..");
 
@@ -200,7 +222,8 @@ void loop(void)
      for a message from a Node who is not able to send a message
      Additionally it is necessary to delete storage of handler which are not required anymore
   */
-  
+  DEBUG_PRINT(PumpList.size());
+  DEBUG_PRINTLNSTR(" pumps available!");
   if (PumpList.size() > 0)
   {
     DEBUG_PRINTLNSTR("Checking pump list");
@@ -209,16 +232,24 @@ void loop(void)
       handler = PumpList.get(i);
       DEBUG_PRINTLN("Processing PumpHandler for NODE-ID:" + String(handler->getID(), DEC));
       handler->processPumpstate(0);//there is no Income Data (0), only process the state machine
-      if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
-      {
-        DEBUG_PRINTLN("Deleting PumpHandler Class because Watering finished " + String(handler->getID(), DEC));
-        PumpList.remove(i); i--;
-        delete handler;
+	  
+//      nDummyCount++;				// This commented section is for the real pump scheduling. It is commented for now to not influence the pump protocol testing.
+//      DEBUG_PRINTSTR("Dummy: ");
+//      DEBUG_PRINTLN(nDummyCount );
+//      if (nDummyCount >= 20) // pumping done
+//      {
+//        DEBUG_PRINTLNSTR("Deleting node form active pump list!");
+        if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
+        {
+          DEBUG_PRINTLN("Deleting PumpHandler Class because Watering finished " + String(handler->getID(), DEC));
+          PumpList.remove(i); i--;
+          delete handler;
+        }
+ 
       }
-
     }
-  }
-  //  DEBUG_PRINTLNSTR("Finished loop");
+//  }  
+//  DEBUG_PRINTLNSTR("Finished loop");
   delay(100);
 
 }
@@ -228,7 +259,8 @@ void loop(void)
 */
 void doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
 {
-  //  uint16_t pumptime=0;
+  nDummyCount = 0;
+//  uint16_t pumptime=0;
   PumpNode_Handler *handler = new PumpNode_Handler(
     PumpNode_ID,
     pumpTime);
@@ -238,18 +270,19 @@ void doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
   myResponse.interval = pumpTime;
   DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
   DEBUG_PRINT(PumpNode_ID);
-  DEBUG_PRINTSTR(" with duration of "); DEBUG_PRINTLN(handler->getPumpTime());
+  DEBUG_PRINTSTR(" with duration of ");
+  DEBUG_PRINTLN(handler->getPumpTime());
   DEBUG_PRINTLNSTR("ms");
   //the first communication with the pumpNode must be initiate here
   handlePumpCommunications();
   DEBUG_PRINT(PumpList.size());
-  DEBUG_PRINTLNSTR(" pumps vailable which are pumping currently!");
+  DEBUG_PRINTLNSTR(" pumps available which are pumping currently!");
 }
 
 
 void handlePumpCommunications()
 {
-  myResponse.state=0;
+  myResponse.state=0;		// again..has this been tested for side effects?
   radio.stopListening();//!!!!!!!!!!!!!!!!! KEEP ATTENTION OF TIME SLOT, IAM ALLOWED TO SEND here??
   radio.write(&myResponse, sizeof(myResponse));
   radio.startListening();
@@ -297,18 +330,18 @@ void logData()
       dataFile.println(currentData);
       dataFile.close();
       // print to the serial port too:
-      DEBUG_PRINTLN("Writing to SD...");
+      DEBUG_PRINTLNSTR("Writing to SD...");
       DEBUG_PRINTLN(currentData);
     }
     // if the file isn't open, pop up an error:
     else
     {
-      DEBUG_PRINTLN("error opening datalog.txt");
-      DEBUG_PRINTLN("data:");
+      DEBUG_PRINTLNSTR("error opening datalog.txt");
+      DEBUG_PRINTLNSTR("data:");
       DEBUG_PRINTLN(currentData);
     }
   }
-  else if (HW == HW_PHOTON)   // on case of a particle, the data might be logged to the flash or not at all.
+  else if (HW == HW_PHOTON)   // in case of a particle, the data might be logged to the flash or not at all.
   {
     // #toimplement
   }
@@ -337,10 +370,10 @@ void handleRegistration()
   }
 
   // store the node in the list if it doesn't exist yet.
-  DEBUG_PRINTSTR("ID:");
-  DEBUG_PRINTLN(myResponse.ID);
-  DEBUG_PRINTSTR("state: ");
-  DEBUG_PRINTLN(myData.state);
+//  DEBUG_PRINTSTR("ID:");
+//  DEBUG_PRINTLN(myResponse.ID);
+//  DEBUG_PRINTSTR("state: ");
+//  DEBUG_PRINTLN(myData.state);
 
 
   currentNode.ID = myResponse.ID;
@@ -462,3 +495,18 @@ void handleMotorMessage()
 
 
 
+
+/*
+ * It is an abstraction layer to get the UNIX timestamp from RTC or web, depending on what's available
+ */
+time_t getCurrentTime()
+{
+  if (HW_RTC == 1)
+  {
+    return myRTC.getTime();
+  }
+  else    // from the web....
+  {
+    
+  }
+}
