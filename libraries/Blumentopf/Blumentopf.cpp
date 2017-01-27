@@ -178,7 +178,7 @@ uint8_t RTC_DS3231::setTime(time_t newTime)
 	breakTime(newTime, tm);
 
 	setDS3231time(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year);
-	DEBUG_PRINTLN("done");
+	DEBUG_PRINTLNSTR("done");
 }
 
 /* 
@@ -939,7 +939,14 @@ void DataStorage::printElements()
 
 
 
-
+/*
+ * Constructor
+ */
+CommandHandler::CommandHandler()
+{
+  mnPreviousHour = 23;  
+  mnPreviousMinute = 59;
+}
 
 /*
  * checks whether there was an interactive command from the APP
@@ -952,9 +959,86 @@ uint8_t CommandHandler::getInteractiveCommands()
 /*
  * Checks whether a watering was scheduled for this time
  */
-uint8_t CommandHandler::checkSchedule()
+uint8_t CommandHandler::checkSchedule(struct nodeList myNodeList, uint16_t* nID, uint16_t* nDuration, time_t currentTime)
 {
+  tmElements_t tm;
+  uint16_t nWateringStartTime;
+  uint16_t i;
+  breakTime(currentTime, tm);
+
+// checks if it's time to start pumping 
+//  if (bPumpTime == false) // so far we are not pumping
+
   
+  nWateringStartTime = WATERING_START_HOUR*60+WATERING_START_MINUTE;
+/*  DEBUG_PRINT("H: ");
+  DEBUG_PRINT(tm.Hour);
+  DEBUG_PRINT(" / H_p: ");
+  DEBUG_PRINT(mnPreviousHour);
+  DEBUG_PRINT(", M: ");
+  DEBUG_PRINT(tm.Minute);
+  DEBUG_PRINT(" / M_p: ");
+  DEBUG_PRINTLN(mnPreviousMinute);
+  
+  DEBUG_PRINT(nWateringStartTime);
+  DEBUG_PRINT(" : ");
+  DEBUG_PRINTLN(tm.Hour*60 + tm.Minute);
+*/
+  if (nWateringStartTime <= (tm.Hour*60 + tm.Minute))    // we are after the watering start point
+  {
+//    DEBUG_PRINT(nWateringStartTime);
+//    DEBUG_PRINT(" : ");
+//    DEBUG_PRINTLN(mnPreviousHour*60 + mnPreviousMinute);
+    if (nWateringStartTime > (mnPreviousHour*60 + mnPreviousMinute))    // in the previous round we have been before
+    {
+      DEBUG_PRINTLNSTR("\tPassed watering start time");
+      // so the watering starts now
+      bWateringNow = true;
+      mnCurrentIndex = 0;
+    }
+  }
+  mnPreviousHour = tm.Hour;
+  mnPreviousMinute = tm.Minute;
+
+
+  if (bWateringNow == true)       // controller is in watering mode
+  {
+//    DEBUG_PRINTLNSTR("\t\tWatering mode");
+    for(i = mnCurrentIndex; i < NODELISTSIZE; i++)
+    {
+      DEBUG_PRINTSTR("\t\tElement");
+      DEBUG_PRINTLN(i);
+      //if (myNodeList.myNodes[i].nodeType == 1)    // it is a motor node
+      if ((myNodeList.myNodes[i].state & (1 << NODELIST_NODETYPE)) == 1)    // it is a motor node
+      {
+//        DEBUG_PRINTSTR("\t\t\tMotorNode");
+        if ((myNodeList.myNodes[i].watering_policy & (1<<POL_ACTIVE)) == 1)    // the watering policy is enabled
+        {
+          DEBUG_PRINTLNSTR("\t\t\tPolicy enabled");
+          if ((myNodeList.myNodes[i].watering_policy & (1<<POL_USE_MOISTURE)) == 1)    // use the data of the moisture sensor
+          {
+            // still has to be implemented. It requires sensor data management within the controller
+            continue; // der Node wird daweil ignoriert.
+          }
+          else      // otherwise just pump for a certain time. This is the most simple way and we will use for the demo
+          {
+             mnCurrentIndex = i+1;  // store the node so next round the following node is checked.
+            *nID = myNodeList.myNodes[i].ID;
+            *nDuration = POL_WATERING_DEFAULT_DURATION;
+            return SCHEDULED_WATERING;
+          }
+        }
+      }
+    }
+      
+  }
+  
+  
+  // when the function arrives here, there are no pumping actions to do.
+
+
+  bWateringNow = false;
+  return NO_SCHEDULED_WATERING;
 }
 
 
@@ -996,15 +1080,15 @@ void nodeList::getNodeList()
       nodeListFile = SD.open(NODELIST_FILENAME, FILE_READ);
       if (nodeListFile)         // if the file is available, read it:
       {
-        DEBUG_PRINTLN("Reading from file...");
+        DEBUG_PRINTLNSTR("Reading from file...");
         while (nodeListFile.available())    // there is data in the file
         {
-          DEBUG_PRINTLN("Reading one node");
+          DEBUG_PRINTLNSTR("Reading one node");
     //      myNodeList.myNodes[myNodeList.mnNodeCount] = nodeListFile.read((uint8_t *)&nodeListElement, sizeof(nodeListElement)/sizeof(uint8_t));      // read one node
            nRet = nodeListFile.read((uint8_t *)&myNodes[mnNodeCount], sizeof(myNodes[mnNodeCount])/sizeof(uint8_t));      // read one node
            if (nRet == 0)
            {
-              DEBUG_PRINTLN("Reading error..");
+              DEBUG_PRINTLNSTR("Reading error..");
            }
           mnNodeCount++;      // keep track of the number of nodes read so far
         }
@@ -1038,7 +1122,7 @@ void nodeList::getNodeList()
         DEBUG_PRINT(myNodes[mnNodeCount].ID);
         DEBUG_PRINT(" - ");
       //  if (myNodes[mnNodeCount].nodeType == 0)
-        if((myNodes[mnNodeCount].state & (1<<NODELIST_NODETYPE))==false)
+        if((myNodes[mnNodeCount].state & (1<<NODELIST_NODETYPE))==0)
         {
           DEBUG_PRINTLNSTR("SensorNode");
         }
@@ -1105,11 +1189,11 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
   uint16_t nCurrentAddress;
   
 // check if node exists already:
-  DEBUG_PRINTLN("\tBrowsing list of existing nodes");
+  DEBUG_PRINTLNSTR("\tBrowsing list of existing nodes");
   nodeIndex = findNodeByID(newElement.ID);
   if (nodeIndex != 0xff)        // // element exists already
   {
-    DEBUG_PRINTLN("\tNode exists already! Node cannot be added!");
+    DEBUG_PRINTLNSTR("\tNode exists already! Node cannot be added!");
     return 1;
   }
   
@@ -1118,7 +1202,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
 // otherwise add the node to the list and to the memory:
   if (mnNodeCount < NODELISTSIZE)
   {
-    DEBUG_PRINTLN("list isn't full yet.");
+    DEBUG_PRINTLNSTR("list isn't full yet.");
     myNodes[mnNodeCount] = newElement;      // copy new element
     mnNodeCount++;                          // keep track of the number of elements
 
@@ -1127,12 +1211,12 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
       DEBUG_PRINT("\tArduino ");
       if (SD_AVAILABLE == 1)          // write it to SD
       {
-        DEBUG_PRINTLN("(SD version)");
+        DEBUG_PRINTLNSTR("(SD version)");
         // todo
       }
       else                            // write it to EEPROM
       {
-        DEBUG_PRINTLN("(non SD version)");
+        DEBUG_PRINTLNSTR("(non SD version)");
         nCurrentAddress = NODELIST_ADDRESS + (mnNodeCount-1) * sizeof(struct nodeListElement);    // calculating the next EEPROM node list address
         EEPROM.put(nCurrentAddress, newElement);                                               // writing the node to EEPROM
         DEBUG_PRINT("\tStored node to EEPROM at address ");
@@ -1142,14 +1226,14 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
     }
     else            // on a particle: write it to the flash memory
     {
-      DEBUG_PRINTLN("Particle");
+      DEBUG_PRINTLNSTR("Particle");
       // todo
     }
     
   }
   else
   {
-    DEBUG_PRINTLN("Node list is full! Node cannot be added!");
+    DEBUG_PRINTLNSTR("Node list is full! Node cannot be added!");
     return 2;
   }
   return 0;
@@ -1218,7 +1302,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
 
 
 /**
-* For a pumpNode setup an activation time
+* For a pumpNode setup an activation duration
 */
  void PumpNode_Handler::setPumpTime(uint16_t pumptime){
  
@@ -1228,7 +1312,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
  
  
 /**
-* For a pumpNode get the current Pump Time
+* For a pumpNode get the current Pump duration
 */
  uint16_t PumpNode_Handler::getPumpTime(void){
  
