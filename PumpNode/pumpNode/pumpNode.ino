@@ -19,7 +19,7 @@ RF24 radio(9, 10);
 const int radio_channel = 108;
 
 unsigned int OnOff = 0, answer = 0;
-unsigned long started_waiting_at = 0, previousTime = 0, interval = 0, dif = 0, criticalTime = 0;
+unsigned long started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0;
 const int pumpPin = 3;
 int status; //normal states are positive numbers , erro states are negative
 //byte addresses[][6] = {"Pump", "Contr"};
@@ -55,11 +55,10 @@ void setup() {
 
   //Print debug info
   radio.printDetails();
-
-  interval = 0;
+  OnOff = 0;
   status = 0;
-  criticalTime = 60000; //software watchdog looks for freesing states
-
+  //criticalTime = PUMPNODE_CRITICAL_STATE_OCCUPATION/2; //software watchdog looks for freesing states
+  criticalTime = PUMPNODE_CRITICAL_STATE_OCCUPATION/2; //software watchdog looks for freesing states
   /*Blumentopf protocol specific**/
   struct EEPROM_Data myEEPROMData;
 
@@ -68,13 +67,14 @@ void setup() {
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
   myData.state = 0;
   myResponse.interval = 100;
-    
-    
+
+
   while (registerNode() > 0)                         //register PumpNode at the controller
   {
     DEBUG_PRINTLNSTR("[Setup()]Registration failed,pause 2 seconds then start again.");
-    delay(2000);
+    //delay(2000);
   }
+   DEBUG_PRINTLNSTR("[Setup()]REGISTRATION SUCCEDD!!!");
   //set standard values
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
   myData.humidity = 0.0f;
@@ -149,15 +149,18 @@ void setup() {
 void loop(void) {
   unsigned long currentTime = millis();
   String out = "";
-  /********STATE 0*******/
+
+  //DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
+  //DEBUG_PRINTLNSTR(" bytes available.");
+  /*******************************STATE 0*****************************/
   if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time to turn on the pump
     dif = 0;
     if (radio.available()) {
       DEBUG_PRINTLNSTR("------------------------------------------------------");
       DEBUG_PRINTLNSTR("Available radio ");
       /********Receiving next pumping time period**************/
-      OnOff = recvData();
-
+      OnOff = recvData(); //receive pumptime[ms] from controller
+      /*******************************************************/
       out = "[Status 0]Received payload " + String(OnOff, DEC);
       DEBUG_PRINTLN(out);
 
@@ -165,40 +168,42 @@ void loop(void) {
         answer = OnOff;
         DEBUG_PRINTLNSTR("[Status 0]Send acknowledgment to the pump request.");
         /********Sending acknowlegment,which is the same number as OnOff time request**************/
-        delay(100);//some time to wait
-        sendData(answer);
+        delay(2000);//some time to wait
+        sendData(answer);//will be received by Controller::Pump_handler in State 1
         /*******************************************************************************************/
         status = PUMPNODE_STATE_1_RESPONSE;
         previousTime = millis();
       } else {
-        status = PUMPNODE_STATE_ERROR_START;
+        DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node");
         previousTime = millis();
       }
       Serial.flush();
     }
-    /********STATE 1*******/
+    /***************************STATE 1************************/
   } else if (status == PUMPNODE_STATE_1_RESPONSE) { //In state 0 pumpNode send acknowledgment, now we get confirmation from controller
 
     if (radio.available()) {
       /********Receiving ACKNOWLEGMENT**************/
       //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
-      if (recvData() > 0) {//if message was not dedicated to this recvData returns -1
-        digitalWrite(pumpPin, HIGH);
-        interval = OnOff * 1000L;
-        out = "[Status 1]Pump will work for " + String(interval, DEC) + "ms";
-        DEBUG_PRINTLN(out);
-        started_waiting_at = millis();
-        previousTime = millis();
-        status = PUMPNODE_STATE_2_PUMPACTIVE;
+      uint16_t recv = recvData();
+      if (recv > 0) {
+        if (recv == (2 * OnOff)) { //received from Controller in State 1
+          digitalWrite(pumpPin, HIGH);
+          out = "[Status 1]Pump will work for " + String(OnOff, DEC) + "ms";
+          DEBUG_PRINTLN(out);
+          started_waiting_at = millis();
+          previousTime = millis();
+          status = PUMPNODE_STATE_2_PUMPACTIVE;
+        }
       }
     }
-    /********STATE 2*******/
+    /**************************STATE 2**************************/
   } else if (status == PUMPNODE_STATE_2_PUMPACTIVE) {
     dif = (currentTime - started_waiting_at);
 
-    if ((dif > interval)) {
+    if ((dif > OnOff)) {
 
-      out = "[Status 2]ElapseTime[" + String(dif, DEC) + "] greater than Interval[" + String(interval, DEC) + "]";
+      out = "[Status 2]ElapseTime[" + String(dif, DEC) + "] greater than Interval[" + String(OnOff, DEC) + "]";
       DEBUG_PRINTLN(out);
       answer = dif; //send him the total time needed
       DEBUG_PRINTLNSTR("Turn off the pump "); delay(50);
@@ -207,6 +212,8 @@ void loop(void) {
       DEBUG_PRINTLN(out);
 
       /********Sending final confirmation,which is the total time measured during pump activation**/
+      //no delay necessary because of pumptime
+      delay(500);//some time to wait
       sendData(answer);
       /*******************************************************************************************/
 
@@ -219,44 +226,22 @@ void loop(void) {
     if (radio.available())
     {
       /********Receiving ACKNOWLEGMENT**************/
+      uint16_t recv = recvData();
       //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
-      if (recvData() > 0)
-      { //if message was not dedicated to this pumpNode recvData returns -1
-        DEBUG_PRINTLNSTR("[State 3]Received confirmation.");
-        DEBUG_PRINTLNSTR("-------------------------------------------------------------");
-        status = PUMPNODE_STATE_0_PUMPREQUEST;
-        dif = 0;
-        previousTime = millis();
-        Serial.flush();
-      }
-    }
-  } else if (status == PUMPNODE_STATE_ERROR_START)
-  {
-    /*There was a bad pump time request*/
-    answer = -1;
-    DEBUG_PRINTLNSTR("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-    out = "[Status -1]A bad pump time request was received:  " + String(answer, DEC);
-    DEBUG_PRINTLN(out);
-
-    sendData(answer);
-
-    previousTime = millis();
-    status = PUMPNODE_STATE_ERROR_END;
-  } else if (status == PUMPNODE_STATE_ERROR_END) {
-    if (radio.available())
-    {
-      if (recvData() > 0)
+      if (recv > 0)//are data adressed to this node
       {
-        DEBUG_PRINTLNSTR("[State -2]Received confirmation.");
-        DEBUG_PRINTLNSTR("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-        status = PUMPNODE_STATE_0_PUMPREQUEST;
-        previousTime = millis();
+        if (recv == 0xffff)
+        { //if message was not dedicated to this pumpNode recvData returns -1
+          DEBUG_PRINTLNSTR("[State 3]Received confirmation.");
+          DEBUG_PRINTLNSTR("-------------------------------------------------------------");
+          status = PUMPNODE_STATE_0_PUMPREQUEST;
+          dif = 0;
+          previousTime = millis();
+          Serial.flush();
+        }
       }
-
     }
   }
-
-
 
 
   /******************S O F T W A R E   W A T C H D O G *****************************/
@@ -297,8 +282,8 @@ void sendData(unsigned int answer_)
   myData.interval = answer_;
 
   radio.stopListening();
-  DEBUG_PRINTSTR("\tSending data...........");
-  DEBUG_PRINTSTR("Data-state:");
+  DEBUG_PRINTSTR("\t[sendDat]Sending data "); DEBUG_PRINT(answer_);
+  DEBUG_PRINTSTR(" with STATE:");
   DEBUG_PRINTLN(myData.state);
   //  radio.write(&answer_, sizeof(struct sensorData));
   radio.write(&myData, sizeof(struct sensorData));
@@ -311,17 +296,17 @@ void sendData(unsigned int answer_)
 
 unsigned int recvData(void)
 {
-  //return -1 if message is not for us to keep state
-
+  //return 0 if message is not for us to keep state
+  //ID_INEXISTENT soll behandelt werden??????????????ß
   radio.read(&myResponse, sizeof(struct responseData) );          // Get the payload
-  DEBUG_PRINTLN("[recvData]: Resp-interval:"+String(myResponse.interval,DEC)+
-  ", Resp-ID:"+String(myResponse.ID,DEC)+", Data-ID:"+String(myData.ID,DEC)+", Resp-state:"+String(myResponse.state,BIN));
+  DEBUG_PRINTLN("[recvData]: Resp-interval:" + String(myResponse.interval, DEC) +
+                ", Resp-ID:" + String(myResponse.ID, DEC) + ", Data-ID:" + String(myData.ID, DEC) + ", Resp-state:" + String(myResponse.state, BIN));
 
   if (myResponse.ID == myData.ID)
   {
     return myResponse.interval;
   }
-  return -1;
+  return 0;
 }
 
 
@@ -340,7 +325,7 @@ int registerNode(void)
     DEBUG_PRINTLNSTR(". Registering at the server with this persistent ID... ");
 
     myData.state &= ~(1 << NEW_NODE_BIT);    // this is a known node
-    
+
   }
   else                                      // this is a new node
   {
@@ -393,7 +378,7 @@ int registerNode(void)
   radio.read(&myResponse , sizeof(myResponse));
   /****************************************************************************/
   DEBUG_PRINTLNSTR("[registerNode()]received: ID: ");
-  DEBUG_PRINT(String(myResponse.ID,DEC) +", Status: " + String(myResponse.state,BIN));
+  DEBUG_PRINT(String(myResponse.ID, DEC) + ", Status: " + String(myResponse.state, BIN));
   DEBUG_PRINTLNSTR("");
   if ((myResponse.state & (1 << ID_REGISTRATION_ERROR)) == false)
   {

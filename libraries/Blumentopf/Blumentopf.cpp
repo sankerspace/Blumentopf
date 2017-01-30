@@ -1152,6 +1152,7 @@ void nodeList::clearEEPROM_Nodelist()
   myNodes[0].ID = 0xffff;
   myNodes[0].state = 0;
   myNodes[0].sensorID = 0;
+  myNodes[0].watering_policy = 0;
   
   for(mnNodeCount = 0; mnNodeCount < NODELISTSIZE; mnNodeCount++)
   {
@@ -1274,8 +1275,9 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
     
     return 0xff;
   }
-  /*manipulates state bit, set state to pump avtive*/
-  void nodeList::setPumpActive(uint16_t ID){
+  /*manipulates state bit, set pump in active mode*/
+  void nodeList::setPumpActive(uint16_t ID)
+  {
     for(int index=0;index<mnNodeCount;index++)
     {
       if(myNodes[index].ID==ID){
@@ -1283,7 +1285,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
       }
     }
   }
-  
+  /*manipulates state bit, set pump in inactive mode */
   void nodeList::setPumpInactive(uint16_t ID)
   {
     for(int index=0;index<mnNodeCount;index++)
@@ -1293,6 +1295,46 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
       }
     }
   } 
+  /*manipulates state bit, set node Online */
+  //only call that if the node is already stored in the EEPROM
+   //only the NodeList of the Controller is updated
+  void nodeList::setNodeOnline(uint16_t ID)
+  {
+    for(int index=0;index<mnNodeCount;index++)
+    {
+      if(myNodes[index].ID==ID){
+        myNodes[index].state |= (1<<NODELIST_NODEONLINE);
+      }
+    }
+  }
+  /*manipulates state bit, set node offline */
+  //only call that if the node is already stored in the EEPROM
+  //only the NodeList of the Controller is updated
+  void nodeList::setNodeOffline(uint16_t ID) //maybe Node was not responding a long time
+  {
+    for(int index=0;index<mnNodeCount;index++)
+    {
+      if(myNodes[index].ID==ID){
+        myNodes[index].state &= ~(1<<NODELIST_NODEONLINE);
+      }
+    }
+  }
+  /*
+  *0xff .. Node doesnt exist
+  *0x00 .. Sensor or Pump Node did'nt registrate (or no lifesign)!!!!!!!!!
+  *0x01 .. Sensor or Pump Node has performed a registration(and responds always)
+  */
+  uint8_t nodeList::isOnline(uint16_t ID) // PumpNode currently active or not
+   {
+    for(int index=0;index<mnNodeCount;index++)
+    {
+      if(myNodes[index].ID==ID){
+        return ( (myNodes[index].state & (1<<NODELIST_NODEONLINE))>> NODELIST_NODEONLINE);
+      }
+    }
+    
+    return 0xff;
+  }
 
 
 
@@ -1336,10 +1378,7 @@ uint16_t PumpNode_Handler::getID(void)
 */
  uint16_t PumpNode_Handler::getResponseData(void)
  {
-  uint16_t tmp=this->pumpnode_response;
-  //response will be consumed to pretend repeat sending
-  this->pumpnode_response=0; 
-  return tmp;
+  return this->pumpnode_response;
  }
 
  /**
@@ -1348,6 +1387,8 @@ uint16_t PumpNode_Handler::getID(void)
  void PumpNode_Handler::resetState(void){
     
     this->pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
+    this->pumpnode_previousTime=millis();
+    this->pumpnode_dif=0;
  }
  
  
@@ -1363,17 +1404,30 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   
         //[STATE 0]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_0_PUMPREQUEST){
-    this->pumpnode_response=this->OnOff; 
-    DEBUG_PRINTSTR("[PumpNode_Handler][State 0:]Pump time sent to PumPnode ");
-    DEBUG_PRINTLN(this->pumpnode_ID);
-    this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
-    this->pumpnode_previousTime=millis();//A change of state occured here
-    this->pumpnode_started_waiting_at = millis();       
-    DEBUG_PRINTLNSTR("[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...");
-
+    if(IncomeData>0)
+    {
+      this->pumpnode_response=this->OnOff; 
+      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 0:]Pump time of ");
+      DEBUG_PRINT(this->pumpnode_response);
+      DEBUG_PRINTSTR("ms sent to PumPnode ");
+      DEBUG_PRINTLN(this->pumpnode_ID);
+      this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
+       
+      DEBUG_PRINTLNSTR("\t[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...");
+     // while (Serial.available() <= 0);
+     // Serial.read();
+      this->pumpnode_dif=0;
+      this->pumpnode_previousTime=millis();//A change of state occured here
+      this->pumpnode_started_waiting_at = millis();     
+    }else{
+      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData ");
+      DEBUG_PRINT(IncomeData);
+      DEBUG_PRINTSTR("]\n"); 
+    }
   }else //[STATE 1]-------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_1_RESPONSE){
-    if(IncomeData==0){
+    if(IncomeData==0)
+    {
       this->pumpnode_response=0;
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
       if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
@@ -1381,54 +1435,60 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
        
           this->pumpnode_status=PUMPNODE_STATE_3_RESP_FAILED;
        }
-    }else
-    if(IncomeData<0)
+    }else if(IncomeData==this->OnOff)
     {
-      this->pumpnode_response=-1;
-         DEBUG_PRINTSTR("[PumpNode_Handler][State 1]-Bad message error from PumpNode-ID:");
-         DEBUG_PRINT(this->pumpnode_ID); 
-         DEBUG_PRINTLNSTR(".");
-      //go back to state 0
-      this->pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
-      this->pumpnode_previousTime=millis();
-        
-    }else{
       this->pumpnode_response=2*this->OnOff;//some usefull check
-      this->pumpnode_status=PUMPNODE_STATE_2_PUMPACTIVE;
-      this->pumpnode_previousTime=millis();//A change of state occured here
-      DEBUG_PRINTSTR("[PumpNode_Handler][State 1]-Send Response to Node-ID");
+    
+      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 1]-Send Response to Node-ID");
       DEBUG_PRINT(this->pumpnode_ID); 
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response); 
+      
+      //while (Serial.available() <= 0);
+      //Serial.read();
+       
+      this->pumpnode_status=PUMPNODE_STATE_2_PUMPACTIVE;
+      this->pumpnode_previousTime=millis();//A change of state occured here
+      this->pumpnode_started_waiting_at = millis();   
+    }else{
+      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 1]-ERROR INCOME DATA (");
+      DEBUG_PRINT(IncomeData); 
+      DEBUG_PRINTSTR(") FROM PUMP NODE with ID:");
+      DEBUG_PRINTLN(this->pumpnode_ID);
+      
     }
-    
 
   }else //[STATE 2]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPACTIVE){
-    if(IncomeData==0){
+    if(IncomeData==0)
+    {
       this->pumpnode_response=0;
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
       if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
        {
  
-          this->pumpnode_status=PUMPNODE_STATE_3_RESP_FAILED;
+          this->pumpnode_status=PUMPNODE_STATE_4_RESP_FAILED;
        }
-    }else
-    if(IncomeData<0)
+    }else    
+    if(IncomeData>this->OnOff)//receive the total time needed 
     {
-        DEBUG_PRINTSTR("[PumpNode_Handler][State 2:]Bad message error from PumpNode-ID:");DEBUG_PRINT(this->pumpnode_ID); DEBUG_PRINTLNSTR(".");
-      this->pumpnode_response=-1;
-      //go back to state 0
-      this->pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
-      this->pumpnode_previousTime=millis();
-        
-    }else{
-      this->pumpnode_response=2*this->OnOff;//some usefull check
+      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 2]-Received Response from node-ID ");
+      DEBUG_PRINT(this->pumpnode_ID);DEBUG_PRINTSTR(" ,Response: ");
+      DEBUG_PRINTLN(IncomeData);
+      this->pumpnode_response=0xffff;//some usefull check
       this->pumpnode_status=PUMPNODE_STATE_3_RESPONSE;
-      this->pumpnode_previousTime=millis();//A change of state occured here
-      DEBUG_PRINTSTR("[PumpNode_Handler][State 2]-Send Response to Node-ID");
+     
+      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 2]-Send Response to Node-ID");
       DEBUG_PRINT(this->pumpnode_ID); 
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response);  
+      
+      //while (Serial.available() <= 0);
+      //Serial.read();
+       
+      this->pumpnode_previousTime=millis();//A change of state occured here
+    }else{
+      DEBUG_PRINTLNSTR("\t[PumpNode_Handler][State 2]-ERROR INCOME DATA FROM PUMP NODE!!!!!!!");
     }
+    
     
 
 
@@ -1436,9 +1496,10 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESPONSE){
       //Nothing to do
     
-  }else //[STATE -3]---------------------------------------------------------
+  }
+  else //[STATE -3]---------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESP_FAILED){
-    DEBUG_PRINTSTR("[State -3:]Failed, response timed out[wait:");
+    DEBUG_PRINTSTR("\t[PumpNode_Handler][State -3:]Failed, response timed out[wait:");
     DEBUG_PRINT(this->pumpnode_dif);
     DEBUG_PRINTSTR(",ID:");DEBUG_PRINT(this->pumpnode_ID); 
     DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff); 
@@ -1447,7 +1508,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     
   }else //[STATE -4]----------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_4_RESP_FAILED){
-    DEBUG_PRINTSTR("[State -4:]Failed, response timed out[wait:");
+    DEBUG_PRINTSTR("\t[PumpNode_Handler][State -4:]Failed, response timed out[wait:");
     DEBUG_PRINT(this->pumpnode_dif);
     DEBUG_PRINTSTR(",ID:");DEBUG_PRINT(this->pumpnode_ID); 
     DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff); 
@@ -1461,10 +1522,6 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
      DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
      delay(50);
      resetState();
-     this->pumpnode_previousTime=0;
-     this->pumpnode_dif=0;
-     //setPumpTime(this->OnOff);
-
   }    
  }
  

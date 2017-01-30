@@ -32,7 +32,7 @@ DO NOT CHANGE:
 #define SD_AVAILABLE 0
 
 //Radio communication defines
-#define REGISTRATION_TIMEOUT_INTERVAL	500  // in Milliseconds   
+#define REGISTRATION_TIMEOUT_INTERVAL	3000  // in Milliseconds   
 #define WAIT_RESPONSE_INTERVAL        2000 // in Milliseconds   
 
 
@@ -136,6 +136,7 @@ DO NOT CHANGE:
 
 #define NODELIST_NODETYPE       (0)
 #define NODELIST_PUMPACTIVE     (1)
+#define NODELIST_NODEONLINE     (2)
 
 
 /*
@@ -277,7 +278,8 @@ struct nodeListElement
   uint16_t ID;
   uint8_t state;        
   // Bit 0: NODE_TYPE:0...this is a SensorNode,1...this is a MotorNode
-  // Bit 1: PUMPACTIVE:0...inactive ,1...active
+  // Bit 1: PUMPACTIVE:0...inactive ,1...active (is currently pumping[1] or not[0])
+  // Bit 2: ONLINE:0...OFFLINE , 1...ONLINE (the node has performed a registration)
   uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
   byte  watering_policy;
 };
@@ -308,6 +310,16 @@ public:
   uint8_t isActive(uint16_t ID); // PumpNode currently active or not
   void setPumpActive(uint16_t ID);
   void setPumpInactive(uint16_t ID); 
+  //only call that if the node is already stored in the EEPROM
+  void setNodeOnline(uint16_t ID);
+  //only call that if the node is already stored in the EEPROM
+  void setNodeOffline(uint16_t ID); //maybe Node was not responding a long time
+  /*
+  *0xff .. Node doesnt exist
+  *0x00 .. Sensor or Pump Node did'nt registrate (or no lifesign)!!!!!!!!!
+  *0x01 .. Sensor or Pump Node has performed a registration(and responds always)
+  */
+  uint8_t isOnline(uint16_t ID); // PumpNode currently active or not
 };
 
 /*
@@ -372,14 +384,13 @@ public:
         OnOff=pumpTime*1000;
         pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
         pumpnode_response=0;
-        pumpnode_started_waiting_at=0;
-        pumpnode_previousTime=0;
-        pumpnode_previousTime=0;
+        pumpnode_started_waiting_at=millis();
+        pumpnode_previousTime=millis();
         pumpnode_dif=0;
     }
     
     ~PumpNode_Handler(){}
-
+   
     void     setPumpTime(uint16_t pumptime);
     uint16_t getPumpTime(void);
     int      getState(void);
@@ -388,6 +399,7 @@ public:
     void     processPumpstate(uint16_t IncomeData);
      
 private:
+   // static uint8_t counter;
     /*state variable*/
     uint16_t pumpnode_ID;
     uint16_t OnOff;                     //duration of pumping[sec]   
