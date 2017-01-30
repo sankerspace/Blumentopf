@@ -6,7 +6,6 @@
 
 // Comment this line for the release version:
 #define DEBUG 1
-#define SD_CARD_AVAILABLE 1
 
 // watering policy:
 #define POL_WATERING_DEFAULT_DURATION (10)      // per default it should give water for 10 seconds every day after 19:00
@@ -109,7 +108,7 @@ DO NOT CHANGE:
 #else
   #define DEBUG_PRINT(x)
   #define DEBUG_PRINTSTR(x)
-  #define DEBUG_PRINT(x, c)
+  #define DEBUG_PRINTDIG(x, c)
   #define DEBUG_PRINTLN(x)
   #define DEBUG_PRINTLNSTR(x)
 #endif 

@@ -291,52 +291,52 @@ void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOf
 //  readDS3231time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);
   // send it to the serial monitor
 //  Serial.println(".");
-  Serial.print(hour, DEC);
+  DEBUG_PRINTDIG(hour, DEC);
   // convert the byte variable to a decimal number when displayed
-  Serial.print(":");
+  DEBUG_PRINTSTR(":");
   if (minute<10)
   {
-    Serial.print("0");
+    DEBUG_PRINTSTR("0");
   }
-  Serial.print(minute, DEC);
-  Serial.print(":");
+  DEBUG_PRINTDIG(minute, DEC);
+  DEBUG_PRINTSTR(":");
   if (second<10)
   {
-    Serial.print("0");
+    DEBUG_PRINTSTR("0");
   }
-  Serial.print(second, DEC);
-  Serial.print(" ");
-  Serial.print(dayOfMonth, DEC);
-  Serial.print("/");
-  Serial.print(month, DEC);
-  Serial.print("/");
-  Serial.print(year, DEC);
-  Serial.print(" Day of week: ");
+  DEBUG_PRINTDIG(second, DEC);
+  DEBUG_PRINTSTR(" ");
+  DEBUG_PRINTDIG(dayOfMonth, DEC);
+  DEBUG_PRINTSTR("/");
+  DEBUG_PRINTDIG(month, DEC);
+  DEBUG_PRINTSTR("/");
+  DEBUG_PRINTDIG(year, DEC);
+  DEBUG_PRINTSTR(" Day of week: ");
   switch(dayOfWeek)
   {
   case 1:
-    Serial.println("Sunday");
+    DEBUG_PRINTLNSTR("Sunday");
     break;
   case 2:
-    Serial.println("Monday");
+    DEBUG_PRINTLNSTR("Monday");
     break;
   case 3:
-    Serial.println("Tuesday");
+    DEBUG_PRINTLNSTR("Tuesday");
     break;
   case 4:
-    Serial.println("Wednesday");
+    DEBUG_PRINTLNSTR("Wednesday");
     break;
   case 5:
-    Serial.println("Thursday");
+    DEBUG_PRINTLNSTR("Thursday");
     break;
   case 6:
-    Serial.println("Friday");
+    DEBUG_PRINTLNSTR("Friday");
     break;
   case 7:
-    Serial.println("Saturday");
+    DEBUG_PRINTLNSTR("Saturday");
     break;
   default:
-    Serial.println("Error");
+    DEBUG_PRINTLNSTR("Error");
   }
 
 }
@@ -496,8 +496,8 @@ void DataStorage::unsetHeaders()
   for (i = 0; i < INDEXELEMENTS; i++)
   {
     nAddress = INDEXBEGIN + i*sizeof(dummyHeader);
-    Serial.print("X: ");
-    Serial.println(nAddress);
+    DEBUG_PRINTSTR("X: ");
+    DEBUG_PRINTLN(nAddress);
     EEPROM.put(nAddress, dummyHeader);
   }
 }
@@ -1060,8 +1060,8 @@ void nodeList::getNodeList()
  */
   if (HW == HW_ARDUINO)
   {
-    if (SD_AVAILABLE == 1)
-    {
+  
+#if (SD_AVAILABLE == 1)
       File nodeListFile;
       if (SD.exists(NODELIST_FILENAME))    // node list file exists. good!
       {
@@ -1100,9 +1100,10 @@ void nodeList::getNodeList()
         DEBUG_PRINTSTR("error opening ");
         DEBUG_PRINTLNSTR(NODELIST_FILENAME);
       }
-    }
-    else      // read nodes from EEPROM
-    {
+
+  
+ #else 
+ 
       nCurrentAddress = NODELIST_ADDRESS;
       
       DEBUG_PRINTSTR("Maximum nodelist length: ");
@@ -1134,7 +1135,9 @@ void nodeList::getNodeList()
       }
       DEBUG_PRINT(mnNodeCount);
       DEBUG_PRINTLNSTR(" nodes found in total.");
-    }
+
+#endif
+    
   }
 
  
@@ -1210,20 +1213,21 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
     if (HW == HW_ARDUINO)
     {
       DEBUG_PRINT("\tArduino ");
-      if (SD_AVAILABLE == 1)          // write it to SD
-      {
+             // write it to SD
+#if (SD_AVAILABLE == 1)
         DEBUG_PRINTLNSTR("(SD version)");
         // todo
-      }
-      else                            // write it to EEPROM
-      {
+    
+#else                            
+        // write it to EEPROM
+     
         DEBUG_PRINTLNSTR("(non SD version)");
         nCurrentAddress = NODELIST_ADDRESS + (mnNodeCount-1) * sizeof(struct nodeListElement);    // calculating the next EEPROM node list address
         EEPROM.put(nCurrentAddress, newElement);                                               // writing the node to EEPROM
         DEBUG_PRINT("\tStored node to EEPROM at address ");
         DEBUG_PRINTLN(nCurrentAddress);
-        
-      }
+#endif   
+    
     }
     else            // on a particle: write it to the flash memory
     {
@@ -1418,7 +1422,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_dif=0;
       this->pumpnode_previousTime=millis();//A change of state occured here
       this->pumpnode_started_waiting_at = millis(); 
-      DEBUG_PRINTLN("\t\t[PumpNode_Handler][State 0:]previousTime:"+String(this->pumpnode_previousTime,DEC))   ; 
+      
     }else{
       DEBUG_PRINTSTR("\t[PumpNode_Handler][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData ");
       DEBUG_PRINT(IncomeData);
@@ -1514,7 +1518,6 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
  /*Software Watch Dog*/
   if((millis()-this->pumpnode_previousTime)>(PUMPNODE_CRITICAL_STATE_OCCUPATION+this->OnOff)){
      DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
-      DEBUG_PRINTLN("\t\t[PumpNode_Handler][Watchdog]previousTime: "+String(this->pumpnode_previousTime,DEC))   ; 
      delay(50);
      resetState();
   }    

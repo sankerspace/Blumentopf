@@ -11,9 +11,10 @@
 #include <Time.h>
 #include <TimeLib.h>
 
-//#ifdef SD_CARD_AVAILABLE
+#if (SD_AVAILABLE == 1)
 #include <SD.h>
-//#elif 
+#endif
+
 
 #include <LinkedList.h>
 
@@ -95,6 +96,7 @@ bool initStorage()
 {
   if (HW == HW_ARDUINO)             // using arduino
   {
+#if (SD_AVAILABLE == 1)
     DEBUG_PRINTLNSTR("Initializing SD card...");
 
     // see if the card is present and can be initialized:
@@ -104,6 +106,7 @@ bool initStorage()
       // don't do anything more:
       return false;
     }
+#endif
   }
   else if (HW == HW_PHOTON)         // using photon
   {
@@ -113,7 +116,7 @@ bool initStorage()
 }
 
 void loop(void)
-{ 
+{
   uint8_t nPipenum;
   uint8_t nICA;   // Interactive Command Answer
   uint8_t nSCA;   // Scheduled Command Answer
@@ -135,15 +138,15 @@ void loop(void)
     DEBUG_PRINTSTR("\nMessage available at pipe ");
     DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
-    DEBUG_PRINTLN("[RECEIVED:]State:"+String(myData.state,BIN)+" from ID:"+String(myData.ID,DEC)+
-    " with Interval:"+String(myData.interval));
-   
+    DEBUG_PRINTSTR("[RECEIVED:]State:"); DEBUG_PRINT(String(myData.state, BIN)); DEBUG_PRINTSTR(" from ID:"); DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR(" with Interval:"); DEBUG_PRINTLN(myData.interval);
+
     //      myResponse.ControllerTime = 1481803260;
     //    getUNIXtime(&myResponse.ControllerTime);    // gets current timestamp
 
     // log the data to the SD card:
     logData();
-   
+
     if ((myData.state & (1 << MSG_TYPE_BIT)) == false) // this is a registration request. Send ack-message
     {
       DEBUG_PRINTLNSTR("Registration request");
@@ -158,8 +161,9 @@ void loop(void)
       }
       else                                  // it is a motor node message
       {
-        DEBUG_PRINTLNSTR("Motor Message");
-        DEBUG_PRINTLN("ID:" + String(myData.ID, DEC) + ", Data:" + String(myData.interval, DEC));
+        DEBUG_PRINTSTR("Motor Message:\nID:");
+        DEBUG_PRINT(myData.ID); DEBUG_PRINTSTR(", Data:");
+        DEBUG_PRINTLN(myData.interval);
         handleMotorMessage();
 
         //        bResponseNeeded = false;
@@ -171,11 +175,12 @@ void loop(void)
       radio.stopListening();
       //to make state changes and to turn on receiver mode, otherwise the message is lost
 
-      DEBUG_PRINTLN(myResponse.ControllerTime);
+      //DEBUG_PRINTLN(myResponse.ControllerTime);
 
       // Send back response, controller real time and the next sleep interval:
-      DEBUG_PRINT("Sending back response: "+String(myResponse.interval,DEC)+
-        ", ID:"+String(myResponse.ID,DEC)+", STATE:"+String(myResponse.state,BIN));
+      DEBUG_PRINTSTR("Sending back response: "); DEBUG_PRINT(myResponse.interval);
+      DEBUG_PRINTSTR(", ID:"); DEBUG_PRINT(myResponse.ID); DEBUG_PRINTSTR(", STATE:");
+      DEBUG_PRINT(String(myResponse.state, BIN));
       delay(2000);
       radio.write(&myResponse, sizeof(myResponse));
 
@@ -192,17 +197,15 @@ void loop(void)
   {
     /* this is only for testing!! */
     //DEBUG_PRINTLN(nTestWatering);
-    if(myNodeList.isOnline(myNodeList.myNodes[0].ID)){
-        if((nTestWatering % 20000)==0)
-          DEBUG_PRINTLN(nTestWatering);
-        nTestWatering++;
+    if (myNodeList.isOnline(myNodeList.myNodes[0].ID)) {
+      nTestWatering++;
     }
-    if ((nTestWatering % 20000)==0 )
+    if ((nTestWatering % 20000) == 0 )
     {
 
       if (myNodeList.getNodeType(myNodeList.myNodes[0].ID) == 1)
       {
-        DEBUG_PRINT("Node list id: ");
+        DEBUG_PRINTSTR("Node list id: ");
         DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
         if (myNodeList.isActive(myNodeList.myNodes[0].ID) == 0)//check if the first node (index=0)in the list is active
           doWateringTasks(myNodeList.myNodes[0].ID, 10); //here a new order to a pump Node has to be planned
@@ -244,7 +247,7 @@ void loop(void)
     PumpNode_Handler *handler;
     for (int i = 0; i < PumpList.size(); i++) {
       handler = PumpList.get(i);
-      DEBUG_PRINTLN("Processing PumpHandler for NODE-ID:" + String(handler->getID(), DEC));
+      DEBUG_PRINTSTR("Processing PumpHandler for NODE-ID:"); DEBUG_PRINTLN(handler->getID());
       handler->processPumpstate(0);//there is no Income Data (0), only process the state machine
 
       // This commented section is for the real pump scheduling. It is commented for now to not influence the pump protocol testing.
@@ -259,11 +262,11 @@ void loop(void)
       */
       if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
       {
-        DEBUG_PRINTLN("Deleting PumpHandler Class because Watering finished " + String(handler->getID(), DEC));
+        DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished "); DEBUG_PRINT(handler->getID());
         PumpList.remove(i); i--;
         myNodeList.setPumpInactive(handler->getID());
         delete handler;
-        DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
+        DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
         DEBUG_PRINTLNSTR(" bytes available.");
       }
     }
@@ -309,15 +312,15 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
         DEBUG_PRINTSTR("[doWateringTasks()]");
         DEBUG_PRINT(PumpList.size());
         DEBUG_PRINTLNSTR(" pumps ACTIVE!!!!");
-      }else
+      } else
         DEBUG_PRINTLNSTR("Pump is already i use!!");
-    }else
+    } else
       DEBUG_PRINTLNSTR("THIS IS NOT A PUMP NODE!!");
-  }else
+  } else
     DEBUG_PRINTLNSTR("");
 
-    DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
-    DEBUG_PRINTLNSTR(" bytes available.");
+  DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+  DEBUG_PRINTLNSTR(" bytes available.");
   return 0;
 }
 
@@ -338,6 +341,7 @@ void handlePumpCommunications()
 */
 void logData(void)
 {
+#if (SD_AVAILABLE == 1)
   String currentData = "";
 
   // parse the data to the string:
@@ -360,9 +364,10 @@ void logData(void)
   currentData += String(myData.state);
   currentData += ",";
   currentData += String(myData.interval);
-
+#endif
   if (HW == HW_ARDUINO)
   {
+#if (SD_AVAILABLE == 1)
     File dataFile = SD.open("datalog.txt", FILE_WRITE);
     //int dataFile;
 
@@ -374,6 +379,7 @@ void logData(void)
       // print to the serial port too:
       DEBUG_PRINTLNSTR("Writing to SD...");
       DEBUG_PRINTLN(currentData);
+
     }
     // if the file isn't open, pop up an error:
     else
@@ -382,6 +388,7 @@ void logData(void)
       DEBUG_PRINTLNSTR("data:");
       DEBUG_PRINTLN(currentData);
     }
+#endif
   }
   else if (HW == HW_PHOTON)   // in case of a particle, the data might be logged to the flash or not at all.
   {
