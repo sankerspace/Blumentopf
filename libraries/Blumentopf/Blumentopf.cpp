@@ -1414,11 +1414,11 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
        
       DEBUG_PRINTLNSTR("\t[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...");
-     // while (Serial.available() <= 0);
-     // Serial.read();
+   
       this->pumpnode_dif=0;
       this->pumpnode_previousTime=millis();//A change of state occured here
-      this->pumpnode_started_waiting_at = millis();     
+      this->pumpnode_started_waiting_at = millis(); 
+      DEBUG_PRINTLN("\t\t[PumpNode_Handler][State 0:]previousTime:"+String(this->pumpnode_previousTime,DEC))   ; 
     }else{
       DEBUG_PRINTSTR("\t[PumpNode_Handler][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData ");
       DEBUG_PRINT(IncomeData);
@@ -1442,10 +1442,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINTSTR("\t[PumpNode_Handler][State 1]-Send Response to Node-ID");
       DEBUG_PRINT(this->pumpnode_ID); 
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response); 
-      
-      //while (Serial.available() <= 0);
-      //Serial.read();
-       
+ 
       this->pumpnode_status=PUMPNODE_STATE_2_PUMPACTIVE;
       this->pumpnode_previousTime=millis();//A change of state occured here
       this->pumpnode_started_waiting_at = millis();   
@@ -1477,13 +1474,10 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_response=0xffff;//some usefull check
       this->pumpnode_status=PUMPNODE_STATE_3_RESPONSE;
      
-      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 2]-Send Response to Node-ID");
+      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 2]-Send Response to Node-ID ");
       DEBUG_PRINT(this->pumpnode_ID); 
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response);  
       
-      //while (Serial.available() <= 0);
-      //Serial.read();
-       
       this->pumpnode_previousTime=millis();//A change of state occured here
     }else{
       DEBUG_PRINTLNSTR("\t[PumpNode_Handler][State 2]-ERROR INCOME DATA FROM PUMP NODE!!!!!!!");
@@ -1518,8 +1512,9 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   }
   
  /*Software Watch Dog*/
-  if((millis()-this->pumpnode_previousTime)>(PUMPNODE_CRITICAL_STATE_OCCUPATION+this->pumpnode_dif)){
+  if((millis()-this->pumpnode_previousTime)>(PUMPNODE_CRITICAL_STATE_OCCUPATION+this->OnOff)){
      DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
+      DEBUG_PRINTLN("\t\t[PumpNode_Handler][Watchdog]previousTime: "+String(this->pumpnode_previousTime,DEC))   ; 
      delay(50);
      resetState();
   }    

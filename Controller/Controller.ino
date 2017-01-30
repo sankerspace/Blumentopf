@@ -10,7 +10,10 @@
 // For RTC:
 #include <Time.h>
 #include <TimeLib.h>
+
+//#ifdef SD_CARD_AVAILABLE
 #include <SD.h>
+//#elif 
 
 #include <LinkedList.h>
 
@@ -31,7 +34,7 @@ RTC_DS3231 myRTC;
 nodeList myNodeList;
 LinkedList<PumpNode_Handler*> PumpList = LinkedList<PumpNode_Handler*>();
 
-uint8_t nTestWatering = 0;
+uint16_t nTestWatering = 0;
 /*
    SETUP
 
@@ -110,12 +113,11 @@ bool initStorage()
 }
 
 void loop(void)
-{
+{ 
   uint8_t nPipenum;
   uint8_t nICA;   // Interactive Command Answer
   uint8_t nSCA;   // Scheduled Command Answer
   bool bResponseNeeded = true;    // not always a message needs to be sent
-  static uint16_t nTestWatering = 0;
   uint16_t nDuration;
   uint16_t nID;
   time_t currentTime;
@@ -191,10 +193,11 @@ void loop(void)
     /* this is only for testing!! */
     //DEBUG_PRINTLN(nTestWatering);
     if(myNodeList.isOnline(myNodeList.myNodes[0].ID)){
-        DEBUG_PRINTLN(nTestWatering);
+        if((nTestWatering % 20000)==0)
+          DEBUG_PRINTLN(nTestWatering);
         nTestWatering++;
     }
-    if (nTestWatering == 500 )
+    if ((nTestWatering % 20000)==0 )
     {
 
       if (myNodeList.getNodeType(myNodeList.myNodes[0].ID) == 1)
@@ -260,6 +263,8 @@ void loop(void)
         PumpList.remove(i); i--;
         myNodeList.setPumpInactive(handler->getID());
         delete handler;
+        DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
+        DEBUG_PRINTLNSTR(" bytes available.");
       }
     }
     //  } //if_end
@@ -310,6 +315,9 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
       DEBUG_PRINTLNSTR("THIS IS NOT A PUMP NODE!!");
   }else
     DEBUG_PRINTLNSTR("");
+
+    DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
+    DEBUG_PRINTLNSTR(" bytes available.");
   return 0;
 }
 
