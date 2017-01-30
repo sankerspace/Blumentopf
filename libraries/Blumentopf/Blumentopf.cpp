@@ -42,10 +42,11 @@
 * This scetion deals with the RTC and time conversions
 */
 
- 
+#if (HW_RTC==1)
 /*
 *  DS1302
 */
+#if (HW_RTC_DS1302==1)
 
 RTC_DS1302::RTC_DS1302(uint8_t CE_pin, uint8_t IO_pin, uint8_t SCLK_pin)
 	: RTC(CE_pin, IO_pin, SCLK_pin) {}
@@ -87,6 +88,7 @@ int RTC_DS1302::init(uint8_t* state)
     }
   }
 }
+
 uint8_t RTC_DS1302::setTime(time_t newTime)
 {
 	return RTC.set(newTime);
@@ -130,7 +132,7 @@ int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
   
 }
 
-
+#elif (HW_RTC_DS3232==1)
 /*
 *  DS3231
 */
@@ -220,7 +222,8 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 }
 
 
-
+#endif
+#endif
 
 /*
 * DS3231 helper functions from Eric Ayars:
@@ -1418,21 +1421,25 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
        
       DEBUG_PRINTLNSTR("\t[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...");
-   
-      this->pumpnode_dif=0;
+
       this->pumpnode_previousTime=millis();//A change of state occured here
       this->pumpnode_started_waiting_at = millis(); 
+      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 0:]previousTime=");
+      DEBUG_PRINTLN(this->pumpnode_previousTime);
+      this->pumpnode_debugCounter=DEBUG_CYCLE;
       
     }else{
-      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData ");
-      DEBUG_PRINT(IncomeData);
-      DEBUG_PRINTSTR("]\n"); 
+      if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
+        DEBUG_PRINTSTR("\t[PumpNode_Handler][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData ");
+        DEBUG_PRINT(IncomeData);
+        DEBUG_PRINTLNSTR("]\n"); 
+      }
+      this->pumpnode_debugCounter++;
     }
   }else //[STATE 1]-------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_1_RESPONSE){
     if(IncomeData==0)
     {
-      this->pumpnode_response=0;
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
       if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
        {
@@ -1450,19 +1457,21 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_status=PUMPNODE_STATE_2_PUMPACTIVE;
       this->pumpnode_previousTime=millis();//A change of state occured here
       this->pumpnode_started_waiting_at = millis();   
+      this->pumpnode_debugCounter=DEBUG_CYCLE;
     }else{
-      DEBUG_PRINTSTR("\t[PumpNode_Handler][State 1]-ERROR INCOME DATA (");
-      DEBUG_PRINT(IncomeData); 
-      DEBUG_PRINTSTR(") FROM PUMP NODE with ID:");
-      DEBUG_PRINTLN(this->pumpnode_ID);
-      
+       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
+        DEBUG_PRINTSTR("\t[PumpNode_Handler][State 1]-ERROR INCOME DATA (");
+        DEBUG_PRINT(IncomeData); 
+        DEBUG_PRINTSTR(") FROM PUMP NODE with ID:");
+        DEBUG_PRINTLN(this->pumpnode_ID);
+      }
+      this->pumpnode_debugCounter++;
     }
 
   }else //[STATE 2]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPACTIVE){
     if(IncomeData==0)
     {
-      this->pumpnode_response=0;
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
       if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
        {
@@ -1483,8 +1492,12 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response);  
       
       this->pumpnode_previousTime=millis();//A change of state occured here
+      this->pumpnode_debugCounter=DEBUG_CYCLE;
     }else{
-      DEBUG_PRINTLNSTR("\t[PumpNode_Handler][State 2]-ERROR INCOME DATA FROM PUMP NODE!!!!!!!");
+      if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
+        DEBUG_PRINTLNSTR("\t[PumpNode_Handler][State 2]-ERROR INCOME DATA FROM PUMP NODE!!!!!!!");
+      }
+      this->pumpnode_debugCounter++;
     }
     
     
@@ -1493,7 +1506,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   }else //[STATE 3]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESPONSE){
       //Nothing to do
-    
+      
   }
   else //[STATE -3]---------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESP_FAILED){
@@ -1516,10 +1529,22 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   }
   
  /*Software Watch Dog*/
-  if((millis()-this->pumpnode_previousTime)>(PUMPNODE_CRITICAL_STATE_OCCUPATION+this->OnOff)){
-     DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
-     delay(50);
-     resetState();
+  uint32_t dif=(millis()-this->pumpnode_previousTime);
+  if(dif>(PUMPNODE_CRITICAL_STATE_OCCUPATION+this->pumpnode_dif)){
+     DEBUG_PRINTLNSTR("\t[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
+     DEBUG_PRINTSTR("\t[PumpNode_Handler][WATCHDOG]Dif=");
+     DEBUG_PRINT(dif);
+     DEBUG_PRINTSTR("ms, previousTime=");
+     DEBUG_PRINT(this->pumpnode_previousTime);
+     DEBUG_PRINTLNSTR("ms");
+     if(dif>(2*PUMPNODE_CRITICAL_STATE_OCCUPATION))
+     {  
+      DEBUG_PRINTLNSTR("\t[PumpNode_Handler][WATCHDOG]\\ 
+      STATEMACHINE DIDN'T PROCESS FOR LONGER TIME, MAYBE PUMPNODE IS NOT RESPONDING");
+      this->pumpnode_previousTime=millis();
+      this->pumpnode_status=PUMPNODE_STATE_3_RESPONSE;
+     }else
+      resetState();
   }    
  }
  

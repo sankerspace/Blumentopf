@@ -16,11 +16,11 @@ RF24 radio(9, 10);
 
 
 /****************** User Config ***************************/
-const int radio_channel = 108;
+const uint8_t radio_channel = 108;
 
-unsigned int OnOff = 0, answer = 0;
-unsigned long started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0;
-const int pumpPin = 3;
+uint16_t OnOff = 0, answer = 0;
+uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0;
+const uint8_t pumpPin = 3;
 int status; //normal states are positive numbers , erro states are negative
 //byte addresses[][6] = {"Pump", "Contr"};
 const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
@@ -37,7 +37,7 @@ struct responseData myResponse;
 void setup() {
 
   Serial.begin(BAUD);
-  while (!Serial) {}
+  DEBUG_SERIAL_INIT_WAIT
   pinMode(pumpPin, OUTPUT);
 
   randomSeed(analogRead(0));//initialize Random generator
@@ -45,7 +45,7 @@ void setup() {
   radio.begin();
 
   radio.setPALevel(RF24_PA_LOW);
-  radio.setChannel(radio_channel);
+  radio.setChannel(_RADIO_CHANNEL_);
 
   radio.openWritingPipe(pipes[1]);        // Both radios listen on the same pipes by default, but opposite addresses
   radio.openReadingPipe(1, pipes[0]);     // Open a reading pipe on address 0, pipe 1
@@ -56,9 +56,10 @@ void setup() {
   //Print debug info
   radio.printDetails();
   OnOff = 0;
-  status = 0;
+  status = PUMPNODE_STATE_0_PUMPREQUEST;
   //criticalTime = PUMPNODE_CRITICAL_STATE_OCCUPATION/2; //software watchdog looks for freesing states
-  criticalTime = PUMPNODE_CRITICAL_STATE_OCCUPATION/2; //software watchdog looks for freesing states
+  criticalTime = (uint32_t)(PUMPNODE_CRITICAL_STATE_OCCUPATION/2); //software watchdog looks for freesing states
+  DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("CRITICALTIME:");DEBUG_PRINTLN(criticalTime);
   /*Blumentopf protocol specific**/
   struct EEPROM_Data myEEPROMData;
 
@@ -71,10 +72,10 @@ void setup() {
 
   while (registerNode() > 0)                         //register PumpNode at the controller
   {
-    DEBUG_PRINTLNSTR("[Setup()]Registration failed,pause 2 seconds then start again.");
-    //delay(2000);
+    DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("[Setup()]Registration failed,pause 2 seconds then start again.");
+    delay(2000);
   }
-   DEBUG_PRINTLNSTR("[Setup()]REGISTRATION SUCCEDD!!!");
+   DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("[Setup()]REGISTRATION SUCCEDD!!!");
   //set standard values
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
   myData.humidity = 0.0f;
@@ -83,6 +84,9 @@ void setup() {
   myData.voltage = 0;
   myData.VCC = 0;
   myData.realTime = 0;
+
+  previousTime=millis();
+ 
 }
 
 
@@ -147,7 +151,7 @@ void setup() {
 /*********************************L O O P*******************************************************/
 /***********************************************************************************************/
 void loop(void) {
-  unsigned long currentTime = millis();
+  uint32_t currentTime = millis();
   String out = "";
 
   //DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
@@ -155,34 +159,34 @@ void loop(void) {
   /*******************************STATE 0*****************************/
   if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time to turn on the pump
     dif = 0;
-    if (radio.available()) {
+    if (radio.available()>0) {
       DEBUG_PRINTLNSTR("------------------------------------------------------");
       DEBUG_PRINTLNSTR("Available radio ");
       /********Receiving next pumping time period**************/
       OnOff = recvData(); //receive pumptime[ms] from controller
       /*******************************************************/
       out = "[Status 0]Received payload " + String(OnOff, DEC);
-      DEBUG_PRINTLN(out);
+      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLN(out);
 
       if (OnOff > 0) {
         answer = OnOff;
-        DEBUG_PRINTLNSTR("[Status 0]Send acknowledgment to the pump request.");
+        DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("[Status 0]Send acknowledgment to the pump request.");
         /********Sending acknowlegment,which is the same number as OnOff time request**************/
-        delay(2000);//some time to wait
+        delay(WAIT_SEND_INTERVAL);//some time to wait
         sendData(answer);//will be received by Controller::Pump_handler in State 1
         /*******************************************************************************************/
         status = PUMPNODE_STATE_1_RESPONSE;
         previousTime = millis();
       } else {
-        DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node");
+        DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node");
         previousTime = millis();
       }
-      Serial.flush();
+      DEBUG_FLUSH;
     }
     /***************************STATE 1************************/
   } else if (status == PUMPNODE_STATE_1_RESPONSE) { //In state 0 pumpNode send acknowledgment, now we get confirmation from controller
 
-    if (radio.available()) {
+    if (radio.available()>0) {
       /********Receiving ACKNOWLEGMENT**************/
       //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
       uint16_t recv = recvData();
@@ -190,7 +194,7 @@ void loop(void) {
         if (recv == (2 * OnOff)) { //received from Controller in State 1
           digitalWrite(pumpPin, HIGH);
           out = "[Status 1]Pump will work for " + String(OnOff, DEC) + "ms";
-          DEBUG_PRINTLN(out);
+          DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLN(out);
           started_waiting_at = millis();
           previousTime = millis();
           status = PUMPNODE_STATE_2_PUMPACTIVE;
@@ -204,22 +208,23 @@ void loop(void) {
     if ((dif > OnOff)) {
 
       out = "[Status 2]ElapseTime[" + String(dif, DEC) + "] greater than Interval[" + String(OnOff, DEC) + "]";
-      DEBUG_PRINTLN(out);
+      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLN(out);
       answer = dif; //send him the total time needed
-      DEBUG_PRINTLNSTR("Turn off the pump "); delay(50);
+      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("Turn off the pump "); delay(50);
       digitalWrite(pumpPin, LOW);
       out = "[Status 2]Send final confirmation that pump is OFF: " + String(answer, DEC);
-      DEBUG_PRINTLN(out);
+      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLN(out);
 
       /********Sending final confirmation,which is the total time measured during pump activation**/
       //no delay necessary because of pumptime
-      delay(500);//some time to wait
+      if(dif<WAIT_SEND_INTERVAL) 
+        delay(WAIT_SEND_INTERVAL);//some time to wait
       sendData(answer);
       /*******************************************************************************************/
 
       status = PUMPNODE_STATE_3_RESPONSE;
       previousTime = millis();
-      Serial.flush();
+     DEBUG_FLUSH;
     }
     /********STATE 2*******/
   } else if (status == PUMPNODE_STATE_3_RESPONSE) {
@@ -232,12 +237,12 @@ void loop(void) {
       {
         if (recv == 0xffff)
         { //if message was not dedicated to this pumpNode recvData returns -1
-          DEBUG_PRINTLNSTR("[State 3]Received confirmation.");
-          DEBUG_PRINTLNSTR("-------------------------------------------------------------");
+          DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("[State 3]Received confirmation.");
+          DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("-------------------------------------------------------------");
           status = PUMPNODE_STATE_0_PUMPREQUEST;
           dif = 0;
           previousTime = millis();
-          Serial.flush();
+          DEBUG_FLUSH;
         }
       }
     }
@@ -250,8 +255,7 @@ void loop(void) {
   //radio.printDetails();
   if ((millis() - previousTime) > (criticalTime + dif))
   {
-    DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
-    delay(50);
+    DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
     status = PUMPNODE_STATE_0_PUMPREQUEST;
     previousTime = millis(); //A change of state occured here
     digitalWrite(pumpPin, LOW);//for security reasons
@@ -270,36 +274,35 @@ void loop(void) {
 /*Send data over RF:
   Every send operation concludes to an immediate response from controller
 */
-void sendData(unsigned int answer_)
+void sendData(uint16_t answer_)
 {
-  DEBUG_PRINTSTR("state_1:");
-  DEBUG_PRINTLN(myData.state);
+
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
-  DEBUG_PRINTSTR("state_2:");
-  DEBUG_PRINTLN(myData.state);
-
+ 
   myData.interval = answer_;
 
-  radio.stopListening();
-  DEBUG_PRINTSTR("\t[sendDat]Sending data "); DEBUG_PRINT(answer_);
+
+  DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("\t[SENDING]Sending data "); DEBUG_PRINT(answer_);
   DEBUG_PRINTSTR(" with STATE:");
   DEBUG_PRINTLN(myData.state);
   //  radio.write(&answer_, sizeof(struct sensorData));
+  radio.stopListening();
   radio.write(&myData, sizeof(struct sensorData));
-  DEBUG_PRINTLNSTR("done");
   radio.startListening();
+  DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("done");
+
 }
 
 //struct sensorData myData;
 //struct responseData myResponse;
 
-unsigned int recvData(void)
+uint16_t recvData(void)
 {
   //return 0 if message is not for us to keep state
   //ID_INEXISTENT soll behandelt werden??????????????ß
   radio.read(&myResponse, sizeof(struct responseData) );          // Get the payload
-  DEBUG_PRINTLN("[recvData]: Resp-interval:" + String(myResponse.interval, DEC) +
+  DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLN("[RECEIVING]: Resp-interval:" + String(myResponse.interval, DEC) +
                 ", Resp-ID:" + String(myResponse.ID, DEC) + ", Data-ID:" + String(myData.ID, DEC) + ", Resp-state:" + String(myResponse.state, BIN));
 
   if (myResponse.ID == myData.ID)
@@ -320,16 +323,16 @@ int registerNode(void)
   // A NODE WITH IDE=0 IS VALID????
   if ((myData.ID < 0xffff) && (myData.ID > 0))                        // this is a known node - 20170110... this is the new check..
   {
-    DEBUG_PRINTSTR("[registerNode()]:EEPROM-ID found: ");
+    DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("[registerNode()]:EEPROM-ID found: ");
     DEBUG_PRINT(myData.ID);                // Persistent ID
-    DEBUG_PRINTLNSTR(". Registering at the server with this persistent ID... ");
+    DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR(". Registering at the server with this persistent ID... ");
 
     myData.state &= ~(1 << NEW_NODE_BIT);    // this is a known node
 
   }
   else                                      // this is a new node
   {
-    DEBUG_PRINTSTR("[registerNode()]:No EEPROM-ID found. Registering at server and get new ID ");
+    DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("[registerNode()]:No EEPROM-ID found. Registering at server and get new ID ");
     myData.state |= (1 << NEW_NODE_BIT);    // this is a new node
 
     //randNumber = random(300);
@@ -337,7 +340,7 @@ int registerNode(void)
     myData.temperature = (float)(numb % 100);
 
 
-    DEBUG_PRINTSTR("random session ID: ");
+    DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("random session ID: ");
     DEBUG_PRINT(myData.temperature);
     DEBUG_PRINTLNSTR("...");
   }
@@ -346,7 +349,7 @@ int registerNode(void)
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
 
   // Send the measurement results
-  DEBUG_PRINTSTR("[registerNode()]:Sending data...");
+  DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("[registerNode()]:Sending data...");
   DEBUG_PRINT(myData.state);
   DEBUG_PRINTSTR(" ID: ");
   DEBUG_PRINTLN(myData.ID);
@@ -357,7 +360,7 @@ int registerNode(void)
   /*********************************************************************************/
   //  while (!radio.available());   // pump node hangs here in case the registration request gets lost. That's why there should be a timeout check
   // Wait here until we get a response, or timeout (REGISTRATION_TIMEOUT_INTERVAL == ~500ms)
-  unsigned long started_waiting_at = millis();
+  uint32_t started_waiting_at = millis();
   bool timeout = false;
   while ( (radio.available() == 0 ) && ! timeout )
   {
@@ -369,7 +372,7 @@ int registerNode(void)
   // Describe the results
   if ( timeout )              // the controller did not answer. Abort registration and retry later.
   {
-    DEBUG_PRINTLNSTR("[registerNode()]:Failed, response timed out.");
+    DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("[registerNode()]:Failed, response timed out.");
     return 1;
   }
 
@@ -377,16 +380,16 @@ int registerNode(void)
   /*******************Registration Response from Controller*********************/
   radio.read(&myResponse , sizeof(myResponse));
   /****************************************************************************/
-  DEBUG_PRINTLNSTR("[registerNode()]received: ID: ");
-  DEBUG_PRINT(String(myResponse.ID, DEC) + ", Status: " + String(myResponse.state, BIN));
+  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[registerNode()]received: ID: ");
+  DEBUG_PRINT(myResponse.ID);DEBUG_PRINTSTR(", Status: ");DEBUG_PRINT(String(myResponse.state, BIN));
   DEBUG_PRINTLNSTR("");
   if ((myResponse.state & (1 << ID_REGISTRATION_ERROR)) == false)
   {
     if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
     {
 
-      DEBUG_PRINTLNSTR("  [registerNode()]:Got response!");
-      DEBUG_PRINTSTR("  [registerNode()]Received Session ID: ");
+      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("  [registerNode()]:Got response!");
+      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("  [registerNode()]Received Session ID: ");
       DEBUG_PRINT((int)(myResponse.interval / 100));
 
       DEBUG_PRINTSTR(",  expected: ");
@@ -403,16 +406,16 @@ int registerNode(void)
         myEEPROMData.ID = myResponse.ID;
         EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);  // writing the data (ID) back to EEPROM...
 
-        DEBUG_PRINTLNSTR("  [registerNode()]...ID matches");
-        DEBUG_PRINTSTR("  [registerNode()]Persistent ID: ");
+        DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("  [registerNode()]...ID matches");
+        DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("  [registerNode()]Persistent ID: ");
         DEBUG_PRINT(myResponse.ID);
         DEBUG_PRINTSTR(", Interval: ");
         DEBUG_PRINTLN(myData.interval);
-        DEBUG_PRINTLNSTR("  [registerNode()]Stored Persistent ID in EEPROM...");
+        DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("  [registerNode()]Stored Persistent ID in EEPROM...");
       }
       else                                                  // not our response
       {
-        DEBUG_PRINTLNSTR("  [registerNode()]ID missmatch! Ignore response...");
+        DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("  [registerNode()]ID missmatch! Ignore response...");
         return 11;
       }
 
@@ -424,14 +427,14 @@ int registerNode(void)
       {
         myData.interval = myResponse.interval;
 
-        DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
+        DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
         DEBUG_PRINT(myResponse.ID);
         DEBUG_PRINTSTR("...ID matches, registration successful! Interval: ");
         DEBUG_PRINTLN(myData.interval);
       }
       else                                                  // not our response
       {
-        DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
+        DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
         DEBUG_PRINT(myResponse.ID);
         DEBUG_PRINTLNSTR("  ...ID missmatch! Ignore response...");
         return 12;

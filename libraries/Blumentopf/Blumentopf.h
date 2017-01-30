@@ -1,7 +1,6 @@
 #include <Time.h>
 #include "Wire.h"
-#include <TimeLib.h>
-#include <DS1302RTC.h>
+
 
 
 // Comment this line for the release version:
@@ -28,12 +27,30 @@ DO NOT CHANGE:
 //#define HW_RTC (0)    // there is no RTC
 #define HW_RTC (1)      // use the RTC
 
-#define SD_AVAILABLE 0
+#if (HW_RTC==1)
 
+  #define HW_RTC_DS1302 (0) //normaly used
+  #define HW_RTC_DS3232 (1) //alternative RTC
+
+  #if (HW_RTC_DS1302==1)
+    #include <TimeLib.h>
+    #include <DS1302RTC.h>
+  #elif(HW_RTC_DS3232==1)
+    #include "DS3232RTC.h"
+    #define HW_RTC_PIN (4)
+  #endif
+#endif
+
+#define SD_AVAILABLE  (0)
+#if (SD_AVAILABLE ==1)
+  #define SD_CHIPSELECT (4)
+#endif
 //Radio communication defines
-#define REGISTRATION_TIMEOUT_INTERVAL	3000  // in Milliseconds   
-#define WAIT_RESPONSE_INTERVAL        2000 // in Milliseconds   
-
+#define _RADIO_CHANNEL_ 108
+#define WAIT_SEND_INTERVAL            2000
+#define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*3  // in Milliseconds  
+#define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds   
+          
 
 // DS3231 TWI communication address:
 #define DS3231_I2C_ADDRESS 0x68
@@ -105,13 +122,18 @@ DO NOT CHANGE:
   #define DEBUG_PRINTDIG(x, c)  Serial.print (x, c)
   #define DEBUG_PRINTLN(x)      Serial.println (x)
   #define DEBUG_PRINTLNSTR(x)   Serial.println(F(x))
+  #define DEBUG_FLUSH           Serial.flush()
+  #define DEBUG_SERIAL_INIT_WAIT while (!Serial) {}
 #else
   #define DEBUG_PRINT(x)
   #define DEBUG_PRINTSTR(x)
   #define DEBUG_PRINTDIG(x, c)
   #define DEBUG_PRINTLN(x)
   #define DEBUG_PRINTLNSTR(x)
+  #define DEBUG_FLUSH   
+  #define DEBUG_SERIAL_INIT_WAIT
 #endif 
+#define DEBUG_CYCLE 10000
 
 
 /*
@@ -324,7 +346,7 @@ public:
 /*
 * to be able to deal with multiple kinds of RTCs, we implement an abstraction layer.
 */
-
+#if (HW_RTC==1)
 class RTCLayer
 {
 public:
@@ -337,7 +359,7 @@ public:
 	virtual int adjustRTC(int, uint8_t*, time_t);
 };
 
-
+#if (HW_RTC_DS3232==1)
 class RTC_DS3231 : public RTCLayer
 {
 public:
@@ -350,7 +372,7 @@ public:
 	int adjustRTC(int, uint8_t*, time_t);
 };
 
-
+#elif (HW_RTC_DS1302==1)
 class RTC_DS1302 : public RTCLayer
 {
 public:
@@ -364,7 +386,8 @@ public:
 private:
 	DS1302RTC RTC;
 };
-
+#endif
+#endif
 /*
 *Class PumpNode_Handler
 *   Every PumpNode is controlled by its own PumpNode_Handler
@@ -386,6 +409,7 @@ public:
         pumpnode_started_waiting_at=millis();
         pumpnode_previousTime=millis();
         pumpnode_dif=0;
+        pumpnode_debugCounter=DEBUG_CYCLE;
     }
     
     ~PumpNode_Handler(){}
@@ -402,16 +426,17 @@ private:
     /*state variable*/
     uint16_t pumpnode_ID;
     uint16_t OnOff;                     //duration of pumping[sec]   
-    int pumpnode_status;                //in which status is the PUMP Node
+    int8_t pumpnode_status;                //in which status is the PUMP Node
     uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
     /*some timers for state observations*/
-    uint16_t pumpnode_started_waiting_at;//
-    uint16_t pumpnode_previousTime;      //needed by the software watchdog
-    uint16_t pumpnode_dif;               //how many time passed is stored here,
+    uint32_t pumpnode_started_waiting_at;//
+    uint32_t pumpnode_previousTime;      //needed by the software watchdog
+    uint32_t pumpnode_dif;               //how many time passed is stored here,
                                          //only STATE 1 and STATE 2 (controller)
+    uint16_t pumpnode_debugCounter;
     void resetState(void);
-};//9*16byte
-
+};//3*2byte,1*1byte,3*4byte
+//19byte
 
 
 /* manipulates a specified control register */

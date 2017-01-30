@@ -1,10 +1,7 @@
 #include "Blumentopf.h"
 
-#include <RF24.h>
-#include <RF24_config.h>
 
 #include <SPI.h>
-//#include "nRF24L01.h"
 #include "RF24.h"
 
 // For RTC:
@@ -14,13 +11,18 @@
 #if (SD_AVAILABLE == 1)
 #include <SD.h>
 #endif
+#include <LinkedList.h> //for PumpHandler List
 
-
-#include <LinkedList.h>
+/**some declarations for the RTC , in case we have a RTC*/
+#if (HW_RTC==1)
+#if (HW_RTC_DS1302==1)
+RTC_DS3231 myRTC;
+#elif (HW_RTC_DS3232==1)
+const int pinRTC = HW_RTC_PIN;
+#endif
+#endif
 
 #define INTERVAL (100)
-
-const int chipSelect = 4;
 
 struct responseData myResponse;
 struct sensorData myData;
@@ -31,11 +33,10 @@ uint16_t nDummyCount;
 RF24 radio(9, 10);
 //brauchen wir 3 pipes!!!!!!!!!!??
 const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL}; // pipe[0] ist answer-channel
-RTC_DS3231 myRTC;
 nodeList myNodeList;
 LinkedList<PumpNode_Handler*> PumpList = LinkedList<PumpNode_Handler*>();
 
-uint16_t nTestWatering = 0;
+uint16_t nTestWatering = 1000;
 /*
    SETUP
 
@@ -52,7 +53,7 @@ void setup(void)
 
   //  radio.setRetries(15,15);
   //  radio.setPALevel(RF24_PA_MIN);
-  radio.setChannel(108);  // Above most Wifi Channels
+  radio.setChannel(_RADIO_CHANNEL_);  // Above most Wifi Channels
 
   //  radio.setPayloadSize(8);
   radio.openReadingPipe(1, pipes[1]);
@@ -60,29 +61,43 @@ void setup(void)
   radio.startListening();
   pinMode(LED_BUILTIN, OUTPUT);
 
+  DEBUG_PRINTSTR("[CONTROLLER]");
+  DEBUG_PRINTSTR("[STRUCT SensorData SIZE]");
   DEBUG_PRINTLN(sizeof(struct sensorData));
-
+  DEBUG_PRINTSTR("[CONTROLLER]");
+  DEBUG_PRINTSTR("[STRUCT ResponseData SIZE]");
+  DEBUG_PRINTLN(sizeof(struct responseData));
+  //Initiate Real Time Clock
+#if (HW_RTC==1)
+#if (HW_RTC_DS1302==1)
   myRTC.init(&myData.state);
+  displayTimeFromUNIX(myRTC.getTime());
+#elif (HW_RTC_DS3232==1)
+  pinMode(pinRTC, OUTPUT);
+  digitalWrite(pinRTC, HIGH);
+  displayTimeFromUNIX(RTC.get());
+#endif
+#endif
   //  myNodeList.clearEEPROM_Nodelist();    // deletes the node list
   myNodeList.getNodeList();
 
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
   //  myRTC.setTime(1485362865);
+  
+  
 
-  displayTimeFromUNIX(myRTC.getTime());
+#if (SD_AVAILABLE == 1)
 
-  if (SD_AVAILABLE == 1)
+  if (initStorage() == false)
   {
-    if (initStorage() == false)
-    {
-      return;
-    }
-
-    DEBUG_PRINTLNSTR("card initialized.");
+    return;
   }
+
+  DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("card initialized.");
 
   digitalWrite(12, HIGH);
   SPI.transfer(0xAA);
+#endif
 
 }
 
@@ -97,10 +112,10 @@ bool initStorage()
   if (HW == HW_ARDUINO)             // using arduino
   {
 #if (SD_AVAILABLE == 1)
-    DEBUG_PRINTLNSTR("Initializing SD card...");
+    DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("Initializing SD card...");
 
     // see if the card is present and can be initialized:
-    if (!SD.begin(chipSelect))
+    if (!SD.begin(SD_CHIPSELECT))
     {
       DEBUG_PRINTLNSTR("Card failed, or not present");
       // don't do anything more:
@@ -135,10 +150,10 @@ void loop(void)
 
   if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
   {
-    DEBUG_PRINTSTR("\nMessage available at pipe ");
+    DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("\nMessage available at pipe ");
     DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
-    DEBUG_PRINTSTR("[RECEIVED:]State:"); DEBUG_PRINT(String(myData.state, BIN)); DEBUG_PRINTSTR(" from ID:"); DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("[RECEIVED:]State:"); DEBUG_PRINT(String(myData.state, BIN)); DEBUG_PRINTSTR(" from ID:"); DEBUG_PRINT(myData.ID);
     DEBUG_PRINTSTR(" with Interval:"); DEBUG_PRINTLN(myData.interval);
 
     //      myResponse.ControllerTime = 1481803260;
@@ -149,19 +164,19 @@ void loop(void)
 
     if ((myData.state & (1 << MSG_TYPE_BIT)) == false) // this is a registration request. Send ack-message
     {
-      DEBUG_PRINTLNSTR("Registration request");
+      DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("Registration request");
       handleRegistration();                 // answer the registration request. There is no difference between sensor nodes and motor nodes.
     }
     else                                    // This is a data message
     {
       if ((myData.state & (1 << NODE_TYPE)) == false) // it is a sensor node
       {
-        DEBUG_PRINTLNSTR("Sensor Data");
+        DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("SENSOR MESSAGE");
         handleDataMessage();
       }
       else                                  // it is a motor node message
       {
-        DEBUG_PRINTSTR("Motor Message:\nID:");
+        DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("MOTOR MESSAGE:ID:");
         DEBUG_PRINT(myData.ID); DEBUG_PRINTSTR(", Data:");
         DEBUG_PRINTLN(myData.interval);
         handleMotorMessage();
@@ -172,43 +187,45 @@ void loop(void)
 
     if (bResponseNeeded == true)          // If it is necessary to send an answer, send it.
     {
-      radio.stopListening();
+      
       //to make state changes and to turn on receiver mode, otherwise the message is lost
 
       //DEBUG_PRINTLN(myResponse.ControllerTime);
 
       // Send back response, controller real time and the next sleep interval:
-      DEBUG_PRINTSTR("Sending back response: "); DEBUG_PRINT(myResponse.interval);
-      DEBUG_PRINTSTR(", ID:"); DEBUG_PRINT(myResponse.ID); DEBUG_PRINTSTR(", STATE:");
+      DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("Sending back response: "); 
+      DEBUG_PRINT(myResponse.interval);
+      DEBUG_PRINTSTR(", ID:"); DEBUG_PRINT(myResponse.ID); DEBUG_PRINTSTR(", STATUS-BYTE:");
       DEBUG_PRINT(String(myResponse.state, BIN));
-      delay(2000);
+      delay(WAIT_SEND_INTERVAL);
+      radio.stopListening();
       radio.write(&myResponse, sizeof(myResponse));
-
-      DEBUG_PRINTLNSTR("............Done");
-      //delay(100);   // ist das delay notwendig?
       radio.startListening();
-      delay(100);   // ist das delay notwendig?
-      DEBUG_PRINTLNSTR("Listening...");
+      DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("............Done");
+     
+      DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("Listening now...");
     }
     digitalWrite(LED_BUILTIN, LOW);
-    delay(10);
+  
   }
-  else                                      // no message arrived. Checking the schedule
+  else  // no message arrived. Checking the schedule
   {
     /* this is only for testing!! */
     //DEBUG_PRINTLN(nTestWatering);
     if (myNodeList.isOnline(myNodeList.myNodes[0].ID)) {
       nTestWatering++;
     }
-    if ((nTestWatering % 20000) == 0 )
+    if ((nTestWatering % 30000) == 0 )
     {
 
       if (myNodeList.getNodeType(myNodeList.myNodes[0].ID) == 1)
       {
-        DEBUG_PRINTSTR("Node list id: ");
+        DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("[TEST]Node id: ");
         DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
         if (myNodeList.isActive(myNodeList.myNodes[0].ID) == 0)//check if the first node (index=0)in the list is active
           doWateringTasks(myNodeList.myNodes[0].ID, 10); //here a new order to a pump Node has to be planned
+        else
+          DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("[TEST]ERROR:Node already in use.");
       }
     }
     /* Testing end */
@@ -229,6 +246,7 @@ void loop(void)
     */
     digitalWrite(LED_BUILTIN, LOW);
     //DEBUG_PRINTLN("nothing yet..");
+    DEBUG_FLUSH;
 
   }
   /*Most of the time the Controller waits for incoming messages from Pumpnodes
@@ -247,7 +265,10 @@ void loop(void)
     PumpNode_Handler *handler;
     for (int i = 0; i < PumpList.size(); i++) {
       handler = PumpList.get(i);
-      DEBUG_PRINTSTR("Processing PumpHandler for NODE-ID:"); DEBUG_PRINTLN(handler->getID());
+      if((nTestWatering % DEBUG_CYCLE) == 0){
+        DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("Processing PumpHandler for NODE-ID:"); 
+        DEBUG_PRINTLN(handler->getID());
+      }
       handler->processPumpstate(0);//there is no Income Data (0), only process the state machine
 
       // This commented section is for the real pump scheduling. It is commented for now to not influence the pump protocol testing.
@@ -262,19 +283,29 @@ void loop(void)
       */
       if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
       {
-        DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished "); DEBUG_PRINT(handler->getID());
+        DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished "); 
+        DEBUG_PRINTLN(handler->getID());
         PumpList.remove(i); i--;
         myNodeList.setPumpInactive(handler->getID());
         delete handler;
-        DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+        DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
         DEBUG_PRINTLNSTR(" bytes available.");
       }
     }
     //  } //if_end
     //  DEBUG_PRINTLNSTR("Finished loop");
-    delay(100);
+    //delay(100);
 
   }
+  //only informatve, can be deleted later
+  if ((nTestWatering % DEBUG_CYCLE) == 0) {
+    DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("nTestWatering="); DEBUG_PRINT(nTestWatering);
+    DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+    DEBUG_PRINTLNSTR(" bytes available.");
+    
+  }
+
+
 }//loop()
 /*A pumpNode must perform watering, so we decide to start this task by creating a new
   PumpNode_Handler Class which controls the state changes and the whole interaction betwen
@@ -283,11 +314,11 @@ void loop(void)
 uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
 {
   nDummyCount = 0;
-  DEBUG_PRINTSTR("[doWateringTasks()]");
   if (myNodeList.isOnline(PumpNode_ID) == 1) {
     if (myNodeList.getNodeType(PumpNode_ID) == 1)
     {
-      DEBUG_PRINTSTR("Pump ID ");
+      DEBUG_PRINTSTR("[CONTROLLER]");
+      DEBUG_PRINTSTR("[doWateringTasks()]Pump ID ");
       if (myNodeList.isActive(PumpNode_ID) == 0)
       {
         DEBUG_PRINT(PumpNode_ID);
@@ -302,6 +333,7 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
         myResponse.ID = handler->getID();
         myResponse.interval = handler->getResponseData();
         myResponse.state &= ~(1 << ID_INEXISTENT);
+        DEBUG_PRINTSTR("[CONTROLLER]");
         DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
         DEBUG_PRINT(PumpNode_ID);
         DEBUG_PRINTSTR(" with duration of ");
@@ -309,18 +341,19 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime)
         DEBUG_PRINTLNSTR(" ms");
         //the first communication with the pumpNode must be initiate here
         handlePumpCommunications();
+        DEBUG_PRINTSTR("[CONTROLLER]");
         DEBUG_PRINTSTR("[doWateringTasks()]");
         DEBUG_PRINT(PumpList.size());
         DEBUG_PRINTLNSTR(" pumps ACTIVE!!!!");
+
       } else
-        DEBUG_PRINTLNSTR("Pump is already i use!!");
+        DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("ERROR:Pump is already i use!!");
     } else
-      DEBUG_PRINTLNSTR("THIS IS NOT A PUMP NODE!!");
+      DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("ERROR:THIS IS NOT A PUMP NODE!!");
   } else
     DEBUG_PRINTLNSTR("");
 
-  DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
-  DEBUG_PRINTLNSTR(" bytes available.");
+
   return 0;
 }
 
@@ -331,7 +364,7 @@ void handlePumpCommunications()
   radio.stopListening();//!!!!!!!!!!!!!!!!! KEEP ATTENTION OF TIME SLOT, IAM ALLOWED TO SEND here??
   radio.write(&myResponse, sizeof(myResponse));
   radio.startListening();
-  delay(100);   // ist das delay notwendig?
+ // delay(100);   // ist das delay notwendig?
 }
 
 
@@ -377,15 +410,17 @@ void logData(void)
       dataFile.println(currentData);
       dataFile.close();
       // print to the serial port too:
-      DEBUG_PRINTLNSTR("Writing to SD...");
+      DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("[logData()]Writing to SD...");
       DEBUG_PRINTLN(currentData);
 
     }
     // if the file isn't open, pop up an error:
     else
     {
-      DEBUG_PRINTLNSTR("error opening datalog.txt");
-      DEBUG_PRINTLNSTR("data:");
+      DEBUG_PRINTSTR("[CONTROLLER]");
+      DEBUG_PRINTLNSTR("[logData()]error opening datalog.txt");
+      DEBUG_PRINTSTR("[CONTROLLER]");
+      DEBUG_PRINTLNSTR("[logData()]data:");
       DEBUG_PRINTLN(currentData);
     }
 #endif
@@ -406,7 +441,7 @@ void handleRegistration()
   uint8_t nRet;
   bool newNode = true;;
   struct nodeListElement currentNode;
-  DEBUG_PRINTLNSTR("Registration request!");
+  DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("[handleRegistration()]Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
   //  if (myData.ID > 0)                      // known node
   if ((myData.state & (1 << NEW_NODE_BIT)) == false)                    // known node
@@ -432,15 +467,15 @@ void handleRegistration()
 
   if ((myData.state & (1 << NODE_TYPE)) == 0)
   {
-    DEBUG_PRINTLNSTR("SensorNode");
+    DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("[handleRegistration()]SensorNode");
     currentNode.state &= ~(1 << NODELIST_NODETYPE);  // SensorNode
   }
   else
   {
-    DEBUG_PRINTLNSTR("PumpNode");
+    DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("[handleRegistration()]PumpNode");
     currentNode.state |= (1 << NODELIST_NODETYPE);  // MotorNode
   }
-  DEBUG_PRINTLNSTR("Storing node..");
+  DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("[handleRegistration()]Storing node..");
 
   if (newNode) {
 
@@ -451,11 +486,12 @@ void handleRegistration()
       //introduced a new Flag, the registrating Node must be somehow informed about
       //bad registration
       myResponse.state |= (1 << ID_REGISTRATION_ERROR);
-      DEBUG_PRINTLNSTR("Node registration aborted!");
+      DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("[handleRegistration()]ERROR:Node registration aborted!");
     }
     else
     { //succefull registration of a new node
-      DEBUG_PRINTSTR("Session-ID and interval: ");
+      DEBUG_PRINTSTR("[CONTROLLER]");
+      DEBUG_PRINTLNSTR("[handleRegistration()]Session-ID and interval: ");
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", Persistent ID: ");
       DEBUG_PRINTLN(myResponse.ID);
@@ -469,11 +505,13 @@ void handleRegistration()
     if (myNodeList.findNodeByID(myData.ID) == 0xff)
     {
       myResponse.state |= (1 << ID_REGISTRATION_ERROR);
-      DEBUG_PRINTLNSTR("ID is not in the NodeList registered!");
-      DEBUG_PRINTLNSTR("Node registration aborted!");
+      DEBUG_PRINTSTR("[CONTROLLER]");
+      DEBUG_PRINTLNSTR("[handleRegistration()]ERROR:ID is not in the NodeList registered!");
+      DEBUG_PRINTSTR("[CONTROLLER]");
+      DEBUG_PRINTLNSTR("[handleRegistration()]ERROR:Node registration aborted!");
     } else
     { //succefull registration of a known node
-      DEBUG_PRINTSTR("Session-ID and interval: ");
+      DEBUG_PRINTSTR("[CONTROLLER]");DEBUG_PRINTLNSTR("[handleRegistration()]Session-ID and interval: ");
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", Persistent ID: ");
       DEBUG_PRINTLN(myResponse.ID);
@@ -493,7 +531,8 @@ void handleDataMessage()
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
   if (nodeIndex == 0xff)      // if the node does not exist
   {
-    DEBUG_PRINTLNSTR("Node does not exist - there seems to be a topology problem.");
+    DEBUG_PRINTSTR("[CONTROLLER]");
+    DEBUG_PRINTLNSTR("[handleRegistration()]Node does not exist - there seems to be a topology problem.");
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
   }
   DEBUG_PRINTLNSTR("Data message");
@@ -538,7 +577,8 @@ void handleDataMessage()
 */
 void handleMotorMessage()
 {
-  DEBUG_PRINTLNSTR("[handleMotorMessage()]A new Motormessage received.....");
+   DEBUG_PRINTSTR("[CONTROLLER]");
+   DEBUG_PRINTLNSTR("[handleMotorMessage()]A new Motormessage received.....");
   // check if the node ID actually exists in the node table..
   uint8_t nodeIndex;
   nodeIndex = myNodeList.findNodeByID(myData.ID);   // or however the ID is called..
@@ -546,11 +586,13 @@ void handleMotorMessage()
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
   if (nodeIndex == 0xff)      // if the node does not exist
   {
+    DEBUG_PRINTSTR("[CONTROLLER]");
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Node does not exist - there seems to be a topology problem.");
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
   } else if (PumpList.size() > 0)
   {
-    DEBUG_PRINTLNSTR("[handleMotorMessage()]Checking pump list");
+    DEBUG_PRINTSTR("[CONTROLLER]");
+    DEBUG_PRINTLNSTR("[handleMotorMessage()]Iterate pump list and search for Pumphandler");
     PumpNode_Handler *handler;
     for (int i = 0; i < PumpList.size(); i++) {
       handler = PumpList.get(i);
@@ -575,12 +617,14 @@ void handleMotorMessage()
 */
 time_t getCurrentTime()
 {
-  if (HW_RTC == 1)
-  {
-    return myRTC.getTime();
-  }
-  else    // from the web....
-  {
+#if (HW_RTC==1)
+#if (HW_RTC_DS1302==1)
+  return myRTC.getTime()
+#elif (HW_RTC_DS3232==1)
+  return RTC.get();
+#endif
+#endif
+ 
 
-  }
+ 
 }
