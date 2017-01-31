@@ -239,7 +239,10 @@ void loop(void)
         if (myNodeList.isActive(myNodeList.myNodes[0].ID) == 0)//check if the first node (index=0)in the list is active
         { uint8_t ret;
           ret = doWateringTasks(myNodeList.myNodes[0].ID, 10, 0); //here a new order to a pump Node has to be planned
-          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
+          if(ret>0){
+            DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
+            
+          }          
         } else
           DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[TEST]ERROR:Node already in use.");
       }
@@ -306,9 +309,10 @@ void loop(void)
       {
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished ");
         DEBUG_PRINTLN(handler->getID());
-        PumpList.remove(i); i--;
-        myNodeList.setPumpInactive(handler->getID());
-        delete handler;
+
+        removePumphandler(i, handler);
+        i--;
+
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
         DEBUG_PRINTLNSTR(" bytes available.");
       } else if (handler->getState() == PUMPNODE_STATE_ERROR)
@@ -319,7 +323,14 @@ void loop(void)
         uint8_t ret = doWateringTasks(handler->getID(), handler->getPumpTime(), handler);
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
         if (ret > 0) {
+          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:Deleting PumpHandler Class because ");
+          DEBUG_PRINTSTR("of some Error in doWateringTasks()");
 
+          removePumphandler(i, handler);
+          i--;
+
+          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+          DEBUG_PRINTLNSTR(" bytes available.");
         }
       }
     }
@@ -349,8 +360,15 @@ void loop(void)
     return 20: Node ID PumpNode_ID, is not a pumpNode
     return 30: Pump already active
 
-
 */
+
+void  removePumphandler(int index, PumpNode_Handler* handler)
+{
+  PumpList.remove(index);
+  myNodeList.setPumpInactive(handler->getID());
+  delete handler;
+}
+
 
 String handle_ErrorMessages(uint8_t ret)
 {
@@ -365,6 +383,9 @@ String handle_ErrorMessages(uint8_t ret)
       break;
     case 30:
       out += "[doWateringTasks]ERROR:PUMP IS ALREADY IN USE!!";
+      break;
+    case 40:
+      out += "[doWateringTasks]ERROR:Parameter not correct!!";
       break;
     default:
       break;
@@ -387,10 +408,10 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
 {
   nDummyCount = 0;
   if (handler_ > 0) {
-    if (handler_->getID() == PumpNode_ID) {
+    if ((handler_->getID() == PumpNode_ID) && (handler_->getPumpTime() == pumpTime)) {
       handler_->reset();
       handler_->processPumpstate(pumpTime);
-      myResponse.ID = handler_->getID();
+      myResponse.ID = PumpNode_ID;
       myResponse.interval = handler_->getResponseData();
       myResponse.state &= ~(1 << ID_INEXISTENT);
       DEBUG_PRINTSTR("[CONTROLLER]");
