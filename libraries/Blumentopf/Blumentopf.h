@@ -187,12 +187,11 @@ DO NOT CHANGE:
 #define PUMPNODE_STATE_0_PUMPREQUEST    0 //(pumpNode and Controller)
 #define PUMPNODE_STATE_1_RESPONSE       1 //(pumpNode and Controller)
 #define PUMPNODE_STATE_2_PUMPACTIVE     2 //(pumpNode and Controller)
-#define PUMPNODE_STATE_3_RESPONSE       3 //(pumpNode)
+#define PUMPNODE_STATE_3_RESPONSE       3 //(pumpNode and Controller)-SUCCESFULL 
 
-#define PUMPNODE_STATE_ERROR_START      -1 //(pumpNode and Controller)
-#define PUMPNODE_STATE_ERROR_END        -2 //(pumpNode)
-#define PUMPNODE_STATE_3_RESP_FAILED    -3 //(Controller) 
-#define PUMPNODE_STATE_4_RESP_FAILED    -4 //(Controller)  
+#define PUMPNODE_STATE_ERROR            -1 //(Controller)            -ERROR
+#define PUMPNODE_STATE_3_RESP_FAILED    -2  //(Controller) 
+#define PUMPNODE_STATE_4_RESP_FAILED    -3 //(Controller)  
 
 #define PUMPNODE_CRITICAL_STATE_OCCUPATION 60000 // in Milliseconds   
 /*
@@ -400,10 +399,10 @@ class PumpNode_Handler
 {
 public: 
     /*pumpTime in seconds*/
-    PumpNode_Handler(uint16_t pumpNodeID,uint16_t pumpTime)
+    PumpNode_Handler(uint16_t pumpNodeID)
     {
         pumpnode_ID=pumpNodeID;
-        OnOff=pumpTime*1000;
+        OnOff=0;
         pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
         pumpnode_response=0;
         pumpnode_started_waiting_at=millis();
@@ -420,6 +419,7 @@ public:
     uint16_t getID(void);
     uint16_t getResponseData(void);
     void     processPumpstate(uint16_t IncomeData);
+    void     reset(void);
      
 private:
    // static uint8_t counter;
@@ -434,7 +434,7 @@ private:
     uint32_t pumpnode_dif;               //how many time passed is stored here,
                                          //only STATE 1 and STATE 2 (controller)
     uint16_t pumpnode_debugCounter;
-    void resetState(void);
+    
 };//3*2byte,1*1byte,3*4byte
 //19byte
 

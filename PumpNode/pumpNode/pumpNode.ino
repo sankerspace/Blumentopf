@@ -20,6 +20,7 @@ const uint8_t radio_channel = 108;
 
 uint16_t OnOff = 0, answer = 0;
 uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0;
+uint32_t pump_worktime=0;
 const uint8_t pumpPin = 3;
 int status; //normal states are positive numbers , erro states are negative
 //byte addresses[][6] = {"Pump", "Contr"};
@@ -242,6 +243,11 @@ void loop(void) {
           status = PUMPNODE_STATE_0_PUMPREQUEST;
           dif = 0;
           previousTime = millis();
+          pump_worktime+=OnOff;
+          DEBUG_PRINTSTR("[PUMPNODE]");
+          DEBUG_PRINTSTR("OVERALL PUMPTIME :");
+          DEBUG_PRINT(pump_worktime/1000); 
+          DEBUG_PRINTLNSTR(" seconds.");
           DEBUG_FLUSH;
         }
       }
