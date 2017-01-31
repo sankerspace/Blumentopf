@@ -209,12 +209,12 @@ void loop(void) {
     if ((dif > OnOff)) {
 
       out = "[Status 2]ElapseTime[" + String(dif, DEC) + "] greater than Interval[" + String(OnOff, DEC) + "]";
-      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLN(out);
+      DEBUG_PRINTSTR("[PUMPNODE][Status 2]");DEBUG_PRINTLN(out);
       answer = dif; //send him the total time needed
-      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLNSTR("Turn off the pump "); delay(50);
+      DEBUG_PRINTSTR("[PUMPNODE][Status 2]");DEBUG_PRINTLNSTR("Turn off the pump "); delay(50);
       digitalWrite(pumpPin, LOW);
       out = "[Status 2]Send final confirmation that pump is OFF: " + String(answer, DEC);
-      DEBUG_PRINTSTR("[PUMPNODE]");DEBUG_PRINTLN(out);
+      DEBUG_PRINTSTR("[PUMPNODE][Status 2]");DEBUG_PRINTLN(out);
 
       /********Sending final confirmation,which is the total time measured during pump activation**/
       //no delay necessary because of pumptime

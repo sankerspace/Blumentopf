@@ -149,8 +149,9 @@ void loop(void)
   //struct interactiveCommand myInteractiveCommand;
   myResponse.state = 0;
   myResponse.interval = INTERVAL;
-  myResponse.ControllerTime = getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
-
+  //EBUG_PRINTSTR("Time before taking RTC:");DEBUG_PRINTLN(millis());
+  myResponse.ControllerTime =getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
+  //DEBUG_PRINTSTR("Time after taking RTC:");DEBUG_PRINTLN(millis());
   //DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
   //DEBUG_PRINTLNSTR(" bytes available.");
 
@@ -204,7 +205,7 @@ void loop(void)
       DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Sending back response: ");
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", ID:"); DEBUG_PRINT(myResponse.ID); DEBUG_PRINTSTR(", STATUS-BYTE:");
-      DEBUG_PRINT(String(myResponse.state, BIN));
+      DEBUG_PRINTLN(String(myResponse.state, BIN));
       delay(WAIT_SEND_INTERVAL);
       radio.stopListening();
       radio.write(&myResponse, sizeof(myResponse));
@@ -223,7 +224,7 @@ void loop(void)
 
 #if (TEST_PUMP==1)
     /* this is only for testing!! */
-    //DEBUG_PRINTLN(nTestWatering);
+   // DEBUG_PRINTLN(nTestWatering);
 
     if (myNodeList.isOnline(myNodeList.myNodes[0].ID)) {
       nTestWatering++;
@@ -315,12 +316,16 @@ void loop(void)
 
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
         DEBUG_PRINTLNSTR(" bytes available.");
+        
       } else if (handler->getState() == PUMPNODE_STATE_ERROR)
       {
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("ERROR:PUMP STATEHANDLER IS IN ERROR STATE");
-        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("ERROR:RESTART PUMP ");
+        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:");DEBUG_PRINT(handler->getID());
+        DEBUG_PRINTSTR(" ,PumpTime: ");DEBUG_PRINTLN(handler->getPumpTime());
         //@Marko should PUMP always be restarted, maybe it is OFFLINE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        uint8_t ret = doWateringTasks(handler->getID(), handler->getPumpTime(), handler);
+        
+        uint8_t ret = doWateringTasks(handler->getID(), (handler->getPumpTime()/1000), handler);//getPumpTime is in ms
+        
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
         if (ret > 0) {
           DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:Deleting PumpHandler Class because ");

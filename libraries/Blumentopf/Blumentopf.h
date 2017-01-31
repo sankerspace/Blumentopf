@@ -5,6 +5,8 @@
 
 // Comment this line for the release version:
 #define DEBUG 1
+#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
+
 
 // watering policy:
 #define POL_WATERING_DEFAULT_DURATION (10)      // per default it should give water for 10 seconds every day after 19:00
@@ -46,7 +48,7 @@ DO NOT CHANGE:
   #define SD_CHIPSELECT (4)
 #endif
 //Radio communication defines
-#define _RADIO_CHANNEL_ 108
+#define _RADIO_CHANNEL_               152//108
 #define WAIT_SEND_INTERVAL            2000
 #define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*3  // in Milliseconds  
 #define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds   
