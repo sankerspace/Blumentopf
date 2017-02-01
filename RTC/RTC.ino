@@ -54,7 +54,7 @@ void setup()
   str2 = str2 + day(time_) + "." + month(time_) + "." + year(time_) + "--" + hour(time_) + ":" + minute(time_) + ":" + second(time_); //debug
   Serial.println(str2);//debug
 
-
+  displayTimeFromUNIX(RTC.get());
   /*
     To preserve the battery, the first time V BAT is applied
     to the device, the oscillator will not start up until V CC

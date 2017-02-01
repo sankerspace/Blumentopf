@@ -30,6 +30,7 @@ class CommandHandler myCommandHandler;
 
 uint16_t nDummyCount;
 
+
 RF24 radio(9, 10);
 //brauchen wir 3 pipes!!!!!!!!!!??
 const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL}; // pipe[0] ist answer-channel
@@ -206,7 +207,7 @@ void loop(void)
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", ID:"); DEBUG_PRINT(myResponse.ID); DEBUG_PRINTSTR(", STATUS-BYTE:");
       DEBUG_PRINTLN(String(myResponse.state, BIN));
-      delay(WAIT_SEND_INTERVAL);
+      delay(WAIT_SEND_INTERVAL);//ther is some time to, to ensure that node is prepared to receive messages
       radio.stopListening();
       radio.write(&myResponse, sizeof(myResponse));
       radio.startListening();
@@ -239,7 +240,7 @@ void loop(void)
         DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
         if (myNodeList.isActive(myNodeList.myNodes[0].ID) == 0)//check if the first node (index=0)in the list is active
         { uint8_t ret;
-          ret = doWateringTasks(myNodeList.myNodes[0].ID, 10, 0); //here a new order to a pump Node has to be planned
+          ret = doWateringTasks(myNodeList.myNodes[0].ID, 10000, 0); //here a new order to a pump Node has to be planned
           if(ret>0){
             DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
             
@@ -258,10 +259,12 @@ void loop(void)
     if (nSCA == SCHEDULED_WATERING)
     {
       //@marko  CHECK RETURN VALUE with
-      doWateringTasks(nID, nDuration, 0);                 //  the node is added to the "active pumps"-list and the pump is notified
+      //ATTENTION: parameter for nDuration must be in ms, but for workaround I multiplied with 1000
+      doWateringTasks(nID, nDuration*1000, 0);                 //  the node is added to the "active pumps"-list and the pump is notified
     }
     /*    if (nICA == INTERACTIVE_COMMAND_AVAILABLE )                                     // some IOT watering needs to be done
         {
+           //ATTENTION : PUMPTIME IN MILLISECONDS
           //doWateringTasks(1, 10); //here a new order to a pump Node has to be planned
         }
     */
@@ -324,7 +327,7 @@ void loop(void)
         DEBUG_PRINTSTR(" ,PumpTime: ");DEBUG_PRINTLN(handler->getPumpTime());
         //@Marko should PUMP always be restarted, maybe it is OFFLINE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         
-        uint8_t ret = doWateringTasks(handler->getID(), (handler->getPumpTime()/1000), handler);//getPumpTime is in ms
+        uint8_t ret = doWateringTasks(handler->getID(), handler->getPumpTime(), handler);//getPumpTime is in ms
         
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
         if (ret > 0) {
@@ -407,6 +410,7 @@ String handle_ErrorMessages(uint8_t ret)
    return 10: Pump not Online
    return 20: Node ID PumpNode_ID, is not a pumpNode
    return 30: Pump already active
+*NOTIFICATION: (01.02.2017)Changed requirement for pumpTime to be in Milliseconds not in seconds 
 
 */
 uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handler *handler_)
@@ -423,8 +427,8 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
       DEBUG_PRINTSTR("[doWateringTasks()]Retry pump request to Node-ID: ");
       DEBUG_PRINT(PumpNode_ID);
       DEBUG_PRINTSTR(" with duration of ");
-      DEBUG_PRINT(handler_->getPumpTime());
-      DEBUG_PRINTLNSTR(" ms");
+      DEBUG_PRINT(pumpTime);
+      DEBUG_PRINTLNSTR(" s");
       //the first communication with the pumpNode must be initiate here
       handlePumpCommunications();
     }

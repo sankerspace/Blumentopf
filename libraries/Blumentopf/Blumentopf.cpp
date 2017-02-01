@@ -1423,7 +1423,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   if(this->pumpnode_status == PUMPNODE_STATE_0_PUMPREQUEST){
     if(IncomeData>0)
     {
-      this->OnOff=IncomeData*1000;//calculated from seconds in milliseconds
+      this->OnOff=IncomeData;//calculated from seconds in milliseconds
       this->pumpnode_response=this->OnOff; 
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 0:]Pump time of ");
       DEBUG_PRINT(this->pumpnode_response);

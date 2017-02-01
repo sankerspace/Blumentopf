@@ -1,0 +1,1357 @@
+[PUMPNODE]CRITICALTIME:30000
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+23:02:46 31/1/47 Day of week: Tuesday
+Maximum nodelist length: 4Starting search at 950
+Nodes found: 
+16289 - PumpNode
+1 nodes found in total.
+Message available at pipe 1
+100, Persistent ID: 16289
+, Time: 1485903772
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]received: ID: 
+16289, Status: 1
+[PUMPNODE]  [registerNode()]:Got response for ID: 16289...ID matches, registration successful! Interval: 100
+[PUMPNODE][Setup()]REGISTRATION SUCCEDD!!!
+Message available at pipe 1
+100, Persistent ID: 16289
+, Time: 1485903780
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=50522
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=96715
+[TEST]ERROR:Node already in use.
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60096ms, previousTime=96715ms
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=189377
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :10 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4003,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=243275
+[TEST]ERROR:Node already in use.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4003,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60097ms, previousTime=243275ms
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=335964
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :20 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=382134
+[TEST]ERROR:Node already in use.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[PUMPNODE]CRITICALTIME:30000
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE]CRITICALTIME:30000
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]:Failed, response timed out.
+[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.
+[PUMPNODE][registerNode()]:EEPROM-ID found: 16289[PUMPNODE]. Registering at the server with this persistent ID... 
+[PUMPNODE][registerNode()]:Sending data...64 ID: 16289
+[PUMPNODE][registerNode()]received: ID: 
+16289, Status: 1
+[PUMPNODE]  [registerNode()]:Got response for ID: 16289...ID matches, registration successful! Interval: 100
+[PUMPNODE][Setup()]REGISTRATION SUCCEDD!!!
+0:44:14 1/2/47 Day of week: Wednesday
+Maximum nodelist length: 4Starting search at 950
+Nodes found: 
+16289 - PumpNode
+1 nodes found in total.
+Message available at pipe 1
+100, Persistent ID: 16289
+, Time: 1485909854
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=42943
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :10 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=89256
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :20 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=143303
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :30 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=189606
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :40 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=243665
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :50 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=289981
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :60 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=344039
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :70 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=390344
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60096ms, previousTime=392408ms
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=485399
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10002] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10002
+[PUMPNODE]	[SENDING]Sending data 10002 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :80 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10002
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=539460
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :90 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=585777
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :100 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=639836
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=686177
+[TEST]ERROR:Node already in use.
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60092ms, previousTime=686177ms
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=779163
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :110 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=833214
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :120 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=879519
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :130 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=933577
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :140 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=979910
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :150 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1033989
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4003,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60101ms, previousTime=1036050ms
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1129044
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :160 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1175352
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :170 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1229400
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1275734
+[TEST]ERROR:Node already in use.
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60090ms, previousTime=1275734ms
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1368719
+[TEST]ERROR:Node already in use.
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60093ms, previousTime=1370808ms
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1463797
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :180 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1517870
+[TEST]ERROR:Node already in use.
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :190 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1564203
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :200 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1618266
+[TEST]ERROR:Node already in use.
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :210 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1664582
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :220 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1718639
+[TEST]ERROR:Node already in use.
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10002] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10002
+[PUMPNODE]	[SENDING]Sending data 10002 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10002
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :230 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1764942
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4003,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :240 seconds.
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1819001
+[TEST]ERROR:Node already in use.
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :250 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 16289
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1865331
+[TEST]ERROR:Node already in use.
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID16289,respond:20000
+[PUMPNODE]NO ANSWER, WE WILL RESET THE STATE MACHINE!!
+------------------------------------------------------
+Available radio 
+[PUMPNODE][RECEIVING]: Resp-interval:10000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 0]Received payload 10000
+[PUMPNODE][Status 0]Send acknowledgment to the pump request.
+[PUMPNODE]	[SENDING]Sending data 10000 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:20000, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][Status 1]Pump will work for 10000ms
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+[PUMPNODE][Status 2][Status 2]ElapseTime[10001] greater than Interval[10000]
+[PUMPNODE][Status 2]Turn off the pump 
+[PUMPNODE][Status 2][Status 2]Send final confirmation that pump is OFF: 10001
+[PUMPNODE]	[SENDING]Sending data 10001 with STATE:66
+[PUMPNODE]done
+[PUMPNODE][RECEIVING]: Resp-interval:65535, Resp-ID:16289, Data-ID:16289, Resp-state:0
+[PUMPNODE][State 3]Received confirmation.
+[PUMPNODE]-------------------------------------------------------------
+[PUMPNODE]OVERALL PUMPTIME :260 seconds.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:16289,duration:10000
+Message available at pipe 1
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 16289 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 16289,respond:65535
+
