@@ -30,11 +30,19 @@ DO NOT CHANGE:
 #define HW_RTC (1)      // use the RTC
 
 #if (HW_RTC==1)
+  //defines if we want to set the HW RTC in the setup
+  #define _YEAR   2017
+  #define _MONTH  02
+  #define _DAY    01
+  #define _WEEKDAY 04   //sunday is 1
+  #define _HOUR   02
+  #define _MINUTE 50
+  #define _SECOND 30
+  
+  #define HW_RTC_DS1302 (0) //normaly used  (DS1302 OR DS3231)
+  #define HW_RTC_DS3232 (1) //alternative RTC (DS3232)
 
-  #define HW_RTC_DS1302 (0) //normaly used
-  #define HW_RTC_DS3232 (1) //alternative RTC
-
-  #if (HW_RTC_DS1302==1)
+  #if (HW_RTC_DS1302==1) //
     #include <TimeLib.h>
     #include <DS1302RTC.h>
   #elif(HW_RTC_DS3232==1)
@@ -42,6 +50,9 @@ DO NOT CHANGE:
     #define HW_RTC_PIN (4)
   #endif
 #endif
+
+
+
 
 #define SD_AVAILABLE  (0)
 #if (SD_AVAILABLE ==1)
@@ -352,7 +363,7 @@ class RTCLayer
 {
 public:
 	RTCLayer() {}
-
+  ~RTCLayer() {}
 	virtual int init(uint8_t* state);
 	virtual	uint8_t setTime(time_t);
 	virtual time_t getTime();
@@ -360,12 +371,12 @@ public:
 	virtual int adjustRTC(int, uint8_t*, time_t);
 };
 
-#if (HW_RTC_DS3232==1)
+#if (HW_RTC_DS1302==1)
 class RTC_DS3231 : public RTCLayer
 {
 public:
 	RTC_DS3231() {};	//: RTCLayer() {};
-
+  ~RTC_DS3231() {};
 	int init(uint8_t* state);
 	uint8_t setTime(time_t);
 	time_t getTime();
@@ -373,12 +384,12 @@ public:
 	int adjustRTC(int, uint8_t*, time_t);
 };
 
-#elif (HW_RTC_DS1302==1)
+
 class RTC_DS1302 : public RTCLayer
 {
 public:
 	RTC_DS1302(uint8_t, uint8_t, uint8_t);
-
+  ~RTC_DS1302() {};
 	int init(uint8_t* state);
 	uint8_t setTime(time_t);
 	time_t getTime();
@@ -387,6 +398,26 @@ public:
 private:
 	DS1302RTC RTC;
 };
+
+#elif (HW_RTC_DS3232==1)
+
+class RTC_DS3232 : public RTCLayer
+{
+public:
+	RTC_DS3232() {RTC=0;};	//: RTCLayer() {};
+ ~RTC_DS3232();
+	int init(uint8_t* state);
+	uint8_t setTime(time_t);
+	time_t getTime();
+	int setAlarm(time_t);
+	int adjustRTC(int, uint8_t*, time_t);
+private:
+	DS3232RTC* RTC;
+};
+
+
+
+
 #endif
 #endif
 /*
@@ -456,6 +487,8 @@ void getUNIXtime(time_t *, tmElements_t*);
 
 /* displays the time on the Serial interface*/
 void displayTime();
+
+String displayTime(time_t time_);
 
 /* displays the time in the UNIX timestamp */
 void displayTimeFromUNIX(time_t);

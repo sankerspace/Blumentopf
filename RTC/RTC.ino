@@ -21,7 +21,7 @@ void setup()
   //External Interrupt Pin
   pinMode(wakeUpPin, INPUT);
 
-  Serial.begin(19200);//debug
+  Serial.begin(115200);//debug
   Serial.println("Startup...");//debug
   delay(100);//debug
 
@@ -47,14 +47,14 @@ void setup()
   time_ = RTC.get();
   
   String str = "Date: "; //debug
-  str = str + tm.Day + "." + tm.Month + "." + tmYearToY2k(tm.Year) + "--" + tm.Hour + ":" + tm.Minute + ":" + tm.Second; //debug
+  str = str + tm.Day + "." + tm.Month + "." + tmYearToY2k(tm.Year) + "--" + tm.Hour + ":" + tm.Minute + ":" + tm.Second + ":" +tm.Wday; //debug
   Serial.println(str);//debug
   // Power for RTC from Arduino PIN to RTC VCC
   String str2 = "Date: "; //debug
-  str2 = str2 + day(time_) + "." + month(time_) + "." + year(time_) + "--" + hour(time_) + ":" + minute(time_) + ":" + second(time_); //debug
+  str2 = str2 + day(time_) + "." + month(time_) + "." + year(time_) + "--" + hour(time_) + ":" + minute(time_) + ":" + second(time_)+"-"+weekday(time_); //debug
   Serial.println(str2);//debug
 
-  displayTimeFromUNIX(RTC.get());
+  
   /*
     To preserve the battery, the first time V BAT is applied
     to the device, the oscillator will not start up until V CC

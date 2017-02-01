@@ -87,7 +87,7 @@ void setup() {
   myData.realTime = 0;
 
   previousTime=millis();
- 
+  displayTime(now());
 }
 
 
@@ -102,14 +102,14 @@ void setup() {
   recv() pump Time                <--       send() pumpTime
   (some delay)
   send() Acknowledgment           -->
-                                      |
+   (Data: OnOff)                      |
   STATE 1:                            |     {if wait for response takes too long -> STATE -3}
                                       -->   recv() Acknowledgment(PumpNode confirms Pumptime)
                                       |
                                       |
                                       |
   recv() Response(by protocoll)  <--     __send() Response(by Protocol of Blumentopf)
-  (possible error detection necessary)| |
+  (possible error detection necessary)| |   (Data: 2*OnOff)
                                       | |
        TURN ON PUMP                   | |
                                       | |
@@ -120,9 +120,9 @@ void setup() {
        TURN OFF PUMP                  | |
                                       |       (maximum wait time = pumptime + timeoff)
   send() Confirmation(Pump off)          -->  recv() Controller knows that Pump is Off now
-                                      |       {if wait for response takes too long -> STATE -4}
+  (Data: dif)                         |       {if wait for response takes too long -> STATE -4}
                                       | |  <--send() Response(by Protocol of Blumentopf)
-                                      | |  |
+                                      | |  |   (Data:0xffff))
   STATE 3:                            | |  |
   recv() Response(by protocoll) <-- ____| _|
   (possible error detection necessary)| |
@@ -313,6 +313,7 @@ uint16_t recvData(void)
 
   if (myResponse.ID == myData.ID)
   {
+    setTime(myResponse.ControllerTime);
     return myResponse.interval;
   }
   return 0;
@@ -451,6 +452,7 @@ int registerNode(void)
     return 10;
   }////////
 
+  setTime(myResponse.ControllerTime);
   return 0;   // all okay
 }
 

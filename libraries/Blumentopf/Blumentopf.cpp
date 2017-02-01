@@ -132,7 +132,7 @@ int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
   
 }
 
-#elif (HW_RTC_DS3232==1)
+
 /*
 *  DS3231
 */
@@ -221,6 +221,92 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 //  }
 }
 
+#elif (HW_RTC_DS3232==1)
+
+
+/*
+*  DS3232
+*/
+	
+ RTC_DS3232::~RTC_DS3232()
+ {//DS3232RTC* RTC
+    if(RTC>0)
+      delete RTC;
+ }
+	
+
+int RTC_DS3232::init(uint8_t* state)
+{
+	DEBUG_PRINTSTR("Initializing the RTC DS3232...");
+  RTC=new DS3232RTC;
+  DEBUG_PRINTLNSTR("done");
+	  
+	*state |= (1 << RTC_RUNNING_BIT);			// set it to valid, otherwise adjust will not react..
+}
+
+/* 
+*	convert from UNIX timestamp to second, minute, hour, etc. and set this time.
+*/
+uint8_t RTC_DS3232::setTime(time_t newTime)
+{
+	tmElements_t tm;
+
+	DEBUG_PRINTSTR("Setting time to the RTC DS3231...old time: ");
+	DEBUG_PRINT(getTime());
+	DEBUG_PRINTSTR("...new time: ");
+	DEBUG_PRINT(newTime);
+	
+	breakTime(newTime, tm);
+
+	this->RTC.write(tm);
+	DEBUG_PRINTLNSTR("done");
+}
+
+/* 
+*	convert from second, minute, hour, etc. to UNIX timestamp.
+*/
+time_t RTC_DS3232::getTime()
+{
+  time_t currentTime = this->RTC.get();
+  
+  return currentTime;
+}
+int RTC_DS3231::setAlarm(time_t)
+{
+  DEBUG_PRINTLNSTR("Still not implemented!!!! ");
+}
+
+int RTC_DS3232::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
+{
+/*
+	time_t tLocalTime;
+	tmElements_t tm;
+
+  if ((*state & (1 << RTC_RUNNING_BIT))  == true)     // only sync if the clock is working.
+  {
+	tLocalTime = getTime();
+	
+	DEBUG_PRINTSTR("\nController time: ");
+	DEBUG_PRINT(controllerTime);
+	
+	DEBUG_PRINTSTR(" Our time: ");
+	DEBUG_PRINTLN(tLocalTime);
+    if (abs(tLocalTime - controllerTime) > RTC_SYNC_THRESHOLD)
+    {
+		DEBUG_PRINTSTR("\tRTC deviation too big. Adjusting RTC...");
+		breakTime(controllerTime, tm);
+	  this->RTC.write(tm);
+		DEBUG_PRINTLNSTR("done");
+    }
+  }
+  */
+}
+
+
+
+
+
+
 
 #endif
 #endif
@@ -285,6 +371,45 @@ void getUNIXtime(time_t * currentUNIXtime, tmElements_t* tm)
 //  byte second, minute, hour, dayOfWeek, dayOfMonth, month, year;
   readDS3231time(&tm->Second, &tm->Minute, &tm->Hour, &tm->Wday, &tm->Day, &tm->Month, &tm->Year);
   *currentUNIXtime = makeTime(*tm);
+}
+
+String displayTime(time_t time_)
+{
+
+    String str = "Date: "; //debug
+    str = str + day(time_) + "." + month(time_) + "." + year(time_) + "--" + hour(time_) + ":" + minute(time_) + ":" + second(time_)+"-"; //debug
+   
+    
+   switch(weekday(time_))
+  {
+  case 1:
+    str+="Sunday";
+    break;
+  case 2:
+    str+="Monday";
+    break;
+  case 3:
+    str+="Tuesday";
+    break;
+  case 4:
+    str+="Wednesday";
+    break;
+  case 5:
+    str+="Thursday";
+    break;
+  case 6:
+    str+="Friday";
+    break;
+  case 7:
+    str+="Saturday";
+    break;
+  default:
+    str="Error";
+  }
+  
+  DEBUG_PRINTLN(str);//debug
+  return str;
+
 }
   
 void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)

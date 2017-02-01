@@ -79,7 +79,8 @@ void setup(void)
 #elif (HW_RTC_DS3232==1)
   pinMode(pinRTC, OUTPUT);
   digitalWrite(pinRTC, HIGH);
-  displayTimeFromUNIX(RTC.get());
+  //displayTimeFromUNIX(RTC.get());
+  displayTime(RTC.get());
 #endif
 #endif
   //  myNodeList.clearEEPROM_Nodelist();    // deletes the node list
@@ -428,7 +429,7 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
       DEBUG_PRINT(PumpNode_ID);
       DEBUG_PRINTSTR(" with duration of ");
       DEBUG_PRINT(pumpTime);
-      DEBUG_PRINTLNSTR(" s");
+      DEBUG_PRINTLNSTR("ms");
       //the first communication with the pumpNode must be initiate here
       handlePumpCommunications();
     }
@@ -746,10 +747,29 @@ time_t getCurrentTime(void)
 {
 #if (HW_RTC==1)
 #if (HW_RTC_DS1302==1)
-  return myRTC.getTime()
+  return myRTC.getTime();
 #elif (HW_RTC_DS3232==1)
   return RTC.get();
 #endif
 #endif
          return 0;
 }
+
+
+
+
+
+
+/*
+*TODO: 
+*  - Need ID for pumphandler
+*  - counter for retrying connections, if more than two -> set oofline
+*  - doWateringtask()-retry-show Pumplist.size
+*  - if controller set pumpnode offline, how to ensure lifesign from pumpnode
+*     NEED SOMETHING LIKE A PING
+*     
+* 
+* 
+*/
+
+
