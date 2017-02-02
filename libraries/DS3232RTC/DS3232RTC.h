@@ -152,6 +152,6 @@ class DS3232RTC
         static uint8_t bcd2dec(uint8_t n);
 };
 
-extern DS3232RTC RTC;
+//extern DS3232RTC RTC;
 
 #endif

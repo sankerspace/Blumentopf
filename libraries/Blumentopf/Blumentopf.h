@@ -1,5 +1,4 @@
-#include <Time.h>
-#include "Wire.h"
+
 
 
 
@@ -30,6 +29,8 @@ DO NOT CHANGE:
 #define HW_RTC (1)      // use the RTC
 
 #if (HW_RTC==1)
+  #include <Time.h>
+  #include "Wire.h"
   //defines if we want to set the HW RTC in the setup
   #define _YEAR   2017
   #define _MONTH  02
@@ -129,7 +130,7 @@ DO NOT CHANGE:
 #define NODE_TYPE (6)             // NODE_TYPE:             0...this is a SensorNode,       1...this is a MotorNode
 
 // For getting rid of serial communication in the release version:
-#ifdef DEBUG
+#if (DEBUG==1)
   #define DEBUG_PRINT(x)        Serial.print(x)
   #define DEBUG_PRINTSTR(x)     Serial.print(F(x))
   #define DEBUG_PRINTDIG(x, c)  Serial.print (x, c)
@@ -206,7 +207,12 @@ DO NOT CHANGE:
 #define PUMPNODE_STATE_3_RESP_FAILED    -2  //(Controller) 
 #define PUMPNODE_STATE_4_RESP_FAILED    -3 //(Controller)  
 
-#define PUMPNODE_CRITICAL_STATE_OCCUPATION 60000 // in Milliseconds   
+#define PUMPNODE_CRITICAL_STATE_OCCUPATION 60000 // in Milliseconds
+
+#define Error_WateringTask_1  "[CONTROLLER][doWateringTasks]ERROR:PUMP NODE IS NOT ONLINE!!"
+#define Error_WateringTask_2  "[CONTROLLER][doWateringTasks]ERROR:THIS IS NOT A PUMP NODE!!"
+#define Error_WateringTask_3  "[CONTROLLER][doWateringTasks]ERROR:PUMP IS ALREADY IN USE!!"
+#define Error_WateringTask_4  "[CONTROLLER][doWateringTasks]ERROR:Parameter not correct!!"   
 /*
  * stores all measurment data in 12 bytes. 32 bytes are available in a message.
 */
@@ -223,7 +229,7 @@ struct sensorData
   uint8_t state;			// could be moved to unused data bits...
   time_t realTime;
   uint16_t interval = 2;
-};
+};//25byte
 
 
 struct responseData
@@ -232,7 +238,7 @@ struct responseData
   time_t ControllerTime;
   uint16_t interval;
   uint8_t state;
-};
+};//9byte
 
 
 struct EEPROM_Data

@@ -4,9 +4,6 @@
 #include <SPI.h>
 #include "RF24.h"
 
-// For RTC:
-#include <Time.h>
-#include <TimeLib.h>
 
 #if (SD_AVAILABLE == 1)
 #include <SD.h>
@@ -14,18 +11,20 @@
 #include <LinkedList.h> //for PumpHandler List
 
 /**some declarations for the RTC , in case we have a RTC*/
+
+
 #if (HW_RTC==1)
 #if (HW_RTC_DS1302==1)
 RTC_DS3231 myRTC;
 #elif (HW_RTC_DS3232==1)
-const int pinRTC = HW_RTC_PIN;
+RTC_DS3232 myRTC;
 #endif
 #endif
 
 #define INTERVAL (100)
 
-struct responseData myResponse;
-struct sensorData myData;
+struct responseData myResponse; //9byte
+struct sensorData myData; //25byte
 class CommandHandler myCommandHandler;
 
 uint16_t nDummyCount;
@@ -33,18 +32,20 @@ uint16_t nDummyCount;
 
 RF24 radio(9, 10);
 //brauchen wir 3 pipes!!!!!!!!!!??
-const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL}; // pipe[0] ist answer-channel
+//const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL}; // pipe[0] ist answer-channel
+const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};//didn't reduce dynamic memory usage
 nodeList myNodeList;
 LinkedList<PumpNode_Handler*> PumpList = LinkedList<PumpNode_Handler*>();
 
+#if TEST_PUMP
 uint16_t nTestWatering = 1000;
-
+#endif
 
 
 /*
    SETUP
 
-   PREREQUIITE:
+   PREREQUISITE:
     EEPROM: every byte in the EEPROM must be initialized with 0xff
     (only,if you use the Blumentopf library the first time)
     (or if you want to delete old nodes and want to start again->nodeList::clearEEPROM_Nodelist())
@@ -56,7 +57,7 @@ void setup(void)
   radio.begin();
 
   //  radio.setRetries(15,15);
-  //  radio.setPALevel(RF24_PA_MIN);
+  //  radio.setPALevel(RF24_PA_MIN);//@Marko: Test other configuration, maybe better communication
   radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
 
   //  radio.setPayloadSize(8);
@@ -71,16 +72,19 @@ void setup(void)
   DEBUG_PRINTSTR("[CONTROLLER]");
   DEBUG_PRINTSTR("[STRUCT ResponseData SIZE]");
   DEBUG_PRINTLN(sizeof(struct responseData));
+  
   //Initiate Real Time Clock
 #if (HW_RTC==1)
 #if (HW_RTC_DS1302==1)
   myRTC.init(&myData.state);
   displayTimeFromUNIX(myRTC.getTime());
 #elif (HW_RTC_DS3232==1)
-  pinMode(pinRTC, OUTPUT);
-  digitalWrite(pinRTC, HIGH);
-  //displayTimeFromUNIX(RTC.get());
-  displayTime(RTC.get());
+  pinMode(HW_RTC_PIN, OUTPUT);
+  digitalWrite(HW_RTC_PIN, HIGH);
+  //displayTime(RTC.get());
+  myRTC.init(&(myResponse.state));
+  displayTime(myRTC.getTime());
+  
 #endif
 #endif
   //  myNodeList.clearEEPROM_Nodelist();    // deletes the node list
@@ -160,15 +164,14 @@ void loop(void)
 
   if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
   {
-
     DEBUG_PRINTSTR("[CONTROLLER]\nMessage available at pipe ");
     DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
     DEBUG_PRINTSTR("[CONTROLLER][RECEIVED:]State: ");
-    DEBUG_PRINT(String(myData.state, BIN));
+    DEBUG_PRINTDIG(myData.state, BIN);
     DEBUG_PRINTSTR(" from ID:");
     DEBUG_PRINT(myData.ID);
-    DEBUG_PRINTSTR(" with Interval:");
+    DEBUG_PRINTSTR(" with Interval: ");
     DEBUG_PRINTLN(myData.interval);
 
     //      myResponse.ControllerTime = 1481803260;
@@ -374,6 +377,16 @@ void loop(void)
 
 }//loop()
 
+
+inline void removePumphandler(int index, PumpNode_Handler* handler)
+{
+  PumpList.remove(index);
+  myNodeList.setPumpInactive(handler->getID());
+  delete handler;
+}
+
+
+
 /**
    This Error Handler summarizes all error messages from different functions
    This should be suitable for a Logging System
@@ -385,37 +398,30 @@ void loop(void)
 
 */
 
-void  removePumphandler(int index, PumpNode_Handler* handler)
+ String handle_ErrorMessages(uint8_t ret)
 {
-  PumpList.remove(index);
-  myNodeList.setPumpInactive(handler->getID());
-  delete handler;
-}
 
-
-String handle_ErrorMessages(uint8_t ret)
-{
-  String out = "[CONTROLLER]";
   switch (ret)
   {
     case 10:
-      out += "[doWateringTasks]ERROR:PUMP NODE IS NOT ONLINE!!";
+     return F(Error_WateringTask_1);
       break;
     case 20:
-      out += "[doWateringTasks]ERROR:THIS IS NOT A PUMP NODE!!";
+      return F(Error_WateringTask_2);
       break;
     case 30:
-      out += "[doWateringTasks]ERROR:PUMP IS ALREADY IN USE!!";
+      return F(Error_WateringTask_3);
       break;
     case 40:
-      out += "[doWateringTasks]ERROR:Parameter not correct!!";
+      return F(Error_WateringTask_4);
       break;
     default:
       break;
   }
-  return out;
+  return "";
+  
+  return "";
 }
-
 
 
 /*A pumpNode must perform watering, so we decide to start this task by creating a new
@@ -446,6 +452,10 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
       DEBUG_PRINTLNSTR("ms");
       //the first communication with the pumpNode must be initiate here
       handlePumpCommunications();
+      DEBUG_PRINTSTR("[CONTROLLER]");
+      DEBUG_PRINTSTR("[doWateringTasks()]");
+      DEBUG_PRINT(PumpList.size());
+      DEBUG_PRINTLNSTR(" pumps ACTIVE!!!!");
     }
     else
       return 40;
@@ -494,7 +504,6 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
     return 10;
 
   }
-
 
   return 0;
 }
@@ -764,11 +773,12 @@ time_t getCurrentTime(void)
 #if (HW_RTC_DS1302==1)
   return myRTC.getTime();
 #elif (HW_RTC_DS3232==1)
-  return RTC.get();
+  return myRTC.getTime();
 #endif
 #endif
-         return 0;
+return 0;
 }
+
 
 
 
