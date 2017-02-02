@@ -258,7 +258,7 @@ uint8_t RTC_DS3232::setTime(time_t newTime)
 	
 	breakTime(newTime, tm);
 
-	this->RTC.write(tm);
+	RTC->write(tm);
 	DEBUG_PRINTLNSTR("done");
 }
 
@@ -267,11 +267,11 @@ uint8_t RTC_DS3232::setTime(time_t newTime)
 */
 time_t RTC_DS3232::getTime()
 {
-  time_t currentTime = this->RTC.get();
+  time_t currentTime = RTC->get();
   
   return currentTime;
 }
-int RTC_DS3231::setAlarm(time_t)
+int RTC_DS3232::setAlarm(time_t)
 {
   DEBUG_PRINTLNSTR("Still not implemented!!!! ");
 }

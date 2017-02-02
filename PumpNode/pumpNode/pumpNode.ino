@@ -24,7 +24,8 @@ uint32_t pump_worktime=0;
 const uint8_t pumpPin = 3;
 int status; //normal states are positive numbers , erro states are negative
 //byte addresses[][6] = {"Pump", "Contr"};
-const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
+//const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
+const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};
 /******************************/
 struct sensorData myData;
 struct responseData myResponse;
