@@ -139,7 +139,10 @@ void setup()
   // setup the RTC
 //  setupRTC();
   myRTC.init(&myData.state);
+  //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
+//  myRTC.setTime(1486049640);
   myData.realTime = myRTC.getTime();
+  displayTimeFromUNIX(myData.realTime);
   
   // read EEPROM
   EEPROM.get(EEPROM_ID_ADDRESS,myEEPROMData);   // reading a struct, so it is flexible...
@@ -154,6 +157,7 @@ void setup()
       Serial.flush();
     #endif
     digitalWrite(sensorPower, LOW);   // turn off the sensor power
+//    hibernate(myResponse.interval);
     Sleepy::loseSomeTime(myResponse.interval*100);
     digitalWrite(sensorPower, HIGH);   // turn on the sensor power
     delay(500);     // RTC needs 500ms startup time in total
@@ -291,7 +295,8 @@ void loop()
   delay(10);
 // initialises the RTC to save power
   myRTC.init(&myData.state);
-  
+
+
 
   delay(1000);    // DHT needs 1s to settle
 
@@ -365,19 +370,19 @@ void sendData()
   myData.state &= ~(1 << NODE_TYPE);      // set node type to sensor
   while (sending == true)
   {
-    DEBUG_PRINT("-");
-    DEBUG_PRINTLN(myData.state);
+//    DEBUG_PRINT("-");
+//    DEBUG_PRINTLN(myData.state);
     nRet = RF_action(&nDelay);
     
     if (nRet == 0)  // got a response
     {
-      Serial.print(":");
+/*      Serial.print(":");
       Serial.println(myResponse.state);
       Serial.print(" / ResponseID: ");
       Serial.println(myResponse.ID);
       Serial.print(" / myID: ");
       Serial.println(myData.ID);
-      
+*/
       if (myResponse.ID == myData.ID)     // response is for us
       {
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
@@ -569,7 +574,7 @@ void setup_RF()
 
   // transmission settings:
 //  radio.setPALevel(RF24_PA_MIN);
-  radio.setChannel(108);  // Above most Wifi Channels
+  radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
 
  //
  // Open pipes to other nodes for communication
@@ -815,7 +820,7 @@ int RF_action(int* pnDelay)
     bool timeout = false;
     while ( (radio.available() == 0 ) && ! timeout )
     {
-      if (millis() - started_waiting_at > 500 )
+      if (millis() - started_waiting_at > REGISTRATION_TIMEOUT_INTERVAL )
       {
         timeout = true;
       }
@@ -850,4 +855,20 @@ int RF_action(int* pnDelay)
     
   return 0;
 }
+
+
+/*
+ * This function sends the ATMega to sleep for a time given in [s/10].
+ * It is not totally accurate, so at some point it should use the RTC as adjustment.
+ */
+void hibernate(uint16_t duration)
+{
+    while (duration > 600)   // more than 60 seconds?
+    {
+      Sleepy::loseSomeTime(60000);  // sleep one minute
+      duration-= 600;
+    }
+    Sleepy::loseSomeTime(duration*100);
+}
+
 

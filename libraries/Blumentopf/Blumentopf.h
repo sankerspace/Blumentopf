@@ -5,7 +5,7 @@
 
 // Comment this line for the release version:
 #define DEBUG 1
-#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
+#define TEST_PUMP 2 //Testcase every 30 seconds turn on first pump in the list
 
 
 // watering policy:
@@ -39,8 +39,8 @@ DO NOT CHANGE:
   #define _MINUTE 50
   #define _SECOND 30
   
-  #define HW_RTC_DS1302 (0) //normaly used  (DS1302 OR DS3231)
-  #define HW_RTC_DS3232 (1) //alternative RTC (DS3232)
+  #define HW_RTC_DS1302 (1) //normaly used  (DS1302 OR DS3231)
+  #define HW_RTC_DS3232 (0) //alternative RTC (DS3232)
 
   #if (HW_RTC_DS1302==1) //
     #include <TimeLib.h>
@@ -59,9 +59,9 @@ DO NOT CHANGE:
   #define SD_CHIPSELECT (4)
 #endif
 //Radio communication defines
-#define _RADIO_CHANNEL_               152//108
+#define RADIO_CHANNEL               152//108
 #define WAIT_SEND_INTERVAL            2000
-#define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*3  // in Milliseconds  
+#define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*3  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten..
 #define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds   
           
 
@@ -74,7 +74,7 @@ DO NOT CHANGE:
 #define DHT11PIN 5                // Pin number for temperature/humidity sensor
 #define MOISTURE_THRESHOLD (1000) // wet/dry threshold
 #define LIGHT_THRESHOLD (512)     // day/nigth threshold
-#define BAUD (115200)               // serial BAUD rate
+#define BAUD (57600)               // serial BAUD rate
 #define PRE_SLEEP_DELAY (100)     // time to finish serial communication before sleep
 #define IREF  (1.1)               // 1V1 voltage of the ADC
 #define RTC_SYNC_THRESHOLD (10)    // How many seconds the Controller and Node clocks can drift apart before resynchronization

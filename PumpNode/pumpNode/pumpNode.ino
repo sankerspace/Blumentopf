@@ -16,7 +16,6 @@ RF24 radio(9, 10);
 
 
 /****************** User Config ***************************/
-const uint8_t radio_channel = 108;
 
 uint16_t OnOff = 0, answer = 0;
 uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0;
@@ -46,7 +45,7 @@ void setup() {
   radio.begin();
 
   radio.setPALevel(RF24_PA_LOW);
-  radio.setChannel(_RADIO_CHANNEL_);
+  radio.setChannel(RADIO_CHANNEL);
 
   radio.openWritingPipe(pipes[1]);        // Both radios listen on the same pipes by default, but opposite addresses
   radio.openReadingPipe(1, pipes[0]);     // Open a reading pipe on address 0, pipe 1

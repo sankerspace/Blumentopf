@@ -271,7 +271,7 @@ time_t RTC_DS3232::getTime()
   
   return currentTime;
 }
-int RTC_DS3231::setAlarm(time_t)
+int RTC_DS3232::setAlarm(time_t)
 {
   DEBUG_PRINTLNSTR("Still not implemented!!!! ");
 }
