@@ -21,7 +21,7 @@ RTC_DS3232 myRTC;
 #endif
 #endif
 
-#define INTERVAL (100)
+#define INTERVAL (300)
 
 struct responseData myResponse; //9byte
 struct sensorData myData; //25byte
@@ -592,16 +592,21 @@ void handleRegistration(void)
   uint8_t nRet;
   bool newNode = true;;
   struct nodeListElement currentNode;
-  DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]Registration request!");
+  uint16_t nodeIndex;
+      
+  DEBUG_PRINTLNSTR("[CONTROLLER][handleRegistration()]Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
   //  if (myData.ID > 0)                      // known node
+  //if (myData.ID < 0xffff)                      // known node
   if ((myData.state & (1 << NEW_NODE_BIT)) == false)                    // known node
   { //a node with ID = 0x0 is valid????
+    DEBUG_PRINTLNSTR("known node");
     myResponse.ID = myData.ID;
     newNode = false;
   }
   else                                    // new node
   {
+    DEBUG_PRINTLNSTR("new node");
     myResponse.interval = 100 * myData.temperature + 20; // this is the session ID (we abused the temperature attribute here.)
     myResponse.ID = myResponse.interval * myResponse.ControllerTime / 100;                       // this is the persistent ID.. Todo : it has to be compared to the node-list, to ensure no ID is used twice
     //newNode=true;
@@ -618,18 +623,19 @@ void handleRegistration(void)
 
   if ((myData.state & (1 << NODE_TYPE)) == 0)
   {
-    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]SensorNode");
+    DEBUG_PRINTLNSTR("[CONTROLLER][handleRegistration()]SensorNode");
     currentNode.state &= ~(1 << NODELIST_NODETYPE);  // SensorNode
   }
   else
   {
-    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]PumpNode");
+    DEBUG_PRINTLNSTR("[CONTROLLER][handleRegistration()]PumpNode");
     currentNode.state |= (1 << NODELIST_NODETYPE);  // MotorNode
   }
-  DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]Storing node..");
-
-  if (newNode) {
-
+  DEBUG_PRINTLNSTR("[CONTROLLER][handleRegistration()]Storing node..");
+  currentNode.nextSlot = 0;
+  
+  if (newNode == true)
+  {
     //Bit NODELIST_NODEONLINE in currentNode.state should stay 0 in the EEPROM forever
     nRet = myNodeList.addNode(currentNode);
     if (nRet > 1)       // there was a serious problem when adding the node. Node has not been added
@@ -637,12 +643,19 @@ void handleRegistration(void)
       //introduced a new Flag, the registrating Node must be somehow informed about
       //bad registration
       myResponse.state |= (1 << ID_REGISTRATION_ERROR);
-      DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]ERROR:Node registration aborted!");
+      DEBUG_PRINTLNSTR("[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!");
     }
     else
-    { //succefull registration of a new node
-      DEBUG_PRINTSTR("[CONTROLLER]");
-      DEBUG_PRINTLNSTR("[handleRegistration()]Session-ID and interval: ");
+    { //successfull registration of a new node
+
+// schedule a new timeslot:
+      nodeIndex = myNodeList.findNodeByID(currentNode.ID);
+      if ((currentNode.state & (1 << NODELIST_NODETYPE)) == 0)    // if the registered node is a sensor node
+      {
+        myNodeList.myNodes[nodeIndex].nextSlot = getNextMeasurementSlot(nodeIndex);
+      }
+
+      DEBUG_PRINTSTR("[CONTROLLER][handleRegistration()]Session-ID and interval: ");
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", Persistent ID: ");
       DEBUG_PRINTLN(myResponse.ID);
@@ -651,9 +664,10 @@ void handleRegistration(void)
       //now the node is online
       myNodeList.setNodeOnline(myResponse.ID);
     }
-  } else
+  }
+  else    // the node is known
   {
-    if (myNodeList.findNodeByID(myData.ID) == 0xff) // node not in node list
+    if (myNodeList.findNodeByID(myData.ID) == 0xffff) // node not in node list
     {
       myResponse.state |= (1 << ID_REGISTRATION_ERROR);
       DEBUG_PRINTSTR("[CONTROLLER]");
@@ -679,14 +693,23 @@ void handleRegistration(void)
 
 void handleDataMessage(void)
 {
-  uint8_t nodeIndex;
+  uint16_t nodeIndex;
   nodeIndex = myNodeList.findNodeByID(myData.ID);
-  myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
-  if (nodeIndex == 0xff)      // if the node does not exist
+  myResponse.state &= ~(1 << ID_INEXISTENT);      // per default the controller knows the node ID
+  myResponse.state &= ~(1 << NODE_TYPE_MISMATCH); // per default the node type matches
+  
+  if (nodeIndex == 0xffff)      // if the node does not exist
   {
-    DEBUG_PRINTSTR("[CONTROLLER]");
-    DEBUG_PRINTLNSTR("[handleRegistration()]Node does not exist - there seems to be a topology problem.");
+    DEBUG_PRINTSTR("[CONTROLLER][handleRegistration()]Node does not exist - there seems to be a topology problem.");    // the node maybe should re-register in this case.
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
+  }
+  else    // node has been found - check whether it indeed is a sensor node!
+  {
+    if ((myNodeList.myNodes[nodeIndex].state & (1 << NODELIST_NODETYPE)) == 1)  // this node is registered as a pump node
+    {
+      DEBUG_PRINTLNSTR("The node ID is registered as a pump node! Check network topology!");
+      myResponse.state |= (1 << NODE_TYPE_MISMATCH);    // the node type in the nodelist does not match
+    }
   }
   DEBUG_PRINTLNSTR("Data message");
   DEBUG_PRINT("ID: ");
@@ -719,7 +742,13 @@ void handleDataMessage(void)
   myResponse.state &= ~(1 << FETCH_EEPROM_DATA2);
 
   myResponse.ID = myData.ID;
-  myResponse.interval = INTERVAL;
+//  myResponse.interval = INTERVAL;
+//  time_t nextSlotTime = getNextMeasurementSlot(nodeIndex);
+
+  if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
+  {
+    myResponse.interval = getNextMeasurementSlot(nodeIndex);
+  }
 }
 
 /*
@@ -733,11 +762,11 @@ void handleMotorMessage(void)
   DEBUG_PRINTSTR("[CONTROLLER]");
   DEBUG_PRINTLNSTR("[handleMotorMessage()]A new Motormessage received.....");
   // check if the node ID actually exists in the node table..
-  uint8_t nodeIndex;
+  uint16_t nodeIndex;
   nodeIndex = myNodeList.findNodeByID(myData.ID);   // or however the ID is called..
 
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
-  if (nodeIndex == 0xff)      // if the node does not exist
+  if (nodeIndex == 0xffff)      // if the node does not exist
   {
     DEBUG_PRINTSTR("[CONTROLLER]");
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Node does not exist - there seems to be a topology problem.");
@@ -797,4 +826,61 @@ return 0;
 * 
 */
 
+
+/*
+ * The function calculates how long the next sensor node needs to sleep.
+ * Therefore it checks whether the start of watering is scheduled now.
+ * It returns in 100ms the sleep duration of the sensor node.
+ */
+uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
+{
+  // todo: check if watering is triggered
+
+  DEBUG_PRINTSTR("Number of Sensor Nodes: ");
+  DEBUG_PRINTLN(myNodeList.getNumberOfSensorNodes());
+
+  time_t tLastScheduledSensorNode = myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot;   // get the last scheduled time slot of all sensor nodes
+  DEBUG_PRINTSTR("Time of last scheduled sensor node: ");
+  DEBUG_PRINTLN(tLastScheduledSensorNode);
+  
+//  if (myNodeList.myNodes[nodeIndex].nextSlot == 0)  // this is the first slot
+//  {
+//    myNodeList.myNodes[nodeIndex].nextSlot = 
+//  }
+
+//  DEBUG_PRINTSTR("Previous slot: ");
+//  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot);
+  
+  // if watering is not triggered, all sensor nodes will have a fixed interval:
+  
+//  myNodeList.myNodes[nodeIndex].nextSlot = myNodeList.myNodes[nodeIndex].nextSlot + INTERVAL * myNodeList.getNumberOfSensorNodes();
+//  myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL;
+
+  DEBUG_PRINTSTR("Current Time: ");
+  DEBUG_PRINTLN(getCurrentTime());
+  
+// are there active tasks?
+  if(tLastScheduledSensorNode > getCurrentTime() - 7)   // yes
+  {
+    DEBUG_PRINTLNSTR("Yes");
+    myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL / 10;
+  }
+  else            // no tasks are scheduled for the future. Start scheduling now
+  {
+    DEBUG_PRINTLNSTR("No");
+    myNodeList.myNodes[nodeIndex].nextSlot = getCurrentTime() + INTERVAL / 10;
+  }
+
+  DEBUG_PRINTSTR("Next slot: ");
+  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot);
+
+
+  
+  DEBUG_PRINTSTR("Interval: ");
+  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - getCurrentTime());
+
+
+  // for testing it is assumed that the watering is not triggered.
+  return (myNodeList.myNodes[nodeIndex].nextSlot - getCurrentTime());
+}
 

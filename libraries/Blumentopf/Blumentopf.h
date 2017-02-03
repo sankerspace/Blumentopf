@@ -1,4 +1,5 @@
-
+#include <Time.h>
+#include "Wire.h"
 
 
 
@@ -29,8 +30,8 @@ DO NOT CHANGE:
 #define HW_RTC (1)      // use the RTC
 
 #if (HW_RTC==1)
-  #include <Time.h>
-  #include "Wire.h"
+//  #include <Time.h>		// if it's included here, some functions will miss it
+//  #include "Wire.h"
   //defines if we want to set the HW RTC in the setup
   #define _YEAR   2017
   #define _MONTH  02
@@ -62,7 +63,7 @@ DO NOT CHANGE:
 //Radio communication defines
 #define RADIO_CHANNEL               152//108
 #define WAIT_SEND_INTERVAL            2000
-#define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*3  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten..
+#define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*3  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
 #define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds   
           
 
@@ -121,16 +122,16 @@ DO NOT CHANGE:
 /*
  * The following defines are for node status bit operations
  */
-#define RTC_RUNNING_BIT (0)       // RTC_RUNNING_BIT:       0...no RTC,						1...RTC okay
-#define MSG_TYPE_BIT (1)          // MSG_TYPE_BIT:          0...init,						1...data
-#define NEW_NODE_BIT (2)          // NEW_NODE_BIT:          0...known node,					1...new node
-#define EEPROM_DATA_AVAILABLE (3) // EEPROM_DATA_AVAILABLE: 0...no data,					1...data available
-#define EEPROM_DATA_PACKED (4)    // EEPROM_DATA_PACKED:    0...live data,					1...EEPROM data
-#define EEPROM_DATA_LAST (5)	  // EEPROM_DATA_LAST:		0...this is not the last data,	1...this is the last data
-#define NODE_TYPE (6)             // NODE_TYPE:             0...this is a SensorNode,       1...this is a MotorNode
+#define RTC_RUNNING_BIT       (0)   // RTC_RUNNING_BIT:       0...no RTC,                    1...RTC okay
+#define MSG_TYPE_BIT          (1)   // MSG_TYPE_BIT:          0...init,                      1...data
+#define NEW_NODE_BIT          (2)   // NEW_NODE_BIT:          0...known node,                1...new node
+#define EEPROM_DATA_AVAILABLE (3)   // EEPROM_DATA_AVAILABLE: 0...no data,                   1...data available
+#define EEPROM_DATA_PACKED    (4)   // EEPROM_DATA_PACKED:    0...live data,                 1...EEPROM data
+#define EEPROM_DATA_LAST      (5)   // EEPROM_DATA_LAST:      0...this is not the last data, 1...this is the last data
+#define NODE_TYPE             (6)   // NODE_TYPE:             0...this is a SensorNode,      1...this is a MotorNode
 
 // For getting rid of serial communication in the release version:
-#if (DEBUG==1)
+#if (DEBUG == 1)
   #define DEBUG_PRINT(x)        Serial.print(x)
   #define DEBUG_PRINTSTR(x)     Serial.print(F(x))
   #define DEBUG_PRINTDIG(x, c)  Serial.print (x, c)
@@ -153,19 +154,20 @@ DO NOT CHANGE:
 /*
  * The following defines are for controller status bit operations
  */
-#define REGISTER_ACK_BIT (0)
-#define FETCH_EEPROM_DATA1 (1)
-#define FETCH_EEPROM_DATA2 (2)
-#define ID_INEXISTENT (3)       // there is no such ID
+#define REGISTER_ACK_BIT      (0)
+#define FETCH_EEPROM_DATA1    (1)
+#define FETCH_EEPROM_DATA2    (2)
+#define ID_INEXISTENT         (3)       // there is no such ID
 //#define EEPROM_OVERFLOW_OFFSET_BIT (1<<5*6-5)
 #define EEPROM_OVERFLOW_OFFSET_BIT (1L<<5*REMAINING_FLAG_SPACE)
-#define FETCH_EEPROM_REG_MASK (6)
+#define NODE_TYPE_MISMATCH    (6)
 #define ID_REGISTRATION_ERROR (7)
 
-#define FETCH_EEPROM_REG_SKIP 	(0)
-#define FETCH_EEPROM_REG_SEND 	(2)
-#define FETCH_EEPROM_REG_DELETE (4)
+#define FETCH_EEPROM_REG_SKIP     (0)
+#define FETCH_EEPROM_REG_SEND     (2)
+#define FETCH_EEPROM_REG_DELETE   (4)
 //#define FETCH_EEPROM_REG_UNUSED (6)
+#define FETCH_EEPROM_REG_MASK     (6)
 
 /*The following are defines for the nodeListElement state variable*/
 
@@ -178,13 +180,13 @@ DO NOT CHANGE:
 *  EEPROM defines
 */
 #define EEPROM_ID_ADDRESS (0)     // ADDRESS of init data within the EEPROM
-#define INDEXBEGIN (10)
+#define INDEXBEGIN        (10)
 //#define INDEX_ELEMENT_SIZE (4)	// has to be the
-#define INDEXELEMENTS (10)
-//#define INDEXENDE  (INDEXBEGIN + INDEXELEMENTS * INDEX_ELEMENT_SIZE)
-#define DATARANGE_END (900)
+#define INDEXELEMENTS     (10)
+//#define INDEXENDE       (INDEXBEGIN + INDEXELEMENTS * INDEX_ELEMENT_SIZE)
+#define DATARANGE_END     (900)
 // EEPROM address for the node list
-#define NODELIST_ADDRESS (950)
+#define NODELIST_ADDRESS  (950)
 
 #define EEPROM_HEADER_STATUS_VALID 15	// indicates this data is valid. Unset when the EEPROM header is initialized
 //#define EEPROM_DATA_STATUS_LAST 14		// indicates this is the last data element in the list.
@@ -212,7 +214,8 @@ DO NOT CHANGE:
 #define Error_WateringTask_1  "[CONTROLLER][doWateringTasks]ERROR:PUMP NODE IS NOT ONLINE!!"
 #define Error_WateringTask_2  "[CONTROLLER][doWateringTasks]ERROR:THIS IS NOT A PUMP NODE!!"
 #define Error_WateringTask_3  "[CONTROLLER][doWateringTasks]ERROR:PUMP IS ALREADY IN USE!!"
-#define Error_WateringTask_4  "[CONTROLLER][doWateringTasks]ERROR:Parameter not correct!!"   
+#define Error_WateringTask_4  "[CONTROLLER][doWateringTasks]ERROR:Parameter not correct!!"
+
 /*
  * stores all measurment data in 12 bytes. 32 bytes are available in a message.
 */
@@ -316,11 +319,12 @@ struct nodeListElement
 {
   uint16_t ID;
   uint8_t state;        
-  // Bit 0: NODE_TYPE:0...this is a SensorNode,1...this is a MotorNode
-  // Bit 1: PUMPACTIVE:0...inactive ,1...active (is currently pumping[1] or not[0])
-  // Bit 2: ONLINE:0...OFFLINE , 1...ONLINE (the node has performed a registration)
+  // Bit 0: NODELIST_NODETYPE:   0...this is a SensorNode, 1...this is a MotorNode
+  // Bit 1: NODELIST_PUMPACTIVE: 0...inactive, 1...active (is currently pumping[1] or not[0])
+  // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE, 1...ONLINE (the node has performed a registration)
   uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
-  byte  watering_policy;
+  byte     watering_policy;
+  time_t   nextSlot;
 };
 
 
@@ -329,10 +333,12 @@ class nodeList
 public:
   struct nodeListElement myNodes[NODELISTSIZE];
   uint16_t mnNodeCount;
-  void getNodeList();
-  uint8_t addNode(struct nodeListElement);
-  uint8_t findNodeByID(uint16_t);         // checks if the node exists
-  void clearEEPROM_Nodelist();
+  void     getNodeList();
+  uint8_t  addNode(struct nodeListElement);
+  uint16_t findNodeByID(uint16_t);         // checks if the node exists
+  void     clearEEPROM_Nodelist();
+  uint16_t getNumberOfSensorNodes();
+  uint16_t getLastScheduledSensorNode();
   
   /*
   *0xff .. Node doesnt exist

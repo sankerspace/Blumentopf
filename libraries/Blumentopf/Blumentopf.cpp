@@ -258,7 +258,7 @@ uint8_t RTC_DS3232::setTime(time_t newTime)
 	
 	breakTime(newTime, tm);
 
-	RTC->write(tm);
+	this->RTC.write(tm);
 	DEBUG_PRINTLNSTR("done");
 }
 
@@ -267,7 +267,7 @@ uint8_t RTC_DS3232::setTime(time_t newTime)
 */
 time_t RTC_DS3232::getTime()
 {
-  time_t currentTime = RTC->get();
+  time_t currentTime = this->RTC.get();
   
   return currentTime;
 }
@@ -473,7 +473,7 @@ void displayTimeFromUNIX(time_t showTime)
 {
 	tmElements_t tm;
 	breakTime(showTime, tm);
-	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year);
+	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year - 30);
 
 }
 // Convert normal decimal numbers to binary coded decimal
@@ -1296,9 +1296,9 @@ void nodeList::clearEEPROM_Nodelist()
 /* checks whether a node with a specific ID exists
  *  
  */
-uint8_t nodeList::findNodeByID(uint16_t ID)
+uint16_t nodeList::findNodeByID(uint16_t ID)
 {
-  uint8_t i;
+  uint16_t i;
   for(i = 0; i < NODELISTSIZE; i++)
   {
     if (myNodes[i].ID == ID)    // element exists already
@@ -1307,7 +1307,7 @@ uint8_t nodeList::findNodeByID(uint16_t ID)
     }
   }
 
-  return 0xff;    // node does not exist
+  return 0xffff;    // node does not exist
 }
 
 
@@ -1317,13 +1317,13 @@ uint8_t nodeList::findNodeByID(uint16_t ID)
  */
 uint8_t nodeList::addNode(struct nodeListElement newElement)
 {
-  uint8_t nodeIndex = 0xff;
+  uint16_t nodeIndex = 0xffff;
   uint16_t nCurrentAddress;
   
 // check if node exists already:
   DEBUG_PRINTLNSTR("\tBrowsing list of existing nodes");
   nodeIndex = findNodeByID(newElement.ID);
-  if (nodeIndex != 0xff)        // // element exists already
+  if (nodeIndex != 0xffff)        // // element exists already
   {
     DEBUG_PRINTLNSTR("\tNode exists already! Node cannot be added!");
     return 1;
@@ -1370,6 +1370,48 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
     return 2;
   }
   return 0;
+}
+
+/*
+ * returns the number of sensor nodes in the list
+ */
+uint16_t nodeList::getNumberOfSensorNodes()
+{
+  uint16_t i, nNumberOfSensorNodes;
+  nNumberOfSensorNodes = 0;
+  
+  for(i = 0; i < mnNodeCount; i++)
+  {
+    if ((myNodes[i].state & (1<<NODELIST_NODETYPE)) == 0) // sensor node
+    {
+      nNumberOfSensorNodes++;     // increase the counter for every sensor node
+    }
+  }
+  return nNumberOfSensorNodes;
+}
+
+
+uint16_t nodeList::getLastScheduledSensorNode()
+{
+  uint16_t i, nLastScheduledNodeIndex = 0;
+  time_t tLastScheduledNodeTime = 0;
+  for(i = 0; i < mnNodeCount; i++)
+  {
+    if ((myNodes[i].state & (1<<NODELIST_NODETYPE)) == 0) // sensor node
+    {
+      DEBUG_PRINT(i);
+      DEBUG_PRINT(": ");
+      DEBUG_PRINTLN(myNodes[i].nextSlot);
+      if (myNodes[i].nextSlot > tLastScheduledNodeTime)   // found new last node
+      {
+        DEBUG_PRINTSTR("New last Node - ");
+        DEBUG_PRINTLN(i);
+        tLastScheduledNodeTime = myNodes[i].nextSlot;
+        nLastScheduledNodeIndex = i;
+      }
+    }
+  }
+  return nLastScheduledNodeIndex;
 }
 
  /*

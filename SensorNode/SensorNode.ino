@@ -103,12 +103,11 @@ void setup()
   pinMode(BATTERY_SENSE_PIN, INPUT);
 
   myResponse.interval = 100;  // at default repeat measurement every 2 seconds
-
+//  killID();
 //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
   delay(100);
   delay(400);     // RTC needs 500ms startup time in total
-
 
   setup_RF();       // initialize the RF24L01+ module
   
@@ -157,8 +156,8 @@ void setup()
       Serial.flush();
     #endif
     digitalWrite(sensorPower, LOW);   // turn off the sensor power
-//    hibernate(myResponse.interval);
-    Sleepy::loseSomeTime(myResponse.interval*100);
+    hibernate(myResponse.interval);
+//    Sleepy::loseSomeTime(myResponse.interval*100);
     digitalWrite(sensorPower, HIGH);   // turn on the sensor power
     delay(500);     // RTC needs 500ms startup time in total
     nRet = registerNode(&nDelay);
@@ -168,6 +167,12 @@ void setup()
  
 }
 
+void killID()
+{
+  struct EEPROM_Data myEEPROMData;
+  myEEPROMData.ID = 0xffff;
+  EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // resetting the ID
+}
 
 int registerNode(int *pnDelay)
 {
@@ -287,7 +292,7 @@ int registerNode(int *pnDelay)
 void loop()
 {
   int nDHT_Status;
-  
+  uint16_t nSleepInterval = 0;
   
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on to indicate action
   
@@ -328,12 +333,13 @@ void loop()
   
 // reads the current real time value
   myData.realTime = myRTC.getTime();
-Serial.println("reading done");
+  DEBUG_PRINTSTR("reading done. Time: ");
+  displayTimeFromUNIX(myData.realTime);
   digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
 
 
 
-  sendData();
+  sendData(&nSleepInterval);
 
 
 
@@ -344,7 +350,8 @@ Serial.println("reading done");
 #endif
 
   turnOffOutputs();
-  Sleepy::loseSomeTime(myResponse.interval * 100);
+//  Sleepy::loseSomeTime(myResponse.interval * 100);
+  Sleepy::loseSomeTime(nSleepInterval * 1000);
 //delay(myResponse.interval * 100);
 
 }
@@ -361,7 +368,7 @@ void turnOffOutputs()
   pinMode(A5, INPUT);
 }
 
-void sendData()
+void sendData(uint16_t* nSleepInterval)
 {
   bool sending = true;
   int nRet;
@@ -388,8 +395,10 @@ void sendData()
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
         {
           DEBUG_PRINTSTR("Response is valid, next measurement in ");
-          DEBUG_PRINT(myResponse.interval / 10);
-          myResponse.interval = 100;
+//          DEBUG_PRINT(myResponse.interval / 10);
+          DEBUG_PRINT(myResponse.interval);
+//          myResponse.interval = 100;
+          *nSleepInterval = myResponse.interval;      // this is the actual time to sleep...
           DEBUG_PRINTLNSTR(" seconds.");
           digitalWrite(sensorPower, HIGH);   // when we finished measuring, turn the sensor power off again
           delay(10);
@@ -843,7 +852,7 @@ int RF_action(int* pnDelay)
       // Show response:
       //printf("Got response %lu, round-trip delay: %lu\n\r",got_time,millis()-got_time);
 
-      DEBUG_PRINTSTR("Got response (Round-trip delay: ");
+      DEBUG_PRINTSTR("\n\tGot response (Round-trip delay: ");
       *pnDelay = millis()-started_waiting_at;
       DEBUG_PRINT(*pnDelay);
       DEBUG_PRINTLN(" ms)");
