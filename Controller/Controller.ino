@@ -21,7 +21,7 @@ RTC_DS3232 myRTC;
 #endif
 #endif
 
-#define INTERVAL (300)
+#define INTERVAL (1800)
 
 struct responseData myResponse; //9byte
 struct sensorData myData; //25byte
@@ -75,19 +75,19 @@ void setup(void)
   
   //Initiate Real Time Clock
 #if (HW_RTC==1)
-#if (HW_RTC_DS1302==1)
-  myRTC.init(&myData.state);
-  displayTimeFromUNIX(myRTC.getTime());
-#elif (HW_RTC_DS3232==1)
-  pinMode(HW_RTC_PIN, OUTPUT);
-  digitalWrite(HW_RTC_PIN, HIGH);
-  //displayTime(RTC.get());
-  myRTC.init(&(myResponse.state));
-  displayTime(myRTC.getTime());
+  #if (HW_RTC_DS1302==1)
+    myRTC.init(&myData.state);
+    displayTimeFromUNIX(myRTC.getTime());
+  #elif (HW_RTC_DS3232==1)
+    pinMode(HW_RTC_PIN, OUTPUT);
+    digitalWrite(HW_RTC_PIN, HIGH);
+    //displayTime(RTC.get());
+    myRTC.init(&(myResponse.state));
+    displayTime(myRTC.getTime());
   
+  #endif
 #endif
-#endif
-  //  myNodeList.clearEEPROM_Nodelist();    // deletes the node list
+    myNodeList.clearEEPROM_Nodelist();    // deletes the node list
   myNodeList.getNodeList();
 
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
@@ -747,7 +747,12 @@ void handleDataMessage(void)
 
   if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
   {
+    DEBUG_PRINTSTR("It was live data...schedule next measurement");
     myResponse.interval = getNextMeasurementSlot(nodeIndex);
+  }
+  else
+  {
+    DEBUG_PRINTSTR("It was EEPROM data...no scheduling needed.");
   }
 }
 
@@ -835,6 +840,8 @@ return 0;
 uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
 {
   // todo: check if watering is triggered
+  time_t currentTime;
+  currentTime = getCurrentTime();
 
   DEBUG_PRINTSTR("Number of Sensor Nodes: ");
   DEBUG_PRINTLN(myNodeList.getNumberOfSensorNodes());
@@ -857,10 +864,10 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
 //  myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL;
 
   DEBUG_PRINTSTR("Current Time: ");
-  DEBUG_PRINTLN(getCurrentTime());
+  DEBUG_PRINTLN(currentTime);
   
 // are there active tasks?
-  if(tLastScheduledSensorNode > getCurrentTime() - 7)   // yes
+  if(tLastScheduledSensorNode > currentTime - 7)   // yes
   {
     DEBUG_PRINTLNSTR("Yes");
     myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL / 10;
@@ -868,7 +875,7 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   else            // no tasks are scheduled for the future. Start scheduling now
   {
     DEBUG_PRINTLNSTR("No");
-    myNodeList.myNodes[nodeIndex].nextSlot = getCurrentTime() + INTERVAL / 10;
+    myNodeList.myNodes[nodeIndex].nextSlot = currentTime + INTERVAL / 10;
   }
 
   DEBUG_PRINTSTR("Next slot: ");
@@ -877,10 +884,14 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
 
   
   DEBUG_PRINTSTR("Interval: ");
-  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - getCurrentTime());
+  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime);
+
+  DEBUG_PRINTSTR("Adjusted by protocol delays: ");
+  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL/1000));
+
 
 
   // for testing it is assumed that the watering is not triggered.
-  return (myNodeList.myNodes[nodeIndex].nextSlot - getCurrentTime());
+  return (myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL/1000));
 }
 

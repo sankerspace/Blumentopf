@@ -15,7 +15,7 @@
 
 
 #include <JeeLib.h>   // For sleeping
-#include <dht11.h>    // Termperature and humidity sensor
+#include <dht11.h>    // Termperature and humidity sensork
 #include <SPI.h>
 //#include "nRF24L01.h" // radio
 #include "RF24.h"     // radio
@@ -103,7 +103,7 @@ void setup()
   pinMode(BATTERY_SENSE_PIN, INPUT);
 
   myResponse.interval = 100;  // at default repeat measurement every 2 seconds
-//  killID();
+  killID();
 //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
   delay(100);
@@ -351,7 +351,8 @@ void loop()
 
   turnOffOutputs();
 //  Sleepy::loseSomeTime(myResponse.interval * 100);
-  Sleepy::loseSomeTime(nSleepInterval * 1000);
+//  Sleepy::loseSomeTime(nSleepInterval * 1000);
+  hibernate(nSleepInterval * 10);
 //delay(myResponse.interval * 100);
 
 }

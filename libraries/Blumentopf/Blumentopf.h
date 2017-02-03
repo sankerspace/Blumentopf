@@ -102,7 +102,7 @@ DO NOT CHANGE:
                                       // in case it is not big enough, it can be increased, but keep in mind that it will use up a lot of space, even if just few nodes are connected!
                                       // If there is time, a list can be implemented...
   #else
-    #define NODELISTSIZE (4)            // Only 4 nodes! Stored in EEPROM
+    #define NODELISTSIZE (8)            // Only 8 nodes! Stored in EEPROM
   #endif
 #endif
 #if (HW == HW_PHOTON)
