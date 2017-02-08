@@ -882,3 +882,12 @@ void hibernate(uint16_t duration)
 }
 
 
+
+
+//TODO:
+
+/*Check if that is resolved???
+
+(Readme.md)If RTC is unplugged, sketch will hang due to a bug in the I2C library.
+
+*/

@@ -60,7 +60,7 @@ void setup(void)
 
   //  radio.setRetries(15,15);
   //  radio.setPALevel(RF24_PA_MIN);//@Marko: Test other configuration, maybe better communication
-  radio.setChannel(_RADIO_CHANNEL_);  // Above most Wifi Channels
+  radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
 
   //  radio.setPayloadSize(8);
   radio.openReadingPipe(1, pipes[1]);
@@ -89,6 +89,7 @@ void setup(void)
   
   #endif
 #endif
+
     myNodeList.clearEEPROM_Nodelist();    // deletes the node list
   myNodeList.getNodeList();
 
@@ -579,7 +580,7 @@ void logData(void)
 void handleRegistration(void)
 {
   uint8_t nRet;
-  bool newNode = true;;
+  bool newNode = true;
   struct nodeListElement currentNode;
   DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
@@ -603,7 +604,7 @@ void handleRegistration(void)
   //  DEBUG_PRINTLN(myData.state);
 
   currentNode.ID = myResponse.ID;
-  currentNode.sensorID = 0;
+  currentNode.sensorID = 0;//Marko@ wann erfolgt eigentlich Zuweisung zum Pumpnode???
 
   if ((myData.state & (1 << NODE_TYPE)) == 0)
   {
@@ -642,7 +643,7 @@ void handleRegistration(void)
     }
   } else
   {
-    if (myNodeList.findNodeByID(myData.ID) == 0xff)
+    if (myNodeList.findNodeByID(myData.ID) == 0xffff)
     {
       myResponse.state |= (1 << ID_REGISTRATION_ERROR);
       DEBUG_PRINTSTR("[CONTROLLER]");
@@ -667,10 +668,10 @@ void handleRegistration(void)
 
 void handleDataMessage(void)
 {
-  uint8_t nodeIndex;
+  uint16_t nodeIndex;
   nodeIndex = myNodeList.findNodeByID(myData.ID);
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
-  if (nodeIndex == 0xff)      // if the node does not exist
+  if (nodeIndex == 0xffff)      // if the node does not exist
   {
     DEBUG_PRINTSTR("[CONTROLLER]");
     DEBUG_PRINTLNSTR("[handleRegistration()]Node does not exist - there seems to be a topology problem.");
@@ -735,11 +736,11 @@ void handleMotorMessage(void)
   DEBUG_PRINTSTR("[CONTROLLER]");
   DEBUG_PRINTLNSTR("[handleMotorMessage()]A new Motormessage received.....");
   // check if the node ID actually exists in the node table..
-  uint8_t nodeIndex;
+  uint16_t nodeIndex;
   nodeIndex = myNodeList.findNodeByID(myData.ID);   // or however the ID is called..
 
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
-  if (nodeIndex == 0xff)      // if the node does not exist
+  if (nodeIndex == 0xffff)      // if the node does not exist
   {
     DEBUG_PRINTSTR("[CONTROLLER]");
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Node does not exist - there seems to be a topology problem.");
@@ -796,7 +797,11 @@ return 0;
 *     NEED SOMETHING LIKE A PING
 *     
 * - DELAY herausholen
-* 
+*Unklar:
+* - isOnline noch notwendig????
+* - (607) currentNode.sensorID = 0;//Marko@ wann erfolgt eigentlich Zuweisung zum Pumpnode???
+*-  void handleDataMessage(void):: if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
+*   (werden nur eeprom daten versendet vom sensornode, dann erhält der sensornode kein neues zeitfenster?)
 */
 
 
