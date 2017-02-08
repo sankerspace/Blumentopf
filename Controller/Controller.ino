@@ -21,7 +21,9 @@ RTC_DS3232 myRTC;
 #endif
 #endif
 
-#define INTERVAL (100)
+
+#define INTERVAL (1800)
+
 
 struct responseData myResponse; //9byte
 struct sensorData myData; //25byte
@@ -75,19 +77,19 @@ void setup(void)
   
   //Initiate Real Time Clock
 #if (HW_RTC==1)
-#if (HW_RTC_DS1302==1)
-  myRTC.init(&myData.state);
-  displayTimeFromUNIX(myRTC.getTime());
-#elif (HW_RTC_DS3232==1)
-  pinMode(HW_RTC_PIN, OUTPUT);
-  digitalWrite(HW_RTC_PIN, HIGH);
-  //displayTime(RTC.get());
-  myRTC.init(&(myResponse.state));
-  displayTime(myRTC.getTime());
+  #if (HW_RTC_DS1302==1)
+    myRTC.init(&myData.state);
+    displayTimeFromUNIX(myRTC.getTime());
+  #elif (HW_RTC_DS3232==1)
+    pinMode(HW_RTC_PIN, OUTPUT);
+    digitalWrite(HW_RTC_PIN, HIGH);
+    //displayTime(RTC.get());
+    myRTC.init(&(myResponse.state));
+    displayTime(myRTC.getTime());
   
+  #endif
 #endif
-#endif
-  //  myNodeList.clearEEPROM_Nodelist();    // deletes the node list
+    myNodeList.clearEEPROM_Nodelist();    // deletes the node list
   myNodeList.getNodeList();
 
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
@@ -705,7 +707,21 @@ void handleDataMessage(void)
   myResponse.state &= ~(1 << FETCH_EEPROM_DATA2);
 
   myResponse.ID = myData.ID;
-  myResponse.interval = INTERVAL;
+
+
+//  myResponse.interval = INTERVAL;
+//  time_t nextSlotTime = getNextMeasurementSlot(nodeIndex);
+
+  if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
+  {
+    DEBUG_PRINTSTR("It was live data...schedule next measurement");
+    myResponse.interval = getNextMeasurementSlot(nodeIndex);
+  }
+  else
+  {
+    DEBUG_PRINTSTR("It was EEPROM data...no scheduling needed.");
+  }
+
 }
 
 /*
@@ -782,5 +798,70 @@ return 0;
 * - DELAY herausholen
 * 
 */
+
+
+
+/*
+ * The function calculates how long the next sensor node needs to sleep.
+ * Therefore it checks whether the start of watering is scheduled now.
+ * It returns in 100ms the sleep duration of the sensor node.
+ */
+uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
+{
+  // todo: check if watering is triggered
+  time_t currentTime;
+  currentTime = getCurrentTime();
+
+  DEBUG_PRINTSTR("Number of Sensor Nodes: ");
+  DEBUG_PRINTLN(myNodeList.getNumberOfSensorNodes());
+
+  time_t tLastScheduledSensorNode = myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot;   // get the last scheduled time slot of all sensor nodes
+  DEBUG_PRINTSTR("Time of last scheduled sensor node: ");
+  DEBUG_PRINTLN(tLastScheduledSensorNode);
+  
+//  if (myNodeList.myNodes[nodeIndex].nextSlot == 0)  // this is the first slot
+//  {
+//    myNodeList.myNodes[nodeIndex].nextSlot = 
+//  }
+
+//  DEBUG_PRINTSTR("Previous slot: ");
+//  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot);
+  
+  // if watering is not triggered, all sensor nodes will have a fixed interval:
+  
+//  myNodeList.myNodes[nodeIndex].nextSlot = myNodeList.myNodes[nodeIndex].nextSlot + INTERVAL * myNodeList.getNumberOfSensorNodes();
+//  myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL;
+
+  DEBUG_PRINTSTR("Current Time: ");
+  DEBUG_PRINTLN(currentTime);
+  
+// are there active tasks?
+  if(tLastScheduledSensorNode > currentTime - 7)   // yes
+  {
+    DEBUG_PRINTLNSTR("Yes");
+    myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL / 10;
+  }
+  else            // no tasks are scheduled for the future. Start scheduling now
+  {
+    DEBUG_PRINTLNSTR("No");
+    myNodeList.myNodes[nodeIndex].nextSlot = currentTime + INTERVAL / 10;
+  }
+
+  DEBUG_PRINTSTR("Next slot: ");
+  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot);
+
+
+  
+  DEBUG_PRINTSTR("Interval: ");
+  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime);
+
+  DEBUG_PRINTSTR("Adjusted by protocol delays: ");
+  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL/1000));
+
+
+
+  // for testing it is assumed that the watering is not triggered.
+  return (myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL/1000));
+}
 
 

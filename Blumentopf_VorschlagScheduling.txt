@@ -1,0 +1,132 @@
+Vorschlag für Blumentopf Zyklus Controller-Sensor-Pumpe
+------------------------------------------------------------
+-------------------------------------------------------------
+
+
+
+|___|       Sensornode schickt seine Daten an den Controller und erhält eine
+  S1        Antwort.
+
+|________|  Ein PumpNode darf maximal 1 minute laufen(uint16 pumptime),
+    P1       sein Zeitslot solltedas doppelte betragen, um genug Spielraum 
+            zu behalten.Der Controller triggert die kommunikation.
+  Am Pumpnode befindet sich ein Button, er ermöglicht es eine Neuregistrierung
+  oder eine Löschung seiner ID zu bewirken.
+  max 2sec. drücken -> neu regisitrieren mit derselben ID
+  > 2 sec. drücken  -> neu registrieren mit neuer ID 
+    (Eine neuregistrierung mit neuer ID könnte aus vielerlei Gründen erwünscht 
+    sein)
+    
+    
+    
+    
+
+|----------|        Registrieungsintervall. Innerhalb dieses Intervals, haben
+    Reg.            andere Nodes die Möglichkeit sich anzumelden.Ein Node
+                    horcht den Funkverkehr ab, wenn nach einer abgelaufenen
+  Zeit t_reg kein Messageverkehr stattfindet, nur in Intervall Reg. möglich,
+  dann unternimmt er einen Registrierungsversuch. Da das Reg. Intervall und
+  t_reg größer als ein maximales Pumpintervall ist, kann eine Registrierung nicht
+  währen eines Pumpvorganges stattfinden.  (t_pumpmax<t_reg<Reg_interval)        
+  Vorschlag: Registrierungsinterval=4*max_pumpzeit
+             t_reg=3*max_pumpzeit                 
+  ------------------------------------------------------------------------------                  
+Ablauf:             
+
+1) Sensor S1 meldet sich an:
+
+Zyklus 1:           S1 sendet Daten an dem Controller, wenn kein PumpNode 
+                    registriert wird werden die Daten zumindest geloggt.    
+|___|----------|    Entscheidung,ob eine Pumpe aktiv sein müsste wird gespeichert. 
+  S1    Reg.
+
+2) PumpNode P1 meldet sich an:
+
+Zyklus 1:  (P1)     Auf einem Sensornode darauffolgendem PumpNode, wird dem
+|___|----------|    Sensornode zugewiesen.
+  S1    Reg.
+  
+Zyklus 2:                   Nach Ablauf von zyklus 1 wird die benötigte Zeit für
+|___|________|----------|   S1 und P1 berücksichtigt und im nächsten Zyklus 2
+ S1     P1      Reg.        eingeplant.Da S1 seine daten dem Controller geschickt
+ 
+ hat, wird ihm vom Controller in der Antwort das Neue Intervall zugeschickt,
+ in welcher Zeit er sich wieder melden soll.Damit wird S1 ein Zeitslot zugesichert.
+ 
+ 
+ 3) Erro Case:
+ 
+Ein weiterer Pumpnode meldet sich an, die Registrierung wird von Controller 
+abgewiesen. (LED off am Arduino, für keine Registrierung)
+Zwei Pumpnodes gehen nicht am selben Sensornode.
+
+4)Sensor S2 meldet sich an:
+Zyklus 2:          (S2)     S2 meldet sich innerhalb des Registrierungsinterval
+|___|________|----------|   an,der Controller plant einen neuen Zyklus 3
+  S1     P1      Reg.
+
+Zyklus 3:                     S2 schickt seine Daten an den Controller und werden
+|___|________|___|----------| geloggt.Ein weiterer Pumpnode darf sich jetzt  
+ S1     P1    S2    Reg.      anmelden.
+
+5)Zwei Fälle sind nun möglich:
+
+5.1) Fall1:Ein neuer Pumpnode P2
+Zyklus 3:            (P2)         
+|___|________|___|----------|   
+ S1     P1    S2    Reg.     
+                                Somit wird S2 eine Pumpe P2 zugewiesen.
+                                 
+Zyklus 4:              
+|___|________|___|________|----------|   
+ S1     P1    S2    P2       Reg.     
+
+5.1) Fall2: Derselbe Pumpnode P1 wird für S2 verwendet(bartozzi idee)
+Zyklus 3:            (P1)         
+|___|________|___|----------|   Am PumpNode P1 wird ein Button für weniger als
+ S1     P1    S2    Reg.        2sec. betätigt, welche eine erneute Registrierung
+                                triggert. Der Controller erkennt denselben Pump-
+ node,aber weist ihn zusätzlich S2 zu.Somit wird S2 diesselbe Pumpe P1 zugewiesen.
+                            
+                                                               
+Zyklus 4:              
+|___|________|___|________|----------|   
+ S1     P1    S2    P1       Reg.     
+
+
+Im Prinzip kann sich ab Fall 5) der Zyklus erweitern lassen mit neuen Sensor-
+nodes und weiteren PumpNodes.Folgende Punkte müssen eingehalten werden:
+
+-) Es muss einen Pumpnode für jeden Sensornode geben, ein Sensornode kann aber
+mehrere PumpNodes haben.
+
+-)Jeder ablaufende Zyklus wird neu bewertet(falls neuer Node,Interrupt)
+-)Registrierungen bleiben, außer manueller Eingriff mit Button
+-)Zeitslot für Pumpnode darf nicht zu groß sein, da der Zyklus andauernd 
+variieren würde. besser feste Zeit, aber mehrfache Zyklen für eine Pumpe 
+Bsp: 5 Zyklen -> 5min
+
+-)Jeder Zyklus darf am Ende durch ein Interrupt ersetzt werden,falls
+sofort eine Pumpe laufen soll.Der Interrupt sollte aber NIE die aktuelle
+Zykluszeit überschreiten. Falls der Interrupt zu Ende ist, muss bis zum ende
+des Zyklus gewartet werden und der reguläre Zyklus beginnt weiter.
+Damit müssen alle Nodes nicht benachrichtigt werden, es findet aber keine
+Kommunikation mit den Nodes statt.
+Für Pumpnode kein Problem, für Sensornode muss ein error handling für
+keine Antwort erfolgen.
+
+
+---------------------------------------------------------------------------
+
+Controller:
+Auch der Controller erhält ein Button um zu ermöglichen,dass sämtliche
+Registrierungen gelöscht werden.(aus dem EEprom)
+Mit dem button können gewisse andere Aktionen gestartet werden
+
+
+
+
+
+
+
+
