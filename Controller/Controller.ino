@@ -90,7 +90,7 @@ void setup(void)
   #endif
 #endif
 
-    myNodeList.clearEEPROM_Nodelist();    // deletes the node list
+    myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   myNodeList.getNodeList();
 
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
@@ -158,7 +158,7 @@ void loop(void)
   //struct interactiveCommand myInteractiveCommand;
   myResponse.state = 0;
   myResponse.interval = INTERVAL;
-  //EBUG_PRINTSTR("Time before taking RTC:");DEBUG_PRINTLN(millis());
+  //DEBUG_PRINTSTR("Time before taking RTC:");DEBUG_PRINTLN(millis());
   myResponse.ControllerTime =getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
   //DEBUG_PRINTSTR("Time after taking RTC:");DEBUG_PRINTLN(millis());
   //DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
