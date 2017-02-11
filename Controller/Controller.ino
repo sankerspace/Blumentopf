@@ -29,7 +29,7 @@ struct responseData myResponse; //9byte
 struct sensorData myData; //25byte
 class CommandHandler myCommandHandler;
 
-//marko@: wozu brauchen wir diese variable? 
+//marko@: wozu brauchen wir diese variable?
 //verwende sie jetzt Um Pumphandler zu zählen
 uint16_t nDummyCount;
 
@@ -57,7 +57,7 @@ uint16_t nTestWatering = 1000;
 
 void setup(void)
 {
-  Serial.begin(BAUD);
+  DEBUG_SERIAL_INIT_WAIT;
   radio.begin();
 
   //  radio.setRetries(15,15);
@@ -76,23 +76,23 @@ void setup(void)
   DEBUG_PRINTSTR("[CONTROLLER]");
   DEBUG_PRINTSTR("[STRUCT ResponseData SIZE]");
   DEBUG_PRINTLN(sizeof(struct responseData));
-  
+
   //Initiate Real Time Clock
 #if (HW_RTC==1)
-  #if (HW_RTC_DS1302==1)
-    myRTC.init(&myData.state);
-    displayTimeFromUNIX(myRTC.getTime());
-  #elif (HW_RTC_DS3232==1)
-    pinMode(HW_RTC_PIN, OUTPUT);
-    digitalWrite(HW_RTC_PIN, HIGH);
-    //displayTime(RTC.get());
-    myRTC.init(&(myResponse.state));
-    displayTime(myRTC.getTime());
-  
-  #endif
+#if (HW_RTC_DS1302==1)
+  myRTC.init(&myData.state);
+  displayTimeFromUNIX(myRTC.getTime());
+#elif (HW_RTC_DS3232==1)
+  pinMode(HW_RTC_PIN, OUTPUT);
+  digitalWrite(HW_RTC_PIN, HIGH);
+  //displayTime(RTC.get());
+  myRTC.init(&(myResponse.state));
+  displayTime(myRTC.getTime());
+
+#endif
 #endif
 
-    myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   myNodeList.getNodeList();
 
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
@@ -113,7 +113,7 @@ void setup(void)
   SPI.transfer(0xAA);
 #endif
 
-nDummyCount=0;
+  nDummyCount = 0;
 }//setup
 
 /*
@@ -162,7 +162,7 @@ void loop(void)
   myResponse.state = 0;
   myResponse.interval = INTERVAL;
   //DEBUG_PRINTSTR("Time before taking RTC:");DEBUG_PRINTLN(millis());
-  myResponse.ControllerTime =getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
+  myResponse.ControllerTime = getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
   //DEBUG_PRINTSTR("Time after taking RTC:");DEBUG_PRINTLN(millis());
   //DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
   //DEBUG_PRINTLNSTR(" bytes available.");
@@ -170,11 +170,11 @@ void loop(void)
 
   if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
   {
-    DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
+    DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("\nMessage available at pipe ");
     //DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
-    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[RECEIVED:]State:");DEBUG_PRINTDIG(myData.state, BIN); DEBUG_PRINTSTR(" from ID:"); DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[RECEIVED:]State:"); DEBUG_PRINTDIG(myData.state, BIN); DEBUG_PRINTSTR(" from ID:"); DEBUG_PRINT(myData.ID);
     DEBUG_PRINTSTR(" with Interval:"); DEBUG_PRINTLN(myData.interval);
 
     //      myResponse.ControllerTime = 1481803260;
@@ -236,7 +236,7 @@ void loop(void)
 
 #if (TEST_PUMP==1)
     /* this is only for testing!! */
-   // DEBUG_PRINTLN(nTestWatering);
+    // DEBUG_PRINTLN(nTestWatering);
 
     if (myNodeList.isOnline(myNodeList.myNodes[0].ID)) {
       nTestWatering++;
@@ -247,16 +247,16 @@ void loop(void)
 
       if (myNodeList.getNodeType(myNodeList.myNodes[0].ID) == 1)
       {
-        
+
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[TEST]Node id: ");
         DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
         if (myNodeList.isActive(myNodeList.myNodes[0].ID) == 0)//check if the first node (index=0)in the list is active
         { uint8_t ret;
           ret = doWateringTasks(myNodeList.myNodes[0].ID, 10000, 0); //here a new order to a pump Node has to be planned
-          if(ret>0){
+          if (ret > 0) {
             DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
-            
-          }          
+
+          }
         } else
           DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[TEST]ERROR:Node already in use.");
       }
@@ -272,7 +272,7 @@ void loop(void)
     {
       //@marko  CHECK RETURN VALUE with
       //ATTENTION: parameter for nDuration must be in ms, but for workaround I multiplied with 1000
-      doWateringTasks(nID, nDuration*1000, 0);                 //  the node is added to the "active pumps"-list and the pump is notified
+      doWateringTasks(nID, nDuration * 1000, 0);               //  the node is added to the "active pumps"-list and the pump is notified
     }
     /*    if (nICA == INTERACTIVE_COMMAND_AVAILABLE )                                     // some IOT watering needs to be done
         {
@@ -305,7 +305,7 @@ void loop(void)
       handler = PumpList.get(i);
 #if (TEST_PUMP==1)
       if ((nTestWatering % DEBUG_CYCLE) == 0) {
-        DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
+        DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Processing PumpHandler for NODE-ID:");
         DEBUG_PRINTLN(handler->getID());
       }
@@ -324,7 +324,9 @@ void loop(void)
       */
       if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
       {
-        DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
+        
+        DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
+        DEBUG_PRINTSTR("[CONTROLLER]Number of PumpHandlers:");DEBUG_PRINTLN(PumpList.size());
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished ");
         DEBUG_PRINTLN(handler->getID());
 
@@ -333,25 +335,39 @@ void loop(void)
 
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
         DEBUG_PRINTLNSTR(" bytes available.");
-        
+
       } else if (handler->getState() == PUMPNODE_STATE_ERROR)
       {
-        DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
+        DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
+        DEBUG_PRINTSTR("[CONTROLLER]Number of PumpHandlers:");DEBUG_PRINTLN(PumpList.size());
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("ERROR:PUMP STATEHANDLER IS IN ERROR STATE");
-        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:");DEBUG_PRINT(handler->getID());
-        DEBUG_PRINTSTR(" ,PumpTime: ");DEBUG_PRINTLN(handler->getPumpTime());
+        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:"); DEBUG_PRINT(handler->getID());
+        DEBUG_PRINTSTR(" ,PumpTime: "); DEBUG_PRINTLN(handler->getPumpTime());
         //@Marko should PUMP always be restarted, maybe it is OFFLINE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        
-        uint8_t ret = doWateringTasks(handler->getID(), handler->getPumpTime(), handler);//getPumpTime is in ms
-        
-        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
-        if (ret > 0) {
-          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:Deleting PumpHandler Class because ");
-          DEBUG_PRINTSTR("of some Error in doWateringTasks()");
+        if (handler->getStateErrorCount() <= MAX_RETRIES) {
+          uint8_t ret = doWateringTasks(handler->getID(), handler->getPumpTime(), handler);//getPumpTime is in ms
 
+          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
+          if (ret > 0) {
+            DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:Deleting PumpHandler Class because ");
+            DEBUG_PRINTSTR("of some Error in doWateringTasks()");
+
+            removePumphandler(i, handler);
+            i--;
+
+            DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+            DEBUG_PRINTLNSTR(" bytes available.");
+          }
+        } else {
+          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:PUMP IS NOT RESPONDING(");
+          DEBUG_PRINT(MAX_RETRIES);
+          DEBUG_PRINTSTR(" RETRIES), ");
+          DEBUG_PRINTSTR("DELETE PUMPHANDLER AND SET PUMP NODE ");DEBUG_PRINT(handler->getID());
+          DEBUG_PRINTLNSTR(" OFFLINE, THAT PUMP NODE MUST REGISTRATE AGAIN.");
+          myNodeList.setNodeOffline(handler->getID());
           removePumphandler(i, handler);
           i--;
-
+          
           DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
           DEBUG_PRINTLNSTR(" bytes available.");
         }
@@ -365,7 +381,7 @@ void loop(void)
 #if (TEST_PUMP==1)
   //only informatve, can be deleted later
   if ((nTestWatering % DEBUG_CYCLE) == 0) {
-    DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
+    DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("nTestWatering="); DEBUG_PRINT(nTestWatering);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
     DEBUG_PRINTLNSTR(" bytes available.");
@@ -382,7 +398,7 @@ inline void removePumphandler(int index, PumpNode_Handler* handler)
   myNodeList.setPumpInactive(handler->getID());
   delete handler;
   DEBUG_PRINTLNSTR("-----------------------------------------------------------------------------------------");
-  
+
 }
 
 
@@ -398,13 +414,13 @@ inline void removePumphandler(int index, PumpNode_Handler* handler)
 
 */
 
- String handle_ErrorMessages(uint8_t ret)
+String handle_ErrorMessages(uint8_t ret)
 {
 
   switch (ret)
   {
     case 10:
-     return F(Error_WateringTask_1);
+      return F(Error_WateringTask_1);
       break;
     case 20:
       return F(Error_WateringTask_2);
@@ -419,7 +435,7 @@ inline void removePumphandler(int index, PumpNode_Handler* handler)
       break;
   }
   return "";
-  
+
 }
 
 
@@ -430,12 +446,12 @@ inline void removePumphandler(int index, PumpNode_Handler* handler)
    return 10: Pump not Online
    return 20: Node ID PumpNode_ID, is not a pumpNode
    return 30: Pump already active
-*NOTIFICATION: (01.02.2017)Changed requirement for pumpTime to be in Milliseconds not in seconds 
+  NOTIFICATION: (01.02.2017)Changed requirement for pumpTime to be in Milliseconds not in seconds
 
 */
 uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handler *handler_)
 {
-  DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
+  DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
   //nDummyCount = 0;
   if (handler_ > 0) {
     if ((handler_->getID() == PumpNode_ID) && (handler_->getPumpTime() == pumpTime)) {
@@ -476,12 +492,12 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
         PumpList.add(handler);          // todo in february: the handler should only add the pump node if it isn't in the list already.
         nDummyCount++;
         handler->setPumpHandlerID(nDummyCount);
-        DEBUG_PRINTLNSTR("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");      
+        DEBUG_PRINTLNSTR("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         handler->processPumpstate(pumpTime);
         myResponse.ID = handler->getID();
         myResponse.interval = handler->getResponseData();
         myResponse.state &= ~(1 << ID_INEXISTENT);
-        
+
         DEBUG_PRINTSTR("[CONTROLLER]");
         DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
         DEBUG_PRINT(PumpNode_ID);
@@ -724,8 +740,8 @@ void handleDataMessage(void)
   myResponse.ID = myData.ID;
 
 
-//  myResponse.interval = INTERVAL;
-//  time_t nextSlotTime = getNextMeasurementSlot(nodeIndex);
+  //  myResponse.interval = INTERVAL;
+  //  time_t nextSlotTime = getNextMeasurementSlot(nodeIndex);
 
   if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
   {
@@ -793,7 +809,7 @@ time_t getCurrentTime(void)
   return myRTC.getTime();
 #endif
 #endif
-return 0;
+  return 0;
 }
 
 
@@ -803,32 +819,32 @@ return 0;
 
 
 /*
-*TODO: 
-*  - Need ID for pumphandler
-*  - counter for retrying connections, if more than two -> set oofline
-*  - doWateringtask()-retry-show Pumplist.size
-*  - if controller set pumpnode offline, how to ensure lifesign from pumpnode
-*     NEED SOMETHING LIKE A PING
-*     
-* - DELAY herausholen
-* Logging System 
-*   Where should the log be stored
-*   No LOG in case of Serial prints
-*   
-*Unklar:
-* - isOnline noch notwendig????
-* - (607) currentNode.sensorID = 0;//Marko@ wann erfolgt eigentlich Zuweisung zum Pumpnode???
-*-  void handleDataMessage(void):: if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
-*   (werden nur eeprom daten versendet vom sensornode, dann erhält der sensornode kein neues zeitfenster?)
+  TODO:
+  
+   - doWateringtask()-retry-show Pumplist.size
+   - if controller set pumpnode offline, how to ensure lifesign from pumpnode
+      NEED SOMETHING LIKE A PING
+
+  - DELAY herausholen
+  Logging System
+    Where should the log be stored
+    No LOG in case of Serial prints
+
+  Unklar:
+  - isOnline noch notwendig????
+  - (607) currentNode.sensorID = 0;//Marko@ wann erfolgt eigentlich Zuweisung zum Pumpnode???
+    removePumphandler() hier sollte oder kann pumphandler vom sensor gelöscht werden
+  -  void handleDataMessage(void):: if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
+    (werden nur eeprom daten versendet vom sensornode, dann erhält der sensornode kein neues zeitfenster?)
 */
 
 
 
 /*
- * The function calculates how long the next sensor node needs to sleep.
- * Therefore it checks whether the start of watering is scheduled now.
- * It returns in 100ms the sleep duration of the sensor node.
- */
+   The function calculates how long the next sensor node needs to sleep.
+   Therefore it checks whether the start of watering is scheduled now.
+   It returns in 100ms the sleep duration of the sensor node.
+*/
 uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
 {
   // todo: check if watering is triggered
@@ -841,25 +857,25 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   time_t tLastScheduledSensorNode = myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot;   // get the last scheduled time slot of all sensor nodes
   DEBUG_PRINTSTR("Time of last scheduled sensor node: ");
   DEBUG_PRINTLN(tLastScheduledSensorNode);
-  
-//  if (myNodeList.myNodes[nodeIndex].nextSlot == 0)  // this is the first slot
-//  {
-//    myNodeList.myNodes[nodeIndex].nextSlot = 
-//  }
 
-//  DEBUG_PRINTSTR("Previous slot: ");
-//  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot);
-  
+  //  if (myNodeList.myNodes[nodeIndex].nextSlot == 0)  // this is the first slot
+  //  {
+  //    myNodeList.myNodes[nodeIndex].nextSlot =
+  //  }
+
+  //  DEBUG_PRINTSTR("Previous slot: ");
+  //  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot);
+
   // if watering is not triggered, all sensor nodes will have a fixed interval:
-  
-//  myNodeList.myNodes[nodeIndex].nextSlot = myNodeList.myNodes[nodeIndex].nextSlot + INTERVAL * myNodeList.getNumberOfSensorNodes();
-//  myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL;
+
+  //  myNodeList.myNodes[nodeIndex].nextSlot = myNodeList.myNodes[nodeIndex].nextSlot + INTERVAL * myNodeList.getNumberOfSensorNodes();
+  //  myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL;
 
   DEBUG_PRINTSTR("Current Time: ");
   DEBUG_PRINTLN(currentTime);
-  
-// are there active tasks?
-  if(tLastScheduledSensorNode > currentTime - 7)   // yes
+
+  // are there active tasks?
+  if (tLastScheduledSensorNode > currentTime - 7)  // yes
   {
     DEBUG_PRINTLNSTR("Yes");
     myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL / 10;
@@ -874,17 +890,17 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot);
 
 
-  
+
   DEBUG_PRINTSTR("Interval: ");
   DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime);
 
   DEBUG_PRINTSTR("Adjusted by protocol delays: ");
-  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL/1000));
+  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL / 1000));
 
 
 
   // for testing it is assumed that the watering is not triggered.
-  return (myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL/1000));
+  return (myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL / 1000));
 }
 
 

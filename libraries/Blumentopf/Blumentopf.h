@@ -138,7 +138,7 @@ DO NOT CHANGE:
   #define DEBUG_PRINTLN(x)      Serial.println (x)
   #define DEBUG_PRINTLNSTR(x)   Serial.println(F(x))
   #define DEBUG_FLUSH           Serial.flush()
-  #define DEBUG_SERIAL_INIT_WAIT while (!Serial) {}
+  #define DEBUG_SERIAL_INIT_WAIT Serial.begin(BAUD);while (!Serial) {}
 #else
   #define DEBUG_PRINT(x)
   #define DEBUG_PRINTSTR(x)
@@ -198,7 +198,8 @@ DO NOT CHANGE:
 #define NO_SCHEDULED_WATERING 2
 /*
 *  PumpNode defines
-*/     
+*/    
+#define MAX_RETRIES                     2 
                                    /*who uses these states*/
 #define PUMPNODE_STATE_0_PUMPREQUEST    0 //(pumpNode and Controller)
 #define PUMPNODE_STATE_1_RESPONSE       1 //(pumpNode and Controller)
@@ -457,6 +458,7 @@ public:
         pumpnode_dif=0;
         pumpnode_debugCounter=DEBUG_CYCLE;
         pumphandler_ID=0;
+        pumpnode_state_error_counter=0;
     }
     
     ~PumpNode_Handler(){}
@@ -469,7 +471,9 @@ public:
     void     processPumpstate(uint16_t IncomeData);
     void     reset(void);
     void     setPumpHandlerID(uint16_t ID_);
-    uint16_t getPumpHandler(void);
+    uint16_t getPumpHandlerID(void);
+    /*How many times I reached the state error*/
+    uint8_t  getStateErrorCount(void);
     
 private:
    // static uint8_t counter;
@@ -485,6 +489,7 @@ private:
                                          //only STATE 1 and STATE 2 (controller)
     uint16_t pumpnode_debugCounter;
     uint16_t pumphandler_ID;
+    uint8_t  pumpnode_state_error_counter;
 };//3*2byte,1*1byte,3*4byte
 //19byte
 

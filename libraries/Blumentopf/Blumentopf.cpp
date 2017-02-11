@@ -1575,6 +1575,7 @@ uint16_t PumpNode_Handler::getID(void)
     this->pumpnode_previousTime=millis();     
     this->pumpnode_dif=0;
     this->pumpnode_debugCounter=DEBUG_CYCLE;
+    
  
  }
  /*only for debug purposes*/
@@ -1583,10 +1584,17 @@ uint16_t PumpNode_Handler::getID(void)
     pumphandler_ID=ID_;
  }
    /*only for debug purposes*/ 
- uint16_t PumpNode_Handler::getPumpHandler(void)
+ uint16_t PumpNode_Handler::getPumpHandlerID(void)
  {
   return pumphandler_ID;
  }
+ 
+ 
+ uint8_t  PumpNode_Handler::getStateErrorCount(void)
+ {
+  return pumpnode_state_error_counter;
+ }
+ 
  /**
 * That function controls the state machine of a Pump Node,
 * in such a way that it receives Responses from Pump by IncomeData
@@ -1709,6 +1717,10 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   if(this->pumpnode_status == PUMPNODE_STATE_ERROR){
       //Nothing to do
       //PUMP CYCLE WAS NOT SUCCESSFULL
+      pumpnode_state_error_counter++;
+      DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTSTR("][State -1]-ERROR STATE COUNTER IS ");DEBUG_PRINTLN(pumpnode_state_error_counter);
+      
   }
   else //[STATE -2]---------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESP_FAILED){

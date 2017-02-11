@@ -39,8 +39,8 @@ struct responseData myResponse;
 /***********************************************************************************************/
 void setup() {
 
-  Serial.begin(BAUD);
-  DEBUG_SERIAL_INIT_WAIT
+
+  DEBUG_SERIAL_INIT_WAIT;
   pinMode(pumpPin, OUTPUT);
   pinMode(buttonPin, INPUT);
   randomSeed(analogRead(0));//initialize Random generator
@@ -135,38 +135,38 @@ void loop(void) {
   buttonstate = digitalRead(buttonPin);
   if (buttonstate == HIGH)
   {
-
+    dif = 0;
     DEBUG_PRINTLNSTR("[PUMPNODE]BUTTON PRESSED!!!!!!!!!!!!");
     status == PUMPNODE_STATE_0_PUMPREQUEST;
     if (!bounce)
       previousTime = millis();
     bounce = true;
 
-  } else
-  {
+  } else if (bounce == true) {
+
     dif = millis() - previousTime;
-    if (bounce == true) {
-      if (dif > 2000)
-      {
-        DEBUG_PRINTLNSTR("[PUMPNODE]REGISTRATION RESET WITH REQUESTING A NEW ID");
-        registration(true);
-        bounce = false;
-        previousTime = millis();
-      } else if (dif > 500)
-      {
-        DEBUG_PRINTLNSTR("[PUMPNODE]REGISTRATION RESET A KNOWN  ID");
-        registration(false);
-        bounce = false;
-        previousTime = millis();
-      }
+    if (dif > 2000)
+    {
+      DEBUG_PRINTLNSTR("[PUMPNODE]REGISTRATION RESET WITH REQUESTING A NEW ID");
+      registration(true);
+      bounce = false;
+      previousTime = millis();
+    } else if (dif > 500)
+    {
+      DEBUG_PRINTLNSTR("[PUMPNODE]REGISTRATION RESET A KNOWN  ID");
+      registration(false);
+      bounce = false;
+      previousTime = millis();
     }
+
   }
   //DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
   //DEBUG_PRINTLNSTR(" bytes available.");
   /*******************************STATE 0*****************************/
   if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time to turn on the pump
-    dif = 0;
+
     if (radio.available() > 0) {
+      dif = 0;
       DEBUG_PRINTLNSTR("------------------------------------------------------");
       DEBUG_PRINTLNSTR("Available radio ");
       /********Receiving next pumping time period**************/
@@ -207,6 +207,9 @@ void loop(void) {
           previousTime = millis();
           status = PUMPNODE_STATE_2_PUMPACTIVE;
         }
+      } else {
+        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 1]Received message was not dedicated to this Pump-Node");
+        previousTime = millis();
       }
     }
     /**************************STATE 2**************************/
@@ -262,6 +265,9 @@ void loop(void) {
           DEBUG_PRINTLNSTR(" seconds.");
           DEBUG_FLUSH;
         }
+      } else {
+        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 3]Received message was not dedicated to this Pump-Node");
+        previousTime = millis();
       }
     }
   }
@@ -506,7 +512,7 @@ void registration(bool refreshID)
     if (buttonstate == HIGH) {
       DEBUG_PRINTLNSTR("[PUMPNODE][Setup()]BUTTON PRESSED IN SETUP MODE!!!!!!!");
       myEEPROMData.ID = 0xffff;
-      myData.ID = myEEPROMData.ID;  
+      myData.ID = myEEPROMData.ID;
       EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);
     }
     delay(2000);
