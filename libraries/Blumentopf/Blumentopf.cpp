@@ -1085,7 +1085,13 @@ uint8_t CommandHandler::getInteractiveCommands()
 }
 
 /*
- * Checks whether a watering was scheduled for this time
+ * * Checks whether a watering was scheduled for this time
+ * It takes the node list and the current time.
+ * From those values it figures out whether it is watering-time and 
+ * whether a pump has to get active. Once a pump has finished pumping, 
+ * the next pump gets started. The node ID of the respective pump and 
+ * the pump duration is returned by the pointers to the calling function.
+ *
  */
 uint8_t CommandHandler::checkSchedule(struct nodeList myNodeList, uint16_t* nID, uint16_t* nDuration, time_t currentTime)
 {
