@@ -1,0 +1,2263 @@
+[CONTROLLER][STRUCT SensorData SIZE]25
+[CONTROLLER][STRUCT ResponseData SIZE]9
+Initializing the RTC DS3232...done
+Date: 11.2.2017--18:10:6-Saturday
+Maximum nodelist length: 8Starting search at 950
+Nodes found: 
+0 nodes found in total.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:397 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]ERROR:ID is not in the NodeList registered!
+[CONTROLLER][handleRegistration()]ERROR:Node registration aborted!
+[CONTROLLER]Sending back response: 1800, ID:397, STATUS-BYTE:10000001
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000100 from ID:65535 with Interval:2
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+	Browsing list of existing nodes
+	Node does not exist within the list yet..
+list isn't full yet.
+	Arduino (non SD version)
+	Stored node to EEPROM at address 950
+[CONTROLLER][handleRegistration()]Session-ID and interval: 
+6120, Persistent ID: 62741
+, Time: 1486836689
+[CONTROLLER]Sending back response: 6120, ID:62741, STATUS-BYTE:1
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=124246
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=178508
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=225010
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=279274
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4003,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=325776
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=380039
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=426542
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=480804
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=527306
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=581570
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=628072
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=682335
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=728838
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=783100
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=829602
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=883865
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=930368
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=984631
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1031133
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1085396
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1131898
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1186162
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1232664
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1286945
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1333447
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1387711
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1434221
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1488484
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1534987
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1589250
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1635752
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1690015
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1736518
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1790789
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1837292
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1891555
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1938058
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=1992321
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2038831
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2093094
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2139598
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2193869
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2240375
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2294645
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2341153
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2395416
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000110 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000000 from ID:62741 with Interval:10001
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+[CONTROLLER][handleRegistration()]Session-ID and interval: 
+1800, Persistent ID: 62741
+, Time: 1486839042
+[CONTROLLER]Sending back response: 1800, ID:62741, STATUS-BYTE:1
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2444000
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000010 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000010 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2498263
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000010 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000010 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2544765
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000010 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000010 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2599028
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000010 from ID:62741 with Interval:10000
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10000
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 1]-Send Response to Node-ID62741,respond:20000
+[CONTROLLER]Sending back response: 20000, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -4:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000010 from ID:62741 with Interval:10001
+[CONTROLLER]MOTOR MESSAGE:ID:62741, Data:10001
+[CONTROLLER][handleMotorMessage()]A new Motormessage received.....
+[CONTROLLER][handleMotorMessage()]Iterate pump list and search for Pumphandler
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Received Response from node-ID 62741 ,Response: 10001
+[BLUMENTOPF]	[PumpNode_Handler][State 2]-Send Response to Node-ID 62741,respond:65535
+[CONTROLLER]Sending back response: 65535, ID:62741, STATUS-BYTE:0
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]Deleting PumpHandler Class because Watering finished 62741
+[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER]
+Message available at pipe [CONTROLLER][RECEIVED:]State:1000100 from ID:65535 with Interval:10001
+[CONTROLLER]Registration request
+[CONTROLLER][handleRegistration()]Registration request!
+[CONTROLLER][handleRegistration()]PumpNode
+[CONTROLLER][handleRegistration()]Storing node..
+	Browsing list of existing nodes
+	Node does not exist within the list yet..
+list isn't full yet.
+	Arduino (non SD version)
+	Stored node to EEPROM at address 960
+[CONTROLLER][handleRegistration()]Session-ID and interval: 
+4220, Persistent ID: 16610
+, Time: 1486839231
+[CONTROLLER]Sending back response: 4220, ID:16610, STATUS-BYTE:1
+[CONTROLLER]............Done
+[CONTROLLER]Listening now...
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 620 bytes available.
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][doWateringTasks()]Pump ID 62741 will be activated now.
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2647649
+[CONTROLLER][doWateringTasks()]Sending pump request to Node-ID: 62741 with duration of 10000 ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4015,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=30000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60166ms, previousTime=2647649ms
+[CONTROLLER]ERROR:PUMP STATEHANDLER IS IN ERROR STATE
+[CONTROLLER]ERROR:RESTART PUMP ID:62741 ,PumpTime: 10000
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2707896
+[CONTROLLER][doWateringTasks()]Retry pump request to Node-ID: 62741 with duration of 10000ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[CONTROLLER]
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=40000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=50000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=60000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER][TEST]Node id: 62741
+[CONTROLLER][TEST]ERROR:Node already in use.
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=0[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=10000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!
+[BLUMENTOPF]	[PumpNode_Handler][WATCHDOG]Dif=60161ms, previousTime=2707896ms
+[CONTROLLER]ERROR:PUMP STATEHANDLER IS IN ERROR STATE
+[CONTROLLER]ERROR:RESTART PUMP ID:62741 ,PumpTime: 10000
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Pump time of 10000ms sent to PumPnode 62741
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...
+[BLUMENTOPF]	[PumpNode_Handler][State 0:]previousTime=2768138
+[CONTROLLER][doWateringTasks()]Retry pump request to Node-ID: 62741 with duration of 10000ms
+[CONTROLLER][doWateringTasks()]1 pumps ACTIVE!!!!
+[CONTROLLER]
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[CONTROLLER]Processing PumpHandler for NODE-ID:62741
+[CONTROLLER]nTestWatering=20000[CONTROLLER][MEMORY]:Between Heap and Stack still 591 bytes available.
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4001,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000
+[BLUMENTOPF]	[PumpNode_Handler][State -3:]Failed, response timed out[wait:4002,ID:62741,duration:10000

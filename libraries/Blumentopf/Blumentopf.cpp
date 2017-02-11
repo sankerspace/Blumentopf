@@ -1118,7 +1118,7 @@ uint8_t CommandHandler::checkSchedule(struct nodeList myNodeList, uint16_t* nID,
 //    DEBUG_PRINT(" : ");
 //    DEBUG_PRINTLN(mnPreviousHour*60 + mnPreviousMinute);
     if (nWateringStartTime > (mnPreviousHour*60 + mnPreviousMinute))    // in the previous round we have been before
-    {
+    {   //Marko@:(23*60+24)>(23*60+59)???? was soll previoushour bedeuten?
       DEBUG_PRINTLNSTR("\tPassed watering start time");
       // so the watering starts now
       bWateringNow = true;
@@ -1274,22 +1274,27 @@ void nodeList::getNodeList()
 
 /*
  * Clears the NodeList-EEPROM
+ * marko@: can not use mnNodeCount as index in the for loop (11.02.17)
  */
 void nodeList::clearEEPROM_Nodelist()
 {
   uint16_t nCurrentAddress;
   
   nCurrentAddress = NODELIST_ADDRESS;
-  myNodes[0].ID = 0xffff;
-  myNodes[0].state = 0;
-  myNodes[0].sensorID = 0;
-  myNodes[0].watering_policy = 0;
   
-  for(mnNodeCount = 0; mnNodeCount < NODELISTSIZE; mnNodeCount++)
+  
+  for(int i = 0; i < NODELISTSIZE; i++)
   {
-    EEPROM.put(nCurrentAddress, myNodes[0]);   // reading a struct, so it is flexible...
+    myNodes[i].ID = 0xffff;
+    myNodes[i].state = 0;
+    myNodes[i].sensorID = 0;
+    myNodes[i].watering_policy = 0;
+    EEPROM.put(nCurrentAddress, myNodes[i]);   // reading a struct, so it is flexible...
     nCurrentAddress += sizeof(struct nodeListElement);
   }
+  
+  mnNodeCount = 0;
+  
 }
 
 
@@ -1314,6 +1319,8 @@ uint16_t nodeList::findNodeByID(uint16_t ID)
 /*
  * Adds a node to the node list.
  * If it a node with this ID already exists, it will not be able to connect.
+ * return 1:Node exists already! Node cannot be added
+ * return 2:Node list is full! Node cannot be added!
  */
 uint8_t nodeList::addNode(struct nodeListElement newElement)
 {
@@ -1329,7 +1336,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
     return 1;
   }
   
-  DEBUG_PRINT("\tNode does not exist within the list yet..");
+  DEBUG_PRINTLNSTR("\tNode does not exist within the list yet..");
   
 // otherwise add the node to the list and to the memory:
   if (mnNodeCount < NODELISTSIZE)
@@ -1350,7 +1357,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
         // write it to EEPROM
      
         DEBUG_PRINTLNSTR("(non SD version)");
-        nCurrentAddress = NODELIST_ADDRESS + (mnNodeCount-1) * sizeof(struct nodeListElement);    // calculating the next EEPROM node list address
+        nCurrentAddress = NODELIST_ADDRESS + ((mnNodeCount-1) * sizeof(struct nodeListElement));    // calculating the next EEPROM node list address
         EEPROM.put(nCurrentAddress, newElement);                                               // writing the node to EEPROM
         DEBUG_PRINT("\tStored node to EEPROM at address ");
         DEBUG_PRINTLN(nCurrentAddress);
@@ -1568,14 +1575,18 @@ uint16_t PumpNode_Handler::getID(void)
     this->pumpnode_previousTime=millis();     
     this->pumpnode_dif=0;
     this->pumpnode_debugCounter=DEBUG_CYCLE;
-        
-       
-        
-    
-    
+ 
  }
- 
- 
+ /*only for debug purposes*/
+ void PumpNode_Handler::setPumpHandlerID(uint16_t ID_)
+ {
+    pumphandler_ID=ID_;
+ }
+   /*only for debug purposes*/ 
+ uint16_t PumpNode_Handler::getPumpHandler(void)
+ {
+  return pumphandler_ID;
+ }
  /**
 * That function controls the state machine of a Pump Node,
 * in such a way that it receives Responses from Pump by IncomeData
@@ -1592,23 +1603,27 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     {
       this->OnOff=IncomeData;//calculated from seconds in milliseconds
       this->pumpnode_response=this->OnOff; 
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 0:]Pump time of ");
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTSTR("][State 0:]Pump time of ");
       DEBUG_PRINT(this->pumpnode_response);
       DEBUG_PRINTSTR("ms sent to PumPnode ");
       DEBUG_PRINTLN(this->pumpnode_ID);
       this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
        
-      DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 0:]Start Listening for first confirmation from the pump...");
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTLNSTR("][State 0:]Start Listening for first confirmation from the pump...");
 
       this->pumpnode_previousTime=millis();//A change of state occured here
       this->pumpnode_started_waiting_at = millis(); 
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 0:]previousTime=");
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID); 
+      DEBUG_PRINTSTR("][State 0:]previousTime=");
       DEBUG_PRINTLN(this->pumpnode_previousTime);
       this->pumpnode_debugCounter=DEBUG_CYCLE;
       
     }else{
       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
-        DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData ");
+        DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID); 
+        DEBUG_PRINTSTR("][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData ");
         DEBUG_PRINT(IncomeData);
         DEBUG_PRINTLNSTR("]\n"); 
       }
@@ -1628,7 +1643,8 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     {
       this->pumpnode_response=2*this->OnOff;//some usefull check
     
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 1]-Send Response to Node-ID");
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID); 
+      DEBUG_PRINTSTR("][State 1]-Send Response to Node-ID");
       DEBUG_PRINT(this->pumpnode_ID); 
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response); 
  
@@ -1638,7 +1654,8 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_debugCounter=DEBUG_CYCLE;
     }else{
        if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
-        DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 1]-ERROR INCOME DATA (");
+        DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+        DEBUG_PRINTSTR("][State 1]-ERROR INCOME DATA (");
         DEBUG_PRINT(IncomeData); 
         DEBUG_PRINTSTR(") FROM PUMP NODE with ID:");
         DEBUG_PRINTLN(this->pumpnode_ID);
@@ -1659,13 +1676,15 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     }else    
     if(IncomeData>this->OnOff)//receive the total time needed 
     {
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 2]-Received Response from node-ID ");
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTSTR("][State 2]-Received Response from node-ID ");
       DEBUG_PRINT(this->pumpnode_ID);DEBUG_PRINTSTR(" ,Response: ");
       DEBUG_PRINTLN(IncomeData);
       this->pumpnode_response=0xffff;//some usefull check
       this->pumpnode_status=PUMPNODE_STATE_3_RESPONSE;
      
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 2]-Send Response to Node-ID ");
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTSTR("][State 2]-Send Response to Node-ID ");
       DEBUG_PRINT(this->pumpnode_ID); 
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response);  
       
@@ -1673,7 +1692,8 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_debugCounter=DEBUG_CYCLE;
     }else{
       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
-        DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler][State 2]-ERROR INCOME DATA FROM PUMP NODE!!!!!!!");
+        DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+        DEBUG_PRINTLNSTR("][State 2]-ERROR INCOME DATA FROM PUMP NODE!!!!!!!");
       }
       this->pumpnode_debugCounter++;
     }
@@ -1692,7 +1712,8 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   }
   else //[STATE -2]---------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESP_FAILED){
-    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State -3:]Failed, response timed out[wait:");
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTSTR("][State -3:]Failed, response timed out[wait:");
     DEBUG_PRINT(this->pumpnode_dif);
     DEBUG_PRINTSTR(",ID:");DEBUG_PRINT(this->pumpnode_ID); 
     DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff); 
@@ -1701,7 +1722,8 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     
   }else //[STATE -3]----------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_4_RESP_FAILED){
-    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][State -4:]Failed, response timed out[wait:");
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTSTR("][State -4:]Failed, response timed out[wait:");
     DEBUG_PRINT(this->pumpnode_dif);
     DEBUG_PRINTSTR(",ID:");DEBUG_PRINT(this->pumpnode_ID); 
     DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff); 
@@ -1716,9 +1738,12 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     
     this->pumpnode_status=PUMPNODE_STATE_ERROR;
     
-    DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!");
-    DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!");
-    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler][WATCHDOG]Dif=");
+    DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID); 
+    DEBUG_PRINTSTR("][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!");
+    DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID); 
+    DEBUG_PRINTSTR("][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!");
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID); 
+    DEBUG_PRINTSTR("][WATCHDOG]Dif=");
     DEBUG_PRINT(dif);
     DEBUG_PRINTSTR("ms, previousTime=");
     DEBUG_PRINT(this->pumpnode_previousTime);

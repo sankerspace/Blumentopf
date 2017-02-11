@@ -5,7 +5,7 @@
 
 // Comment this line for the release version:
 #define DEBUG 1
-#define TEST_PUMP 2 //Testcase every 30 seconds turn on first pump in the list
+#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
 
 
 // watering policy:
@@ -41,8 +41,8 @@ DO NOT CHANGE:
   #define _MINUTE 50
   #define _SECOND 30
   
-  #define HW_RTC_DS1302 (1) //normaly used  (DS1302 OR DS3231)
-  #define HW_RTC_DS3232 (0) //alternative RTC (DS3232)
+  #define HW_RTC_DS1302 (0) //normaly used  (DS1302 OR DS3231)
+  #define HW_RTC_DS3232 (1) //alternative RTC (DS3232)
 
   #if (HW_RTC_DS1302==1) //
     #include <TimeLib.h>
@@ -331,8 +331,10 @@ struct nodeListElement
 class nodeList
 {
 public:
+  nodeList(){mnNodeCount=0;}
   struct nodeListElement myNodes[NODELISTSIZE];
   uint16_t mnNodeCount;
+  
   void     getNodeList();
   uint8_t  addNode(struct nodeListElement);
   uint16_t findNodeByID(uint16_t);         // checks if the node exists
@@ -454,6 +456,7 @@ public:
         pumpnode_previousTime=millis();
         pumpnode_dif=0;
         pumpnode_debugCounter=DEBUG_CYCLE;
+        pumphandler_ID=0;
     }
     
     ~PumpNode_Handler(){}
@@ -465,7 +468,9 @@ public:
     uint16_t getResponseData(void);
     void     processPumpstate(uint16_t IncomeData);
     void     reset(void);
-     
+    void     setPumpHandlerID(uint16_t ID_);
+    uint16_t getPumpHandler(void);
+    
 private:
    // static uint8_t counter;
     /*state variable*/
@@ -479,7 +484,7 @@ private:
     uint32_t pumpnode_dif;               //how many time passed is stored here,
                                          //only STATE 1 and STATE 2 (controller)
     uint16_t pumpnode_debugCounter;
-    
+    uint16_t pumphandler_ID;
 };//3*2byte,1*1byte,3*4byte
 //19byte
 

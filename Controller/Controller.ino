@@ -29,6 +29,8 @@ struct responseData myResponse; //9byte
 struct sensorData myData; //25byte
 class CommandHandler myCommandHandler;
 
+//marko@: wozu brauchen wir diese variable? 
+//verwende sie jetzt Um Pumphandler zu zählen
 uint16_t nDummyCount;
 
 
@@ -111,6 +113,7 @@ void setup(void)
   SPI.transfer(0xAA);
 #endif
 
+nDummyCount=0;
 }//setup
 
 /*
@@ -167,7 +170,7 @@ void loop(void)
 
   if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
   {
-
+    DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("\nMessage available at pipe ");
     //DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
@@ -244,6 +247,7 @@ void loop(void)
 
       if (myNodeList.getNodeType(myNodeList.myNodes[0].ID) == 1)
       {
+        
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[TEST]Node id: ");
         DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
         if (myNodeList.isActive(myNodeList.myNodes[0].ID) == 0)//check if the first node (index=0)in the list is active
@@ -301,6 +305,7 @@ void loop(void)
       handler = PumpList.get(i);
 #if (TEST_PUMP==1)
       if ((nTestWatering % DEBUG_CYCLE) == 0) {
+        DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Processing PumpHandler for NODE-ID:");
         DEBUG_PRINTLN(handler->getID());
       }
@@ -319,6 +324,7 @@ void loop(void)
       */
       if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
       {
+        DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished ");
         DEBUG_PRINTLN(handler->getID());
 
@@ -330,6 +336,7 @@ void loop(void)
         
       } else if (handler->getState() == PUMPNODE_STATE_ERROR)
       {
+        DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("ERROR:PUMP STATEHANDLER IS IN ERROR STATE");
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:");DEBUG_PRINT(handler->getID());
         DEBUG_PRINTSTR(" ,PumpTime: ");DEBUG_PRINTLN(handler->getPumpTime());
@@ -358,6 +365,7 @@ void loop(void)
 #if (TEST_PUMP==1)
   //only informatve, can be deleted later
   if ((nTestWatering % DEBUG_CYCLE) == 0) {
+    DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("nTestWatering="); DEBUG_PRINT(nTestWatering);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
     DEBUG_PRINTLNSTR(" bytes available.");
@@ -373,6 +381,8 @@ inline void removePumphandler(int index, PumpNode_Handler* handler)
   PumpList.remove(index);
   myNodeList.setPumpInactive(handler->getID());
   delete handler;
+  DEBUG_PRINTLNSTR("-----------------------------------------------------------------------------------------");
+  
 }
 
 
@@ -410,7 +420,6 @@ inline void removePumphandler(int index, PumpNode_Handler* handler)
   }
   return "";
   
-  return "";
 }
 
 
@@ -426,7 +435,8 @@ inline void removePumphandler(int index, PumpNode_Handler* handler)
 */
 uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handler *handler_)
 {
-  nDummyCount = 0;
+  DEBUG_PRINTSTR("[TIME] :");DEBUG_PRINTLN(myResponse.ControllerTime);
+  //nDummyCount = 0;
   if (handler_ > 0) {
     if ((handler_->getID() == PumpNode_ID) && (handler_->getPumpTime() == pumpTime)) {
       handler_->reset();
@@ -464,10 +474,14 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
         //  uint16_t pumptime=0;
         PumpNode_Handler *handler = new PumpNode_Handler(PumpNode_ID);
         PumpList.add(handler);          // todo in february: the handler should only add the pump node if it isn't in the list already.
+        nDummyCount++;
+        handler->setPumpHandlerID(nDummyCount);
+        DEBUG_PRINTLNSTR("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");      
         handler->processPumpstate(pumpTime);
         myResponse.ID = handler->getID();
         myResponse.interval = handler->getResponseData();
         myResponse.state &= ~(1 << ID_INEXISTENT);
+        
         DEBUG_PRINTSTR("[CONTROLLER]");
         DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
         DEBUG_PRINT(PumpNode_ID);
@@ -797,6 +811,10 @@ return 0;
 *     NEED SOMETHING LIKE A PING
 *     
 * - DELAY herausholen
+* Logging System 
+*   Where should the log be stored
+*   No LOG in case of Serial prints
+*   
 *Unklar:
 * - isOnline noch notwendig????
 * - (607) currentNode.sensorID = 0;//Marko@ wann erfolgt eigentlich Zuweisung zum Pumpnode???
