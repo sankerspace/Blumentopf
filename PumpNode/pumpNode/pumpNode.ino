@@ -540,7 +540,7 @@ void registration(bool refreshID)
   myData.realTime = 0;
 
   previousTime = millis();
-  displayTime(now());
+  displayTimeFromUNIX(now());
 }
 
 

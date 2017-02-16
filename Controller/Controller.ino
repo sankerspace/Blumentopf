@@ -28,12 +28,12 @@
 /**some declarations for the RTC , in case we have a RTC*/
 
 
-#if (HW_RTC==1)
-#if (HW_RTC_DS1302==1)
-RTC_DS3231 myRTC;
-#elif (HW_RTC_DS3232==1)
-RTC_DS3232 myRTC;
-#endif
+#if (HW_RTC == RTC_1302)
+  RTC_DS1302 myRTC;
+#elif (HW_RTC == RTC_3231)
+  RTC_DS3231 myRTC;
+#elif (HW_RTC == RTC_3232)
+  RTC_DS3232 myRTC;
 #endif
 
 
@@ -75,6 +75,7 @@ void setup(void)
   DEBUG_SERIAL_INIT_WAIT;
   radio.begin();
 
+  
   //  radio.setRetries(15,15);
   //  radio.setPALevel(RF24_PA_MIN);//@Marko: Test other configuration, maybe better communication
   radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
@@ -93,11 +94,12 @@ void setup(void)
   DEBUG_PRINTLN(sizeof(struct responseData));
 
   //Initiate Real Time Clock
-#if (HW_RTC==1)
-  #if (HW_RTC_DS1302==1)
+#if (HW_RTC > NONE)
+  #if (HW_RTC == RTC_1302)
     myRTC.init(&myData.state);
-//  displayTimeFromUNIX(myRTC.getTime());
-  #elif (HW_RTC_DS3232==1)
+  #elif (HW_RTC == RTC_3231)
+    myRTC.init(&myData.state);
+  #elif (HW_RTC == RTC_3232)
     pinMode(HW_RTC_PIN, OUTPUT);
     digitalWrite(HW_RTC_PIN, HIGH);
   //displayTime(RTC.get());
@@ -108,7 +110,7 @@ void setup(void)
   displayTimeFromUNIX(myRTC.getTime());   // if there is a RTC --> display the time independently of the RTC type
 #endif
 
-//  myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   myNodeList.getNodeList();
 
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
@@ -172,13 +174,14 @@ void loop(void)
   bool bResponseNeeded = true;    // not always a message needs to be sent
   uint16_t nDuration;
   uint16_t nID;
+  uint8_t ret;
 
 
   //struct interactiveCommand myInteractiveCommand;
   myResponse.state = 0;
   myResponse.interval = INTERVAL;
   //DEBUG_PRINTSTR("Time before taking RTC:");DEBUG_PRINTLN(millis());
-  myResponse.ControllerTime = getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
+//  myResponse.ControllerTime = getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
   //DEBUG_PRINTSTR("Time after taking RTC:");DEBUG_PRINTLN(millis());
   //DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
   //DEBUG_PRINTLNSTR(" bytes available.");
@@ -186,12 +189,15 @@ void loop(void)
 
   if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
   {
-    DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
-    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("\nMessage available at pipe ");
-    //DEBUG_PRINTLN(nPipenum);
+    DEBUG_PRINTSTR("[TIME] : ");
+    displayTimeFromUNIX(getCurrentTime());
+    DEBUG_PRINTSTR("\n[CONTROLLER] Message available at pipe ");
+    DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
-    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[RECEIVED:]State:"); DEBUG_PRINTDIG(myData.state, BIN); DEBUG_PRINTSTR(" from ID:"); DEBUG_PRINT(myData.ID);
-    DEBUG_PRINTSTR(" with Interval:"); DEBUG_PRINTLN(myData.interval);
+    DEBUG_PRINTSTR("[CONTROLLER][RECEIVED]State: ");
+    DEBUG_PRINTDIG(myData.state, BIN);
+    DEBUG_PRINTSTR(" from ID: "); DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR(" with Interval: "); DEBUG_PRINTLN(myData.interval);
 
     //      myResponse.ControllerTime = 1481803260;
     //    getUNIXtime(&myResponse.ControllerTime);    // gets current timestamp
@@ -208,7 +214,7 @@ void loop(void)
     {
       if ((myData.state & (1 << NODE_TYPE)) == false) // it is a sensor node
       {
-        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("SENSOR MESSAGE");
+        DEBUG_PRINTSTR("[CONTROLLER] SENSOR MESSAGE");
         handleDataMessage();
       }
       else                                  // it is a motor node message
@@ -230,7 +236,7 @@ void loop(void)
       //DEBUG_PRINTLN(myResponse.ControllerTime);
 
       // Send back response, controller real time and the next sleep interval:
-      DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Sending back response: ");
+      DEBUG_PRINTSTR("\tSending back response: ");
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", ID:"); DEBUG_PRINT(myResponse.ID); DEBUG_PRINTSTR(", STATUS-BYTE:");
       DEBUG_PRINTLN(String(myResponse.state, BIN));
@@ -238,7 +244,7 @@ void loop(void)
       radio.stopListening();
       radio.write(&myResponse, sizeof(myResponse));
       radio.startListening();
-      DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("............Done");
+      DEBUG_PRINTLNSTR("\tDone");
 
       DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("Listening now...");
     }
@@ -250,7 +256,7 @@ void loop(void)
 
 
 
-#if (TEST_PUMP==1)
+#if (TEST_PUMP == 1)
     /* this is only for testing!! */
     // DEBUG_PRINTLN(nTestWatering);
 
@@ -264,17 +270,18 @@ void loop(void)
       if (myNodeList.getNodeType(myNodeList.myNodes[0].ID) == 1)
       {
 
-        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[TEST]Node id: ");
+        DEBUG_PRINTSTR("[CONTROLLER][TEST] Node id: ");
         DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
         if (myNodeList.isActive(myNodeList.myNodes[0].ID) == 0)//check if the first node (index=0)in the list is active
-        { uint8_t ret;
+        {
           ret = doWateringTasks(myNodeList.myNodes[0].ID, 10000, 0); //here a new order to a pump Node has to be planned
           if (ret > 0) {
-            DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
+            DEBUG_PRINTSTR("[CONTROLLER]");
+            DEBUG_PRINTLN(handle_ErrorMessages(ret));
 
           }
         } else
-          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[TEST]ERROR:Node already in use.");
+          DEBUG_PRINTSTR("[CONTROLLER][TEST] ERROR: Node already in use.");
       }
     }
     /* Testing end */
@@ -319,10 +326,11 @@ void loop(void)
     PumpNode_Handler *handler;
     for (int i = 0; i < PumpList.size(); i++) {
       handler = PumpList.get(i);
-#if (TEST_PUMP==1)
+#if (TEST_PUMP == 1)
       if ((nTestWatering % DEBUG_CYCLE) == 0) {
-        DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
-        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Processing PumpHandler for NODE-ID:");
+        DEBUG_PRINTSTR("[TIME] : ");
+        displayTimeFromUNIX(getCurrentTime(), 1);
+        DEBUG_PRINTSTR("\r\n\t[CONTROLLER]"); DEBUG_PRINTSTR("Processing PumpHandler for NODE-ID:");
         DEBUG_PRINTLN(handler->getID());
       }
 #endif
@@ -341,8 +349,9 @@ void loop(void)
       if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
       {
         
-        DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
-        DEBUG_PRINTSTR("[CONTROLLER]Number of PumpHandlers:");DEBUG_PRINTLN(PumpList.size());
+        DEBUG_PRINTSTR("[TIME] : ");
+        displayTimeFromUNIX(getCurrentTime(), 1);
+        DEBUG_PRINTSTR("\n[CONTROLLER]Number of PumpHandlers: ");DEBUG_PRINTLN(PumpList.size());
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished ");
         DEBUG_PRINTLN(handler->getID());
 
@@ -354,8 +363,9 @@ void loop(void)
 
       } else if (handler->getState() == PUMPNODE_STATE_ERROR)
       {
-        DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
-        DEBUG_PRINTSTR("[CONTROLLER]Number of PumpHandlers:");DEBUG_PRINTLN(PumpList.size());
+        DEBUG_PRINTSTR("[TIME] : ");
+        displayTimeFromUNIX(getCurrentTime(), 1);
+        DEBUG_PRINTSTR("\n[CONTROLLER]Number of PumpHandlers:");DEBUG_PRINTLN(PumpList.size());
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("ERROR:PUMP STATEHANDLER IS IN ERROR STATE");
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:"); DEBUG_PRINT(handler->getID());
         DEBUG_PRINTSTR(" ,PumpTime: "); DEBUG_PRINTLN(handler->getPumpTime());
@@ -397,9 +407,10 @@ void loop(void)
 #if (TEST_PUMP==1)
   //only informatve, can be deleted later
   if ((nTestWatering % DEBUG_CYCLE) == 0) {
-    DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
-    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("nTestWatering="); DEBUG_PRINT(nTestWatering);
-    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+    DEBUG_PRINTSTR("[TIME] : ");
+    displayTimeFromUNIX(getCurrentTime(), 1);
+    DEBUG_PRINTSTR("\r\n\t[CONTROLLER]"); DEBUG_PRINTSTR("nTestWatering="); DEBUG_PRINTLN(nTestWatering);
+    DEBUG_PRINTSTR("\t[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
     DEBUG_PRINTLNSTR(" bytes available.");
 
   }
@@ -467,7 +478,8 @@ String handle_ErrorMessages(uint8_t ret)
 */
 uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handler *handler_)
 {
-  DEBUG_PRINTSTR("[TIME] :"); DEBUG_PRINTLN(myResponse.ControllerTime);
+  DEBUG_PRINTSTR("[TIME] : ");
+  displayTimeFromUNIX(getCurrentTime(), 1);
   //nDummyCount = 0;
   if (handler_ > 0) {
     if ((handler_->getID() == PumpNode_ID) && (handler_->getPumpTime() == pumpTime)) {
@@ -628,7 +640,9 @@ void handleRegistration(void)
   uint8_t nRet;
   bool newNode = true;
   struct nodeListElement currentNode;
-  DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]Registration request!");
+  
+  myResponse.ControllerTime = getCurrentTime();
+  DEBUG_PRINTSTR("[CONTROLLER][handleRegistration()] Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
   //  if (myData.ID > 0)                      // known node
   if ((myData.state & (1 << NEW_NODE_BIT)) == false)                    // known node
@@ -723,14 +737,14 @@ void handleDataMessage(void)
     DEBUG_PRINTLNSTR("[handleRegistration()]Node does not exist - there seems to be a topology problem.");
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
   }
-  DEBUG_PRINTLNSTR("Data message");
-  DEBUG_PRINT("ID: ");
+  DEBUG_PRINTLNSTR("Data message:");
+  DEBUG_PRINT("\tID: ");
   DEBUG_PRINT(myData.ID);
   DEBUG_PRINTSTR(", Message Type: ");
   DEBUG_PRINT(myData.state & (1 << MSG_TYPE_BIT));
   DEBUG_PRINTSTR(", RTC-Status: ");
   DEBUG_PRINTLN(myData.state & (1 << RTC_RUNNING_BIT));
-  DEBUG_PRINT("Temp: ");
+  DEBUG_PRINT("\tTemp: ");
   DEBUG_PRINT(myData.temperature);
   DEBUG_PRINTSTR(", Humidity: ");
   DEBUG_PRINT(myData.humidity);
@@ -738,7 +752,7 @@ void handleDataMessage(void)
   DEBUG_PRINT(myData.moisture);
   DEBUG_PRINTSTR(", Brightness: ");
   DEBUG_PRINTLN(myData.brightness);
-  DEBUG_PRINTSTR("Interval: ");
+  DEBUG_PRINTSTR("\tInterval: ");
   DEBUG_PRINT(myData.interval);
   DEBUG_PRINTSTR(", Battery Voltage: ");
   DEBUG_PRINTDIG((float)myData.voltage / 100, 2);
@@ -761,12 +775,12 @@ void handleDataMessage(void)
 
   if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
   {
-    DEBUG_PRINTSTR("It was live data...schedule next measurement");
+    DEBUG_PRINTLNSTR("It was live data...schedule next measurement");
     myResponse.interval = getNextMeasurementSlot(nodeIndex);
   }
   else
   {
-    DEBUG_PRINTSTR("It was EEPROM data...no scheduling needed.");
+    DEBUG_PRINTLNSTR("It was EEPROM data...no scheduling needed.");
   }
 
 }
@@ -818,12 +832,8 @@ void handleMotorMessage(void)
 */
 time_t getCurrentTime(void)
 {
-#if (HW_RTC==1)
-#if (HW_RTC_DS1302==1)
+#if (HW_RTC > 0)
   return myRTC.getTime();
-#elif (HW_RTC_DS3232==1)
-  return myRTC.getTime();
-#endif
 #endif
   return 0;
 }
@@ -867,11 +877,11 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   time_t currentTime;
   currentTime = getCurrentTime();
 
-  DEBUG_PRINTSTR("Number of Sensor Nodes: ");
+  DEBUG_PRINTSTR("\tNumber of Sensor Nodes: ");
   DEBUG_PRINTLN(myNodeList.getNumberOfSensorNodes());
 
   time_t tLastScheduledSensorNode = myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot;   // get the last scheduled time slot of all sensor nodes
-  DEBUG_PRINTSTR("Time of last scheduled sensor node: ");
+  DEBUG_PRINTSTR("\tTime of last scheduled sensor node: ");
   DEBUG_PRINTLN(tLastScheduledSensorNode);
 
   //  if (myNodeList.myNodes[nodeIndex].nextSlot == 0)  // this is the first slot
@@ -887,31 +897,33 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   //  myNodeList.myNodes[nodeIndex].nextSlot = myNodeList.myNodes[nodeIndex].nextSlot + INTERVAL * myNodeList.getNumberOfSensorNodes();
   //  myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL;
 
-  DEBUG_PRINTSTR("Current Time: ");
-  DEBUG_PRINTLN(currentTime);
-
-  // are there active tasks?
+  // are there active tasks? (Including the current one)
   if (tLastScheduledSensorNode > currentTime - 7)  // yes
   {
-    DEBUG_PRINTLNSTR("Yes");
+    DEBUG_PRINTLNSTR("\tThere are tasks active");
     myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL / 10;
   }
   else            // no tasks are scheduled for the future. Start scheduling now
   {
-    DEBUG_PRINTLNSTR("No");
+    DEBUG_PRINTLNSTR("\tNo active tasks");
     myNodeList.myNodes[nodeIndex].nextSlot = currentTime + INTERVAL / 10;
   }
 
-  DEBUG_PRINTSTR("Next slot: ");
-  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot);
+  DEBUG_PRINTSTR("\tCurrent Time: ");
+  DEBUG_PRINTLN(currentTime);
+
+  DEBUG_PRINTSTR("\tNext slot time: ");
+  DEBUG_PRINT(myNodeList.myNodes[nodeIndex].nextSlot);
 
 
 
-  DEBUG_PRINTSTR("Interval: ");
-  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime);
+  DEBUG_PRINTSTR(" (Interval: ");
+  DEBUG_PRINT(myNodeList.myNodes[nodeIndex].nextSlot - currentTime);
+  DEBUG_PRINTSTR(",");
 
-  DEBUG_PRINTSTR("Adjusted by protocol delays: ");
-  DEBUG_PRINTLN(myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL / 1000));
+  DEBUG_PRINTSTR(" adjusted by protocol delays: ");
+  DEBUG_PRINT(myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL / 1000));
+  DEBUG_PRINTLNSTR(")");
 
 
 

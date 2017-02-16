@@ -125,10 +125,7 @@ void setup()
 
 //myEEPROM.unsetHeaders();
   myEEPROM.init();
-//  myEEPROM.init();
-//  findIndex();
-//  findIndex();
-//  delIndex();
+
 //    myEEPROM.delIndex();
     
   if (sizeof(struct sensorData) > 32)
@@ -141,7 +138,9 @@ void setup()
   myRTC.init(&myData.state);
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
 //  myRTC.setTime(1486049640);
+
   myData.realTime = myRTC.getTime();
+  DEBUG_PRINTSTR("Time: ");
   displayTimeFromUNIX(myData.realTime);
   
   // read EEPROM
@@ -479,63 +478,18 @@ void sendData(uint16_t* nSleepInterval)
 
 /*
  * Stores data which could not be sent to the EEPROM.
- * It would be good to have an algorithm which evenly uses the EEPROM storage. (Maybe there are simple arduino solutions online...)
+ * The algorithm evenly uses the EEPROM storage.
  * For example:
- *  Possible addresses for data information headers: 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000
+ *  Address examples for data information headers are: 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000
  *  The headers are browsed, always just one header is valid. After the EEPROM data is requested from the controller, the next header is used.
- *  Address blocks of the actual data is stored in the header.
+ *  The block addess of the actual data is stored in the header element.
  */
 void store_DATA_to_EEPROM()
-{   // todo : find a replacement strategy and write the data to EEPROM.
-//  uint8_t nIndexBegin;
-//  findIndex();
-//  myEEPROM.init();
+{
   myEEPROM.add(myData);
   myEEPROM.printElements();
 }
 
-//  uint16_t nIndexBegin;
-//  uint16_t nDataBlockBegin;
-/*
- * This function looks for the EEPROM header. The header is located on a different address after each time the EEPROM data gets fully read by the controller.
- * The purpose is to achieve euqal usage of the EEPROM and avoid defects.
- * 
-*
-* It runs thorugh a predefined address space in the EEPROM and looks for the header information:
-*   INDEXBEGIN      is the start of the address space
-*   INDEXELEMENTS   is the number fo elements (the element size is defined by the struct. It is adapted automatically)
-*   EEPROM_data_start is the first address of the data address space. It is calculated automatically.
-*   DATARANGE_END   is the end of the data address space.
-*   The number of data elements is calculated automatically, although some more testing is adviced.
-*   
-*   Once found it stores this address. Also the current data address stored in the header is retrieved.
-*   If no header is found, one header address and one data address is randomly selected.
-*   The data address is stored in the EEPROM header at the selected address, so next time it will be found.
-*   
-*
- */
-
-
-/*
- * deletes only the index
- */
-/*void delIndex()
-{
-  struct EEPROM_Header myEEPROMHeader;
-  
-  EEPROM.get(nIndexBegin, myEEPROMHeader);   // reading a struct, so it is flexible...
-  myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);
-  EEPROM.put(nIndexBegin, myEEPROMHeader);   // writing the new header with removed index
-}
-*/
-
-/*
- * Deletes data stored in EEPROM
- */
-/*void deleteEEPROM()
-{
-  
-}*/
 
 /*
  * Get last EEPROM data item

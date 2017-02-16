@@ -49,11 +49,11 @@
 * This scetion deals with the RTC and time conversions
 */
 
-#if (HW_RTC==1)
+#if (HW_RTC > NONE)
 /*
 *  DS1302
 */
-#if (HW_RTC_DS1302==1)
+#if (HW_RTC == RTC_1302)
 
 RTC_DS1302::RTC_DS1302(uint8_t CE_pin, uint8_t IO_pin, uint8_t SCLK_pin)
 	: RTC(CE_pin, IO_pin, SCLK_pin) {}
@@ -139,6 +139,7 @@ int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
   
 }
 
+#elif (HW_RTC == RTC_3231)
 
 /*
 *  DS3231
@@ -228,7 +229,7 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 //  }
 }
 
-#elif (HW_RTC_DS3232==1)
+#elif (HW_RTC == RTC_3232)
 
 
 /*
@@ -419,13 +420,17 @@ String displayTime(time_t time_)
 
 }
   
-void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
+void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year, uint8_t nDepth)
 {
 //  byte second, minute, hour, dayOfWeek, dayOfMonth, month, year;
   // retrieve data from DS3231
 //  readDS3231time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);
   // send it to the serial monitor
 //  Serial.println(".");
+  if (nDepth == 0)
+  {
+    return;
+  }
   DEBUG_PRINTDIG(hour, DEC);
   // convert the byte variable to a decimal number when displayed
   DEBUG_PRINTSTR(":");
@@ -440,12 +445,24 @@ void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOf
     DEBUG_PRINTSTR("0");
   }
   DEBUG_PRINTDIG(second, DEC);
+  
+  if (nDepth == 1)
+  {
+    return;
+  }
+  
   DEBUG_PRINTSTR(" ");
   DEBUG_PRINTDIG(dayOfMonth, DEC);
   DEBUG_PRINTSTR("/");
   DEBUG_PRINTDIG(month, DEC);
   DEBUG_PRINTSTR("/");
   DEBUG_PRINTDIG(year, DEC);
+  
+  if (nDepth == 2)
+  {
+    return;
+  }
+  
   DEBUG_PRINTSTR(" Day of week: ");
   switch(dayOfWeek)
   {
@@ -476,12 +493,13 @@ void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOf
 
 }
 
-void displayTimeFromUNIX(time_t showTime)
+void displayTimeFromUNIX(time_t showTime, uint8_t nDepth)
 {
+#if (DEBUG == 1)
 	tmElements_t tm;
 	breakTime(showTime, tm);
-	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year - 30);
-
+	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year - 30, nDepth);	// -30 to convert von 00 to 1970 format
+#endif
 }
 // Convert normal decimal numbers to binary coded decimal
 byte decToBcd(byte val)
@@ -782,6 +800,10 @@ uint8_t DataStorage::add(struct sensorData currentData)
 	mnLastData = nNextData;
 }
 
+
+/*
+ * deletes only the index
+ */
 void DataStorage::delIndex()
 {
   struct EEPROM_Header myEEPROMHeader;
@@ -1345,22 +1367,23 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
   nodeIndex = findNodeByID(newElement.ID);
   if (nodeIndex != 0xffff)        // // element exists already
   {
-    DEBUG_PRINTLNSTR("\tNode exists already! Node cannot be added!");
+    DEBUG_PRINTLNSTR("\t\tNode exists already! Node cannot be added!");
     return 1;
   }
   
-  DEBUG_PRINTLNSTR("\tNode does not exist within the list yet..");
+  DEBUG_PRINTLNSTR("\t\tNode does not exist within the list yet..");
   
 // otherwise add the node to the list and to the memory:
   if (mnNodeCount < NODELISTSIZE)
   {
-    DEBUG_PRINTLNSTR("list isn't full yet.");
+    DEBUG_PRINTLNSTR("\t\tList isn't full yet.");
     myNodes[mnNodeCount] = newElement;      // copy new element
+	myNodes[mnNodeCount].nextSlot = 0;		// no slot yet
     mnNodeCount++;                          // keep track of the number of elements
 
     if (HW == HW_ARDUINO)
     {
-      DEBUG_PRINT("\tArduino ");
+      DEBUG_PRINT("\tHW = Arduino ");
              // write it to SD
 #if (SD_AVAILABLE == 1)
         DEBUG_PRINTLNSTR("(SD version)");
@@ -1386,7 +1409,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
   }
   else
   {
-    DEBUG_PRINTLNSTR("Node list is full! Node cannot be added!");
+    DEBUG_PRINTLNSTR("\tNode list is full! Node cannot be added!");
     return 2;
   }
   return 0;
@@ -1419,13 +1442,14 @@ uint16_t nodeList::getLastScheduledSensorNode()
   {
     if ((myNodes[i].state & (1<<NODELIST_NODETYPE)) == 0) // sensor node
     {
-      DEBUG_PRINT(i);
-      DEBUG_PRINT(": ");
-      DEBUG_PRINTLN(myNodes[i].nextSlot);
+//		DEBUG_PRINT("\t");
+//      DEBUG_PRINT(i);
+//      DEBUG_PRINT(": ");
+//      DEBUG_PRINTLN(myNodes[i].nextSlot);
       if (myNodes[i].nextSlot > tLastScheduledNodeTime)   // found new last node
       {
-        DEBUG_PRINTSTR("New last Node - ");
-        DEBUG_PRINTLN(i);
+//        DEBUG_PRINTSTR("\t\tNew last Node - ");
+//        DEBUG_PRINTLN(i);
         tLastScheduledNodeTime = myNodes[i].nextSlot;
         nLastScheduledNodeIndex = i;
       }

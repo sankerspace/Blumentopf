@@ -39,9 +39,15 @@ DO NOT CHANGE:
 #define HW HW_ARDUINO   // tells whether to compile for Arduino or Photon
 
 //#define HW_RTC (0)    // there is no RTC
-#define HW_RTC (1)      // use the RTC
+#define NONE		(0)
+#define RTC_1302	(1)
+#define RTC_3231	(2)
+#define RTC_3232	(3)
 
-#if (HW_RTC==1)
+// SET THE RTC TYPE HERE:
+#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
+
+#if (HW_RTC > NONE)
 //  #include <Time.h>		// if it's included here, some functions will miss it
 //  #include "Wire.h"
   //defines if we want to set the HW RTC in the setup
@@ -53,13 +59,17 @@ DO NOT CHANGE:
   #define _MINUTE 50
   #define _SECOND 30
   
-  #define HW_RTC_DS1302 (1) //normaly used  (DS1302 OR DS3231)
-  #define HW_RTC_DS3232 (0) //alternative RTC (DS3232)
+//  #define HW_RTC_DS1302 (1) //normaly used  (DS1302 OR DS3231)
+//  #define HW_RTC_DS3232 (0) //alternative RTC (DS3232)
 
-  #if (HW_RTC_DS1302==1) //
+//  #if (HW_RTC_DS1302==1) //
+  #if (HW_RTC == RTC_1302) //
     #include <TimeLib.h>
     #include <DS1302RTC.h>
-  #elif(HW_RTC_DS3232==1)
+//  #elif(HW_RTC_DS3232==1)
+  #elif(HW_RTC == RTC_3231)
+//    #include <TimeLib.h>
+  #elif(HW_RTC == RTC_3232)
     #include "DS3232RTC.h"
     #define HW_RTC_PIN (4)
   #endif
@@ -114,7 +124,7 @@ DO NOT CHANGE:
                                       // in case it is not big enough, it can be increased, but keep in mind that it will use up a lot of space, even if just few nodes are connected!
                                       // If there is time, a list can be implemented...
   #else
-    #define NODELISTSIZE (8)            // Only 8 nodes! Stored in EEPROM
+    #define NODELISTSIZE (20)            // Only 8 nodes! Stored in EEPROM
   #endif
 #endif
 #if (HW == HW_PHOTON)
@@ -385,7 +395,7 @@ public:
 /*
 * to be able to deal with multiple kinds of RTCs, we implement an abstraction layer.
 */
-#if (HW_RTC==1)
+#if (HW_RTC > NONE)
 class RTCLayer
 {
 public:
@@ -398,25 +408,13 @@ public:
 	virtual int adjustRTC(int, uint8_t*, time_t);
 };
 
-#if (HW_RTC_DS1302==1)
-class RTC_DS3231 : public RTCLayer
-{
-public:
-	RTC_DS3231() {};	//: RTCLayer() {};
-  ~RTC_DS3231() {};
-	int init(uint8_t* state);
-	uint8_t setTime(time_t);
-	time_t getTime();
-	int setAlarm(time_t);
-	int adjustRTC(int, uint8_t*, time_t);
-};
-
+#if (HW_RTC == RTC_1302)
 
 class RTC_DS1302 : public RTCLayer
 {
 public:
 	RTC_DS1302(uint8_t, uint8_t, uint8_t);
-  ~RTC_DS1302() {};
+    ~RTC_DS1302() {};
 	int init(uint8_t* state);
 	uint8_t setTime(time_t);
 	time_t getTime();
@@ -426,13 +424,29 @@ private:
 	DS1302RTC RTC;
 };
 
-#elif (HW_RTC_DS3232==1)
+#elif (HW_RTC == RTC_3231)
+
+class RTC_DS3231 : public RTCLayer
+{
+public:
+	RTC_DS3231() {};	//: RTCLayer() {};
+    ~RTC_DS3231() {};
+	int init(uint8_t* state);
+	uint8_t setTime(time_t);
+	time_t getTime();
+	int setAlarm(time_t);
+	int adjustRTC(int, uint8_t*, time_t);
+};
+
+
+//#elif (HW_RTC_DS3232==1)
+#elif (HW_RTC == RTC_3232)
 
 class RTC_DS3232 : public RTCLayer
 {
 public:
 	RTC_DS3232() {RTC=0;};	//: RTCLayer() {};
- ~RTC_DS3232();
+   ~RTC_DS3232();
 	int init(uint8_t* state);
 	uint8_t setTime(time_t);
 	time_t getTime();
@@ -525,7 +539,7 @@ void displayTime();
 String displayTime(time_t time_);
 
 /* displays the time in the UNIX timestamp */
-void displayTimeFromUNIX(time_t);
+void displayTimeFromUNIX(time_t, uint8_t nDepth = 4);
 
 /* converts from decimal to binary decimal */
 byte decToBcd(byte);
