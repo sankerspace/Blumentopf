@@ -1,23 +1,16 @@
-#include "Wire.h"
-#include <Time.h>
-#include <TimeLib.h>
-#include <DS1302RTC.h>
-#include <EEPROM.h>
-
-#include <SD.h>
-
-#include <dht11.h>
-#include "Blumentopf.h"
-
-
 /*
- * ---------------- Blumentopf - Library ---------------
+ * Project: NESE_Blumentopf
+ * File:    Blumentopf.cpp
+ * Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
+ *          Marko Stanisic  (0325230@student.tuwien.ac.at)
+ *          Helmut Bergmann (0325535@student.tuwien.ac.at)
+ * The copyright for the software is by the mentioned authors.
  * 
  * This library provides all functions to the network protocol,
  * real time clock and memory management.
- * It is seperated into two parts which are not split 
+ * It is seperated into three main parts which are not split 
  * into different files, because Arduino and Git don't match well.
- * Further the header provides all kind of constants to adjust the program.
+ * 
  * 
  *    Part I
  * The first part deals with the real time clocks and time conversions.
@@ -34,7 +27,21 @@
  * the EEPROM to ensure even usage. It implements the 
  * whole storage logic, so it is very easy to use in the main sketch.
  * 
- */
+ *  Part III
+ * PumpNode_Handler is a list of all nodes which have to pump at the moment.
+*/
+
+#include "Wire.h"
+#include <Time.h>
+#include <TimeLib.h>
+#include <DS1302RTC.h>
+#include <EEPROM.h>
+
+#include <SD.h>
+
+#include <dht11.h>
+#include "Blumentopf.h"
+
 
 
 

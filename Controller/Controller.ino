@@ -1,3 +1,18 @@
+/*
+ * Project: NESE_Blumentopf
+ * File:    Controller.ino
+ * Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
+ *          Marko Stanisic  (0325230@student.tuwien.ac.at)
+ *          Helmut Bergmann (0325535@student.tuwien.ac.at)
+ * The copyright for the software is by the mentioned authors.
+ * 
+ * The purpose of the module is to coordinate the network of
+ * wireless nodes and to connect it to the IOT platform.
+ * The controller module can run on an Arduino or Particle Photon.
+ * Therefore the corresponding flags (HW, HW_RTC, SD_AVAILABLE, etc.) have to be set in the header file.
+ * 
+*/
+
 #include "Blumentopf.h"
 
 
@@ -79,20 +94,21 @@ void setup(void)
 
   //Initiate Real Time Clock
 #if (HW_RTC==1)
-#if (HW_RTC_DS1302==1)
-  myRTC.init(&myData.state);
-  displayTimeFromUNIX(myRTC.getTime());
-#elif (HW_RTC_DS3232==1)
-  pinMode(HW_RTC_PIN, OUTPUT);
-  digitalWrite(HW_RTC_PIN, HIGH);
+  #if (HW_RTC_DS1302==1)
+    myRTC.init(&myData.state);
+//  displayTimeFromUNIX(myRTC.getTime());
+  #elif (HW_RTC_DS3232==1)
+    pinMode(HW_RTC_PIN, OUTPUT);
+    digitalWrite(HW_RTC_PIN, HIGH);
   //displayTime(RTC.get());
-  myRTC.init(&(myResponse.state));
-  displayTime(myRTC.getTime());
-
+    myRTC.init(&(myResponse.state));
+//  displayTime(myRTC.getTime());
+  #endif
+  
+  displayTimeFromUNIX(myRTC.getTime());   // if there is a RTC --> display the time independently of the RTC type
 #endif
-#endif
 
-  myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//  myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   myNodeList.getNodeList();
 
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing

@@ -1,4 +1,16 @@
-
+/*
+ * Project: NESE_Blumentopf
+ * File:    pumpNode.ino
+ * Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
+ *          Marko Stanisic  (0325230@student.tuwien.ac.at)
+ *          Helmut Bergmann (0325535@student.tuwien.ac.at)
+ * The copyright for the software is by the mentioned authors.
+ * 
+ * This program uses a set of sensors to gather information about it's surrounding.
+ * It registers to a controller and periodically sends the data to the controller.
+ * During the measurements the setup goes into a low power mode.
+ * 
+*/
 
 
 /**************PUMP NODE SETTINGS****************************/
@@ -63,7 +75,7 @@ void setup() {
   criticalTime = (uint32_t)(PUMPNODE_CRITICAL_STATE_OCCUPATION / 2); //software watchdog looks for freesing states
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("CRITICALTIME:"); DEBUG_PRINTLN(criticalTime);
 
-  registration(false);
+  registration(true);
 
 
 }
@@ -148,7 +160,7 @@ void loop(void) {
     if (dif > 2000)
     {
       DEBUG_PRINTLNSTR("[PUMPNODE]REGISTRATION RESET WITH REQUESTING A NEW ID");
-      registration(true);
+      registration(false);
       bounce = false;
       previousTime = millis();
     } else if (dif > 500)

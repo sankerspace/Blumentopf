@@ -1,16 +1,17 @@
-// RF_Test
-
 /*
-  This program tests a three different sensors on the arduino.
-  -) Brightness sensor implemented by a photodiode via ADC.
-  -) Moisture sensor implemented by a YL-69 and YL-38 element via ADC.
-  -) Temperature and Humidity sensor implemented by a DHT11 via a serial protocol (dht11.h).
-  
-  During the measurements the program goes into a low power mode
-  
-  created 18 Nov 2016
-  by Bernhard Fritz
+ * Project: NESE_Blumentopf
+ * File:    SensorNode.ino
+ * Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
+ *          Marko Stanisic  (0325230@student.tuwien.ac.at)
+ *          Helmut Bergmann (0325535@student.tuwien.ac.at)
+ * The copyright for the software is by the mentioned authors.
+ * 
+ * This program uses a set of sensors to gather information about it's surrounding.
+ * It registers to a controller and periodically sends the data to the controller.
+ * During the measurements the setup goes into a low power mode.
+ * 
 */
+
 #include "Blumentopf.h"
 
 

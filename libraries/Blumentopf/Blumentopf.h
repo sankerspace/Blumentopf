@@ -1,3 +1,15 @@
+/*
+ * Project: NESE_Blumentopf
+ * File:    Blumentopf.h
+ * Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
+ *          Marko Stanisic  (0325230@student.tuwien.ac.at)
+ *          Helmut Bergmann (0325535@student.tuwien.ac.at)
+ * The copyright for the software is by the mentioned authors.
+ * 
+ * This header file provides all kind of constants used to 
+ * adjust the program's specifics.
+*/
+
 #include <Time.h>
 #include "Wire.h"
 
@@ -41,8 +53,8 @@ DO NOT CHANGE:
   #define _MINUTE 50
   #define _SECOND 30
   
-  #define HW_RTC_DS1302 (0) //normaly used  (DS1302 OR DS3231)
-  #define HW_RTC_DS3232 (1) //alternative RTC (DS3232)
+  #define HW_RTC_DS1302 (1) //normaly used  (DS1302 OR DS3231)
+  #define HW_RTC_DS3232 (0) //alternative RTC (DS3232)
 
   #if (HW_RTC_DS1302==1) //
     #include <TimeLib.h>
