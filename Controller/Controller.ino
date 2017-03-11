@@ -1,16 +1,16 @@
 /*
- * Project: NESE_Blumentopf
- * File:    Controller.ino
- * Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
- *          Marko Stanisic  (0325230@student.tuwien.ac.at)
- *          Helmut Bergmann (0325535@student.tuwien.ac.at)
- * The copyright for the software is by the mentioned authors.
- * 
- * The purpose of the module is to coordinate the network of
- * wireless nodes and to connect it to the IOT platform.
- * The controller module can run on an Arduino or Particle Photon.
- * Therefore the corresponding flags (HW, HW_RTC, SD_AVAILABLE, etc.) have to be set in the header file.
- * 
+   Project: NESE_Blumentopf
+   File:    Controller.ino
+   Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
+            Marko Stanisic  (0325230@student.tuwien.ac.at)
+            Helmut Bergmann (0325535@student.tuwien.ac.at)
+   The copyright for the software is by the mentioned authors.
+
+   The purpose of the module is to coordinate the network of
+   wireless nodes and to connect it to the IOT platform.
+   The controller module can run on an Arduino or Particle Photon.
+   Therefore the corresponding flags (HW, HW_RTC, SD_AVAILABLE, etc.) have to be set in the header file.
+
 */
 
 #include "Blumentopf.h"
@@ -29,11 +29,11 @@
 
 
 #if (HW_RTC == RTC_1302)
-  RTC_DS1302 myRTC;
+RTC_DS1302 myRTC;
 #elif (HW_RTC == RTC_3231)
-  RTC_DS3231 myRTC;
+RTC_DS3231 myRTC;
 #elif (HW_RTC == RTC_3232)
-  RTC_DS3232 myRTC;
+RTC_DS3232 myRTC;
 #endif
 
 
@@ -75,7 +75,7 @@ void setup(void)
   DEBUG_SERIAL_INIT_WAIT;
   radio.begin();
 
-  
+
   //  radio.setRetries(15,15);
   //  radio.setPALevel(RF24_PA_MIN);//@Marko: Test other configuration, maybe better communication
   radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
@@ -95,19 +95,19 @@ void setup(void)
 
   //Initiate Real Time Clock
 #if (HW_RTC > NONE)
-  #if (HW_RTC == RTC_1302)
-    myRTC.init(&myData.state);
-  #elif (HW_RTC == RTC_3231)
-    myRTC.init(&myData.state);
-  #elif (HW_RTC == RTC_3232)
-    pinMode(HW_RTC_PIN, OUTPUT);
-    digitalWrite(HW_RTC_PIN, HIGH);
-    //Bernhard@: anschauen ob myrepsonse.state oder mydata.state
+#if (HW_RTC == RTC_1302)
+  myRTC.init(&myData.state);
+#elif (HW_RTC == RTC_3231)
+  myRTC.init(&myData.state);
+#elif (HW_RTC == RTC_3232)
+  pinMode(HW_RTC_PIN, OUTPUT);
+  digitalWrite(HW_RTC_PIN, HIGH);
+  //Bernhard@: anschauen ob myrepsonse.state oder mydata.state
   //displayTime(RTC.get());
-    myRTC.init(&(myResponse.state));
-//  displayTime(myRTC.getTime());
-  #endif
-  
+  myRTC.init(&(myResponse.state));
+  //  displayTime(myRTC.getTime());
+#endif
+
   displayTimeFromUNIX(myRTC.getTime());   // if there is a RTC --> display the time independently of the RTC type
 #endif
 
@@ -182,7 +182,7 @@ void loop(void)
   myResponse.state = 0;
   myResponse.interval = INTERVAL;
   //DEBUG_PRINTSTR("Time before taking RTC:");DEBUG_PRINTLN(millis());
-//  myResponse.ControllerTime = getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
+  //  myResponse.ControllerTime = getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
   //DEBUG_PRINTSTR("Time after taking RTC:");DEBUG_PRINTLN(millis());
   //DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(String(freeRam(), DEC));
   //DEBUG_PRINTLNSTR(" bytes available.");
@@ -262,29 +262,32 @@ void loop(void)
     /* this is only for testing!! */
     // DEBUG_PRINTLN(nTestWatering);
 
-    if (myNodeList.isOnline(myNodeList.myNodes[0].ID)) {
+    if (myNodeList.mnNodeCount > 0) {
       nTestWatering++;
     }
 
     if ((nTestWatering % 30000) == 0 )
     {
-
-      if (myNodeList.getNodeType(myNodeList.myNodes[0].ID) == 1)
+      for (int i = 0; i < myNodeList.mnNodeCount; i++)
       {
-
-        DEBUG_PRINTSTR("[CONTROLLER][TEST] Node id: ");
-        DEBUG_PRINTLN(myNodeList.myNodes[0].ID);
-        if (myNodeList.isActive(myNodeList.myNodes[0].ID) == 0)//check if the first node (index=0)in the list is active
+        if (myNodeList.getNodeType(myNodeList.myNodes[i].ID) == 1)
         {
-          ret = doWateringTasks(myNodeList.myNodes[0].ID, 10000, 0); //here a new order to a pump Node has to be planned
-          if (ret > 0) {
-            DEBUG_PRINTSTR("[CONTROLLER]");
-            DEBUG_PRINTLN(handle_ErrorMessages(ret));
 
-          }
-        } else
-          DEBUG_PRINTSTR("[CONTROLLER][TEST] ERROR: Node already in use.");
+          DEBUG_PRINTSTR("[CONTROLLER][TEST] Node id: ");
+          DEBUG_PRINTLN(myNodeList.myNodes[i].ID);
+          if (myNodeList.isActive(myNodeList.myNodes[i].ID) == 0)//check if the first node (index=0)in the list is active
+          {
+            ret = doWateringTasks(myNodeList.myNodes[i].ID, 10000, 0); //here a new order to a pump Node has to be planned
+            if (ret > 0) {
+              DEBUG_PRINTSTR("[CONTROLLER]");
+              DEBUG_PRINTLN(handle_ErrorMessages(ret));
+
+            }
+          } else
+            DEBUG_PRINTSTR("[CONTROLLER][TEST] ERROR: Node already in use.");
+        }
       }
+
     }
     /* Testing end */
 #else
@@ -350,10 +353,10 @@ void loop(void)
       */
       if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
       {
-        
+
         DEBUG_PRINTSTR("[TIME] : ");
         displayTimeFromUNIX(getCurrentTime(), 1);
-        DEBUG_PRINTSTR("\n[CONTROLLER]Number of PumpHandlers: ");DEBUG_PRINTLN(PumpList.size());
+        DEBUG_PRINTSTR("\n[CONTROLLER]Number of PumpHandlers: "); DEBUG_PRINTLN(PumpList.size());
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished ");
         DEBUG_PRINTLN(handler->getID());
 
@@ -367,7 +370,7 @@ void loop(void)
       {
         DEBUG_PRINTSTR("[TIME] : ");
         displayTimeFromUNIX(getCurrentTime(), 1);
-        DEBUG_PRINTSTR("\n[CONTROLLER]Number of PumpHandlers:");DEBUG_PRINTLN(PumpList.size());
+        DEBUG_PRINTSTR("\n[CONTROLLER]Number of PumpHandlers:"); DEBUG_PRINTLN(PumpList.size());
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("ERROR:PUMP STATEHANDLER IS IN ERROR STATE");
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:"); DEBUG_PRINT(handler->getID());
         DEBUG_PRINTSTR(" ,PumpTime: "); DEBUG_PRINTLN(handler->getPumpTime());
@@ -390,12 +393,12 @@ void loop(void)
           DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:PUMP IS NOT RESPONDING(");
           DEBUG_PRINT(MAX_RETRIES);
           DEBUG_PRINTSTR(" RETRIES), ");
-          DEBUG_PRINTSTR("DELETE PUMPHANDLER AND SET PUMP NODE ");DEBUG_PRINT(handler->getID());
+          DEBUG_PRINTSTR("DELETE PUMPHANDLER AND SET PUMP NODE "); DEBUG_PRINT(handler->getID());
           DEBUG_PRINTLNSTR(" OFFLINE, THAT PUMP NODE MUST REGISTRATE AGAIN.");
           myNodeList.setNodeOffline(handler->getID());
           removePumphandler(i, handler);
           i--;
-          
+
           DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
           DEBUG_PRINTLNSTR(" bytes available.");
         }
@@ -642,7 +645,7 @@ void handleRegistration(void)
   uint8_t nRet;
   bool newNode = true;
   struct nodeListElement currentNode;
-  
+
   myResponse.ControllerTime = getCurrentTime();
   DEBUG_PRINTSTR("[CONTROLLER][handleRegistration()] Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
@@ -848,7 +851,7 @@ time_t getCurrentTime(void)
 
 /*
   TODO:
-  
+
    - doWateringtask()-retry-show Pumplist.size
    - if controller set pumpnode offline, how to ensure lifesign from pumpnode
       NEED SOMETHING LIKE A PING
