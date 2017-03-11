@@ -37,7 +37,7 @@
 #endif
 
 
-#define INTERVAL (1800)
+#define INTERVAL (600)
 
 
 struct responseData myResponse; //9byte
@@ -102,7 +102,6 @@ void setup(void)
   #elif (HW_RTC == RTC_3232)
     pinMode(HW_RTC_PIN, OUTPUT);
     digitalWrite(HW_RTC_PIN, HIGH);
-    //Bernhard@: anschauen ob myrepsonse.state oder mydata.state
   //displayTime(RTC.get());
     myRTC.init(&(myResponse.state));
 //  displayTime(myRTC.getTime());
