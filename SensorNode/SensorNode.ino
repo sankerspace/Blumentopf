@@ -58,7 +58,13 @@ DataStorage myEEPROM;
 // Set pins:  CE, IO,CLK
 
 //RTC_DS1302 myRTC(2, 3, 4);    // change as needed. The Idea is that only the constructors need to be changed as another RTC is connected. So the RTC calls below should stay as they are.
-RTC_DS3231 myRTC;
+#if (HW_RTC == RTC_1302)
+  RTC_DS1302 myRTC(2, 3, 4);  // CE, IO, CLK (RST, DAT, CLK)
+#elif (HW_RTC == RTC_3231)
+  RTC_DS3231 myRTC;
+#elif (HW_RTC == RTC_3232)
+  RTC_DS3232 myRTC;
+#endif
 
 // Setting the Sensor Pins
 int moisturePin = A0;

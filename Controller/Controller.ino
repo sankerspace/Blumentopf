@@ -212,6 +212,7 @@ void loop(void)
     }
     else                                    // This is a data message
     {
+      myResponse.ControllerTime = getCurrentTime();
       if ((myData.state & (1 << NODE_TYPE)) == false) // it is a sensor node
       {
         DEBUG_PRINTSTR("[CONTROLLER] SENSOR MESSAGE");
