@@ -71,7 +71,7 @@ DO NOT CHANGE:
 //    #include <TimeLib.h>
   #elif(HW_RTC == RTC_3232)
     #include "DS3232RTC.h"
-    #define HW_RTC_PIN (4)
+    #define HW_RTC_PIN (8)
   #endif
 #endif
 
@@ -445,7 +445,7 @@ public:
 class RTC_DS3232 : public RTCLayer
 {
 public:
-	RTC_DS3232() {RTC=0;};	//: RTCLayer() {};
+	RTC_DS3232() {RTC=0; RTC=new DS3232RTC;};	//: RTCLayer() {};
    ~RTC_DS3232();
 	int init(uint8_t* state);
 	uint8_t setTime(time_t);

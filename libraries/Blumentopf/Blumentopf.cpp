@@ -246,10 +246,10 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 int RTC_DS3232::init(uint8_t* state)
 {
 	DEBUG_PRINTSTR("Initializing the RTC DS3232...");
-  RTC=new DS3232RTC;
+ 
   DEBUG_PRINTLNSTR("done");
 	  
-	*state |= (1 << RTC_RUNNING_BIT);			// set it to valid, otherwise adjust will not react..
+	//*state |= (1 << RTC_RUNNING_BIT);			// set it to valid, otherwise adjust will not react..
 }
 
 /* 
@@ -498,7 +498,9 @@ void displayTimeFromUNIX(time_t showTime, uint8_t nDepth)
 #if (DEBUG == 1)
 	tmElements_t tm;
 	breakTime(showTime, tm);
-	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year - 30, nDepth);	// -30 to convert von 00 to 1970 format
+	//marko@: -1970?????
+	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, (tm.Year - 30), nDepth);	// -30 to convert von 00 to 1970 format
+    //displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tmYearToY2k(tm.Year), nDepth);
 #endif
 }
 // Convert normal decimal numbers to binary coded decimal

@@ -141,7 +141,21 @@ void setup()
   
   // setup the RTC
 //  setupRTC();
-  myRTC.init(&myData.state);
+#if (HW_RTC > NONE)
+  #if (HW_RTC == RTC_1302)
+    myRTC.init(&myData.state);
+  #elif (HW_RTC == RTC_3231)
+    myRTC.init(&myData.state);
+  #elif (HW_RTC == RTC_3232)
+    pinMode(HW_RTC_PIN, OUTPUT);
+    digitalWrite(HW_RTC_PIN, HIGH);
+    //Bernhard@: anschauen ob myrepsonse.state oder mydata.state
+  //displayTime(RTC.get());
+    myRTC.init(&(myResponse.state));
+//  displayTime(myRTC.getTime());
+  #endif
+   displayTimeFromUNIX(myRTC.getTime());   // if there is a RTC --> display the time independently of the RTC type
+#endif
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
 //  myRTC.setTime(1486049640);
 
