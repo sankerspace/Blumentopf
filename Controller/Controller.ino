@@ -37,7 +37,7 @@ RTC_DS3232 myRTC;
 #endif
 
 
-#define INTERVAL (1800)
+#define INTERVAL (600)
 
 
 struct responseData myResponse; //9byte
@@ -95,6 +95,7 @@ void setup(void)
 
   //Initiate Real Time Clock
 #if (HW_RTC > NONE)
+
 #if (HW_RTC == RTC_1302)
   myRTC.init(&myData.state);
 #elif (HW_RTC == RTC_3231)
