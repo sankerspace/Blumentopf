@@ -1813,6 +1813,11 @@ int freeRam(void){
 
 
 
-
+void killID()
+{
+  struct EEPROM_Data myEEPROMData;
+  myEEPROMData.ID = 0xffff;
+  EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // resetting the ID
+}
 
 

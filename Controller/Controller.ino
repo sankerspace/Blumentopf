@@ -21,7 +21,7 @@
 
 
 #if (SD_AVAILABLE == 1)
-#include <SD.h>
+  #include <SD.h>
 #endif
 #include <LinkedList.h> //for PumpHandler List
 
@@ -29,11 +29,11 @@
 
 
 #if (HW_RTC == RTC_1302)
-RTC_DS1302 myRTC;
+  RTC_DS1302 myRTC(2, 3, 4);  // CE, IO, CLK (RST, DAT, CLK)
 #elif (HW_RTC == RTC_3231)
-RTC_DS3231 myRTC;
+  RTC_DS3231 myRTC;
 #elif (HW_RTC == RTC_3232)
-RTC_DS3232 myRTC;
+  RTC_DS3232 myRTC;
 #endif
 
 

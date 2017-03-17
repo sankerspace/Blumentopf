@@ -57,6 +57,7 @@ void setup() {
   pinMode(buttonPin, INPUT);
   randomSeed(analogRead(0));//initialize Random generator
 
+  killID();
   radio.begin();
 
   radio.setPALevel(RF24_PA_LOW);

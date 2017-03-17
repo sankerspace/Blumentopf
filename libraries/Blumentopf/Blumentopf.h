@@ -551,3 +551,4 @@ byte bcdToDec(byte);
 /*https://cdn-learn.adafruit.com/downloads/pdf/memories-of-an-arduino.pdf*/
 int freeRam(void);
 
+void killID();
