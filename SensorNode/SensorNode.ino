@@ -206,16 +206,18 @@ int registerNode(int *pnDelay)
   }
   else                                      // this is a new node
   {
-    DEBUG_PRINTSTR("No EEPROM-ID found. Registering at server with this ");
+    DEBUG_PRINTSTR("No EEPROM-ID found. Registering at server with this random session ID: ");
     myData.state |= (1 << NEW_NODE_BIT);    // this is a new node
     
 // worked well as a random pattern generator, has some problems now:
     myData.temperature = (analogRead(randomPIN) % 100);
     
-
-    DEBUG_PRINTSTR("random session ID: ");
     DEBUG_PRINT(myData.temperature);
     DEBUG_PRINTLNSTR("...");
+
+// it is important to delete all previously collected data from the EEPROM, as the controller will not recognize the ID anymore.
+    myEEPROM.stashData();
+    
   }
 
   myData.state &= ~(1 << MSG_TYPE_BIT);     // set message type to init

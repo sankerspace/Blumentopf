@@ -16,7 +16,14 @@
 
 
 // Comment this line for the release version:
-#define DEBUG 1
+#define DEBUG 1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
+#define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored (for debugging storage)
+#define DEBUG_MESSAGE_HEADER 0			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
+#define DEBUG_DATA_CONTENT 0			// 0: disabled		1: show the content of the data messages (for debugging data handling)
+#define DEBUG_SENSOR_SCHEDULING 0		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
+#define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
+#define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
+
 #define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
 
 
@@ -154,19 +161,28 @@ DO NOT CHANGE:
 
 // For getting rid of serial communication in the release version:
 #if (DEBUG == 1)
-  #define DEBUG_PRINT(x)        Serial.print(x)
-  #define DEBUG_PRINTSTR(x)     Serial.print(F(x))
-  #define DEBUG_PRINTDIG(x, c)  Serial.print (x, c)
-  #define DEBUG_PRINTLN(x)      Serial.println (x)
-  #define DEBUG_PRINTLNSTR(x)   Serial.println(F(x))
-  #define DEBUG_FLUSH           Serial.flush()
-  #define DEBUG_SERIAL_INIT_WAIT Serial.begin(BAUD);while (!Serial) {}
+  #define DEBUG_PRINT(x)        		Serial.print(x)
+  #define DEBUG_PRINT_D(x, d)   		if(d>0){ Serial.print(x);}
+  #define DEBUG_PRINTSTR(x)     		Serial.print(F(x))
+  #define DEBUG_PRINTSTR_D(x, d)     	if(d>0){ Serial.print(x);}
+  #define DEBUG_PRINTDIG(x, c)  		Serial.print (x, c)
+  #define DEBUG_PRINTLN(x)      		Serial.println(x)
+  #define DEBUG_PRINTLN_D(x, d)    		if(d>0){ Serial.println(x);}
+  #define DEBUG_PRINTLNSTR(x)   		Serial.println(F(x))
+  #define DEBUG_PRINTLNSTR_D(x, d)		if(d>0){ Serial.println(F(x));}
+  #define DEBUG_FLUSH           		Serial.flush()
+  #define DEBUG_SERIAL_INIT_WAIT 		Serial.begin(BAUD);while (!Serial) {}
+  #define DEBUG_PRINT_MEM			
 #else
   #define DEBUG_PRINT(x)
+  #define DEBUG_PRINT_D(x, d)
   #define DEBUG_PRINTSTR(x)
+  #define DEBUG_PRINTSTR_D(x, d)
   #define DEBUG_PRINTDIG(x, c)
   #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINTLN_D(x, d)
   #define DEBUG_PRINTLNSTR(x)
+  #define DEBUG_PRINTLNSTR_D(x, d)
   #define DEBUG_FLUSH   
   #define DEBUG_SERIAL_INIT_WAIT
 #endif 
@@ -551,4 +567,5 @@ byte bcdToDec(byte);
 /*https://cdn-learn.adafruit.com/downloads/pdf/memories-of-an-arduino.pdf*/
 int freeRam(void);
 
+void printFreeRam();
 void killID();

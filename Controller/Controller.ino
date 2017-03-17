@@ -21,7 +21,7 @@
 
 
 #if (SD_AVAILABLE == 1)
-  #include <SD.h>
+#include <SD.h>
 #endif
 #include <LinkedList.h> //for PumpHandler List
 
@@ -196,10 +196,17 @@ void loop(void)
     DEBUG_PRINTSTR("\n[CONTROLLER] Message available at pipe ");
     DEBUG_PRINTLN(nPipenum);
     radio.read(&myData, sizeof(struct sensorData));
-    DEBUG_PRINTSTR("[CONTROLLER][RECEIVED]State: ");
-    DEBUG_PRINTDIG(myData.state, BIN);
-    DEBUG_PRINTSTR(" from ID: "); DEBUG_PRINT(myData.ID);
-    DEBUG_PRINTSTR(" with Interval: "); DEBUG_PRINTLN(myData.interval);
+
+// output message details only if required
+    if (DEBUG_MESSAGE_HEADER > 0)
+    {
+      DEBUG_PRINTSTR("[CONTROLLER][RECEIVED]State: ");
+      DEBUG_PRINTDIG(myData.state, BIN);
+      DEBUG_PRINTSTR(" from ID: ");
+      DEBUG_PRINT(myData.ID);
+      DEBUG_PRINTSTR(" with Interval: ");
+      DEBUG_PRINTLN(myData.interval);
+    }
 
     //      myResponse.ControllerTime = 1481803260;
     //    getUNIXtime(&myResponse.ControllerTime);    // gets current timestamp
@@ -217,7 +224,7 @@ void loop(void)
       myResponse.ControllerTime = getCurrentTime();
       if ((myData.state & (1 << NODE_TYPE)) == false) // it is a sensor node
       {
-        DEBUG_PRINTSTR("[CONTROLLER] SENSOR MESSAGE");
+        DEBUG_PRINTLNSTR("[CONTROLLER] SENSOR MESSAGE");
         handleDataMessage();
       }
       else                                  // it is a motor node message
@@ -239,7 +246,7 @@ void loop(void)
       //DEBUG_PRINTLN(myResponse.ControllerTime);
 
       // Send back response, controller real time and the next sleep interval:
-      DEBUG_PRINTSTR("\tSending back response: ");
+      DEBUG_PRINTSTR("\tSending back response - interval: ");
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", ID:"); DEBUG_PRINT(myResponse.ID); DEBUG_PRINTSTR(", STATUS-BYTE:");
       DEBUG_PRINTLN(String(myResponse.state, BIN));
@@ -247,7 +254,7 @@ void loop(void)
       radio.stopListening();
       radio.write(&myResponse, sizeof(myResponse));
       radio.startListening();
-      DEBUG_PRINTLNSTR("\tDone");
+//      DEBUG_PRINTLNSTR("\tDone");
 
       DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("Listening now...");
     }
@@ -364,8 +371,9 @@ void loop(void)
         removePumphandler(i, handler);
         i--;
 
-        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
-        DEBUG_PRINTLNSTR(" bytes available.");
+        printFreeRam();
+//        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+//        DEBUG_PRINTLNSTR(" bytes available.");
 
       } else if (handler->getState() == PUMPNODE_STATE_ERROR)
       {
@@ -387,8 +395,9 @@ void loop(void)
             removePumphandler(i, handler);
             i--;
 
-            DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
-            DEBUG_PRINTLNSTR(" bytes available.");
+            printFreeRam();
+//            DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+//            DEBUG_PRINTLNSTR(" bytes available.");
           }
         } else {
           DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:PUMP IS NOT RESPONDING(");
@@ -400,8 +409,9 @@ void loop(void)
           removePumphandler(i, handler);
           i--;
 
-          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
-          DEBUG_PRINTLNSTR(" bytes available.");
+          printFreeRam();
+//          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+//          DEBUG_PRINTLNSTR(" bytes available.");
         }
       }
     }
@@ -416,8 +426,10 @@ void loop(void)
     DEBUG_PRINTSTR("[TIME] : ");
     displayTimeFromUNIX(getCurrentTime(), 1);
     DEBUG_PRINTSTR("\r\n\t[CONTROLLER]"); DEBUG_PRINTSTR("nTestWatering="); DEBUG_PRINTLN(nTestWatering);
-    DEBUG_PRINTSTR("\t[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
-    DEBUG_PRINTLNSTR(" bytes available.");
+    DEBUG_PRINTSTR("\t");
+    printFreeRam();
+//    DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MEMORY]:Between Heap and Stack still "); DEBUG_PRINT(freeRam());
+//    DEBUG_PRINTLNSTR(" bytes available.");
 
   }
 #endif
@@ -648,7 +660,7 @@ void handleRegistration(void)
   struct nodeListElement currentNode;
 
   myResponse.ControllerTime = getCurrentTime();
-  DEBUG_PRINTSTR("[CONTROLLER][handleRegistration()] Registration request!");
+  DEBUG_PRINTLNSTR("[CONTROLLER][handleRegistration()] Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
   //  if (myData.ID > 0)                      // known node
   if ((myData.state & (1 << NEW_NODE_BIT)) == false)                    // known node
@@ -697,12 +709,13 @@ void handleRegistration(void)
     }
     else
     { //succefull registration of a new node
-      DEBUG_PRINTSTR("[CONTROLLER]");
-      DEBUG_PRINTLNSTR("[handleRegistration()]Session-ID and interval: ");
-      DEBUG_PRINT(myResponse.interval);
+      DEBUG_PRINTSTR("[CONTROLLER][handleRegistration()] Session-ID: ");
+      DEBUG_PRINT(myResponse.interval / 100);
+      DEBUG_PRINTSTR(", Interval: ");
+      DEBUG_PRINT(myResponse.interval % 100);
       DEBUG_PRINTSTR(", Persistent ID: ");
-      DEBUG_PRINTLN(myResponse.ID);
-      DEBUG_PRINTSTR(", Time: ");
+      DEBUG_PRINT(myResponse.ID);
+      DEBUG_PRINTSTR(", Timestamp of controller: ");
       DEBUG_PRINTLN(myResponse.ControllerTime);
       //now the node is online
       myNodeList.setNodeOnline(myResponse.ID);
@@ -739,41 +752,43 @@ void handleDataMessage(void)
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
   if (nodeIndex == 0xffff)      // if the node does not exist
   {
-    DEBUG_PRINTSTR("[CONTROLLER]");
-    DEBUG_PRINTLNSTR("[handleRegistration()]Node does not exist - there seems to be a topology problem.");
+    DEBUG_PRINTLNSTR("\t*ERROR*  Node does not exist - there seems to be a topology problem.");
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
   }
-  DEBUG_PRINTLNSTR("Data message:");
-  DEBUG_PRINT("\tID: ");
-  DEBUG_PRINT(myData.ID);
-  DEBUG_PRINTSTR(", Message Type: ");
-  DEBUG_PRINT(myData.state & (1 << MSG_TYPE_BIT));
-  DEBUG_PRINTSTR(", RTC-Status: ");
-  DEBUG_PRINTLN(myData.state & (1 << RTC_RUNNING_BIT));
-  DEBUG_PRINT("\tTemp: ");
-  DEBUG_PRINT(myData.temperature);
-  DEBUG_PRINTSTR(", Humidity: ");
-  DEBUG_PRINT(myData.humidity);
-  DEBUG_PRINTSTR(", Moisture: ");
-  DEBUG_PRINT(myData.moisture);
-  DEBUG_PRINTSTR(", Brightness: ");
-  DEBUG_PRINTLN(myData.brightness);
-  DEBUG_PRINTSTR("\tInterval: ");
-  DEBUG_PRINT(myData.interval);
-  DEBUG_PRINTSTR(", Battery Voltage: ");
-  DEBUG_PRINTDIG((float)myData.voltage / 100, 2);
-  DEBUG_PRINTSTR(", VCC Voltage: ");
-  DEBUG_PRINTDIG((float)myData.VCC / 100, 2);
-  DEBUG_PRINTSTR(", Time: ");
-  DEBUG_PRINTLN(myData.realTime);
+  DEBUG_PRINTLNSTR("\tData message.");
+  if (DEBUG_DATA_CONTENT > 0)   // show the data contents on the serial interface
+  {
+    DEBUG_PRINT("\t\tID: ");
+    DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR(", Message Type: ");
+    DEBUG_PRINT(myData.state & (1 << MSG_TYPE_BIT));
+    DEBUG_PRINTSTR(", RTC-Status: ");
+    DEBUG_PRINTLN(myData.state & (1 << RTC_RUNNING_BIT));
+    DEBUG_PRINT("\t\tTemp: ");
+    DEBUG_PRINT(myData.temperature);
+    DEBUG_PRINTSTR(", Humidity: ");
+    DEBUG_PRINT(myData.humidity);
+    DEBUG_PRINTSTR(", Moisture: ");
+    DEBUG_PRINT(myData.moisture);
+    DEBUG_PRINTSTR(", Brightness: ");
+    DEBUG_PRINTLN(myData.brightness);
+    DEBUG_PRINTSTR("\t\tInterval: ");
+    DEBUG_PRINT(myData.interval);
+    DEBUG_PRINTSTR(", Battery Voltage: ");
+    DEBUG_PRINTDIG((float)myData.voltage / 100, 2);
+    DEBUG_PRINTSTR(", VCC Voltage: ");
+    DEBUG_PRINTDIG((float)myData.VCC / 100, 2);
+    DEBUG_PRINTSTR(", Time: ");
+    DEBUG_PRINTLN(myData.realTime);
   //      DEBUG_PRINTSTR("Time: ");
   //      DEBUG_PRINTLN(myResponse.ControllerTime);
-
+  }
+  
   //  myResponse.state &= ~((1 << FETCH_EEPROM_DATA1) | (1 << FETCH_EEPROM_DATA2));   // We do not want to have EEPROM data now
-  myResponse.state |= (1 << FETCH_EEPROM_DATA1);   // We do want to have EEPROM data now
-  myResponse.state &= ~(1 << FETCH_EEPROM_DATA2);
-
-  myResponse.ID = myData.ID;
+    myResponse.state |= (1 << FETCH_EEPROM_DATA1);   // We do want to have EEPROM data now
+    myResponse.state &= ~(1 << FETCH_EEPROM_DATA2);
+  
+    myResponse.ID = myData.ID;
 
 
   //  myResponse.interval = INTERVAL;
@@ -781,12 +796,12 @@ void handleDataMessage(void)
 
   if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
   {
-    DEBUG_PRINTLNSTR("It was live data...schedule next measurement");
+    DEBUG_PRINTLNSTR("\tIt was live data...schedule next measurement");
     myResponse.interval = getNextMeasurementSlot(nodeIndex);
   }
   else
   {
-    DEBUG_PRINTLNSTR("It was EEPROM data...no scheduling needed.");
+    DEBUG_PRINTLNSTR("\tIt was EEPROM data...no scheduling needed.");
   }
 
 }
@@ -883,12 +898,12 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   time_t currentTime;
   currentTime = getCurrentTime();
 
-  DEBUG_PRINTSTR("\tNumber of Sensor Nodes: ");
-  DEBUG_PRINTLN(myNodeList.getNumberOfSensorNodes());
+  DEBUG_PRINTSTR_D("\t\tNumber of Sensor Nodes: ", DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINTLN_D(myNodeList.getNumberOfSensorNodes(), DEBUG_SENSOR_SCHEDULING);
 
   time_t tLastScheduledSensorNode = myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot;   // get the last scheduled time slot of all sensor nodes
-  DEBUG_PRINTSTR("\tTime of last scheduled sensor node: ");
-  DEBUG_PRINTLN(tLastScheduledSensorNode);
+  DEBUG_PRINTSTR_D("\t\tTime of last scheduled sensor node: ", DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINTLN_D(tLastScheduledSensorNode, DEBUG_SENSOR_SCHEDULING);
 
   //  if (myNodeList.myNodes[nodeIndex].nextSlot == 0)  // this is the first slot
   //  {
@@ -906,31 +921,34 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   // are there active tasks? (Including the current one)
   if (tLastScheduledSensorNode > currentTime - 7)  // yes
   {
-    DEBUG_PRINTLNSTR("\tThere are tasks active");
+    DEBUG_PRINTLNSTR_D("\t\tThere are tasks active", DEBUG_SENSOR_SCHEDULING);
     myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL / 10;
   }
   else            // no tasks are scheduled for the future. Start scheduling now
   {
-    DEBUG_PRINTLNSTR("\tNo active tasks");
+    DEBUG_PRINTLNSTR_D("\t\tNo active tasks", DEBUG_SENSOR_SCHEDULING);
     myNodeList.myNodes[nodeIndex].nextSlot = currentTime + INTERVAL / 10;
   }
 
-  DEBUG_PRINTSTR("\tCurrent Time: ");
-  DEBUG_PRINTLN(currentTime);
+  DEBUG_PRINTSTR_D("\t\tCurrent Time: ", DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINTLN_D(currentTime, DEBUG_SENSOR_SCHEDULING);
 
-  DEBUG_PRINTSTR("\tNext slot time: ");
-  DEBUG_PRINT(myNodeList.myNodes[nodeIndex].nextSlot);
+  DEBUG_PRINTSTR_D("\t\tNext slot time: ", DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINT_D(myNodeList.myNodes[nodeIndex].nextSlot, DEBUG_SENSOR_SCHEDULING);
 
 
 
-  DEBUG_PRINTSTR(" (Interval: ");
-  DEBUG_PRINT(myNodeList.myNodes[nodeIndex].nextSlot - currentTime);
-  DEBUG_PRINTSTR(",");
+  DEBUG_PRINTSTR_D(" (Interval: ", DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINT_D(myNodeList.myNodes[nodeIndex].nextSlot - currentTime, DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINTSTR_D(",", DEBUG_SENSOR_SCHEDULING);
 
-  DEBUG_PRINTSTR(" adjusted by protocol delays: ");
-  DEBUG_PRINT(myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL / 1000));
-  DEBUG_PRINTLNSTR(")");
+  DEBUG_PRINTSTR_D(" adjusted by protocol delays: ", DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINT_D(myNodeList.myNodes[nodeIndex].nextSlot - currentTime - (REGISTRATION_TIMEOUT_INTERVAL / 1000), DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINTLNSTR_D(")", DEBUG_SENSOR_SCHEDULING);
 
+
+// show all scheduled measurements:
+    printNodeList(currentTime);
 
 
   // for testing it is assumed that the watering is not triggered.
@@ -938,3 +956,24 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
 }
 
 
+void printNodeList(time_t currentTime)
+{
+  uint16_t i;
+  if (DEBUG_LIST_SENSOR_SCHEDULING == 0)
+  {
+    return;
+  }
+  DEBUG_PRINTLNSTR("\tNodelist:");
+  
+  for(i = 0; i < myNodeList.mnNodeCount; i++)
+  {
+    if ((myNodeList.myNodes[i].state & (1<<NODELIST_NODETYPE)) == 0) // it is a sensor node
+    {
+      DEBUG_PRINTSTR("\t\tID: ");
+      DEBUG_PRINT(myNodeList.myNodes[i].ID);
+      DEBUG_PRINT(" - ");
+      displayTimeFromUNIX(myNodeList.myNodes[i].nextSlot, 1);
+      DEBUG_PRINTLN(" ");
+    }
+  }
+}

@@ -1365,20 +1365,23 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
   uint16_t nCurrentAddress;
   
 // check if node exists already:
-  DEBUG_PRINTLNSTR("\tBrowsing list of existing nodes");
-  nodeIndex = findNodeByID(newElement.ID);
-  if (nodeIndex != 0xffff)        // // element exists already
-  {
-    DEBUG_PRINTLNSTR("\t\tNode exists already! Node cannot be added!");
-    return 1;
-  }
+	if (DEBUG_NODE_LIST == 1)
+	{
+		DEBUG_PRINTLNSTR_D("\tBrowsing list of existing nodes", DEBUG_NODE_LIST);
+	}
+	nodeIndex = findNodeByID(newElement.ID);
+	if (nodeIndex != 0xffff)        // // element exists already
+	{
+		DEBUG_PRINTLNSTR_D("\t\tNode exists already! Node cannot be added!", DEBUG_NODE_LIST);
+		return 1;
+	}
   
-  DEBUG_PRINTLNSTR("\t\tNode does not exist within the list yet..");
+	DEBUG_PRINTLNSTR_D("\t\tNode does not exist within the list yet..", DEBUG_NODE_LIST);
   
 // otherwise add the node to the list and to the memory:
   if (mnNodeCount < NODELISTSIZE)
   {
-    DEBUG_PRINTLNSTR("\t\tList isn't full yet.");
+	DEBUG_PRINTLNSTR_D("\t\tList isn't full yet.", DEBUG_NODE_LIST);
     myNodes[mnNodeCount] = newElement;      // copy new element
 	myNodes[mnNodeCount].nextSlot = 0;		// no slot yet
     mnNodeCount++;                          // keep track of the number of elements
@@ -1811,7 +1814,15 @@ int freeRam(void){
  return (int) &v-(__brkval==0?(int)&__heap_start:(int) __brkval);
 }
 
-
+void printFreeRam()
+{
+  if (DEBUG_FREE_MEMORY > 0)
+  {
+    DEBUG_PRINTSTR("[CONTROLLER][MEMORY]:Between Heap and Stack still ");
+    DEBUG_PRINT(freeRam());
+	DEBUG_PRINTLNSTR(" bytes available.");
+  }
+}
 
 void killID()
 {
