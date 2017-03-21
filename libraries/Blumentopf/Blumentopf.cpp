@@ -37,10 +37,13 @@
 #include <DS1302RTC.h>
 #include <EEPROM.h>
 
-#include <SD.h>
 
 #include <dht11.h>
 #include "Blumentopf.h"
+
+#if (SD_AVAILABLE == 1)
+	#include <SD.h>
+#endif
 
 
 
@@ -214,11 +217,13 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 //  {
 	tLocalTime = getTime();
 	
-	DEBUG_PRINTSTR("\nController time: ");
+	DEBUG_PRINTSTR("\tController time: ");
 	DEBUG_PRINT(controllerTime);
-	
 	DEBUG_PRINTSTR(" Our time: ");
-	DEBUG_PRINTLN(tLocalTime);
+	DEBUG_PRINT(tLocalTime);
+	DEBUG_PRINTSTR(", Deviation: ");
+	DEBUG_PRINTLN(abs(tLocalTime - controllerTime));
+	
     if (abs(tLocalTime - controllerTime) > RTC_SYNC_THRESHOLD)
     {
 		DEBUG_PRINTSTR("\tRTC deviation too big. Adjusting RTC...");
@@ -245,9 +250,11 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 
 int RTC_DS3232::init(uint8_t* state)
 {
+  if (DEBUG_RTC > 0)
+  {
 	DEBUG_PRINTSTR("Initializing the RTC DS3232...");
- 
-  DEBUG_PRINTLNSTR("done");
+	DEBUG_PRINTLNSTR("done");
+  }
 	  
 	//*state |= (1 << RTC_RUNNING_BIT);			// set it to valid, otherwise adjust will not react..
 }
@@ -566,21 +573,27 @@ uint8_t DataStorage::init()
   {
     currentAddress = INDEXBEGIN + sizeof(myEEPROMHeader) * i;
     EEPROM.get(currentAddress, myEEPROMHeader);   // reading a struct, so it is flexible...
-    DEBUG_PRINTSTR("Header ");
-    DEBUG_PRINT(i);
-    DEBUG_PRINTSTR(" - Address ");
-    DEBUG_PRINT(currentAddress);
-    DEBUG_PRINTSTR(": ");
-    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+	if (DEBUG_DATA_STORAGE > 0)
+	{
+      DEBUG_PRINTSTR("\tHeader ");
+      DEBUG_PRINT(i);
+      DEBUG_PRINTSTR(" - Address ");
+      DEBUG_PRINT(currentAddress);
+      DEBUG_PRINTSTR(": ");
+      DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+	}
     
     if ((myEEPROMHeader.DataStartPosition & (1<<EEPROM_HEADER_STATUS_VALID)) > 0)   // this header is valid.
     {
       mnIndexBegin = currentAddress;     // This is the Index Position
       mnDataBlockBegin = myEEPROMHeader.DataStartPosition & ~(1<<EEPROM_HEADER_STATUS_VALID);    // Calculate the position of the first EEPROM data
-      DEBUG_PRINTSTR("Found Header at ");
-      DEBUG_PRINT(mnIndexBegin);
-      DEBUG_PRINTSTR(", first data block is at ");
-      DEBUG_PRINTLN(mnDataBlockBegin);
+	  if (DEBUG_DATA_STORAGE > 0)
+	  {
+	    DEBUG_PRINTSTR("\tFound Header at ");
+	    DEBUG_PRINT(mnIndexBegin);
+	    DEBUG_PRINTSTR(", first data block is at ");
+	    DEBUG_PRINTLN(mnDataBlockBegin);
+	  }
 	  
 // find next usable data block
 		findQueueEnd();
@@ -603,6 +616,11 @@ uint8_t DataStorage::init()
 
 
   EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the data (ID) back to EEPROM...
+  struct sensorData dummy;
+  EEPROM.get(mnDataBlockBegin, dummy);   // reading a struct, so it is flexible...
+
+  if (DEBUG_DATA_STORAGE > 0)
+  {
   DEBUG_PRINTSTR("No header found.\nHeader adress range:  ");
   DEBUG_PRINT(INDEXBEGIN);
   DEBUG_PRINTSTR(" until ");
@@ -618,22 +636,21 @@ uint8_t DataStorage::init()
   DEBUG_PRINTSTR(" and first data block at ");
   DEBUG_PRINTLN(mnDataBlockBegin);
 
-  struct sensorData dummy;
-  EEPROM.get(mnDataBlockBegin, dummy);   // reading a struct, so it is flexible...
   DEBUG_PRINTSTR("Initializing data block at address ");
   DEBUG_PRINT(mnDataBlockBegin);
   DEBUG_PRINTSTR(" - last_data bit is ");
   DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_LAST)) > 0);
+  }
   
 
   dummy.state = (1 << EEPROM_DATA_LAST);    // the EEPROM_DATA_AVAILABLE bit has to be zero
 
   EEPROM.put(mnDataBlockBegin, dummy);   // writing the data (ID) back to EEPROM...
-  DEBUG_PRINTSTR("Done");
+  DEBUG_PRINTSTR_D("Done", DEBUG_DATA_STORAGE);
 
   EEPROM.get(mnDataBlockBegin, dummy);   // reading a struct, so it is flexible...
-  DEBUG_PRINTSTR(" - data_available bit is ");
-  DEBUG_PRINTLN((dummy.state & (1 << EEPROM_DATA_AVAILABLE)) > 0);
+  DEBUG_PRINTSTR_D(" - data_available bit is ", DEBUG_DATA_STORAGE);
+  DEBUG_PRINTLN_D((dummy.state & (1 << EEPROM_DATA_AVAILABLE)) > 0, DEBUG_DATA_STORAGE);
   mnLastData = mnDataBlockBegin;		// the address of the last item is the address we have been looking for
 //  mnNextData = mnDataBlockBegin;
   empty = true;
@@ -678,7 +695,7 @@ uint8_t DataStorage::findQueueEnd()
 	do
 	{
 		nPreviousAddress = nCurrentAddress;
-		DEBUG_PRINTLN(nCurrentAddress);
+		DEBUG_PRINTLN_D(nCurrentAddress, DEBUG_DATA_STORAGE);
 		EEPROM.get(nCurrentAddress, currentElement);   // reading the current data item
 
 		nCurrentAddress += sizeof(currentElement);
@@ -698,8 +715,8 @@ uint8_t DataStorage::findQueueEnd()
 	
 	if (nCurrentAddress == mnDataBlockBegin)		// flag is not set in any element...there was an overflow!
 	{
-		DEBUG_PRINTSTR("No 'last-item'-flag found! --> Overflow. All elements have to be transmitted. Oldest element is: ");
-		DEBUG_PRINTLN(nAddressOfOldestElement);
+		DEBUG_PRINTSTR_D("No 'last-item'-flag found! --> Overflow. All elements have to be transmitted. Oldest element is: ", DEBUG_DATA_STORAGE);
+		DEBUG_PRINTLN_D(nAddressOfOldestElement, DEBUG_DATA_STORAGE);
 		nCurrentAddress = nAddressOfOldestElement;
 		mnLastData = nAddressBeforeOldestElement;
 		mbOverflow = true;
@@ -717,16 +734,16 @@ uint8_t DataStorage::findQueueEnd()
     }
 	}
 	
-	DEBUG_PRINTSTR("Next: ");
-	DEBUG_PRINTLN(nCurrentAddress);
+	DEBUG_PRINTSTR_D("Next: ", DEBUG_DATA_STORAGE);
+	DEBUG_PRINTLN_D(nCurrentAddress, DEBUG_DATA_STORAGE);
 	empty = true;	// per default we assume there was no data
 	if (nCurrentAddress != (mnDataBlockBegin + sizeof(currentElement)))	// there was at least one data block
 	{
 		empty = false;
 	}
 		
-	DEBUG_PRINTSTR("Last Address: ");
-	DEBUG_PRINTLN(mnLastData);
+	DEBUG_PRINTSTR_D("Last Address: ", DEBUG_DATA_STORAGE);
+	DEBUG_PRINTLN_D(mnLastData, DEBUG_DATA_STORAGE);
 }
 
 /*
@@ -741,18 +758,23 @@ uint8_t DataStorage::add(struct sensorData currentData)
 // for an empty queue mnLastData equals the begin of the list.
 	if (empty == false)
 	{
-    DEBUG_PRINTSTR("Not empty. Previous address: ");
-    DEBUG_PRINT(mnLastData);
-    DEBUG_PRINTSTR(", next usuable address: ");
+      if (DEBUG_DATA_STORAGE > 0)
+      {
+        DEBUG_PRINTSTR("\tNot empty. Previous address: ");
+        DEBUG_PRINT(mnLastData);
+        DEBUG_PRINTSTR(", next usuable address: ");
+      }
 	// getting the next usable address:
-		nNextData = mnLastData;
+      nNextData = mnLastData;
    
-		incrementDataAddress(&nNextData);             // go to the next data address
+      incrementDataAddress(&nNextData);             // go to the next data address
 //		+ sizeof(currentData);
-   DEBUG_PRINTLN(nNextData);
-   DEBUG_PRINTSTR("Begin of the data: ");
-   DEBUG_PRINT(mnDataBlockBegin);
-
+      if (DEBUG_DATA_STORAGE > 0)
+      {
+        DEBUG_PRINTLN(nNextData);
+        DEBUG_PRINTSTR("\tBegin of the data: ");
+        DEBUG_PRINT(mnDataBlockBegin);
+      }
 //		uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
 //		if (nNextData >= DATARANGE_END)	// if the address is outside of the address range, start from the beginning of the data block
 //		{
@@ -766,14 +788,17 @@ uint8_t DataStorage::add(struct sensorData currentData)
 	}
 	else				// the queue is empty
 	{
-    DEBUG_PRINTSTR("Empty. ");
-		nNextData = mnLastData;
+      DEBUG_PRINTSTR_D("\tEmpty. ", DEBUG_DATA_STORAGE);
+      nNextData = mnLastData;
 	}
 
-	DEBUG_PRINTSTR("Adding ");
-	DEBUG_PRINT(currentData.realTime);
-	DEBUG_PRINTSTR(" at address ");
-	DEBUG_PRINTLN(nNextData);
+	if (DEBUG_DATA_STORAGE > 0)
+	{
+	  DEBUG_PRINTSTR("\tAdding ");
+	  DEBUG_PRINT(currentData.realTime);
+	  DEBUG_PRINTSTR(" at address ");
+	  DEBUG_PRINTLN(nNextData);
+	}
 
 	// storing the new data and mark it as last data. In case of an overflow, skip this flag.
 	// In this case there will be no "last" element, but the timestamps will be checked.
@@ -793,8 +818,8 @@ uint8_t DataStorage::add(struct sensorData currentData)
 		lastElement.state &= ~(1<<EEPROM_DATA_LAST);	// previous data is not the last.
 		EEPROM.put(mnLastData, lastElement);   			// writing the state back to the previous element.
 		
-		DEBUG_PRINTSTR("Deleting flag for ");
-		DEBUG_PRINTLN(mnLastData);
+		DEBUG_PRINTSTR_D("Deleting flag for ", DEBUG_DATA_STORAGE);
+		DEBUG_PRINTLN_D(mnLastData, DEBUG_DATA_STORAGE);
 	}
 
 
@@ -839,11 +864,14 @@ void DataStorage::readNextItem(struct sensorData* dataElement)
   if (mbOverflow == false)   				// non-overflow situation
   {
 //    DEBUG_PRINTSTR("\tNo overflow - retrieving data...");
-    DEBUG_PRINTSTR("\tNo overflow - retrieving data from address ");
-    DEBUG_PRINT(mnLastData);
-    DEBUG_PRINTSTR("...");
+    if (DEBUG_DATA_STORAGE > 0)
+    {
+      DEBUG_PRINTSTR("\t\tNo overflow - retrieving data from address ");
+      DEBUG_PRINT(mnLastData);
+      DEBUG_PRINTSTR("...");
+    }
     EEPROM.get(mnLastData, *dataElement);   // reading the data we want to transmit
-    DEBUG_PRINTLNSTR("done");
+    DEBUG_PRINTLNSTR_D("done", DEBUG_DATA_STORAGE);
   }
   else                      				// overflow situation - read
   {
@@ -860,14 +888,14 @@ void DataStorage::readNextItem(struct sensorData* dataElement)
   //    -) unset overflow
 
     uint16_t currentDataAddress = mnDataBlockBegin;
-    DEBUG_PRINTSTR("\tOverflow - current address: ");
-    DEBUG_PRINT(currentDataAddress);
+    DEBUG_PRINTSTR_D("\t\tOverflow - current address: ", DEBUG_DATA_STORAGE);
+    DEBUG_PRINT_D(currentDataAddress, DEBUG_DATA_STORAGE);
     decrementDataAddress(&currentDataAddress);       // get the address of the data to send
-    DEBUG_PRINTSTR(", increased address: ");
-    DEBUG_PRINT(currentDataAddress);
-    DEBUG_PRINT(" - retrieving data...");
+    DEBUG_PRINTSTR_D(", increased address: ", DEBUG_DATA_STORAGE);
+    DEBUG_PRINT_D(currentDataAddress, DEBUG_DATA_STORAGE);
+    DEBUG_PRINT_D(" - retrieving data...", DEBUG_DATA_STORAGE);
     EEPROM.get(currentDataAddress, *dataElement);    // reading out the data
-    DEBUG_PRINTLNSTR("done");
+    DEBUG_PRINTLNSTR_D("done", DEBUG_DATA_STORAGE);
   }
 }
 
@@ -882,17 +910,21 @@ void DataStorage::freeNextItem()
   {
     if (mnLastData == mnDataBlockBegin)   // is this the only element?  set the header index to the next element. The EEPROM_DATA_LAST bit doesn't have to be deleted, since the block will be ignored afterwards anyway
     {
-      DEBUG_PRINTSTR("\tNo overflow..only element - unsetting validity bit of current header (address: ");
-      DEBUG_PRINT(mnIndexBegin);
+	
   // unsetting the header valid bit:
       EEPROM.get(mnIndexBegin, myEEPROMHeader);   // reading the currently valid header
-      DEBUG_PRINT(" - data address: ");
-      DEBUG_PRINT(myEEPROMHeader.DataStartPosition);
-      DEBUG_PRINT(" --> ");
+      if (DEBUG_DATA_STORAGE > 0)
+	  {
+        DEBUG_PRINTSTR("\tNo overflow..only element - unsetting validity bit of current header (address: ");
+        DEBUG_PRINT(mnIndexBegin);
+        DEBUG_PRINT(" - data address: ");
+        DEBUG_PRINT(myEEPROMHeader.DataStartPosition);
+        DEBUG_PRINT(" --> ");
+	  }
       myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);     // unsetting its validity bit
       EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing back the header to invalidate it.
-      DEBUG_PRINT(myEEPROMHeader.DataStartPosition);
-      DEBUG_PRINTLN(")");
+      DEBUG_PRINT_D(myEEPROMHeader.DataStartPosition, DEBUG_DATA_STORAGE);
+      DEBUG_PRINTLN_D(")", DEBUG_DATA_STORAGE);
       
       
   // moving the header index forward:
@@ -906,14 +938,16 @@ void DataStorage::freeNextItem()
       myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);    // Set this as the valid position of the first EEPROM data. It is important to also set the empty flag, so it is clear this data is not valid.
       EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header
 
-
-    DEBUG_PRINTSTR("\tNew header address: ");
-    DEBUG_PRINTLN(mnIndexBegin);
-    DEBUG_PRINTSTR("\tNew data address: ");
-    DEBUG_PRINTLN(mnDataBlockBegin);
-    DEBUG_PRINTSTR("\tAdding validity bit: ");
-    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
-    DEBUG_PRINTLNSTR("\tDone");
+    if (DEBUG_DATA_STORAGE > 0)
+	{
+      DEBUG_PRINTSTR("\tNew header address: ");
+      DEBUG_PRINTLN(mnIndexBegin);
+      DEBUG_PRINTSTR("\tNew data address: ");
+      DEBUG_PRINTLN(mnDataBlockBegin);
+      DEBUG_PRINTSTR("\tAdding validity bit: ");
+      DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+      DEBUG_PRINTLNSTR("\tDone");
+	}
     
     mnLastData = mnDataBlockBegin;    // wird evtl nicht richtig gesetzt!?
   // resetting the storage:
@@ -924,35 +958,41 @@ void DataStorage::freeNextItem()
     {
 
     // mark the previous element as the last one...
-    DEBUG_PRINTSTR("\tNo overflow... multiple elements left - current data address: ");
-    DEBUG_PRINTLN(mnLastData);
+      DEBUG_PRINTSTR_D("\tNo overflow... multiple elements left - current data address: ", DEBUG_DATA_STORAGE);
+      DEBUG_PRINTLN_D(mnLastData, DEBUG_DATA_STORAGE);
       decrementDataAddress(&mnLastData);
-    DEBUG_PRINTSTR("\tsetting data element at address ");
-    DEBUG_PRINT(mnLastData);
-    DEBUG_PRINTLNSTR("\tas last element.");
+	  if (DEBUG_DATA_STORAGE > 0)
+	  {
+        DEBUG_PRINTSTR("\tsetting data element at address ");
+        DEBUG_PRINT(mnLastData);
+        DEBUG_PRINTLNSTR("\tas last element.");
+	  }
       
       setDataAsLast(mnLastData);           // mark it as last
 //      EEPROM.get(mnLastData, currentData);  // reading the previous data
 //      setDataAsLast(currentData);           // mark it as last
 //      EEPROM.put(mnLastData, currentData);  // write back the previous data
-    DEBUG_PRINTLNSTR("\tDone");
+      DEBUG_PRINTLNSTR_D("\tDone", DEBUG_DATA_STORAGE);
     }
   }
   else              // overflow situation - read
   {
     uint16_t currentData = mnDataBlockBegin;
 
-  DEBUG_PRINTSTR("\tOverflow... next data address: ");
-  DEBUG_PRINTLN(currentData);
+    if (DEBUG_DATA_STORAGE > 0)
+    {
+      DEBUG_PRINTSTR("\tOverflow... next data address: ");
+      DEBUG_PRINTLN(currentData);
+    }
 
 
     decrementDataAddress(&currentData);       // get the address of the sent data
-  DEBUG_PRINTSTR("\tPrevious data address: ");
-  DEBUG_PRINTLN(currentData);
+    DEBUG_PRINTSTR_D("\tPrevious data address: ", DEBUG_DATA_STORAGE);
+    DEBUG_PRINTLN_D(currentData, DEBUG_DATA_STORAGE);
     decrementDataAddress(&currentData);       // get the address of the now last element in the storage
     setDataAsLast(currentData);               // mark it as last
-  DEBUG_PRINTSTR("\tAddress of the now last element: ");
-  DEBUG_PRINTLN(currentData);
+    DEBUG_PRINTSTR_D("\tAddress of the now last element: ", DEBUG_DATA_STORAGE);
+    DEBUG_PRINTLN_D(currentData, DEBUG_DATA_STORAGE);
     
     mbOverflow = false;   // reset overflow
   }
@@ -1035,15 +1075,17 @@ void DataStorage::stashData()
   struct EEPROM_Header myEEPROMHeader;
   
   EEPROM.get(mnIndexBegin, myEEPROMHeader);   // reading a struct, so it is flexible...
-  DEBUG_PRINTSTR("Resetting index ");
-  DEBUG_PRINT(myEEPROMHeader.DataStartPosition);
-  DEBUG_PRINTSTR(" - at address ");
-  DEBUG_PRINT(mnIndexBegin);
-  myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);
-  EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
-  DEBUG_PRINTSTR(" to ");
-  DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
-  
+  if (DEBUG_DATA_STORAGE > 0)
+  {
+    DEBUG_PRINTSTR("Resetting index ");
+    DEBUG_PRINT(myEEPROMHeader.DataStartPosition);
+    DEBUG_PRINTSTR(" - at address ");
+    DEBUG_PRINT(mnIndexBegin);
+    myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);
+    EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
+    DEBUG_PRINTSTR_D(" to ", DEBUG_DATA_STORAGE);
+    DEBUG_PRINTLN_D(myEEPROMHeader.DataStartPosition, DEBUG_DATA_STORAGE);
+  }
   
   myEEPROMHeader.DataStartPosition = mnNextDataBlock;	// the next data block is the new start address
   myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);	// set the index valid
@@ -1053,10 +1095,13 @@ void DataStorage::stashData()
 	mnIndexBegin = INDEXBEGIN;
   }
   
-  DEBUG_PRINTSTR("Setting next index at address ");
-  DEBUG_PRINT(mnIndexBegin);
-  DEBUG_PRINTSTR(" to the next data address ");
-  DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+  if (DEBUG_DATA_STORAGE > 0)
+  {
+    DEBUG_PRINTSTR("Setting next index at address ");
+    DEBUG_PRINT(mnIndexBegin);
+    DEBUG_PRINTSTR(" to the next data address ");
+    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
+  }
   
   EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
   mbOverflow = false;	// no overflow happened so far
@@ -1270,13 +1315,16 @@ void nodeList::getNodeList()
  #else 
  
       nCurrentAddress = NODELIST_ADDRESS;
-      
-      DEBUG_PRINTSTR("Maximum nodelist length: ");
-      DEBUG_PRINT(NODELISTSIZE);
-      DEBUG_PRINTSTR("Starting search at ");
-      DEBUG_PRINTLN(nCurrentAddress);
-      DEBUG_PRINTLNSTR("Nodes found: ");
-      
+
+	  if (DEBUG_NODE_LIST > 0)
+	  {
+		  DEBUG_PRINTSTR("\tMaximum nodelist length: ");
+		  DEBUG_PRINT(NODELISTSIZE);
+		  DEBUG_PRINTSTR(" - Starting search at ");
+		  DEBUG_PRINTLN(nCurrentAddress);
+		  DEBUG_PRINTSTR("\tNodes found: ");
+      }
+	  
       for(mnNodeCount = 0; mnNodeCount < NODELISTSIZE; mnNodeCount++)
       {
         EEPROM.get(nCurrentAddress, myNodes[mnNodeCount]);   // reading a struct, so it is flexible...
@@ -1284,22 +1332,36 @@ void nodeList::getNodeList()
         {
           break;
         }
-
-        DEBUG_PRINT(myNodes[mnNodeCount].ID);
-        DEBUG_PRINT(" - ");
-      //  if (myNodes[mnNodeCount].nodeType == 0)
-        if((myNodes[mnNodeCount].state & (1<<NODELIST_NODETYPE))==0)
-        {
-          DEBUG_PRINTLNSTR("SensorNode");
-        }
-        else
-        {
-          DEBUG_PRINTLNSTR("PumpNode");
-        }
+		if (DEBUG_NODE_LIST > 0)
+		{
+			DEBUG_PRINTLN(" ");
+			DEBUG_PRINT(myNodes[mnNodeCount].ID);
+			DEBUG_PRINT(" - ");
+		  //  if (myNodes[mnNodeCount].nodeType == 0)
+			if((myNodes[mnNodeCount].state & (1<<NODELIST_NODETYPE))==0)
+			{
+			  DEBUG_PRINTLNSTR("SensorNode");
+			}
+			else
+			{
+			  DEBUG_PRINTLNSTR("PumpNode");
+			}
+		}
         nCurrentAddress += sizeof(struct nodeListElement);
       }
-      DEBUG_PRINT(mnNodeCount);
-      DEBUG_PRINTLNSTR(" nodes found in total.");
+	  if (DEBUG_NODE_LIST > 0)			// are debug messages enabled?
+	  {
+		  if (mnNodeCount > 0)		// there have been nodes
+		  {
+			  DEBUG_PRINTSTR("\r\n\t");
+			  DEBUG_PRINT(mnNodeCount);
+			  DEBUG_PRINTLNSTR(" nodes found in total.");
+		  }
+		  else
+		  {
+			DEBUG_PRINTLNSTR("none!");
+		  }
+	  }
 
 #endif
     
@@ -1365,10 +1427,10 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
   uint16_t nCurrentAddress;
   
 // check if node exists already:
-	if (DEBUG_NODE_LIST == 1)
-	{
-		DEBUG_PRINTLNSTR_D("\tBrowsing list of existing nodes", DEBUG_NODE_LIST);
-	}
+//	if (DEBUG_NODE_LIST == 1)
+//	{
+	DEBUG_PRINTLNSTR_D("\tBrowsing list of existing nodes", DEBUG_NODE_LIST);
+//	}
 	nodeIndex = findNodeByID(newElement.ID);
 	if (nodeIndex != 0xffff)        // // element exists already
 	{
@@ -1461,6 +1523,21 @@ uint16_t nodeList::getLastScheduledSensorNode()
     }
   }
   return nLastScheduledNodeIndex;
+}
+
+
+uint16_t nodeList::getPumpEpochLength()
+{
+  uint16_t i;
+  uint16_t nPumpNodeCount = 0;
+  for(i = 0; i < mnNodeCount; i++)
+  {
+    if ((myNodes[i].state & (1 << NODELIST_NODETYPE)) == 1)	// pump node
+	{
+	  nPumpNodeCount++;
+	}
+  }
+  return nPumpNodeCount * INTERVAL / 10;
 }
 
  /*

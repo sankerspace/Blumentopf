@@ -15,30 +15,40 @@
 
 
 
-// Comment this line for the release version:
+// General debug messages:
 #define DEBUG 1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
-#define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored (for debugging storage)
-#define DEBUG_MESSAGE_HEADER 0			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
-#define DEBUG_DATA_CONTENT 0			// 0: disabled		1: show the content of the data messages (for debugging data handling)
+#define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
+#define DEBUG_MESSAGE_HEADER 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
+#define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
 #define DEBUG_SENSOR_SCHEDULING 0		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
 #define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
+#define DEBUG_RTC 0						// 0: disabled		1: show RTC infos
 
-#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
+// For debugging the sensor node
+#define DEBUG_DATA_STORAGE 0				// 0: disabled		1: for analysing the EEPROM Data class internals
+#define DEBUG_SENSOR_MESSAGE_HEADER 0		// 0: disabled		1: 
 
+// For debugging the pump node
+
+//#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
+#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
+
+#define INTERVAL (600)	// Duration between two protocol - timeslots [0.1s]
 
 // watering policy:
 #define POL_WATERING_DEFAULT_DURATION (10)      // per default it should give water for 10 seconds every day after 19:00
 #define WATERING_START_HOUR    (23)    // Start of the watering (hour)
 #define WATERING_START_MINUTE  (24)    // Start of the watering (minute)
 
+#define WATERING_CYCLES_TO_WAIT (2)
+#define WATERING_THRESHOLD		(950)	// if no sensor is connected: 300, with photoresistor: 950
 
 /* Table 5 - watering policy flags 
 DO NOT CHANGE:
 */
 #define POL_ACTIVE (0)            // POL_ACTIVE:            0...not active,                   1...active
 #define POL_USE_MOISTURE (1)      // POL_USE_MOISTURE:      0...don't user moisture data,     1...use moisture sensor data
-
 
 // sets Particle or photon:
 #define HW_ARDUINO (1)
@@ -91,8 +101,8 @@ DO NOT CHANGE:
 #endif
 //Radio communication defines
 #define RADIO_CHANNEL               152//108
-#define WAIT_SEND_INTERVAL            2000
-#define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*3  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
+#define WAIT_SEND_INTERVAL            500
+#define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*5  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
 #define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds   
           
 
@@ -131,7 +141,7 @@ DO NOT CHANGE:
                                       // in case it is not big enough, it can be increased, but keep in mind that it will use up a lot of space, even if just few nodes are connected!
                                       // If there is time, a list can be implemented...
   #else
-    #define NODELISTSIZE (20)            // Only 8 nodes! Stored in EEPROM
+    #define NODELISTSIZE (8)            // Only 8 nodes! Stored in EEPROM
   #endif
 #endif
 #if (HW == HW_PHOTON)
@@ -298,17 +308,17 @@ class DataStorage
 {
 ///	DataStorage() : mbOverflow = 0; {}
 public:
-	DataStorage() {}
+  DataStorage() {}
 	
-	uint8_t init();
+  uint8_t init();
 //	uint8_t findIndex();
-	uint8_t add(struct sensorData);
-	void getNext(struct sensorData *);
-	uint8_t remove(uint16_t);
-	uint8_t findQueueEnd();
-	void delIndex();
-	void printElements();
-	void stashData();
+  uint8_t add(struct sensorData);
+  void getNext(struct sensorData *);
+  uint8_t remove(uint16_t);
+  uint8_t findQueueEnd();
+  void delIndex();
+  void printElements();
+  void stashData();
   void readNextItem(struct sensorData*);
   void freeNextItem();
   void unsetHeaders();
@@ -319,13 +329,13 @@ private:
   void decrementDataAddress(uint16_t*);
   void setDataAsLast(uint16_t);
   void setDataAsNotLast(uint16_t);
-	uint16_t mnIndexBegin;
-	uint16_t mnDataBlockBegin;
-	uint16_t mnNextDataBlock;		// Block where next data is stored to. If equal mnDataBlockBegin then it's the first data element.
-	uint16_t mnLastData;		// Block where previous data has been stored to.
+  uint16_t mnIndexBegin;
+  uint16_t mnDataBlockBegin;
+  uint16_t mnNextDataBlock;		// Block where next data is stored to. If equal mnDataBlockBegin then it's the first data element.
+  uint16_t mnLastData;		// Block where previous data has been stored to.
 //	uint16_t mnNextData;
-	bool mbOverflow;		// signals there were more failed transmissions than memory available
-	bool empty;
+  bool mbOverflow;		// signals there were more failed transmissions than memory available
+  bool empty;
 };
 
 /*
@@ -364,15 +374,24 @@ struct nodeListElement
   uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
   byte     watering_policy;
   time_t   nextSlot;
+  sensorData nodeData;
 };
 
-
+// 7258155010
+// 1490033280
 class nodeList
 {
 public:
-  nodeList(){mnNodeCount=0;}
+  nodeList(){mnNodeCount=0; mnCycleCount = 0; mnPreviouslyScheduledNode = NODELISTSIZE; mnPumpSlot = 0; mnPumpSlotEnable = false; mnCurrentInterval = 0;}
   struct nodeListElement myNodes[NODELISTSIZE];
   uint16_t mnNodeCount;
+  uint16_t mnCycleCount;
+  uint16_t mnPreviouslyScheduledNode;
+  bool     mnPumpSlotEnable;
+  time_t   mnPumpSlot;
+  uint16_t mnActivePump;
+  uint16_t mnLastAddedSensorNode;
+  uint16_t mnCurrentInterval;
   
   void     getNodeList();
   uint8_t  addNode(struct nodeListElement);
@@ -380,6 +399,7 @@ public:
   void     clearEEPROM_Nodelist();
   uint16_t getNumberOfSensorNodes();
   uint16_t getLastScheduledSensorNode();
+  uint16_t getPumpEpochLength();
   
   /*
   *0xff .. Node doesnt exist

@@ -426,7 +426,7 @@ int registerNode(void)
   /*******************Registration Response from Controller*********************/
   radio.read(&myResponse , sizeof(myResponse));
   /****************************************************************************/
-  DEBUG_PRINTLNSTR("[PUMPNODE][registerNode()]received: ID: ");
+  DEBUG_PRINTSTR("[PUMPNODE][registerNode()]received: ID: ");
   DEBUG_PRINT(myResponse.ID);
   DEBUG_PRINTSTR(", Status: ");
   DEBUG_PRINTDIG(myResponse.state, BIN);

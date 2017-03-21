@@ -239,13 +239,11 @@ int registerNode(int *pnDelay)
 
       if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
       {
-
-        DEBUG_PRINTLNSTR("Got response!");
-        DEBUG_PRINTSTR("  Received Session ID: ");
+        DEBUG_PRINTSTR("\tReceived Session ID: ");
         DEBUG_PRINT((int)(myResponse.interval/100));
 
         DEBUG_PRINTSTR(",  expected: ");
-        DEBUG_PRINTLN(myData.temperature);
+        DEBUG_PRINT(myData.temperature);
 
         
         if (((int)(myResponse.interval/100)) == (int) (myData.temperature))      // is the response for us? (yes, we stored the session ID in the temperature to keep the message small and reception easy...it could be changed to a struct in a "struct payload" which can be casted in the receiver depending on the status flags)
@@ -253,18 +251,18 @@ int registerNode(int *pnDelay)
           myData.ID = myResponse.ID;
           myData.interval = (myResponse.interval % 100);
           myEEPROMData.ID = myResponse.ID;
-          EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // writing the data (ID) back to EEPROM...
+          EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);   // writing the data (ID) back to EEPROM...
 
           DEBUG_PRINTLNSTR("...ID matches");
-          DEBUG_PRINTSTR("  Persistent ID: ");
+          DEBUG_PRINTSTR("\tPersistent ID: ");
           DEBUG_PRINT(myResponse.ID);
           DEBUG_PRINTSTR(", Interval: ");
           DEBUG_PRINTLN(myData.interval);
-          DEBUG_PRINTSTR("Stored Persistent ID in EEPROM...");
+          DEBUG_PRINTLNSTR("\tStored Persistent ID in EEPROM...");
         }
         else                                                  // not our response
         {
-          DEBUG_PRINTLNSTR("ID missmatch! Ignore response...");
+          DEBUG_PRINTLNSTR("...ID missmatch! Ignore response...");
           return 11;
         }
 
@@ -293,6 +291,7 @@ int registerNode(int *pnDelay)
   }
   else      // there was no response
   {
+    // per default wait the same interval as before
     return nRet;
   }
 
@@ -309,13 +308,13 @@ int registerNode(int *pnDelay)
 void loop()
 {
   int nDHT_Status;
-  uint16_t nSleepInterval = 0;
   
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on to indicate action
   
   digitalWrite(sensorPower, HIGH);   // turn on the sensor power and wait some time to stabilize
   delay(10);
 // initialises the RTC to save power
+  DEBUG_PRINTSTR("\r\nPreparing a data message:\r\n\t");
   myRTC.init(&myData.state);
 
 
@@ -350,13 +349,13 @@ void loop()
   
 // reads the current real time value
   myData.realTime = myRTC.getTime();
-  DEBUG_PRINTSTR("reading done. Time: ");
+  DEBUG_PRINTSTR("\tTime: ");
   displayTimeFromUNIX(myData.realTime);
   digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
 
 
 
-  sendData(&nSleepInterval);
+  sendData();
 
 
 
@@ -369,7 +368,7 @@ void loop()
   turnOffOutputs();
 //  Sleepy::loseSomeTime(myResponse.interval * 100);
 //  Sleepy::loseSomeTime(nSleepInterval * 1000);
-  hibernate(nSleepInterval * 10);
+  hibernate(myNodeList.mnCurrentInterval * 10);
 //delay(myResponse.interval * 100);
 
 }
@@ -386,7 +385,7 @@ void turnOffOutputs()
   pinMode(A5, INPUT);
 }
 
-void sendData(uint16_t* nSleepInterval)
+void sendData()
 {
   bool sending = true;
   int nRet;
@@ -412,11 +411,11 @@ void sendData(uint16_t* nSleepInterval)
       {
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
         {
-          DEBUG_PRINTSTR("Response is valid, next measurement in ");
+          DEBUG_PRINTSTR("\tResponse is valid, next measurement in ");
 //          DEBUG_PRINT(myResponse.interval / 10);
           DEBUG_PRINT(myResponse.interval);
 //          myResponse.interval = 100;
-          *nSleepInterval = myResponse.interval;      // this is the actual time to sleep...
+          myNodeList.mnCurrentInterval = myResponse.interval;      // this is the actual time to sleep...
           DEBUG_PRINTLNSTR(" seconds.");
           digitalWrite(sensorPower, HIGH);   // when we finished measuring, turn the sensor power off again
           delay(10);
@@ -433,11 +432,11 @@ void sendData(uint16_t* nSleepInterval)
         if (EEPROM_data_available() == true)
         {
           DEBUG_PRINTLNSTR("\tData available in EEPROM");
-          Serial.println(myResponse.state);
+
           switch (myResponse.state &  FETCH_EEPROM_REG_MASK)
           {
             case FETCH_EEPROM_REG_SKIP :     // controller doesn't want EEPROM data..go to sleep
-              DEBUG_PRINTLNSTR("\tThe controller doesn't want EEPROM data now");
+              DEBUG_PRINTLNSTR("\tThe controller doesn't want EEPROM data now.");
               sending = false;
               break;
             case FETCH_EEPROM_REG_SEND :     // controller wants EEPROM data now
@@ -473,6 +472,10 @@ void sendData(uint16_t* nSleepInterval)
         if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
         {
           store_DATA_to_EEPROM();
+      // The interval duration should be the same as before..
+          DEBUG_PRINTSTR("\tNext measurement in ");
+          DEBUG_PRINT(myNodeList.mnCurrentInterval);
+          DEBUG_PRINTLNSTR(" seconds.");
         }
         sending = false;
         // otherwise we do not care..start sleeping
@@ -486,6 +489,10 @@ void sendData(uint16_t* nSleepInterval)
       if ((myData.state & (1 << EEPROM_DATA_PACKED)) == false)     // transmitted live data
       {
         store_DATA_to_EEPROM();
+      // The interval duration should be the same as before..
+        DEBUG_PRINTSTR("\tNext measurement in ");
+        DEBUG_PRINT(myNodeList.mnCurrentInterval);
+        DEBUG_PRINTLNSTR(" seconds.");
       }
       // otherwise we do not care..start sleeping anyway
       sending = false;
@@ -515,10 +522,10 @@ void store_DATA_to_EEPROM()
  */
 void fetchEEPROMdata(struct sensorData* nextData)
 {
-  DEBUG_PRINTLNSTR("Getting a data element for transmission..");
+  DEBUG_PRINTLNSTR("\t\tGetting a data element for transmission..");
 //  struct sensorData nextData;
   myEEPROM.readNextItem(nextData);
-  DEBUG_PRINTLNSTR("done");
+//  DEBUG_PRINTLNSTR("done");
 }
 
 /*
@@ -528,7 +535,7 @@ void fetchEEPROMdata(struct sensorData* nextData)
  */
 void freeEEPROMdata()
 {
-  DEBUG_PRINTLNSTR("Deleting the transmitted data element from EEPROM..");
+  DEBUG_PRINTLNSTR("\tDeleting the transmitted data element from EEPROM..");
   myEEPROM.freeNextItem();
   DEBUG_PRINTLNSTR("done");
 }
@@ -620,10 +627,11 @@ uint16_t getBatteryVoltage()
   delay(20);
 
 
-  DEBUG_PRINTSTR("\n nResult: ");
+/*  DEBUG_PRINTSTR("\n nResult: ");
   DEBUG_PRINTLN(nResult);
   DEBUG_PRINTDIG(V_ADC_max, 2);
   DEBUG_PRINTLNSTR("");
+*/
 
   float fVoltage = 100.0 * nResult * VOLTAGE_DIVIDER_FACTOR * V_ADC_max / (1024);
 
@@ -693,16 +701,15 @@ int readDHT11()
 void printValues(int DHT11_State)
 {
   char cDegreeSymbol = 176;
-  DEBUG_PRINTLN("\n");
 
 // Print the Temperature and Humidity values:
   if (DHT11_State == 0)
   {
-    DEBUG_PRINTSTR("Humidity:    ");
+    DEBUG_PRINTSTR("\tHumidity:    ");
     DEBUG_PRINTDIG((float) myData.humidity , 2);
     DEBUG_PRINTLN("%");
   
-    DEBUG_PRINTSTR("Temperature: ");
+    DEBUG_PRINTSTR("\tTemperature: ");
     DEBUG_PRINTDIG((float) myData.temperature , 2);
     DEBUG_PRINT(cDegreeSymbol);
     DEBUG_PRINTLN("C");
@@ -713,43 +720,45 @@ void printValues(int DHT11_State)
     switch (DHT11_State)
     {
     case DHTLIB_ERROR_CHECKSUM: 
-      DEBUG_PRINTLNSTR("No Humidity and Temperature data - Checksum error"); 
+      DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Checksum error");
+      break;
     case DHTLIB_ERROR_TIMEOUT: 
-      DEBUG_PRINTLNSTR("No Humidity and Temperature data - Time out error"); 
+      DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Time out error"); 
+      break;
     default: 
-      DEBUG_PRINTLNSTR("No Humidity and Temperature data - Unknown error"); 
+      DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Unknown error"); 
     }
   }
 
 // Print the light value
   if(myData.brightness < LIGHT_THRESHOLD)
   {
-    DEBUG_PRINTSTR("It is night (");
+    DEBUG_PRINTSTR("\tIt is night (");
     DEBUG_PRINT(myData.brightness);
-    DEBUG_PRINT(")\n");
+    DEBUG_PRINTLN(")");
   }
   else
   {
-    DEBUG_PRINTSTR("It is day   (");
+    DEBUG_PRINTSTR("\tIt is day   (");
     DEBUG_PRINT(myData.brightness);
-    DEBUG_PRINT(")\n");
+    DEBUG_PRINTLN(")");
   }
 
 
   // Print the moisture value
   if(myData.moisture < MOISTURE_THRESHOLD)
   {
-    DEBUG_PRINTSTR("The plant doesn't need watering (");
+    DEBUG_PRINTSTR("\tThe plant doesn't need watering (");
     DEBUG_PRINT(myData.moisture);
     DEBUG_PRINTLN(")");
   }
   else {
-    DEBUG_PRINTSTR("It is time to water the plant   (");
+    DEBUG_PRINTSTR("\tIt is time to water the plant   (");
     DEBUG_PRINT(myData.moisture);
     DEBUG_PRINTLN(")");
   }
 
-  DEBUG_PRINTSTR("Voltage:     ");
+  DEBUG_PRINTSTR("\tVoltage:     ");
   DEBUG_PRINT(myData.voltage);
   DEBUG_PRINTLN("V");
   return;
@@ -786,9 +795,9 @@ int RF_action(int* pnDelay)
     
     // Send the measurement results
     DEBUG_PRINTSTR("Sending data...");
-    DEBUG_PRINT(myData.state);
+//    DEBUG_PRINT(myData.state);
     DEBUG_PRINTSTR("ID: ");
-    DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTLN(myData.ID);
     radio.write(&myData, sizeof(struct sensorData));
     
   delay(10);   
@@ -796,7 +805,7 @@ int RF_action(int* pnDelay)
     radio.startListening();
 
 
-    
+
     // Wait here until we get a response, or timeout (250ms)
     unsigned long started_waiting_at = millis();
     bool timeout = false;
@@ -811,7 +820,11 @@ int RF_action(int* pnDelay)
     // Describe the results
     if ( timeout )
     {
-      DEBUG_PRINTLNSTR("Failed, response timed out.");
+      DEBUG_PRINTLNSTR("\tFailed, response timed out.");
+      DEBUG_PRINTSTR("\t\tStarted to wait at: ");
+      DEBUG_PRINT(started_waiting_at);
+      DEBUG_PRINTSTR("\t\t current time: ");
+      DEBUG_PRINTLN(millis());
       radio.powerDown();
       return 1;
     }
@@ -825,7 +838,7 @@ int RF_action(int* pnDelay)
       // Show response:
       //printf("Got response %lu, round-trip delay: %lu\n\r",got_time,millis()-got_time);
 
-      DEBUG_PRINTSTR("\n\tGot response (Round-trip delay: ");
+      DEBUG_PRINTSTR("\tGot response (Round-trip delay: ");
       *pnDelay = millis()-started_waiting_at;
       DEBUG_PRINT(*pnDelay);
       DEBUG_PRINTLN(" ms)");
