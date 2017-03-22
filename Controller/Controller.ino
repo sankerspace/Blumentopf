@@ -369,7 +369,9 @@ if (bProcessPumps == false)
   // Therefore it seems also inactive pumpnodes should be addressed here.
               connectedSensorNode = myNodeList.findNodeByID(myNodeList.myNodes[myNodeList.mnActivePump].sensorID);   // this is the connected Sensor
               DEBUG_PRINTSTR("\t\t\tMoisture: ");
-              DEBUG_PRINTLN(myNodeList.myNodes[connectedSensorNode].nodeData.moisture);
+              DEBUG_PRINT(myNodeList.myNodes[connectedSensorNode].nodeData.moisture);
+              DEBUG_PRINTSTR(", ");
+              DEBUG_PRINTLN(myNodeList.myNodes[connectedSensorNode].nodeData.moisture2);
               if (myNodeList.myNodes[connectedSensorNode].nodeData.moisture <= WATERING_THRESHOLD)    // watering needed
 //if (1)
               {
@@ -724,6 +726,8 @@ void logData(void)
   currentData += ",";
   currentData += String(myData.moisture);
   currentData += ",";
+  currentData += String(myData.moisture2);
+  currentData += ",";
   currentData += String(myData.brightness);
   currentData += ",";
   currentData += String(myData.voltage);
@@ -897,6 +901,8 @@ void handleDataMessage(void)
     DEBUG_PRINT(myData.humidity);
     DEBUG_PRINTSTR(", Moisture: ");
     DEBUG_PRINT(myData.moisture);
+    DEBUG_PRINTSTR(", Moisture2: ");
+    DEBUG_PRINT(myData.moisture2);
     DEBUG_PRINTSTR(", Brightness: ");
     DEBUG_PRINTLN(myData.brightness);
     DEBUG_PRINTSTR("\t\tInterval: ");

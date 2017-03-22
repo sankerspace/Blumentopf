@@ -271,9 +271,10 @@ DO NOT CHANGE:
 struct sensorData
 {
   uint16_t ID;
-  float temperature;//4byte		// should be shortended to uint16_t
-  float humidity;//4byte			// should be shortended to uint16_t
+  float temperature;//4byte		// should be shortened to uint16_t
+  float humidity;//4byte			// should be shortened to uint16_t
   uint16_t moisture;
+  uint16_t moisture2;
   uint16_t brightness;
 //  float voltage;
   uint16_t voltage;
@@ -281,7 +282,7 @@ struct sensorData
   uint8_t state;			// could be moved to unused data bits...
   time_t realTime;//4byte
   uint16_t interval = 2;
-};//25byte
+};//27byte
 
 
 struct responseData
