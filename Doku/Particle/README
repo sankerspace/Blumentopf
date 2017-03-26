@@ -1,0 +1,38 @@
+Controller should work on a Particle Photon, but also can run an Arduino
+Here you can find a description how to prepare/compile to run the Controller.ino
+on a Particle Photon
+
+Configuration on the breadboard:
+-Particle Photon
+-DS3231 Real Time Controller
+-nRF24L01+ 
+
+Pin Configuration:
+  rf-Gnd/Pin1 to ground-breadboard
+  rf-Vcc/Pin2 to  3,3v-breadboard
+  rf-CE/Pin3 to   D6-photon
+  rf-CS/Pin4 to   A2-photon
+  rf-SCK/Pin5 to  A3-photon
+  rf-MOSI/Pin6 to A5-photon
+  rf-MISO/Pin7 to A4-photon
+
+  DS3231/VCC  to   3,3v-breadboard
+  DS3231/Gnd  to   Ground-breadboard
+  DS3231/SCL  to   D0-photon  
+  DS3231/SDA  to   D1-photon
+  
+  
+1)  Prepare Atom IDE (half online/ half offline)
+
+  https://atom.io/packages/particle-dev
+ 
+2) Create Symbolic Links to all cpp and h files necessary for controller.ino
+    
+    Start bash script <path-to_repo>/Doku/Particle/createSymbols.sh
+    which automatically creates alls symbol links to these files 
+    inside folder  <path-to_repo>/Controller 
+ 
+3)  Compile Controller.ino for Photon
+
+    
+

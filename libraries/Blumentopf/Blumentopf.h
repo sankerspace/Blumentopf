@@ -84,9 +84,9 @@ DO NOT CHANGE:
     #include <TimeLib.h>
     #include <DS1302RTC.h>
 //  #elif(HW_RTC_DS3232==1)
-  #elif(HW_RTC == RTC_3231)
+  #elif(HW_RTC == RTC_3231 && HW == HW_PHOTON)
 //    #include <TimeLib.h>
-  #elif(HW_RTC == RTC_3232)
+  #elif(HW_RTC == RTC_3232 HW != HW_PHOTON)
     #include "DS3232RTC.h"
     #define HW_RTC_PIN (8)
   #endif
