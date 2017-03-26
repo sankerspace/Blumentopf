@@ -5,8 +5,8 @@
  *          Marko Stanisic  (0325230@student.tuwien.ac.at)
  *          Helmut Bergmann (0325535@student.tuwien.ac.at)
  * The copyright for the software is by the mentioned authors.
- * 
- * This header file provides all kind of constants used to 
+ *
+ * This header file provides all kind of constants used to
  * adjust the program's specifics.
 */
 
@@ -16,7 +16,7 @@
 
 
 // General debug messages:
-#define DEBUG 1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
+#define DEBUG_ 1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
 #define DEBUG_MESSAGE_HEADER 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
@@ -27,7 +27,7 @@
 
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0				// 0: disabled		1: for analysing the EEPROM Data class internals
-#define DEBUG_SENSOR_MESSAGE_HEADER 0		// 0: disabled		1: 
+#define DEBUG_SENSOR_MESSAGE_HEADER 0		// 0: disabled		1:
 
 // For debugging the pump node
 
@@ -44,7 +44,7 @@
 #define WATERING_CYCLES_TO_WAIT (2)
 #define WATERING_THRESHOLD		(950)	// if no sensor is connected: 300, with photoresistor: 950
 
-/* Table 5 - watering policy flags 
+/* Table 5 - watering policy flags
 DO NOT CHANGE:
 */
 #define POL_ACTIVE (0)            // POL_ACTIVE:            0...not active,                   1...active
@@ -53,8 +53,8 @@ DO NOT CHANGE:
 // sets Particle or photon:
 #define HW_ARDUINO (1)
 #define HW_PHOTON (2)
-#define HW HW_ARDUINO   // tells whether to compile for Arduino or Photon
-
+#define HW HW_PHOTON  // tells whether to compile for Arduino or Photon
+//#define HW HW_ARDUINO
 //#define HW_RTC (0)    // there is no RTC
 #define NONE		(0)
 #define RTC_1302	(1)
@@ -75,12 +75,12 @@ DO NOT CHANGE:
   #define _HOUR   02
   #define _MINUTE 50
   #define _SECOND 30
-  
+
 //  #define HW_RTC_DS1302 (1) //normaly used  (DS1302 OR DS3231)
 //  #define HW_RTC_DS3232 (0) //alternative RTC (DS3232)
 
 //  #if (HW_RTC_DS1302==1) //
-  #if (HW_RTC == RTC_1302) //
+  #if (HW_RTC == RTC_1302 && HW != HW_PHOTON) //
     #include <TimeLib.h>
     #include <DS1302RTC.h>
 //  #elif(HW_RTC_DS3232==1)
@@ -103,8 +103,8 @@ DO NOT CHANGE:
 #define RADIO_CHANNEL               152//108
 #define WAIT_SEND_INTERVAL            500
 #define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*5  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
-#define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds   
-          
+#define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds
+
 
 // DS3231 TWI communication address:
 #define DS3231_I2C_ADDRESS 0x68
@@ -170,7 +170,7 @@ DO NOT CHANGE:
 #define NODE_TYPE             (6)   // NODE_TYPE:             0...this is a SensorNode,      1...this is a MotorNode
 
 // For getting rid of serial communication in the release version:
-#if (DEBUG == 1)
+#if (DEBUG_ == 1)
   #define DEBUG_PRINT(x)        		Serial.print(x)
   #define DEBUG_PRINT_D(x, d)   		if(d>0){ Serial.print(x);}
   #define DEBUG_PRINTSTR(x)     		Serial.print(F(x))
@@ -182,7 +182,7 @@ DO NOT CHANGE:
   #define DEBUG_PRINTLNSTR_D(x, d)		if(d>0){ Serial.println(F(x));}
   #define DEBUG_FLUSH           		Serial.flush()
   #define DEBUG_SERIAL_INIT_WAIT 		Serial.begin(BAUD);while (!Serial) {}
-  #define DEBUG_PRINT_MEM			
+  #define DEBUG_PRINT_MEM
 #else
   #define DEBUG_PRINT(x)
   #define DEBUG_PRINT_D(x, d)
@@ -193,9 +193,9 @@ DO NOT CHANGE:
   #define DEBUG_PRINTLN_D(x, d)
   #define DEBUG_PRINTLNSTR(x)
   #define DEBUG_PRINTLNSTR_D(x, d)
-  #define DEBUG_FLUSH   
+  #define DEBUG_FLUSH
   #define DEBUG_SERIAL_INIT_WAIT
-#endif 
+#endif
 #define DEBUG_CYCLE 10000
 
 
@@ -246,17 +246,17 @@ DO NOT CHANGE:
 #define NO_SCHEDULED_WATERING 2
 /*
 *  PumpNode defines
-*/    
-#define MAX_RETRIES                     2 
+*/
+#define MAX_RETRIES                     2
                                    /*who uses these states*/
 #define PUMPNODE_STATE_0_PUMPREQUEST    0 //(pumpNode and Controller)
 #define PUMPNODE_STATE_1_RESPONSE       1 //(pumpNode and Controller)
 #define PUMPNODE_STATE_2_PUMPACTIVE     2 //(pumpNode and Controller)
-#define PUMPNODE_STATE_3_RESPONSE       3 //(pumpNode and Controller)-SUCCESFULL 
+#define PUMPNODE_STATE_3_RESPONSE       3 //(pumpNode and Controller)-SUCCESFULL
 
 #define PUMPNODE_STATE_ERROR            -1 //(Controller)            -ERROR
-#define PUMPNODE_STATE_3_RESP_FAILED    -2  //(Controller) 
-#define PUMPNODE_STATE_4_RESP_FAILED    -3 //(Controller)  
+#define PUMPNODE_STATE_3_RESP_FAILED    -2  //(Controller)
+#define PUMPNODE_STATE_4_RESP_FAILED    -3 //(Controller)
 
 #define PUMPNODE_CRITICAL_STATE_OCCUPATION 60000 // in Milliseconds
 
@@ -309,13 +309,13 @@ class DataStorage
 ///	DataStorage() : mbOverflow = 0; {}
 public:
   DataStorage() {}
-	
+
   uint8_t init();
 //	uint8_t findIndex();
-  uint8_t add(struct sensorData);
+  void add(struct sensorData);//Bernhard@:Rückgabewert war uint8_t
   void getNext(struct sensorData *);
   uint8_t remove(uint16_t);
-  uint8_t findQueueEnd();
+  void findQueueEnd();
   void delIndex();
   void printElements();
   void stashData();
@@ -348,7 +348,7 @@ class CommandHandler
 {
   public:
     CommandHandler();
-    uint8_t getInteractiveCommands();
+    void getInteractiveCommands();//Bernhard@::rückgabetyp war uint8_t
     uint8_t checkSchedule(struct nodeList, uint16_t*, uint16_t*, time_t);
   private:
     bool bWateringNow = false;
@@ -360,14 +360,14 @@ class CommandHandler
 
 /*
  * In this struct all information about the nodes is stored.
- * It lists the node IDs, whether it is a sensor or motor node, 
+ * It lists the node IDs, whether it is a sensor or motor node,
  * which sensorNode controls which motorNode and it can be extended by
  * the node specific settings for the control algorithm.
  */
 struct nodeListElement
 {
   uint16_t ID;
-  uint8_t state;        
+  uint8_t state;
   // Bit 0: NODELIST_NODETYPE:   0...this is a SensorNode, 1...this is a MotorNode
   // Bit 1: NODELIST_PUMPACTIVE: 0...inactive, 1...active (is currently pumping[1] or not[0])
   // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE, 1...ONLINE (the node has performed a registration)
@@ -392,7 +392,7 @@ public:
   uint16_t mnActivePump;
   uint16_t mnLastAddedSensorNode;
   uint16_t mnCurrentInterval;
-  
+
   void     getNodeList();
   uint8_t  addNode(struct nodeListElement);
   uint16_t findNodeByID(uint16_t);         // checks if the node exists
@@ -400,14 +400,14 @@ public:
   uint16_t getNumberOfSensorNodes();
   uint16_t getLastScheduledSensorNode();
   uint16_t getPumpEpochLength();
-  
+
   /*
   *0xff .. Node doesnt exist
   *0x00.. SensorNode
   *0x01 .. PumpNode
   */
   uint8_t getNodeType(uint16_t ID); //Sensor or Pump Node
-  
+
   /*
   *0xff .. Node doesnt exist
   *0x00 .. PumpNode not active , no WateringTask Send currently
@@ -415,7 +415,7 @@ public:
   */
   uint8_t isActive(uint16_t ID); // PumpNode currently active or not
   void setPumpActive(uint16_t ID);
-  void setPumpInactive(uint16_t ID); 
+  void setPumpInactive(uint16_t ID);
   //only call that if the node is already stored in the EEPROM
   void setNodeOnline(uint16_t ID);
   //only call that if the node is already stored in the EEPROM
@@ -435,13 +435,15 @@ public:
 class RTCLayer
 {
 public:
-	RTCLayer() {}
-  ~RTCLayer() {}
-	virtual int init(uint8_t* state);
-	virtual	uint8_t setTime(time_t);
-	virtual time_t getTime();
-	virtual int setAlarm(time_t);
-	virtual int adjustRTC(int, uint8_t*, time_t);
+  //Bernhard@: Ich frage mich cht was das für ein Compiler  in der AArduino IDE
+  //da der
+	//virtual RTCLayer() {}
+  virtual ~RTCLayer() {}
+	virtual int init(uint8_t* state)=0;
+	virtual	uint8_t setTime(time_t)=0;
+	virtual time_t getTime()=0;
+	virtual int setAlarm(time_t)=0;
+	virtual int adjustRTC(int, uint8_t*, time_t)=0;
 };
 
 #if (HW_RTC == RTC_1302)
@@ -465,13 +467,13 @@ private:
 class RTC_DS3231 : public RTCLayer
 {
 public:
-	RTC_DS3231() {};	//: RTCLayer() {};
+	   RTC_DS3231() {};	//: RTCLayer() {};
     ~RTC_DS3231() {};
-	int init(uint8_t* state);
-	uint8_t setTime(time_t);
-	time_t getTime();
-	int setAlarm(time_t);
-	int adjustRTC(int, uint8_t*, time_t);
+    int init(uint8_t* state);
+    uint8_t setTime(time_t);
+    time_t getTime();
+    int setAlarm(time_t);
+    int adjustRTC(int, uint8_t*, time_t);
 };
 
 
@@ -481,7 +483,7 @@ public:
 class RTC_DS3232 : public RTCLayer
 {
 public:
-	RTC_DS3232() {RTC=0; RTC=new DS3232RTC;};	//: RTCLayer() {};
+	RTC_DS3232();	//: RTCLayer() {};
    ~RTC_DS3232();
 	int init(uint8_t* state);
 	uint8_t setTime(time_t);
@@ -500,14 +502,14 @@ private:
 /*
 *Class PumpNode_Handler
 *   Every PumpNode is controlled by its own PumpNode_Handler
-*   Processing of a pumpNode and the whole state machine , 
-*   including its necessary time monitoring, is handled 
+*   Processing of a pumpNode and the whole state machine ,
+*   including its necessary time monitoring, is handled
 *   inside that class
 */
 
 class PumpNode_Handler
 {
-public: 
+public:
     /*pumpTime in seconds*/
     PumpNode_Handler(uint16_t pumpNodeID)
     {
@@ -522,9 +524,9 @@ public:
         pumphandler_ID=0;
         pumpnode_state_error_counter=0;
     }
-    
+
     ~PumpNode_Handler(){}
-   
+
     void     setPumpTime(uint16_t pumptime);
     uint16_t getPumpTime(void);
     int      getState(void);
@@ -536,12 +538,12 @@ public:
     uint16_t getPumpHandlerID(void);
     /*How many times I reached the state error*/
     uint8_t  getStateErrorCount(void);
-    
+
 private:
    // static uint8_t counter;
     /*state variable*/
     uint16_t pumpnode_ID;
-    uint16_t OnOff;                     //duration of pumping[sec]   
+    uint16_t OnOff;                     //duration of pumping[sec]
     int8_t pumpnode_status;                //in which status is the PUMP Node
     uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
     /*some timers for state observations*/
