@@ -32,7 +32,16 @@ Pin Configuration:
     which automatically creates alls symbol links to these files 
     inside folder  <path-to_repo>/Controller 
  
-3)  Compile Controller.ino for Photon
+3)  Include R24 Lib and use firmware version 0.6.0 particle dev 
 
-    
+  Our Library Rf24 in folder libraries has no compability for Spark processors,
+  in order we have to introduce the "particle-rf24" library from 
+  particle public libraries  
+  -> include in project-properties : dependencies.particle-rf24=0.0.2
+      in a new line
+      
+  some compile errors occured in photon firmware version 0.6.1,
+  so i cannot choose the most actual firmware version and have to
+  compile for version 0.6.0
+   
 

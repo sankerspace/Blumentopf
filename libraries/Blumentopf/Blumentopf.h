@@ -10,9 +10,8 @@
  * adjust the program's specifics.
 */
 
-#include <Time.h>
-#include "Wire.h"
 
+#include "Time.h"
 
 
 // General debug messages:
@@ -24,6 +23,7 @@
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
 #define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 0						// 0: disabled		1: show RTC infos
+#define DEBUG_RF24 0           // 0: disabled		1: show nRF24L01 infos
 
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0				// 0: disabled		1: for analysing the EEPROM Data class internals
@@ -31,39 +31,50 @@
 
 // For debugging the pump node
 
-//#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
-#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
+#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
+//#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
 
-#define INTERVAL (600)	// Duration between two protocol - timeslots [0.1s]
+#define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]
 
 // watering policy:
-#define POL_WATERING_DEFAULT_DURATION (10)      // per default it should give water for 10 seconds every day after 19:00
-#define WATERING_START_HOUR    (23)    // Start of the watering (hour)
-#define WATERING_START_MINUTE  (24)    // Start of the watering (minute)
+#define POL_WATERING_DEFAULT_DURATION 10      // per default it should give water for 10 seconds every day after 19:00
+#define WATERING_START_HOUR    23    // Start of the watering (hour)
+#define WATERING_START_MINUTE  24    // Start of the watering (minute)
 
-#define WATERING_CYCLES_TO_WAIT (2)
-#define WATERING_THRESHOLD		(950)	// if no sensor is connected: 300, with photoresistor: 950
+#define WATERING_CYCLES_TO_WAIT 2
+#define WATERING_THRESHOLD		950	// if no sensor is connected: 300, with photoresistor: 950
 
 /* Table 5 - watering policy flags
 DO NOT CHANGE:
 */
-#define POL_ACTIVE (0)            // POL_ACTIVE:            0...not active,                   1...active
-#define POL_USE_MOISTURE (1)      // POL_USE_MOISTURE:      0...don't user moisture data,     1...use moisture sensor data
+#define POL_ACTIVE 0            // POL_ACTIVE:            0...not active,                   1...active
+#define POL_USE_MOISTURE 1      // POL_USE_MOISTURE:      0...don't user moisture data,     1...use moisture sensor data
 
 // sets Particle or photon:
-#define HW_ARDUINO (1)
-#define HW_PHOTON (2)
-#define HW HW_PHOTON  // tells whether to compile for Arduino or Photon
+#define HW_ARDUINO  1
+#define HW_PHOTON   2
+#define HW  HW_PHOTON  // tells whether to compile for Arduino or Photon
 //#define HW HW_ARDUINO
+
+#if (HW == HW_ARDUINO)
+  #include <Wire.h>
+  #include <Arduino.h>
+#endif
+
+#if (HW == HW_PHOTON)
+  #include <application.h>
+  #define F(x) ((const char*)(x)) //ther is no
+#endif
+
 //#define HW_RTC (0)    // there is no RTC
-#define NONE		(0)
-#define RTC_1302	(1)
-#define RTC_3231	(2)
-#define RTC_3232	(3)
+#define NONE		0
+#define RTC_1302	1
+#define RTC_3231	2
+#define RTC_3232	3
 
 // SET THE RTC TYPE HERE:
+//#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
 #define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
-
 #if (HW_RTC > NONE)
 //  #include <Time.h>		// if it's included here, some functions will miss it
 //  #include "Wire.h"
@@ -78,15 +89,14 @@ DO NOT CHANGE:
 
 //  #define HW_RTC_DS1302 (1) //normaly used  (DS1302 OR DS3231)
 //  #define HW_RTC_DS3232 (0) //alternative RTC (DS3232)
-
 //  #if (HW_RTC_DS1302==1) //
   #if (HW_RTC == RTC_1302 && HW != HW_PHOTON) //
     #include <TimeLib.h>
     #include <DS1302RTC.h>
 //  #elif(HW_RTC_DS3232==1)
-  #elif(HW_RTC == RTC_3231 && HW == HW_PHOTON)
+  #elif(HW_RTC == RTC_3231)
 //    #include <TimeLib.h>
-  #elif(HW_RTC == RTC_3232 HW != HW_PHOTON)
+  #elif(HW_RTC == RTC_3232 && HW != HW_PHOTON)
     #include "DS3232RTC.h"
     #define HW_RTC_PIN (8)
   #endif
@@ -104,7 +114,9 @@ DO NOT CHANGE:
 #define WAIT_SEND_INTERVAL            500
 #define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*5  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
 #define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds
-
+#if (DEBUG_RF24==1)
+  #define SERIAL_DEBUG 1
+#endif
 
 // DS3231 TWI communication address:
 #define DS3231_I2C_ADDRESS 0x68

@@ -30,10 +30,7 @@
  *  Part III
  * PumpNode_Handler is a list of all nodes which have to pump at the moment.
 */
-
-#include "Wire.h"
-#include <Time.h>
-#include <TimeLib.h>
+#include "Blumentopf.h"
 
 //for compilation on spark processor problematic
 #if (HW == 1)
@@ -43,7 +40,7 @@
 #endif
 
 
-#include "Blumentopf.h"
+
 
 #if (SD_AVAILABLE == 1)
 	#include <SD.h>
@@ -207,7 +204,6 @@ uint8_t RTC_DS3231::setTime(time_t newTime)
 */
 time_t RTC_DS3231::getTime()
 {
-	DEBUG_PRINTLNSTR("getTime()");
   tmElements_t tm;
   time_t currentTime;
   getUNIXtime(&currentTime, &tm);

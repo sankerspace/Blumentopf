@@ -71,51 +71,43 @@ fi
 ##-------------RF24 .cpp .h nRF24L01.h R24_config.h printf.h-------------------------------
 
 
-if [ -e "$repo_Path/Controller/RF24.h"  ]
+if [ -e "$repo_Path/Controller/particle-RF24.h"  ]
 then
-  echo "$repo_Path/Controller/RF24.h already exists."
+  echo "$repo_Path/Controller/particle-RF24.h already exists."
 else
-  echo "Create Symbol Link:$repo_Path/Controller/RF24.h."
-  ln -s $repo_Path/libraries/RF24/RF24.h $repo_Path/Controller/RF24.h
+  echo "Create Symbol Link:$repo_Path/Controller/particle-RF24.h."
+  ln -s $repo_Path/libraries/RF24_PARTICLE/particle-rf24.h $repo_Path/Controller/particle-rf24.h
   echo
 fi
 
-if [ -e "$repo_Path/Controller/RF24.cpp"  ]
+if [ -e "$repo_Path/Controller/particle-RF24.cpp"  ]
 then
-  echo "$repo_Path/Controller/RF24.cpp already exists."
+  echo "$repo_Path/Controller/particle-RF24.cpp already exists."
 else
-  echo "Create Symbol Link:$repo_Path/Controller/RF24.cpp."
-  ln -s $repo_Path/libraries/RF24/RF24.cpp $repo_Path/Controller/RF24.cpp
+  echo "Create Symbol Link:$repo_Path/Controller/particle-RF24.cpp."
+  ln -s $repo_Path/libraries/RF24_PARTICLE/particle-rf24.cpp $repo_Path/Controller/particle-rf24.cpp
   echo
 fi
 
-if [ -e "$repo_Path/Controller/nRF24L01.h"  ]
+if [ -e "$repo_Path/Controller/particle-nRF24L01.h"  ]
 then
-  echo "$repo_Path/Controller/nRF24L01.h already exists."
+  echo "$repo_Path/Controller/particle-nRF24L01.h already exists."
 else
-  echo "Create Symbol Link:$repo_Path/Controller/nRF24L01.h."
-  ln -s $repo_Path/libraries/RF24/nRF24L01.h $repo_Path/Controller/nRF24L01.h
+  echo "Create Symbol Link:$repo_Path/Controller/particle-nRF24L01.h."
+  ln -s $repo_Path/libraries/RF24_PARTICLE/particle-nRF24L01.h $repo_Path/Controller/particle-nRF24L01.h
   echo
 fi
 
-if [ -e "$repo_Path/Controller/RF24_config.h"  ]
+if [ -e "$repo_Path/Controller/particle-RF24_config.h"  ]
 then
-  echo "$repo_Path/Controller/RF24_config.h already exists."
+  echo "$repo_Path/Controller/particle-RF24_config.h already exists."
 else
-  echo "Create Symbol Link:$repo_Path/Controller/RF24_config.h."
-  ln -s $repo_Path/libraries/RF24/RF24_config.h $repo_Path/Controller/RF24_config.h
+  echo "Create Symbol Link:$repo_Path/Controller/particle-RF24_config.h."
+  ln -s $repo_Path/libraries/RF24_PARTICLE/particle-rf24_config.h $repo_Path/Controller/particle-rf24_config.h
   echo
 fi
 
 
-if [ -e "$repo_Path/Controller/printf.h"  ]
-then
-  echo "$repo_Path/Controller/printf.h already exists."
-else
-  echo "Create Symbol Link:$repo_Path/Controller/printf.h."
-  ln -s $repo_Path/libraries/RF24/printf.h $repo_Path/Controller/printf.h
-  echo
-fi
 echo "---------------------Finished--------------------------"
 #ln -s $(pwd)/../../libraries/Blumentopf/Blumentopf.cpp $(pwd)/../../Controller/Blumentopf.cpp
 
