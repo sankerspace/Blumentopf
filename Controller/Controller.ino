@@ -51,8 +51,14 @@ class CommandHandler myCommandHandler;
 //verwende sie jetzt Um Pumphandler zu zählen
 uint16_t nDummyCount;
 
+#if(HW==HW_PHOTON)
+/* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
+//function to initiate radio device with radio(CE pin,CS pin)
+  RF24 radio(D6,A2);
+#elif(HW==HW_ARDUINO)
+  RF24 radio(9, 10);
+#endif
 
-RF24 radio(9, 10);
 //brauchen wir 3 pipes!!!!!!!!!!??
 //const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL}; // pipe[0] ist answer-channel
 const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};//didn't reduce dynamic memory usage

@@ -1,0 +1,8 @@
+-) nRF24L01+:
+  
+Settings:
+
+
+-)EEPROM :
+
+The EEPROM must be initialized with 0xffff for every word.

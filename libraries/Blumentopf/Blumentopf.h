@@ -21,8 +21,8 @@
 #define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
 #define DEBUG_SENSOR_SCHEDULING 0		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
-#define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
-#define DEBUG_RTC 0						// 0: disabled		1: show RTC infos
+#define DEBUG_FREE_MEMORY 1				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
+#define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
 #define DEBUG_RF24 0           // 0: disabled		1: show nRF24L01 infos
 
 // For debugging the sensor node
