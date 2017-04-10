@@ -552,8 +552,8 @@ void setup_RF()
  // Setup and configure rf radio
  //
 
- radio.begin();
-
+ //radio.begin();
+ radio.begin(RADIO_DELAY,RADIO_RETRIES,RADIO_SPEED,RADIO_CRC,RADIO_CHANNEL,RADIO_PA_LEVEL);
  // optionally, increase the delay between retries & # of retries
  // radio.setRetries(15,15);
 
@@ -563,7 +563,8 @@ void setup_RF()
 
   // transmission settings:
 //  radio.setPALevel(RF24_PA_MIN);
-  radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
+  
+  //radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
 
  //
  // Open pipes to other nodes for communication

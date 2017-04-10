@@ -1911,9 +1911,13 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
 //https://cdn-learn.adafruit.com/downloads/pdf/memories-of-an-arduino.pdf
 int freeRam(void){
+#if (HW==HW_ARDUINO)
  extern int  __heap_start,*__brkval;
  int v;
  return (int) &v-(__brkval==0?(int)&__heap_start:(int) __brkval);
+#else
+ return 0;
+#endif
 }
 
 void printFreeRam()
@@ -1921,7 +1925,9 @@ void printFreeRam()
   if (DEBUG_FREE_MEMORY > 0)
   {
     DEBUG_PRINTSTR("[CONTROLLER][MEMORY]:Between Heap and Stack still ");
-    DEBUG_PRINT(freeRam());
+    #if (HW==HW_ARDUINO)
+      DEBUG_PRINT(freeRam());
+    #endif
 	DEBUG_PRINTLNSTR(" bytes available.");
   }
 }

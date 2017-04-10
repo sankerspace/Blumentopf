@@ -12,7 +12,7 @@
 #define __RF24_CONFIG_H__
 
     /*** USER DEFINES:  ***/
-    //#define FAILURE_HANDLING
+    #define FAILURE_HANDLING
     //#define SERIAL_DEBUG
 
     /**********************/

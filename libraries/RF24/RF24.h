@@ -135,6 +135,22 @@ public:
    * @code radio.begin() @endcode
    */
   bool begin(void);
+  
+   /**
+   * Begin operation of the chip
+   * 
+   * Call this in setup(), before calling any other methods.
+   * @code radio.begin() @endcode
+   * Marko@ : Modifikation
+   *  p_delay is the delay between retries[max 255] ->RF24::setRetries() 
+   *  p_retries is the number of retires[max 255] ->RF24::setRetries()
+   *  p_SPEED: RF24_1MBPS = 0, RF24_2MBPS, RF24_250KBPS 
+   *  p_CRC_8Bit_16Bit: true 8Bit CRC , false 16Bit CRC
+   *  p_channel: channel frequency for communication [max 125]
+   *  p_PA_LEVEL: RF24_PA_MIN = 0,RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
+   */
+  bool begin(uint8_t p_delay,uint8_t p_retries,rf24_datarate_e p_SPEED,bool   p_CRC_8Bit_16Bit,uint8_t p_channel,rf24_pa_dbm_e p_PA_LEVEL);
+  
 
   /**
    * Start listening on the pipes opened for reading.

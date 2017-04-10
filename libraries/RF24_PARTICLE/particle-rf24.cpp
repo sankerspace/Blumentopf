@@ -37,6 +37,7 @@ void RF24::csn(bool mode)
   SPI.setDataMode(SPI_MODE0);
 
   // Was 4Mhz on Arduino
+  //SPI.setClockSpeed(10, MHZ);
   SPI.setClockDivider(SPI_CLOCK_DIV16); // 4.5Mhz (if using <= 2mbps data rate)
   //SPI.setClockDivider(SPI_CLOCK_DIV32); // 2.25Mhz (if using <= 1mbps data rate)
 
@@ -288,7 +289,7 @@ RF24::RF24(uint8_t _cepin, uint8_t _cspin):
 
 void RF24::setChannel(uint8_t channel)
 {
-  const uint8_t max_channel = 127;
+  const uint8_t max_channel = 125;
   write_register(RF_CH,rf24_min(channel,max_channel));
 }
 
@@ -450,6 +451,101 @@ bool RF24::begin(void)
 
 /****************************************************************************/
 
+bool RF24::begin(uint8_t p_delay,uint8_t p_retries,rf24_datarate_e p_SPEED,bool p_CRC_8Bit_16Bit,uint8_t p_channel,rf24_pa_dbm_e p_PA_LEVEL)
+{
+
+
+  uint8_t setup=0;
+  // Initialize pins
+  if (ce_pin != csn_pin) pinMode(ce_pin,OUTPUT);
+  pinMode(csn_pin,OUTPUT);
+
+  SPI.begin();
+  ce(LOW);
+  csn(HIGH);
+
+  // Must allow the radio time to settle else configuration bits will not necessarily stick.
+  // This is actually only required following power up but some settling time also appears to
+  // be required after resets too. For full coverage, we'll always assume the worst.
+  // Enabling 16b CRC is by far the most obvious case if the wrong timing is used - or skipped.
+  // Technically we require 4.5ms + 14us as a worst case. We'll just call it 5ms for good measure.
+  // WARNING: Delay is based on P-variant whereby non-P *may* require different timing.
+  delay( 5 ) ;
+
+  // Reset CONFIG and enable 16-bit CRC.
+  write_register( CONFIG, 0b00001100 ) ;
+
+  // Set 1500uS (minimum for 32B payload in ESB@250KBPS) timeouts, to make testing a little easier
+  // WARNING: If this is ever lowered, either 250KBS mode with AA is broken or maximum packet
+  // sizes must never be used. See documentation for a more complete explanation.
+
+   //Modification: Marko@
+  setRetries(p_delay,p_retries);
+
+  // Reset value is MAX
+  //Modification: Marko@
+  setPALevel( p_PA_LEVEL ) ;
+
+
+  // check for connected module and if this is a p nRF24l01 variant
+  //
+  if( setDataRate( RF24_250KBPS ) )
+  {
+    p_variant = true ;
+  }
+  /*setup = read_register(RF_SETUP);
+  if( setup == 0b00001110 )     // register default for nRF24L01P
+  {
+    p_variant = true ;
+  }*/
+
+  // Then set the data rate to the slowest (and most reliable) speed supported by all
+  // hardware.
+
+   //Modification: Marko@
+   setDataRate( p_SPEED ) ;
+
+  // Initialize CRC and request 2-byte (16bit) CRC
+  //Modification: Marko@
+  //NRF_CONFIG was resetet before and default is 16bit
+  if(p_CRC_8Bit_16Bit){
+    setCRCLength( RF24_CRC_8 ) ;
+  }
+
+  // Disable dynamic payloads, to match dynamic_payloads_enabled setting - Reset value is 0
+  toggle_features();
+  write_register(FEATURE,0 );
+  write_register(DYNPD,0);
+
+  // Reset current status
+  // Notice reset and flush is the last thing we do
+  write_register(NRF_STATUS,rf24_BV(RX_DR) | rf24_BV(TX_DS) | rf24_BV(MAX_RT) );
+
+  // Set up default configuration.  Callers can always change it later.
+  // This channel should be universally safe and not bleed over into adjacent
+  // spectrum.
+
+  //Modification: Marko@
+  setChannel(p_channel);
+
+  // Flush buffers
+  flush_rx();
+  flush_tx();
+
+  powerUp(); //Power up by default when begin() is called
+
+  // Enable PTX, do not write CE high so radio will remain in standby I mode ( 130us max to transition to RX or TX instead of 1500us from powerUp )
+  // PTX should use only 22uA of power
+  write_register(CONFIG, ( read_register(CONFIG) ) & ~rf24_BV(PRIM_RX) );
+
+  // if setup is 0 or ff then there was no response from module
+  return ( setup != 0 && setup != 0xff );
+}
+
+/****************************************************************************/
+
+
+
 void RF24::startListening(void)
 {
   powerUp();
@@ -527,11 +623,12 @@ void RF24::powerUp(void)
 /******************************************************************/
 #if defined (FAILURE_HANDLING)
 void RF24::errNotify(){
+
 	#if defined (SERIAL_DEBUG)
 	  RF24_SERIAL("RF24 HARDWARE FAIL: Radio not responding, verify pin connections, wiring, etc.\r\n");
 	#endif
 	#if defined (FAILURE_HANDLING)
-	failureDetected = 1;
+  failureDetected = 1;
 	#else
 	delay(5000);
 	#endif

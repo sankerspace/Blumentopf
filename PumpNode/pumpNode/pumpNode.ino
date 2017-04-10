@@ -1,24 +1,25 @@
 /*
- * Project: NESE_Blumentopf
- * File:    pumpNode.ino
- * Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
- *          Marko Stanisic  (0325230@student.tuwien.ac.at)
- *          Helmut Bergmann (0325535@student.tuwien.ac.at)
- * The copyright for the software is by the mentioned authors.
- * 
- * This program uses a set of sensors to gather information about it's surrounding.
- * It registers to a controller and periodically sends the data to the controller.
- * During the measurements the setup goes into a low power mode.
- * 
+   Project: NESE_Blumentopf
+   File:    pumpNode.ino
+   Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
+            Marko Stanisic  (0325230@student.tuwien.ac.at)
+            Helmut Bergmann (0325535@student.tuwien.ac.at)
+   The copyright for the software is by the mentioned authors.
+
+   This program uses a set of sensors to gather information about it's surrounding.
+   It registers to a controller and periodically sends the data to the controller.
+   During the measurements the setup goes into a low power mode.
+
 */
 
 
 /**************PUMP NODE SETTINGS****************************/
-#include "Blumentopf.h"
-#include <SPI.h>
+//#include <SPI.h>
 #include "printf.h"
-#include "nRF24L01.h"
-#include "RF24.h"
+#include "Blumentopf.h"
+
+//#include "nRF24L01.h"
+//#include "RF24.h"
 #include <EEPROM.h>
 
 //function to initiate radio device with radio(CE pin,CS pin)
@@ -39,10 +40,15 @@ int buttonstate = 0;
 //byte addresses[][6] = {"Pump", "Contr"};
 //const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
 const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};
+
+
 /******************************/
 struct sensorData myData;
 struct responseData myResponse;
 
+#if (DEBUG_RF24 == 1)
+uint32_t time_;
+#endif
 
 
 
@@ -53,24 +59,28 @@ void setup() {
 
 
   DEBUG_SERIAL_INIT_WAIT;
+  printf_begin();
   pinMode(pumpPin, OUTPUT);
   pinMode(buttonPin, INPUT);
   randomSeed(analogRead(0));//initialize Random generator
 
   killID();
-  radio.begin();
-
-  radio.setPALevel(RF24_PA_LOW);
-  radio.setChannel(RADIO_CHANNEL);
+  //radio.begin();
+  radio.begin(RADIO_DELAY, RADIO_RETRIES, RADIO_SPEED, RADIO_CRC, RADIO_CHANNEL, RADIO_PA_LEVEL);
+  //radio.setPALevel(RF24_PA_LOW);
+  //radio.setChannel(RADIO_CHANNEL);
 
   radio.openWritingPipe(pipes[1]);        // Both radios listen on the same pipes by default, but opposite addresses
   radio.openReadingPipe(1, pipes[0]);     // Open a reading pipe on address 0, pipe 1
 
   radio.startListening();                       // Start listening
-
+  
+#if (DEBUG_RF24==1)
+  radio.printDetails();
+#endif
 
   //Print debug info
-  radio.printDetails();
+  //radio.printDetails();
 
   //criticalTime = PUMPNODE_CRITICAL_STATE_OCCUPATION/2; //software watchdog looks for freesing states
   criticalTime = (uint32_t)(PUMPNODE_CRITICAL_STATE_OCCUPATION / 2); //software watchdog looks for freesing states
@@ -145,6 +155,13 @@ void setup() {
 void loop(void) {
   uint32_t currentTime = millis();
 
+#if (DEBUG_RF24 == 1 && DEBUG_==1)
+  if ((millis() - time_) > 20000)
+  {
+    radio.printDetails();
+    time_ = millis();
+  }
+#endif
   buttonstate = digitalRead(buttonPin);
   if (buttonstate == HIGH)
   {
@@ -338,7 +355,9 @@ uint16_t recvData(void)
 {
   //return 0 if message is not for us to keep state
   //ID_INEXISTENT soll behandelt werden??????????????ß
-  radio.read(&myResponse, sizeof(struct responseData) );          // Get the payload
+  while (radio.available()) {
+    radio.read(&myResponse, sizeof(struct responseData) );          // Get the payload
+  }
   DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: Resp-interval:");
   DEBUG_PRINTDIG(myResponse.interval, DEC);
   DEBUG_PRINTSTR(", Resp-ID:");
@@ -353,6 +372,8 @@ uint16_t recvData(void)
   if (myResponse.ID == myData.ID)
   {
     setTime(myResponse.ControllerTime);
+
+    displayTimeFromUNIX(myResponse.ControllerTime);
     return myResponse.interval;
   }
   return 0;
@@ -400,9 +421,41 @@ int registerNode(void)
   DEBUG_PRINTSTR(" ID: ");
   DEBUG_PRINTLN(myData.ID);
   /*********Sending registration request to the Controller***************************/
+/*LÖSCHEN*/
+
+
+  
+
+   DEBUG_PRINTLNSTR("Initialize struct sensorData with arbitrary values: ");  
+   myData.humidity=12000.234f;
+   myData.moisture=13000;
+   myData.brightness=21546;
+    myData.voltage=45258;
+    myData.VCC=55879;
+    myData.realTime=millis();
+
+  DEBUG_PRINTSTR(" humidity: ");
+  DEBUG_PRINTLN(myData.humidity);
+  DEBUG_PRINTSTR(" moisture: ");
+  DEBUG_PRINTLN(myData.moisture);
+  DEBUG_PRINTSTR(" brightness: ");
+  DEBUG_PRINTLN(myData.brightness);
+  DEBUG_PRINTSTR(" voltage: ");
+  DEBUG_PRINTLN(myData.voltage);
+  DEBUG_PRINTSTR(" VCC: ");
+  DEBUG_PRINTLN(myData.VCC);
+   DEBUG_PRINTSTR(" realTime: ");
+  DEBUG_PRINTLN(myData.realTime);
+   DEBUG_PRINTSTR("SIZE OF SENDING DATA STRUCTURE : ");
+  DEBUG_PRINTLN(sizeof(myData));
+   /*LÖSCHEN*/
   radio.stopListening();
-  radio.write(&myData, sizeof(struct sensorData));
+   if (!radio.write( &myData, sizeof(myData) )){
+       DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:Sending data...");
+       DEBUG_PRINTLNSTR("  FAILED!!!!!!!!!!!");
+     }
   radio.startListening();
+
   /*********************************************************************************/
   //  while (!radio.available());   // pump node hangs here in case the registration request gets lost. That's why there should be a timeout check
   // Wait here until we get a response, or timeout (REGISTRATION_TIMEOUT_INTERVAL == ~500ms)
@@ -424,8 +477,12 @@ int registerNode(void)
 
   // There was a response --> read the message
   /*******************Registration Response from Controller*********************/
-  radio.read(&myResponse , sizeof(myResponse));
+  while (radio.available())
+  {
+    radio.read(&myResponse , sizeof(myResponse));
+  }
   /****************************************************************************/
+  displayTimeFromUNIX(myResponse.ControllerTime);
   DEBUG_PRINTSTR("[PUMPNODE][registerNode()]received: ID: ");
   DEBUG_PRINT(myResponse.ID);
   DEBUG_PRINTSTR(", Status: ");

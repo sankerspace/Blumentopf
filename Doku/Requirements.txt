@@ -1,7 +1,14 @@
 -) nRF24L01+:
-  
-Settings:
-
+[http://www.nordicsemi.com/eng/Products/2.4GHz-RF/nRF24L01]
+[pdf download: http://www.nordicsemi.com/eng/nordic/download_resource/8041/1/42058007/2730]
+Settings on both nRF24L01+ modules have to be the same:[p 77]
+  > CRC    [default: CRC16]
+  > Use the same frequency channel on both devices [default:76]
+    (preferable over 100 because of interference with other Wlan devices)
+  > receiver: same address as transmitter device,
+               disable auto aknowledgment
+    transmitter:
+  >select data rate (1Mbs or 250kbs) on both devices(transceiver and receiver)
 
 -)EEPROM :
 

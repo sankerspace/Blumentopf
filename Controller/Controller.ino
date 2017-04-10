@@ -12,21 +12,15 @@
    Therefore the corresponding flags (HW, HW_RTC, SD_AVAILABLE, etc.) have to be set in the header file.
 
 */
-
+//#include <SPI.h>
 #include "Blumentopf.h"
+#include <LinkedList.h> //for PumpHandler List
 
-
-#include <SPI.h>
-#if (HW == HW_ARDUINO)
-  #include "RF24.h"
-#elif(HW == HW_PHOTON)
-  #include "particle-rf24.h"
-#endif
 
 #if (SD_AVAILABLE == 1)
-#include <SD.h>
+  #include <SD.h>
 #endif
-#include <LinkedList.h> //for PumpHandler List
+
 
 /**some declarations for the RTC , in case we have a RTC*/
 
@@ -39,6 +33,9 @@
   RTC_DS3232 myRTC;
 #endif
 
+#if (DEBUG_RF24 == 1 && DEBUG_==1)
+  uint32_t time_;
+#endif
 
 //#define INTERVAL (600)
 
@@ -55,7 +52,7 @@ uint16_t nDummyCount;
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
 //function to initiate radio device with radio(CE pin,CS pin)
   RF24 radio(D6,A2);
-#elif(HW==HW_ARDUINO)
+#else
   RF24 radio(9, 10);
 #endif
 
@@ -84,12 +81,13 @@ uint16_t nTestWatering = 1000;
 void setup(void)
 {
   DEBUG_SERIAL_INIT_WAIT;
-  radio.begin();
 
-
+  //radio.begin();
+  //Marko@ : want to ensure that all three node types use the same settings
+  radio.begin(RADIO_DELAY,RADIO_RETRIES,RADIO_SPEED,RADIO_CRC,RADIO_CHANNEL,RADIO_PA_LEVEL);
   //  radio.setRetries(15,15);
   //  radio.setPALevel(RF24_PA_MIN);//@Marko: Test other configuration, maybe better communication
-  radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
+  //radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
 
   //  radio.setPayloadSize(8);
   radio.openReadingPipe(1, pipes[1]);
@@ -151,6 +149,8 @@ DEBUG_PRINTLNSTR("\r\n****************");
 #endif
 
   nDummyCount = 0;
+
+
 }//setup
 
 /*
@@ -208,6 +208,24 @@ bool initStorage()
 */
 void loop(void)
 {
+  #if (DEBUG_RF24 == 1 && DEBUG_==1)
+      if((millis()-time_)>20000)
+      {
+        DEBUG_PRINTLNSTR("<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>");
+        radio.printDetails();
+        time_=millis();
+        DEBUG_PRINTLNSTR("RF24-Settings:");
+        DEBUG_PRINTSTR("\tRADIO_CHANNEL: ");DEBUG_PRINTLN(RADIO_CHANNEL);
+        DEBUG_PRINTSTR("\tRADIO_DELAY: ");DEBUG_PRINTLN(RADIO_DELAY);
+        DEBUG_PRINTSTR("\tRADIO_RETRIES: ");DEBUG_PRINTLN(RADIO_RETRIES);
+        DEBUG_PRINTSTR("\tRADIO_SPEED: ");DEBUG_PRINTLN(RADIO_SPEED);
+        DEBUG_PRINTSTR("\tRADIO_CRC: ");DEBUG_PRINTLN(RADIO_CRC);
+        DEBUG_PRINTSTR("\tRADIO_PA_LEVEL: ");DEBUG_PRINTLN(RADIO_PA_LEVEL);
+        DEBUG_PRINTLNSTR("<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>");
+      }
+  #endif
+
+
   uint8_t nPipenum;
 #if (TEST_PUMP == 0)
   uint8_t nICA;   // Interactive Command Answer
@@ -234,12 +252,16 @@ void loop(void)
    *
    */
   if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
+  //  if (radio.available())
   {
+    DEBUG_PRINTSTR("[CONTROLLER]RF24::Payloadsize: ");  DEBUG_PRINT(radio.getPayloadSize()); DEBUG_PRINTLNSTR(".");
     DEBUG_PRINTSTR("[TIME] : ");
     displayTimeFromUNIX(getCurrentTime());
 //    DEBUG_PRINTSTR("\n[CONTROLLER] Message available at pipe ");
 //    DEBUG_PRINTLN(nPipenum);
-    radio.read(&myData, sizeof(struct sensorData));
+    while (radio.available()) {
+      radio.read(&myData, sizeof(myData));
+    }
 
 // output message details only if required
     if (DEBUG_MESSAGE_HEADER > 0)
@@ -250,6 +272,21 @@ void loop(void)
       DEBUG_PRINT(myData.ID);
       DEBUG_PRINTSTR(" with Interval: ");
       DEBUG_PRINTLN(myData.interval);
+      if(DEBUG_MESSAGE_HEADER_2 > 0)
+      {
+        DEBUG_PRINTSTR("humidity: ");
+        DEBUG_PRINTLN(myData.humidity);
+        DEBUG_PRINTSTR("moisture: ");
+        DEBUG_PRINTLN(myData.moisture);
+        DEBUG_PRINTSTR("brightness: ");
+        DEBUG_PRINTLN(myData.brightness);
+        DEBUG_PRINTSTR("voltage: ");
+        DEBUG_PRINTLN(myData.voltage);
+        DEBUG_PRINTSTR("VCC: ");
+        DEBUG_PRINTLN(myData.VCC);
+        DEBUG_PRINTSTR("realTime: ");
+        DEBUG_PRINTLN(myData.realTime);
+      }
     }
 
     //      myResponse.ControllerTime = 1481803260;
@@ -622,7 +659,6 @@ inline void removePumphandler(int index, PumpNode_Handler* handler)
 
 String handle_ErrorMessages(uint8_t ret)
 {
-
   switch (ret)
   {
     case 10:

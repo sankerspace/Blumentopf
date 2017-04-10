@@ -18,12 +18,13 @@
 #define DEBUG_ 1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
 #define DEBUG_MESSAGE_HEADER 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
+#define DEBUG_MESSAGE_HEADER_2 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
 #define DEBUG_SENSOR_SCHEDULING 0		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
-#define DEBUG_FREE_MEMORY 1				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
+#define DEBUG_FREE_MEMORY 0			// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
-#define DEBUG_RF24 0           // 0: disabled		1: show nRF24L01 infos
+#define DEBUG_RF24 1           // 0: disabled		1: show nRF24L01 infos
 
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0				// 0: disabled		1: for analysing the EEPROM Data class internals
@@ -53,17 +54,31 @@ DO NOT CHANGE:
 // sets Particle or photon:
 #define HW_ARDUINO  1
 #define HW_PHOTON   2
-#define HW  HW_PHOTON  // tells whether to compile for Arduino or Photon
-//#define HW HW_ARDUINO
+
+#if defined(SPARK) || defined(PLATFORM_ID)
+  #define HW  HW_PHOTON  // tells whether to compile for Arduino or Photon
+#else
+  #define HW HW_ARDUINO
+#endif
+
+  
 
 #if (HW == HW_ARDUINO)
   #include <Wire.h>
   #include <Arduino.h>
+  #include <SPI.h>
+  #include "RF24.h"
 #endif
 
 #if (HW == HW_PHOTON)
   #include <application.h>
-  #define F(x) ((const char*)(x)) //ther is no
+  #ifdef F
+    #undef F  //because its defined in application.h and that cannot handle const string
+    #define F(x) ((const char*)(x)) //ther is no
+  #else
+    #define F(x) ((const char*)(x)) //ther is no
+  #endif
+   #include "particle-rf24.h"
 #endif
 
 //#define HW_RTC (0)    // there is no RTC
@@ -73,8 +88,8 @@ DO NOT CHANGE:
 #define RTC_3232	3
 
 // SET THE RTC TYPE HERE:
-//#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
 #define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
+//#define HW_RTC RTC_3232      // kind of RTC. NONE for disable it.
 #if (HW_RTC > NONE)
 //  #include <Time.h>		// if it's included here, some functions will miss it
 //  #include "Wire.h"
@@ -111,7 +126,12 @@ DO NOT CHANGE:
 #endif
 //Radio communication defines
 #define RADIO_CHANNEL               152//108
-#define WAIT_SEND_INTERVAL            500
+#define RADIO_DELAY                  5
+#define RADIO_RETRIES                15
+#define RADIO_SPEED                  RF24_1MBPS //RF24.h of particle-rf24.h
+#define RADIO_CRC                    false //CRC8 true,CRC16 false
+#define RADIO_PA_LEVEL               RF24_PA_LOW
+#define WAIT_SEND_INTERVAL           500
 #define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*5  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
 #define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds
 #if (DEBUG_RF24==1)
@@ -282,26 +302,26 @@ DO NOT CHANGE:
 */
 struct sensorData
 {
-  uint16_t ID;
+  uint16_t ID; //2 Byte
   float temperature;//4byte		// should be shortended to uint16_t
   float humidity;//4byte			// should be shortended to uint16_t
-  uint16_t moisture;
-  uint16_t brightness;
+  uint16_t moisture; //2 Byte
+  uint16_t brightness; //2 Byte
 //  float voltage;
-  uint16_t voltage;
-  uint16_t VCC;
+  uint16_t voltage; //2 Byte
+  uint16_t VCC; //2 Byte
   uint8_t state;			// could be moved to unused data bits...
   time_t realTime;//4byte
-  uint16_t interval = 2;
+  uint16_t interval = 2; //2 Byte
 };//25byte
 
 
 struct responseData
 {
-  uint16_t ID;
-  time_t ControllerTime;
-  uint16_t interval;
-  uint8_t state;
+  uint16_t ID;    //2 Byte
+  time_t ControllerTime; //4byte
+  uint16_t interval; //2 Byte
+  uint8_t state; //1 Byte
 };//9byte
 
 

@@ -1,0 +1,100 @@
+(The above answers explained the reason quite clear, but seems not totally clear about the size of padding, so, I will add an answer according to what I learn from The Lost Art of C Structure Packing)
+Memory align rules - for struct
+
+    Before each individual member, there will be padding so that to make it start at an address that is divisible by its size. e.g on 64 bit system,int should start at address divisible by 4, and long by 8, short by 2.
+    char and char[] is special, could be any memory address, so they don't need padding before them.
+    For struct, other than the alignment need for each individual member, the size of whole struct itself will be aligned to a size divisale by size of largest individual member, by padding at end. e.g if struct's largest member is long then divisible by 8, int then by 4, short then by 2.
+
+
+
+
+
+
+
+
+
+Example
+
+(for 64 bit system)
+
+memory_align.c:
+
+
+/**
+ * Memory align & padding - for struct.
+ * compile: gcc memory_align.c
+ * execute: ./a.out
+ */ 
+#include <stdio.h>
+
+// size is 8, 4 + 1, then round to multiple of 4 (int's size),
+struct stu_a {
+    int i;
+    char c;
+};
+
+// size is 16, 8 + 1, then round to multiple of 8 (long's size),
+struct stu_b {
+    long l;
+    char c;
+};
+
+// size is 24, l need padding by 4 before it, then round to multiple of 8 (long's size),
+struct stu_c {
+    int i;
+    long l;
+    char c;
+};
+
+// size is 16, 8 + 4 + 1, then round to multiple of 8 (long's size),
+struct stu_d {
+    long l;
+    int i;
+    char c;
+};
+
+int test() {
+    printf("%s: %ld\n", "stu_a", sizeof(struct stu_a));
+    printf("%s: %ld\n", "stu_b", sizeof(struct stu_b));
+    printf("%s: %ld\n", "stu_c", sizeof(struct stu_c));
+    printf("%s: %ld\n", "stu_d", sizeof(struct stu_d));
+    return 0;
+}
+
+int main(int argc, char * argv[]) {
+    test();
+    return 0;
+}
+
+Execution result:
+
+stu_a: 8
+stu_b: 16
+stu_c: 24
+stu_d: 16
+
+
+
+Tips
+
+    The order of member might affect actual size of struct, so take that in mind. e.g the stu_c and stu_d from above example has the same members, but in different order, and result in different size for the struct.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
