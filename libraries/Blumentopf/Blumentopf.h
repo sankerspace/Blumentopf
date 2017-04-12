@@ -25,6 +25,7 @@
 #define DEBUG_FREE_MEMORY 0			// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
 #define DEBUG_RF24 1           // 0: disabled		1: show nRF24L01 infos
+#define DEBUG_INFO 1           // 0: disabled		1: show infos
 
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0				// 0: disabled		1: for analysing the EEPROM Data class internals
@@ -61,7 +62,7 @@ DO NOT CHANGE:
   #define HW HW_ARDUINO
 #endif
 
-  
+
 
 #if (HW == HW_ARDUINO)
   #include <Wire.h>
@@ -125,12 +126,13 @@ DO NOT CHANGE:
   #define SD_CHIPSELECT (4)
 #endif
 //Radio communication defines
-#define RADIO_CHANNEL               152//108
-#define RADIO_DELAY                  5
-#define RADIO_RETRIES                15
-#define RADIO_SPEED                  RF24_1MBPS //RF24.h of particle-rf24.h
+#define RADIO_CHANNEL               152   //[0-125]
+#define RADIO_AUTO_ACK              true  //ture,false
+#define RADIO_DELAY                  5    //[]
+#define RADIO_RETRIES                15   //[]
+#define RADIO_SPEED                  RF24_1MBPS //RF24_2MBPS, RF24_1MBPS, RF24_250KBPS
 #define RADIO_CRC                    false //CRC8 true,CRC16 false
-#define RADIO_PA_LEVEL               RF24_PA_LOW
+#define RADIO_PA_LEVEL               RF24_PA_LOW //RF24_PA_HIGH , RF24_PA_MAX, RF24_PA_ERROR
 #define WAIT_SEND_INTERVAL           500
 #define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*5  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
 #define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds
@@ -302,27 +304,33 @@ DO NOT CHANGE:
 */
 struct sensorData
 {
-  uint16_t ID; //2 Byte
+
   float temperature;//4byte		// should be shortended to uint16_t
   float humidity;//4byte			// should be shortended to uint16_t
-  uint16_t moisture; //2 Byte
-  uint16_t brightness; //2 Byte
-//  float voltage;
+
+  time_t realTime;//4byte
+  uint16_t ID; //2 Byte
+  uint16_t interval = 2; //2 Byte
   uint16_t voltage; //2 Byte
   uint16_t VCC; //2 Byte
-  uint8_t state;			// could be moved to unused data bits...
-  time_t realTime;//4byte
-  uint16_t interval = 2; //2 Byte
-};//25byte
+  uint16_t moisture; //2 Byte
+  uint16_t brightness; //2 Byte
+  uint16_t dummy16; //2 Byte
+  uint8_t  dummy8;  //1 Byte
+  uint8_t state;		//1Byte	// could be moved to unused data bits...
 
+};//25byte   //on particle 28byte
+//has to fill a padding  of 3 byte
 
 struct responseData
 {
-  uint16_t ID;    //2 Byte
   time_t ControllerTime; //4byte
+  uint16_t ID;    //2 Byte
   uint16_t interval; //2 Byte
+  uint16_t dummy16; //2 Byte
+  uint8_t  dummy8;  //1 Byte
   uint8_t state; //1 Byte
-};//9byte
+};//9byte      //on particle 12byte
 
 
 struct EEPROM_Data
@@ -383,10 +391,11 @@ class CommandHandler
     void getInteractiveCommands();//Bernhard@::rückgabetyp war uint8_t
     uint8_t checkSchedule(struct nodeList, uint16_t*, uint16_t*, time_t);
   private:
-    bool bWateringNow = false;
+    uint16_t mnCurrentIndex;
     uint8_t mnPreviousHour;
     uint8_t mnPreviousMinute;
-    uint16_t mnCurrentIndex;
+    bool bWateringNow = false;
+
 };
 
 
@@ -398,15 +407,18 @@ class CommandHandler
  */
 struct nodeListElement
 {
+  sensorData nodeData;
+  time_t   nextSlot;
   uint16_t ID;
+  uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
   uint8_t state;
   // Bit 0: NODELIST_NODETYPE:   0...this is a SensorNode, 1...this is a MotorNode
   // Bit 1: NODELIST_PUMPACTIVE: 0...inactive, 1...active (is currently pumping[1] or not[0])
   // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE, 1...ONLINE (the node has performed a registration)
-  uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
   byte     watering_policy;
-  time_t   nextSlot;
-  sensorData nodeData;
+
+
+
 };
 
 // 7258155010
@@ -416,14 +428,15 @@ class nodeList
 public:
   nodeList(){mnNodeCount=0; mnCycleCount = 0; mnPreviouslyScheduledNode = NODELISTSIZE; mnPumpSlot = 0; mnPumpSlotEnable = false; mnCurrentInterval = 0;}
   struct nodeListElement myNodes[NODELISTSIZE];
+  time_t   mnPumpSlot;
   uint16_t mnNodeCount;
   uint16_t mnCycleCount;
   uint16_t mnPreviouslyScheduledNode;
-  bool     mnPumpSlotEnable;
-  time_t   mnPumpSlot;
   uint16_t mnActivePump;
   uint16_t mnLastAddedSensorNode;
   uint16_t mnCurrentInterval;
+  bool     mnPumpSlotEnable;
+
 
   void     getNodeList();
   uint8_t  addNode(struct nodeListElement);

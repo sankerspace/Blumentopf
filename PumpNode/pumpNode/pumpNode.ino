@@ -66,7 +66,7 @@ void setup() {
 
   killID();
   //radio.begin();
-  radio.begin(RADIO_DELAY, RADIO_RETRIES, RADIO_SPEED, RADIO_CRC, RADIO_CHANNEL, RADIO_PA_LEVEL);
+  radio.begin(RADIO_AUTO_ACK,RADIO_DELAY, RADIO_RETRIES, RADIO_SPEED, RADIO_CRC, RADIO_CHANNEL, RADIO_PA_LEVEL);
   //radio.setPALevel(RF24_PA_LOW);
   //radio.setChannel(RADIO_CHANNEL);
 
@@ -74,10 +74,19 @@ void setup() {
   radio.openReadingPipe(1, pipes[0]);     // Open a reading pipe on address 0, pipe 1
 
   radio.startListening();                       // Start listening
-  
+
+#if (DEBUG_==1)
 #if (DEBUG_RF24==1)
   radio.printDetails();
 #endif
+#if (DEBUG_INFO == 1)
+  
+    DEBUG_PRINTSTR("\n\tSize of myData: "); DEBUG_PRINTLN(sizeof(myData));
+    DEBUG_PRINTSTR("\n\tSize of myResponse: "); DEBUG_PRINTLN(sizeof(myResponse));
+#endif
+#endif
+
+
 
   //Print debug info
   //radio.printDetails();
@@ -160,6 +169,8 @@ void loop(void) {
   {
     radio.printDetails();
     time_ = millis();
+
+
   }
 #endif
   buttonstate = digitalRead(buttonPin);
@@ -421,18 +432,18 @@ int registerNode(void)
   DEBUG_PRINTSTR(" ID: ");
   DEBUG_PRINTLN(myData.ID);
   /*********Sending registration request to the Controller***************************/
-/*LÖSCHEN*/
+  /*LÖSCHEN*/
 
 
-  
 
-   DEBUG_PRINTLNSTR("Initialize struct sensorData with arbitrary values: ");  
-   myData.humidity=12000.234f;
-   myData.moisture=13000;
-   myData.brightness=21546;
-    myData.voltage=45258;
-    myData.VCC=55879;
-    myData.realTime=millis();
+
+  DEBUG_PRINTLNSTR("Initialize struct sensorData with arbitrary values: ");
+  myData.humidity = 12000.234f;
+  myData.moisture = 13000;
+  myData.brightness = 21546;
+  myData.voltage = 45258;
+  myData.VCC = 55879;
+  myData.realTime = millis();
 
   DEBUG_PRINTSTR(" humidity: ");
   DEBUG_PRINTLN(myData.humidity);
@@ -444,16 +455,16 @@ int registerNode(void)
   DEBUG_PRINTLN(myData.voltage);
   DEBUG_PRINTSTR(" VCC: ");
   DEBUG_PRINTLN(myData.VCC);
-   DEBUG_PRINTSTR(" realTime: ");
+  DEBUG_PRINTSTR(" realTime: ");
   DEBUG_PRINTLN(myData.realTime);
-   DEBUG_PRINTSTR("SIZE OF SENDING DATA STRUCTURE : ");
+  DEBUG_PRINTSTR("SIZE OF SENDING DATA STRUCTURE : ");
   DEBUG_PRINTLN(sizeof(myData));
-   /*LÖSCHEN*/
+  /*LÖSCHEN*/
   radio.stopListening();
-   if (!radio.write( &myData, sizeof(myData) )){
-       DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:Sending data...");
-       DEBUG_PRINTLNSTR("  FAILED!!!!!!!!!!!");
-     }
+  if (!radio.write( &myData, sizeof(myData) )) {
+    DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:Sending data...");
+    DEBUG_PRINTLNSTR("  FAILED!!!!!!!!!!!");
+  }
   radio.startListening();
 
   /*********************************************************************************/

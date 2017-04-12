@@ -693,7 +693,7 @@ bool RF24::begin(void)
 
 /****************************************************************************/
 
-bool RF24::begin(uint8_t p_delay,uint8_t p_retries,rf24_datarate_e p_SPEED,bool   p_CRC_8Bit_16Bit,uint8_t p_channel,rf24_pa_dbm_e p_PA_LEVEL)
+bool RF24::begin(bool p_AutoACK,uint8_t p_delay,uint8_t p_retries,rf24_datarate_e p_SPEED,bool   p_CRC_8Bit_16Bit,uint8_t p_channel,rf24_pa_dbm_e p_PA_LEVEL)
 {
 
   uint8_t setup=0;
@@ -765,6 +765,9 @@ bool RF24::begin(uint8_t p_delay,uint8_t p_retries,rf24_datarate_e p_SPEED,bool 
   // WARNING: If this is ever lowered, either 250KBS mode with AA is broken or maximum packet
   // sizes must never be used. See documentation for a more complete explanation.
   
+   //Modification: Marko@
+  setAutoAck(p_AutoACK);
+  
   //Modification: Marko@
   setRetries(p_delay,p_retries);
 
@@ -811,7 +814,9 @@ bool RF24::begin(uint8_t p_delay,uint8_t p_retries,rf24_datarate_e p_SPEED,bool 
   
    //Modification: Marko@
    setChannel(p_channel);
-
+  
+ 
+  
   // Flush buffers
   flush_rx();
   flush_tx();
