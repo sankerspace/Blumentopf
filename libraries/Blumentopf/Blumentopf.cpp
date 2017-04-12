@@ -218,20 +218,33 @@ int RTC_DS3231::setAlarm(time_t)
 int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
 {
 	time_t tLocalTime;
+	time_t tDifference;
 	tmElements_t tm;
 
 //  if ((*state & (1 << RTC_RUNNING_BIT))  == true)     // only sync if the clock is working.
 //  {
 	tLocalTime = getTime();
 
+
+	if (tLocalTime > controllerTime)
+	{
+	  tDifference = tLocalTime - controllerTime;
+	}
+	else
+	{
+	  tDifference = controllerTime - tLocalTime;
+	}
+
+
 	DEBUG_PRINTSTR("\tController time: ");
 	DEBUG_PRINT(controllerTime);
 	DEBUG_PRINTSTR(" Our time: ");
 	DEBUG_PRINT(tLocalTime);
 	DEBUG_PRINTSTR(", Deviation: ");
-	DEBUG_PRINTLN(abs(tLocalTime - controllerTime));
 
-    if (abs(tLocalTime - controllerTime) > RTC_SYNC_THRESHOLD)
+	DEBUG_PRINTLN(tDifference);
+
+    if (tDifference > RTC_SYNC_THRESHOLD)
     {
 		DEBUG_PRINTSTR("\tRTC deviation too big. Adjusting RTC...");
 		breakTime(controllerTime, tm);

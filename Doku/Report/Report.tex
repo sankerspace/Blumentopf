@@ -265,6 +265,31 @@ States:
 \end{itemize}
 
 
+\subsection{Pump Node}
+
+
+\subsubsection{Fall-back Mode}
+To guarantee a dependable solution resistant to external factors such as a failing internet connection or wireless jamming attacks, a fall-back mode has been implemented to water the flowers reliably, even if the control node is unavailable.
+
+For this purpose the pump node uses all incoming messages, also those addressed to other nodes, to detect the availability of the controller. If the pump node does not receive any messages from the controller for a specified timeout\_duration, it assumes the controller is offline and goes into a fall-back mode.
+
+The parameters for the fall-back mode are:
+\begin{itemize}
+\item timeout\_duration
+\item enable
+\item time
+\item watering\_duration
+\end{itemize}
+
+These parameters can be set at the IOT front-end-interface and get transmitted to the pump nodes by the controller at the pump node registration and with every pump request. (so in case they get changed the pump node stays up to date)
+In case the fall-back is disabled, no action takes place if the controller is unavailable.
+In case the fall-back is enabled and the controller is unavailable, daily at the specified time the pump node pumps for the specified watering\_duration.
+
+This mechanism does not guarantee a perfect watering, however it prevents the plants from drying.
+
+To make the fall-back visible to the monitor node, a notification message is broadcasted via the wireless network containing the timestamp, pump duration and last timestamp from a controller message.
+
+
 \subsection{Protocol}
 For registering nodes and perform data exchanges a protocol has been developed. The developed library provides access to the protocol registers to use the functionality of the protocol.
 

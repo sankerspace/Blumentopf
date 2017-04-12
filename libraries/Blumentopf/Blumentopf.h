@@ -305,6 +305,7 @@ DO NOT CHANGE:
 struct sensorData
 {
 
+
   float temperature;//4byte		// should be shortended to uint16_t
   float humidity;//4byte			// should be shortended to uint16_t
 
@@ -314,10 +315,11 @@ struct sensorData
   uint16_t voltage; //2 Byte
   uint16_t VCC; //2 Byte
   uint16_t moisture; //2 Byte
+  uint16_t moisture2;//2 Byte
   uint16_t brightness; //2 Byte
-  uint16_t dummy16; //2 Byte
-  uint8_t  dummy8;  //1 Byte
   uint8_t state;		//1Byte	// could be moved to unused data bits...
+  uint8_t  dummy8;  //1 Byte
+
 
 };//25byte   //on particle 28byte
 //has to fill a padding  of 3 byte

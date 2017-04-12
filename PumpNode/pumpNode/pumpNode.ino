@@ -603,6 +603,7 @@ void registration(bool refreshID)
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
   myData.humidity = 0.0f;
   myData.moisture = 0;
+  myData.moisture2 = 0;
   myData.brightness = 0;
   myData.voltage = 0;
   myData.VCC = 0;

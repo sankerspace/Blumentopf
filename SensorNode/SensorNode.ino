@@ -68,6 +68,7 @@ DataStorage myEEPROM;
 
 // Setting the Sensor Pins
 int moisturePin = A0;
+int moisturePin2 = A2;
 int lightPin = A1;
 int sensorPower = 8;
 
@@ -105,6 +106,7 @@ void setup()
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(moisturePin, INPUT);
+  pinMode(moisturePin2, INPUT);
   pinMode(lightPin, INPUT);
   pinMode(sensorPower, OUTPUT);
   pinMode(BATTERY_SENSE_PIN, INPUT);
@@ -226,6 +228,7 @@ int registerNode(int *pnDelay)
   
   myData.humidity = 0;
   myData.moisture = 0;
+  myData.moisture2 = 0;
   myData.brightness = 0;
   myData.voltage = 0;
 
@@ -325,6 +328,7 @@ void loop()
 // The accuracy of the ADCs should be improved as in https://www.youtube.com/watch?v=E8GqHvOK4DI&feature=youtu.be
 // read the input on analog pin 0 (moisture):
   myData.moisture = analogRead(moisturePin);
+  myData.moisture2 = analogRead(moisturePin2);
     
 // read the input on analog pin 1 (light):
   myData.brightness = analogRead(lightPin);
@@ -749,13 +753,24 @@ void printValues(int DHT11_State)
   // Print the moisture value
   if(myData.moisture < MOISTURE_THRESHOLD)
   {
-    DEBUG_PRINTSTR("\tThe plant doesn't need watering (");
+    DEBUG_PRINTSTR("\tThe plant1 doesn't need watering (");
     DEBUG_PRINT(myData.moisture);
     DEBUG_PRINTLN(")");
   }
   else {
-    DEBUG_PRINTSTR("\tIt is time to water the plant   (");
+    DEBUG_PRINTSTR("\tIt is time to water plant1   (");
     DEBUG_PRINT(myData.moisture);
+    DEBUG_PRINTLN(")");
+  }
+  if(myData.moisture2 < MOISTURE_THRESHOLD)
+  {
+    DEBUG_PRINTSTR("\tThe plant2 doesn't need watering (");
+    DEBUG_PRINT(myData.moisture2);
+    DEBUG_PRINTLN(")");
+  }
+  else {
+    DEBUG_PRINTSTR("\tIt is time to water plant2   (");
+    DEBUG_PRINT(myData.moisture2);
     DEBUG_PRINTLN(")");
   }
 
