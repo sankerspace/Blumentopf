@@ -84,7 +84,7 @@ void setup(void)
 
   //radio.begin();
   //Marko@ : want to ensure that all three node types use the same settings
-  radio.begin(RADIO_DELAY,RADIO_RETRIES,RADIO_SPEED,RADIO_CRC,RADIO_CHANNEL,RADIO_PA_LEVEL);
+  radio.begin(RADIO_AUTO_ACK,RADIO_DELAY,RADIO_RETRIES,RADIO_SPEED,RADIO_CRC,RADIO_CHANNEL,RADIO_PA_LEVEL);
   //  radio.setRetries(15,15);
   //  radio.setPALevel(RF24_PA_MIN);//@Marko: Test other configuration, maybe better communication
   //radio.setChannel(RADIO_CHANNEL);  // Above most Wifi Channels
@@ -208,22 +208,31 @@ bool initStorage()
 */
 void loop(void)
 {
-  #if (DEBUG_RF24 == 1 && DEBUG_==1)
+#if (DEBUG_==1)
       if((millis()-time_)>20000)
       {
-        DEBUG_PRINTLNSTR("<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>");
-        radio.printDetails();
-        time_=millis();
-        DEBUG_PRINTLNSTR("RF24-Settings:");
-        DEBUG_PRINTSTR("\tRADIO_CHANNEL: ");DEBUG_PRINTLN(RADIO_CHANNEL);
-        DEBUG_PRINTSTR("\tRADIO_DELAY: ");DEBUG_PRINTLN(RADIO_DELAY);
-        DEBUG_PRINTSTR("\tRADIO_RETRIES: ");DEBUG_PRINTLN(RADIO_RETRIES);
-        DEBUG_PRINTSTR("\tRADIO_SPEED: ");DEBUG_PRINTLN(RADIO_SPEED);
-        DEBUG_PRINTSTR("\tRADIO_CRC: ");DEBUG_PRINTLN(RADIO_CRC);
-        DEBUG_PRINTSTR("\tRADIO_PA_LEVEL: ");DEBUG_PRINTLN(RADIO_PA_LEVEL);
-        DEBUG_PRINTLNSTR("<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>");
+        if(DEBUG_RF24 == 1)
+        {
+          DEBUG_PRINTLNSTR("<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>");
+          radio.printDetails();
+          time_=millis();
+          DEBUG_PRINTLNSTR("RF24-Settings:");
+          DEBUG_PRINTSTR("\tRADIO_CHANNEL: ");DEBUG_PRINTLN(RADIO_CHANNEL);
+          DEBUG_PRINTSTR("\tRADIO_DELAY: ");DEBUG_PRINTLN(RADIO_DELAY);
+          DEBUG_PRINTSTR("\tRADIO_RETRIES: ");DEBUG_PRINTLN(RADIO_RETRIES);
+          DEBUG_PRINTSTR("\tRADIO_SPEED: ");DEBUG_PRINTLN(RADIO_SPEED);
+          DEBUG_PRINTSTR("\tRADIO_CRC: ");DEBUG_PRINTLN(RADIO_CRC);
+          DEBUG_PRINTSTR("\tRADIO_PA_LEVEL: ");DEBUG_PRINTLN(RADIO_PA_LEVEL);
+          DEBUG_PRINTLNSTR("<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>");
       }
-  #endif
+      if(DEBUG_INFO==1)
+      {
+            DEBUG_PRINTSTR("\n\tSize of myData: ");DEBUG_PRINTLN(sizeof(myData));
+            DEBUG_PRINTSTR("\n\tSize of myResponse: ");DEBUG_PRINTLN(sizeof(myResponse));
+      }
+
+    }
+#endif
 
 
   uint8_t nPipenum;
