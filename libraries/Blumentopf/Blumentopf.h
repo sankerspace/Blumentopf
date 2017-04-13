@@ -62,7 +62,7 @@ DO NOT CHANGE:
 #define RTC_3232	(3)
 
 // SET THE RTC TYPE HERE:
-#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
+#define HW_RTC 1      // kind of RTC. NONE for disable it.
 
 #if (HW_RTC > NONE)
 //  #include <Time.h>		// if it's included here, some functions will miss it
@@ -158,6 +158,9 @@ DO NOT CHANGE:
 // (R1*R1*V_max) / (1024.0*(1 - (R1*V_max / ((R1+R2)*IREF)))
 
 
+#define SENSORNODE 0
+#define PUMPNODE   1
+
 /*
  * The following defines are for node status bit operations
  */
@@ -168,6 +171,7 @@ DO NOT CHANGE:
 #define EEPROM_DATA_PACKED    (4)   // EEPROM_DATA_PACKED:    0...live data,                 1...EEPROM data
 #define EEPROM_DATA_LAST      (5)   // EEPROM_DATA_LAST:      0...this is not the last data, 1...this is the last data
 #define NODE_TYPE             (6)   // NODE_TYPE:             0...this is a SensorNode,      1...this is a MotorNode
+
 
 // For getting rid of serial communication in the release version:
 #if (DEBUG == 1)
@@ -398,7 +402,9 @@ public:
   uint8_t  addNode(struct nodeListElement);
   uint16_t findNodeByID(uint16_t);         // checks if the node exists
   void     clearEEPROM_Nodelist();
-  uint16_t getNumberOfSensorNodes();
+  uint16_t getNumberOfNodesByType(uint8_t);
+//  uint16_t getNumberOfSensorNodes();
+//  uint16_t getNumberOfPumpNodes();
   uint16_t getLastScheduledSensorNode();
   uint16_t getPumpEpochLength();
   

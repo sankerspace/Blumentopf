@@ -601,7 +601,7 @@ void setup_RF()
 uint16_t averageADC(uint8_t ADCpin, uint8_t cycles)
 {
   uint8_t i;
-  uint32_t nValue;
+  uint32_t nValue = 0;
   for (i = 0; i < 8; i++)  // burn some readings
   {
     analogRead(ADCpin);

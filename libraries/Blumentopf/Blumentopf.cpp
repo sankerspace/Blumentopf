@@ -695,7 +695,7 @@ uint8_t DataStorage::findQueueEnd()
 	time_t firstItemTimestamp;
 	nCurrentAddress = mnDataBlockBegin;
 	uint16_t nAddressOfOldestElement;
-	uint16_t nAddressBeforeOldestElement;
+	uint16_t nAddressBeforeOldestElement = 0;
 	struct sensorData currentElement;
  uint16_t nPreviousOldestElement;
 
@@ -1494,23 +1494,25 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
 }
 
 /*
- * returns the number of sensor nodes in the list
+ * returns the number of sensor- or pump nodes contained in the node list
+ *
+ * Sensornode: nodeType == 0 
+ * Pumpnode:   nodeType == 1
  */
-uint16_t nodeList::getNumberOfSensorNodes()
+uint16_t nodeList::getNumberOfNodesByType(uint8_t nodeType)
 {
-  uint16_t i, nNumberOfSensorNodes;
-  nNumberOfSensorNodes = 0;
+  uint16_t i, nNumberOfTypedNodes;
+  nNumberOfTypedNodes = 0;
   
   for(i = 0; i < mnNodeCount; i++)
   {
-    if ((myNodes[i].state & (1<<NODELIST_NODETYPE)) == 0) // sensor node
+    if ((myNodes[i].state & (1<<NODELIST_NODETYPE)) == nodeType) // sensor node
     {
-      nNumberOfSensorNodes++;     // increase the counter for every sensor node
+      nNumberOfTypedNodes++;     // increase the counter for every sensor node
     }
   }
-  return nNumberOfSensorNodes;
+  return nNumberOfTypedNodes;
 }
-
 
 uint16_t nodeList::getLastScheduledSensorNode()
 {
@@ -1539,15 +1541,7 @@ uint16_t nodeList::getLastScheduledSensorNode()
 
 uint16_t nodeList::getPumpEpochLength()
 {
-  uint16_t i;
-  uint16_t nPumpNodeCount = 0;
-  for(i = 0; i < mnNodeCount; i++)
-  {
-    if ((myNodes[i].state & (1 << NODELIST_NODETYPE)) == 1)	// pump node
-	{
-	  nPumpNodeCount++;
-	}
-  }
+  uint16_t nPumpNodeCount = getNumberOfNodesByType(PUMPNODE);
   return nPumpNodeCount * INTERVAL / 10;
 }
 

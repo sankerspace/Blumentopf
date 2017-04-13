@@ -330,23 +330,37 @@ void loop(void)
       myCurrentTime = getCurrentTime();
 //      displayTimeFromUNIX(myCurrentTime, 1);
 
-if (bProcessPumps == false)
-{
-        if (myNodeList.mnPumpSlot <= myCurrentTime)      // The sensorNode-slots are over. Now it's time to go through the pumps and activate them if needed.
+      if (bProcessPumps == false)
+      {
+        DEBUG_PRINTSTR_D("\r\n\tNumber of active pumps: ", DEBUG_SENSOR_SCHEDULING);
+        DEBUG_PRINTLN_D(myNodeList.getNumberOfNodesByType(PUMPNODE), DEBUG_SENSOR_SCHEDULING);
+        if (myNodeList.getNumberOfNodesByType(PUMPNODE) > 0)      // are there any pumps?
         {
-          DEBUG_PRINTLNSTR("\r\n\tAll data arrived. Activating the pumps...");
-          bProcessPumps = true;
-          myNodeList.mnActivePump = 0;
-  
-        }
-        else
-        {
-          DEBUG_PRINTLNSTR("\tWaiting until the pump timeslot starts..");
-        }
-}
+
+            if (myNodeList.mnPumpSlot <= myCurrentTime)      // The sensorNode-slots are over. Now it's time to go through the pumps and activate them if needed.
+            {
+              
+                DEBUG_PRINTLNSTR("\r\n\tAll data arrived. Activating the pumps...");
+                bProcessPumps = true;
+                myNodeList.mnActivePump = 0;                
+            }
+            else
+            {
+              DEBUG_PRINTLNSTR("\tWaiting until the pump timeslot starts..");
+            }
+          }
+          else  // there are no pumps in the list. Skip pumping!  ( ist das so richtig? was ist mit myNodeList.mnPumpSlotEnable??)
+          {
+            DEBUG_PRINTLNSTR("\r\n\tThere are no pumps to be activated! Resuming sensor node scheduling");
+            bProcessPumps = false;
+            myNodeList.mnPumpSlotEnable = false;
+          }
+      }
 
       if (bProcessPumps == true)    // The pumps have to be processed?
       {
+        DEBUG_PRINTSTR("\t\t Pumps active: ");
+        DEBUG_PRINTLN(PumpList.size());
         if (PumpList.size() > 0)    // are there still active pumps?
         {
           DEBUG_PRINTLNSTR("\t\t Waiting for pump to finish pumping...");
@@ -913,11 +927,8 @@ void handleDataMessage(void)
     DEBUG_PRINTDIG((float)myData.VCC / 100, 2);
     DEBUG_PRINTSTR(", Time: ");
     DEBUG_PRINTLN(myData.realTime);
-  //      DEBUG_PRINTSTR("Time: ");
-  //      DEBUG_PRINTLN(myResponse.ControllerTime);
   }
   
-  //  myResponse.state &= ~((1 << FETCH_EEPROM_DATA1) | (1 << FETCH_EEPROM_DATA2));   // We do not want to have EEPROM data now
     myResponse.state |= (1 << FETCH_EEPROM_DATA1);   // We do want to have EEPROM data now
     myResponse.state &= ~(1 << FETCH_EEPROM_DATA2);
   
@@ -926,8 +937,6 @@ void handleDataMessage(void)
 // copying the data to the nodelist
     myNodeList.myNodes[nodeIndex].nodeData = myData;
 
-  //  myResponse.interval = INTERVAL;
-  //  time_t nextSlotTime = getNextMeasurementSlot(nodeIndex);
 
   if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
   {
@@ -1033,13 +1042,13 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   time_t currentTime;
   currentTime = getCurrentTime();
 
-  if (myNodeList.mnPreviouslyScheduledNode >= nodeIndex) // The the nodelist has been parsed once
+  if (myNodeList.mnPreviouslyScheduledNode >= nodeIndex) // The nodelist has been parsed once
   {
     myNodeList.mnCycleCount++;    // as the whole list has been run through once more, increase the counter.
   }
   
   DEBUG_PRINTSTR_D("\t\tNumber of Sensor Nodes: ", DEBUG_SENSOR_SCHEDULING);
-  DEBUG_PRINTLN_D(myNodeList.getNumberOfSensorNodes(), DEBUG_SENSOR_SCHEDULING);
+  DEBUG_PRINTLN_D(myNodeList.getNumberOfNodesByType(SENSORNODE), DEBUG_SENSOR_SCHEDULING);
 
   time_t tLastScheduledSensorNode = myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot;   // get the last scheduled time slot of all sensor nodes
   DEBUG_PRINTSTR_D("\t\tTime of last scheduled sensor node: ", DEBUG_SENSOR_SCHEDULING);
@@ -1074,7 +1083,7 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   DEBUG_PRINTLN(myNodeList.mnCycleCount);
   if (myNodeList.mnCycleCount >= WATERING_CYCLES_TO_WAIT) // there have been enough cycles so far...move the next measurements after the pump node runs..
   {
-//
+
     DEBUG_PRINTLNSTR("\t\tIn Pump Epoch");
 
     DEBUG_PRINTSTR("\t\t\tEpoch Length: ");
