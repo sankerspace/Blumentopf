@@ -10,7 +10,7 @@ int main(void)
   char word[4] = {'S','I','S','I'};
   RF24_adresses generator;
   bool b=generator.generate(word);
-  cout<<b<<endl; 
+ 
   cout << generator.printGenerator()<<endl;
   return 0;
 }

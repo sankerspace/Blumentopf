@@ -17,9 +17,10 @@ class RF24_adresses
 {
   private:
     int position;
-    LinkedList<char**> grouplist;
+    LinkedList<char*> grouplist;
     int adressExists(char word[4]);
     bool increase(void);
+    
   public:
     RF24_adresses(void); 
     ~RF24_adresses(void);  
@@ -27,7 +28,7 @@ class RF24_adresses
    
     
     void reset(void);
-    char** nextGroup(void);
+    char* nextGroup(void);
    
     bool Group_delete(int i);
     bool Group_delete(char word[4]);

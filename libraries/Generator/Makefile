@@ -18,7 +18,7 @@ HDRS := $(wildcard *.h)
 
 
 .PHONY: all
-all: example
+all: examples
   
   
 example: RF24generator.o example.o 
@@ -30,7 +30,15 @@ example.o: example.cpp
 RF24generator.o: RF24generator.cpp
 	$(CC) $(CFLAGS) ${HEADER_1} -c RF24generator.cpp
 	
+examples: RF24generator.cpp RF24generator.h example.cpp
+	 $(CC) $(CFLAGS) ${HEADER_1} -o $@ $+  $(LDFLAGS)
+	 
 
+gdbexample: RF24generator.cpp RF24generator.h example.cpp
+	 $(CC) $(CFLAGS) ${HEADER_1} -g -o $@ $+  $(LDFLAGS)
+   
+   
+   
 .PHONY: clean
 clean:
-	rm -rf *.o example
+	rm -rf *.o example examples gdbexample
