@@ -268,7 +268,7 @@ void loop(void)
     displayTimeFromUNIX(getCurrentTime());
 //    DEBUG_PRINTSTR("\n[CONTROLLER] Message available at pipe ");
 //    DEBUG_PRINTLN(nPipenum);
-    while (radio.available()) {
+    while (radio.available()) {  //Bernhard@ : Schau da das an bitte!!!!!!!!!!!!!!!!!
       radio.read(&myData, sizeof(myData));
     }
 
@@ -432,10 +432,10 @@ void loop(void)
 
             if (myNodeList.mnPumpSlot <= myCurrentTime)      // The sensorNode-slots are over. Now it's time to go through the pumps and activate them if needed.
             {
-              
+
                 DEBUG_PRINTLNSTR("\r\n\tAll data arrived. Activating the pumps...");
                 bProcessPumps = true;
-                myNodeList.mnActivePump = 0;                
+                myNodeList.mnActivePump = 0;
             }
             else
             {

@@ -129,7 +129,7 @@ DO NOT CHANGE:
 #endif
 //Radio communication defines
 #define RADIO_CHANNEL               152   //[0-125]
-#define RADIO_AUTO_ACK              true  //ture,false
+#define RADIO_AUTO_ACK              false  //ture,false
 #define RADIO_DELAY                  5    //[]
 #define RADIO_RETRIES                15   //[]
 #define RADIO_SPEED                  RF24_1MBPS //RF24_2MBPS, RF24_1MBPS, RF24_250KBPS
