@@ -46,7 +46,7 @@ class CommandHandler myCommandHandler;
 
 //marko@: wozu brauchen wir diese variable?
 //verwende sie jetzt Um Pumphandler zu zählen
-uint16_t nDummyCount;
+uint16_t nDummyCount,nCountPumpHandler;
 
 #if(HW==HW_PHOTON)
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
@@ -149,7 +149,7 @@ DEBUG_PRINTLNSTR("\r\n****************");
 #endif
 
   nDummyCount = 0;
-
+  nCountPumpHandler=0;
 
 }//setup
 
@@ -722,7 +722,6 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
   DEBUG_PRINTSTR("[TIME] : ");
   displayTimeFromUNIX(getCurrentTime(), 1);
   DEBUG_PRINTLNSTR(" ");
-  //nDummyCount = 0;
   if (handler_ > 0) {
     if ((handler_->getID() == PumpNode_ID) && (handler_->getPumpTime() == pumpTime)) {
       handler_->reset();
@@ -760,8 +759,8 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
         //  uint16_t pumptime=0;
         PumpNode_Handler *handler = new PumpNode_Handler(PumpNode_ID);
         PumpList.add(handler);          // todo in february: the handler should only add the pump node if it isn't in the list already.
-        nDummyCount++;
-        handler->setPumpHandlerID(nDummyCount);
+        nCountPumpHandler++;
+        handler->setPumpHandlerID(nCountPumpHandler);
         DEBUG_PRINTLNSTR("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         handler->processPumpstate(pumpTime);
         myResponse.ID = handler->getID();
