@@ -33,8 +33,11 @@
   RTC_DS3232 myRTC;
 #endif
 
-#if (DEBUG_RF24 == 1 && DEBUG_==1)
-  uint32_t time_;
+#if (DEBUG_==1)
+  #if(DEBUG_RF24 == 1)
+    uint32_t time_;
+  #endif
+  uint16_t nDummyCount=0;
 #endif
 
 //#define INTERVAL (600)
@@ -46,7 +49,17 @@ class CommandHandler myCommandHandler;
 
 //marko@: wozu brauchen wir diese variable?
 //verwende sie jetzt Um Pumphandler zu zählen
-uint16_t nDummyCount;
+uint16_t nPumpHandlerCnt=0;
+/*Marko@: introduced for increasing communication reliability by redundance
+*        important for Pump Handler,  instead waiting for acknowledgment
+*        we resend a message to ensure that at least one message arrives desination
+*        maximum resend count defined in RADIO_RESEND_NUMB
+*/
+uint8_t write_cnt=1;
+/*
+*
+*/
+bool bResponseNeeded = true;
 
 #if(HW==HW_PHOTON)
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
@@ -64,6 +77,7 @@ LinkedList<PumpNode_Handler*> PumpList = LinkedList<PumpNode_Handler*>();
 
 #if TEST_PUMP
 uint16_t nTestWatering = 1000;
+uint8_t i_=0;
 #endif
 
 
@@ -148,7 +162,7 @@ DEBUG_PRINTLNSTR("\r\n****************");
   SPI.transfer(0xAA);
 #endif
 
-  nDummyCount = 0;
+
 
 
 }//setup
@@ -242,7 +256,7 @@ void loop(void)
   uint16_t nDuration;
   uint16_t nID;
 #endif
-  bool bResponseNeeded = true;    // not always a message needs to be sent
+  bResponseNeeded = true;    // not always a message needs to be sent
   uint8_t ret;
 
 
@@ -260,8 +274,8 @@ void loop(void)
    *  1) CHECK FOR INCOMING MESSAGES
    *
    */
-  if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
-  //  if (radio.available())
+  //if (radio.available(&nPipenum) == true)    // 19.1.2017     checks whether data is available and passes back the pipe ID
+    if (radio.available())
   {
     DEBUG_PRINTSTR("[CONTROLLER]RF24::Payloadsize: ");  DEBUG_PRINT(radio.getPayloadSize()); DEBUG_PRINTLNSTR(".");
     DEBUG_PRINTSTR("[TIME] : ");
@@ -327,7 +341,7 @@ void loop(void)
         //        bResponseNeeded = false;
       }
     }
-
+    //in every loop bResponseNeeded is redefined to true
     if (bResponseNeeded == true)          // If it is necessary to send an answer, send it.
     {
 
@@ -344,14 +358,22 @@ void loop(void)
       DEBUG_PRINTLN(String(myResponse.state, BIN));
       delay(WAIT_SEND_INTERVAL);//ther is some time to, to ensure that node is prepared to receive messages     // 20170312 - Berhnard: Can we find another way for this as this solution slows down the communication and is suspected to leading to timeouts.
       radio.stopListening();
-      radio.write(&myResponse, sizeof(myResponse));
+      while(write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
+      {
+        radio.write(&myResponse, sizeof(myResponse));
+        write_cnt--;
+      }
       radio.startListening();
 //      DEBUG_PRINTLNSTR("\tDone");
 
       DEBUG_PRINTLNSTR("[CONTROLLER] Listening now...");
+
+    }else{
+        DEBUG_PRINTSTR("\tResponse sending is skipped: ");
+        DEBUG_PRINTLNSTR("[CONTROLLER] Listening now...");
     }
     digitalWrite(LED_BUILTIN, LOW);
-
+    write_cnt=1;//reset
   }
 
   else  // no message arrived. In this case the controller can check the schedule whether pumps have to be activated and it has to check whether there have been IOT requests.
@@ -378,30 +400,31 @@ void loop(void)
     // DEBUG_PRINTLN(nTestWatering);
 
     if (myNodeList.mnNodeCount > 0) {
+      if(i_ >= myNodeList.mnNodeCount)
+        i_= 0;
       nTestWatering++;
     }
 
-    if ((nTestWatering % 30000) == 0 )
+    if ((nTestWatering % 10000) == 0 )
     {
-      for (int i = 0; i < myNodeList.mnNodeCount; i++)
+
+      if (myNodeList.getNodeType(myNodeList.myNodes[i_].ID) == 1)
       {
-        if (myNodeList.getNodeType(myNodeList.myNodes[i].ID) == 1)
+
+        DEBUG_PRINTSTR("\t[CONTROLLER][TEST] Node id: ");
+        DEBUG_PRINTLN(myNodeList.myNodes[i_].ID);
+        if (myNodeList.isActive(myNodeList.myNodes[i_].ID) == 0)//check if the first node (index=0)in the list is active
         {
+          ret = doWateringTasks(myNodeList.myNodes[i_].ID, 10000, 0); //here a new order to a pump Node has to be planned
+          if (ret > 0) {
+            DEBUG_PRINTSTR("\t[CONTROLLER]");
+            DEBUG_PRINTLN(handle_ErrorMessages(ret));
 
-          DEBUG_PRINTSTR("\t[CONTROLLER][TEST] Node id: ");
-          DEBUG_PRINTLN(myNodeList.myNodes[i].ID);
-          if (myNodeList.isActive(myNodeList.myNodes[i].ID) == 0)//check if the first node (index=0)in the list is active
-          {
-            ret = doWateringTasks(myNodeList.myNodes[i].ID, 10000, 0); //here a new order to a pump Node has to be planned
-            if (ret > 0) {
-              DEBUG_PRINTSTR("\t[CONTROLLER]");
-              DEBUG_PRINTLN(handle_ErrorMessages(ret));
-
-            }
-          } else
-            DEBUG_PRINTLNSTR("\t[CONTROLLER][TEST] ERROR: Node already in use.");
-        }
+          }
+        } else
+        DEBUG_PRINTLNSTR("\t[CONTROLLER][TEST] ERROR: Node already in use.");
       }
+      i_++;
 
     }
     /* Testing end */
@@ -707,7 +730,6 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
   DEBUG_PRINTSTR("[TIME] : ");
   displayTimeFromUNIX(getCurrentTime(), 1);
   DEBUG_PRINTLNSTR(" ");
-  //nDummyCount = 0;
   if (handler_ > 0) {
     if ((handler_->getID() == PumpNode_ID) && (handler_->getPumpTime() == pumpTime)) {
       handler_->reset();
@@ -745,8 +767,8 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
         //  uint16_t pumptime=0;
         PumpNode_Handler *handler = new PumpNode_Handler(PumpNode_ID);
         PumpList.add(handler);          // todo in february: the handler should only add the pump node if it isn't in the list already.
-        nDummyCount++;
-        handler->setPumpHandlerID(nDummyCount);
+        nPumpHandlerCnt++;
+        handler->setPumpHandlerID(nPumpHandlerCnt);
         DEBUG_PRINTLNSTR("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         handler->processPumpstate(pumpTime);
         myResponse.ID = handler->getID();
@@ -760,6 +782,7 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
         DEBUG_PRINT(handler->getPumpTime());
         DEBUG_PRINTLNSTR(" ms");
         //the first communication with the pumpNode must be initiate here
+
         handlePumpCommunications();
         DEBUG_PRINTSTR("[CONTROLLER]");
         DEBUG_PRINTSTR("[doWateringTasks()]");
@@ -788,8 +811,13 @@ void handlePumpCommunications()
 {
 
   radio.stopListening();//!!!!!!!!!!!!!!!!! KEEP ATTENTION OF TIME SLOT, IAM ALLOWED TO SEND here??
-  radio.write(&myResponse, sizeof(myResponse));
+  while(write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
+  {
+    radio.write(&myResponse, sizeof(myResponse));
+    write_cnt--;
+  }
   radio.startListening();
+  write_cnt=1;
   // delay(100);   // ist das delay notwendig?
 }
 
@@ -1049,7 +1077,7 @@ void handleMotorMessage(void)
     DEBUG_PRINTSTR("[CONTROLLER]");
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Node does not exist - there seems to be a topology problem.");
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
-  } else if (PumpList.size() > 0)
+  } else if (isActive(nodeIndex))
   {
     DEBUG_PRINTSTR("[CONTROLLER]");
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Iterate pump list and search for Pumphandler");
@@ -1059,12 +1087,39 @@ void handleMotorMessage(void)
       //DEBUG_PRINTLN("Processing PumpHandler for NODE-ID:" + String(handler->getID(), DEC));
       if (handler->getID() == myData.ID)
       {
-        handler->processPumpstate(myData.interval);
-        myResponse.ID = myData.ID;
-        myResponse.interval = handler->getResponseData();
+        /*
+        *dummy8 contains state from pumpnode, if the message state  is not equal
+        *pumphandler state, we have a redundant message here, which will be skipped
+        */
+        if(myData.dummy8 ==  handler->getState())
+        {
+          handler->processPumpstate(myData.interval);
+          DEBUG_PRINTSTR("[CONTROLLER]");
+          DEBUG_PRINTLNSTR("[handleMotorMessage()]Iterate pump list and search for Pumphandler");
+          if(handler->getState() < PUMPNODE_STATE_3_FINISHED)
+          {
+            myResponse.ID = myData.ID;
+            myResponse.interval = handler->getResponseData();
+            myResponse.dummy8=handler->getState();
+            write_cnt=RADIO_RESEND_NUMB;
+            bResponseNeeded=true;
+            DEBUG_PRINTLNSTR("\tPumpHandler processed, we will send a respond.");
+          }else{
+            write_cnt=1;
+            bResponseNeeded=false;
+            DEBUG_PRINTLNSTR("\tA Retransmitted Message, will be skipped.");
+          }//else
+        }else{
+          DEBUG_PRINTLNSTR("\tA Retransmitted Message, will be skipped.");
+        }
         i = PumpList.size(); //get out of the for lopp, we are finished
-      }
-    }
+
+      }//if
+    }//for
+  }else
+  {
+    DEBUG_PRINTSTR("[CONTROLLER]");
+    DEBUG_PRINTLNSTR("[handleMotorMessage()]Error: Got Message from PumpNode which is not active!");
   }
 }
 
