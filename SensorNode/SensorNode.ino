@@ -27,8 +27,8 @@
 #include <TimeLib.h>
 
 
-struct sensorData myData;
-struct responseData myResponse;
+struct Data myData;
+struct Data myResponse;
 class nodeList myNodeList;
 
 /*
@@ -136,7 +136,7 @@ void setup()
 
 //    myEEPROM.delIndex();
     
-  if (sizeof(struct sensorData) > 32)
+  if (sizeof(struct Data) > 32)
   {
     DEBUG_PRINTLNSTR("Fatal error - too much sensor data. Restructure message protocol\n");
   }
@@ -161,9 +161,9 @@ void setup()
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
 //  myRTC.setTime(1486049640);
 
-  myData.realTime = myRTC.getTime();
+  myData.Time = myRTC.getTime();
   DEBUG_PRINTSTR("Time: ");
-  displayTimeFromUNIX(myData.realTime);
+  displayTimeFromUNIX(myData.Time);
   
   // read EEPROM
   EEPROM.get(EEPROM_ID_ADDRESS,myEEPROMData);   // reading a struct, so it is flexible...
@@ -352,9 +352,9 @@ void loop()
 
   
 // reads the current real time value
-  myData.realTime = myRTC.getTime();
+  myData.Time = myRTC.getTime();
   DEBUG_PRINTSTR("\tTime: ");
-  displayTimeFromUNIX(myData.realTime);
+  displayTimeFromUNIX(myData.Time);
   digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
 
 
@@ -423,7 +423,7 @@ void sendData()
           DEBUG_PRINTLNSTR(" seconds.");
           digitalWrite(sensorPower, HIGH);   // when we finished measuring, turn the sensor power off again
           delay(10);
-          myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
+          myRTC.adjustRTC(nDelay, &myData.state, myResponse.Time);//ControllerTime
           delay(10);
           digitalWrite(sensorPower, LOW);   // when we finished measuring, turn the sensor power off again
         }
@@ -524,7 +524,7 @@ void store_DATA_to_EEPROM()
  * In case of non-overflow this is  the item at the end of the chain.
  * In the overflow-situation this means the oldest item will be retrieved.
  */
-void fetchEEPROMdata(struct sensorData* nextData)
+void fetchEEPROMdata(struct Data* nextData)//sensorData
 {
   DEBUG_PRINTLNSTR("\t\tGetting a data element for transmission..");
 //  struct sensorData nextData;
@@ -557,7 +557,7 @@ void setup_RF()
  //
 
  //radio.begin();
- radio.begin(RADIO_DELAY,RADIO_RETRIES,RADIO_SPEED,RADIO_CRC,RADIO_CHANNEL,RADIO_PA_LEVEL);
+ radio.begin(RADIO_AUTO_ACK,RADIO_DELAY,RADIO_RETRIES,RADIO_SPEED,RADIO_CRC,RADIO_CHANNEL,RADIO_PA_LEVEL);
  // optionally, increase the delay between retries & # of retries
  // radio.setRetries(15,15);
 
@@ -814,7 +814,8 @@ int RF_action(int* pnDelay)
 //    DEBUG_PRINT(myData.state);
     DEBUG_PRINTSTR("ID: ");
     DEBUG_PRINTLN(myData.ID);
-    radio.write(&myData, sizeof(struct sensorData));
+    myData.dummy16=0;//sensorData will be send
+    radio.write(&myData, sizeof(struct Data));
     
   delay(10);   
     // Now, continue listening
@@ -849,7 +850,7 @@ int RF_action(int* pnDelay)
       // Grab the response, compare, and send to debugging spew
       unsigned long got_time;
       got_time = millis();
-      radio.read( &myResponse, sizeof(myResponse) );
+      radio.read( &myResponse, sizeof(struct Data) );
       
       // Show response:
       //printf("Got response %lu, round-trip delay: %lu\n\r",got_time,millis()-got_time);

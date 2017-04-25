@@ -122,7 +122,7 @@ int RTC_DS1302::setAlarm(time_t)
  * The RC1302 doesn't support direct subsecond synchronisation. So I just the real time second and also do not transmit milliseconds between the nodes.
  * If the difference between the real time clocks is bigger than a certain threshold, the SensorNode clock gets updated.
 */
-int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
+int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t Time)
 {
 // (nDelay - 110)     / eigentliche Laufzeit. Server und Node machen in Summe 110ms Pause
 // (nDelay - 110) /2  / Laufzeit pro Richtung
@@ -135,9 +135,9 @@ int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
   if ((*state & (1 << RTC_RUNNING_BIT))  == true)     // only sync if the clock is working.
   {
     tLocalTime = RTC.get();
-    if (abs(tLocalTime - controllerTime) > RTC_SYNC_THRESHOLD)
+    if (abs(tLocalTime - Time) > RTC_SYNC_THRESHOLD)
     {
-      RTC.set(controllerTime);
+      RTC.set(Time);
     }
   }
 
@@ -215,7 +215,7 @@ int RTC_DS3231::setAlarm(time_t)
 	return 0;
 }
 
-int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
+int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t Time)
 {
 	time_t tLocalTime;
 	time_t tDifference;
@@ -226,18 +226,18 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 	tLocalTime = getTime();
 
 
-	if (tLocalTime > controllerTime)
+	if (tLocalTime > Time)
 	{
-	  tDifference = tLocalTime - controllerTime;
+	  tDifference = tLocalTime - Time;
 	}
 	else
 	{
-	  tDifference = controllerTime - tLocalTime;
+	  tDifference = Time - tLocalTime;
 	}
 
 
 	DEBUG_PRINTSTR("\tController time: ");
-	DEBUG_PRINT(controllerTime);
+	DEBUG_PRINT(Time);
 	DEBUG_PRINTSTR(" Our time: ");
 	DEBUG_PRINT(tLocalTime);
 	DEBUG_PRINTSTR(", Deviation: ");
@@ -247,7 +247,7 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
     if (tDifference > RTC_SYNC_THRESHOLD)
     {
 		DEBUG_PRINTSTR("\tRTC deviation too big. Adjusting RTC...");
-		breakTime(controllerTime, tm);
+		breakTime(Time, tm);
 		setDS3231time(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year);
 		DEBUG_PRINTLNSTR("done");
     }
@@ -320,7 +320,7 @@ int RTC_DS3232::setAlarm(time_t)
   DEBUG_PRINTLNSTR("Still not implemented!!!! ");
 }
 
-int RTC_DS3232::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
+int RTC_DS3232::adjustRTC(int roundTripDelay, uint8_t* state, time_t Time)
 {
 /*
 	time_t tLocalTime;
@@ -639,17 +639,17 @@ uint8_t DataStorage::init()
 
   // if it reaches this point, no index was found. Set random index:
   uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(myEEPROMHeader) * INDEXELEMENTS;
-  uint16_t modul = (DATARANGE_END - EEPROM_data_start) / sizeof(struct sensorData);
+  uint16_t modul = (DATARANGE_END - EEPROM_data_start) / sizeof(struct Data);
 
 
 
-  mnDataBlockBegin = EEPROM_data_start + sizeof(struct sensorData) * (analogRead(17) % modul);     // This is the new index Position;
+  mnDataBlockBegin = EEPROM_data_start + sizeof(struct Data) * (analogRead(17) % modul);     // This is the new index Position;
   myEEPROMHeader.DataStartPosition =  mnDataBlockBegin;
   myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);    // Set this as the position of the first EEPROM data
 
 
   EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the data (ID) back to EEPROM...
-  struct sensorData dummy;
+  struct Data dummy;
   EEPROM.get(mnDataBlockBegin, dummy);   // reading a struct, so it is flexible...
 
   if (DEBUG_DATA_STORAGE > 0)
@@ -722,7 +722,7 @@ void DataStorage::findQueueEnd()
 	uint16_t nAddressOfOldestElement=0;
 	//Bernhard@: Variablen initialisieren bitte
 	uint16_t nAddressBeforeOldestElement=0;
-	struct sensorData currentElement;
+	struct Data currentElement;
   uint16_t nPreviousOldestElement=0;
 
 
@@ -740,9 +740,9 @@ void DataStorage::findQueueEnd()
 		{
 			nCurrentAddress = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
 		}
-		if (firstItemTimestamp > currentElement.realTime)		// remember the timestamp and address of the oldest element
+		if (firstItemTimestamp > currentElement.Time)		// remember the timestamp and address of the oldest element
 		{
-			firstItemTimestamp = currentElement.realTime;
+			firstItemTimestamp = currentElement.Time;
       nPreviousOldestElement = firstItemTimestamp;
 			nAddressOfOldestElement = nCurrentAddress;
 			nAddressBeforeOldestElement = nPreviousAddress;
@@ -786,9 +786,9 @@ void DataStorage::findQueueEnd()
 /*
 *	storing new data:
 */
-void DataStorage::add(struct sensorData currentData)
+void DataStorage::add(struct Data currentData)
 {
-	struct sensorData lastElement;
+	struct Data lastElement;
 	uint16_t nNextData;   // at this address the data will be inserted
 
 // calculate next data address, once we arrive at the end of the memory, wrap around..
@@ -832,7 +832,7 @@ void DataStorage::add(struct sensorData currentData)
 	if (DEBUG_DATA_STORAGE > 0)
 	{
 	  DEBUG_PRINTSTR("\tAdding ");
-	  DEBUG_PRINT(currentData.realTime);
+	  DEBUG_PRINT(currentData.Time);
 	  DEBUG_PRINTSTR(" at address ");
 	  DEBUG_PRINTLN(nNextData);
 	}
@@ -877,7 +877,7 @@ void DataStorage::delIndex()
   EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
 }
 
-void DataStorage::getNext(struct sensorData * currentData)
+void DataStorage::getNext(struct Data * currentData)
 {
 
 }
@@ -894,7 +894,7 @@ void DataStorage::getNext(struct sensorData * currentData)
  * mbOverflow
  *
  */
-void DataStorage::readNextItem(struct sensorData* dataElement)
+void DataStorage::readNextItem(struct Data* dataElement)
 {
   // kann man das einfach anhand der Pointer zurückdrehen? :-O
 
@@ -1058,7 +1058,7 @@ void DataStorage::incrementHeaderAddress(uint16_t* headerAddress)
  */
 void DataStorage::incrementDataAddress(uint16_t* dataAddress)
 {
-  *dataAddress += sizeof(struct sensorData);  // go one element forward
+  *dataAddress += sizeof(struct Data);  // go one element forward
   if (*dataAddress >= DATARANGE_END)          // is it out of the address range?
   {
     *dataAddress = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;   // go to the beginning of the address range
@@ -1072,22 +1072,22 @@ void DataStorage::incrementDataAddress(uint16_t* dataAddress)
  */
 void DataStorage::decrementDataAddress(uint16_t* dataAddress)
 {
-  *dataAddress -= sizeof(struct sensorData);  // go one element back
+  *dataAddress -= sizeof(struct Data);  // go one element back
   if (*dataAddress < INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS)          // is it out of the address range?
   {
     // find the last possible address in the range:
     do
     {
-      *dataAddress += sizeof(struct sensorData);
+      *dataAddress += sizeof(struct Data);
     }
     while(*dataAddress < DATARANGE_END);
-    *dataAddress -= sizeof(struct sensorData);
+    *dataAddress -= sizeof(struct Data);
   }
 }
 
 void DataStorage::setDataAsLast(uint16_t dataAddress)   // wie sind die flags gesetzt, wenn kein element valid ist??
 {
-  struct sensorData data;
+  struct Data data;
   EEPROM.get(dataAddress, data);   // reading the data
   data.state |= (1 << EEPROM_DATA_LAST);
   EEPROM.put(dataAddress, data);   // writing the data back
@@ -1095,7 +1095,7 @@ void DataStorage::setDataAsLast(uint16_t dataAddress)   // wie sind die flags ge
 
 void DataStorage::setDataAsNotLast(uint16_t dataAddress)
 {
-  struct sensorData data;
+  struct Data data;
   EEPROM.get(dataAddress, data);   // reading the data
   data.state &= ~(1 << EEPROM_DATA_LAST);
   EEPROM.put(dataAddress, data);   // writing the data back
@@ -1149,7 +1149,7 @@ void DataStorage::stashData()
 void DataStorage::printElements()
 {
 	uint16_t currentDataAddress;
-	struct sensorData currentElement;
+	struct Data currentElement;
 
 	currentDataAddress = mnDataBlockBegin;
 
@@ -1159,7 +1159,7 @@ void DataStorage::printElements()
 		DEBUG_PRINTSTR("Address: ");
 		DEBUG_PRINT(currentDataAddress);
 		DEBUG_PRINTSTR(" - time: ");
-		DEBUG_PRINT(currentElement.realTime);
+		DEBUG_PRINT(currentElement.Time);
 		DEBUG_PRINTSTR(" - overflow: ");
 		DEBUG_PRINTLN(mbOverflow);
 		currentDataAddress += sizeof(currentElement);
@@ -1846,7 +1846,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINT(this->pumpnode_ID);DEBUG_PRINTSTR(" ,Response: ");
       DEBUG_PRINTLN(IncomeData);
       this->pumpnode_response=0xffff;//some usefull check
-      this->pumpnode_status=PUMPNODE_STATE_3_RESPONSE;
+      this->pumpnode_status=PUMPNODE_STATE_3_FINISHED;
 
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
       DEBUG_PRINTSTR("][State 2]-Send Response to Node-ID ");
@@ -1867,7 +1867,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
 
   }else //[STATE 3]------------------------------------------------------------
-  if(this->pumpnode_status == PUMPNODE_STATE_3_RESPONSE){
+  if(this->pumpnode_status == PUMPNODE_STATE_3_FINISHED){
       //Nothing to do
       //PUMP CYCLE WAS SUCCESSFULL
   }else //[STATE -1]------------------------------------------------------------

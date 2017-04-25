@@ -43,8 +43,8 @@
 //#define INTERVAL (600)
 
 
-struct responseData myResponse; //9byte
-struct sensorData myData; //25byte
+struct Data myResponse; //9byte
+struct Data myData; //25byte
 class CommandHandler myCommandHandler;
 
 //marko@: wozu brauchen wir diese variable?
@@ -110,13 +110,7 @@ void setup(void)
   pinMode(LED_BUILTIN, OUTPUT);
 
 DEBUG_PRINTLNSTR("\r\n****************");
-/*  DEBUG_PRINTSTR("[CONTROLLER]");
-  DEBUG_PRINTSTR("[STRUCT SensorData SIZE]");
-  DEBUG_PRINTLN(sizeof(struct sensorData));
-  DEBUG_PRINTSTR("[CONTROLLER]");
-  DEBUG_PRINTSTR("[STRUCT ResponseData SIZE]");
-  DEBUG_PRINTLN(sizeof(struct responseData));
-*/
+
 
   //Initiate Real Time Clock
 #if (HW_RTC > NONE)
@@ -146,7 +140,7 @@ DEBUG_PRINTLNSTR("\r\n****************");
 
   //  myResponse.ControllerTime = 1481803260;   // dummy time for testing..since I have only one RTC for testing
   //  myRTC.setTime(1485362865);
-
+  myResponse.dummy16=2;//myResponse is marked as Controller Data
 
 
 #if (SD_AVAILABLE == 1)
@@ -263,6 +257,7 @@ void loop(void)
   //struct interactiveCommand myInteractiveCommand;
   myResponse.state = 0;
   myResponse.interval = INTERVAL;
+
   //DEBUG_PRINTSTR("Time before taking RTC:");DEBUG_PRINTLN(millis());
   //  myResponse.ControllerTime = getCurrentTime(); //maybe it is not clever to request time from RTC in EVERY loop
   //DEBUG_PRINTSTR("Time after taking RTC:");DEBUG_PRINTLN(millis());
@@ -308,7 +303,7 @@ void loop(void)
         DEBUG_PRINTSTR("VCC: ");
         DEBUG_PRINTLN(myData.VCC);
         DEBUG_PRINTSTR("realTime: ");
-        DEBUG_PRINTLN(myData.realTime);
+        DEBUG_PRINTLN(myData.Time);
       }
     }
 
@@ -325,7 +320,7 @@ void loop(void)
     }
     else                                    // This is a data message
     {
-      myResponse.ControllerTime = getCurrentTime();
+      myResponse.Time = getCurrentTime();
       if ((myData.state & (1 << NODE_TYPE)) == false) // it is a sensor node
       {
         DEBUG_PRINTLNSTR("[CONTROLLER] SENSOR MESSAGE");
@@ -599,7 +594,7 @@ if (bProcessPumps == false)
 
             //Marko@ : eine active pump list habe ich bereits erstellt -> myNodeList.setPumpInactive(handler->getID());
       */
-      if (handler->getState() == PUMPNODE_STATE_3_RESPONSE)
+      if (handler->getState() == PUMPNODE_STATE_3_FINISHED)
       {
 
         DEBUG_PRINTSTR("[TIME] : ");
@@ -624,8 +619,14 @@ if (bProcessPumps == false)
         //@Marko should PUMP always be restarted, maybe it is OFFLINE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (handler->getStateErrorCount() <= MAX_RETRIES) {
           uint8_t ret = doWateringTasks(handler->getID(), handler->getPumpTime(), handler);//getPumpTime is in ms
-
-          DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLN(handle_ErrorMessages(ret));
+          DEBUG_PRINTSTR("[CONTROLLER]");
+          DEBUG_PRINTSTR("This is the pumpnode_state_error_counter: ");
+          DEBUG_PRINT(handler->getStateErrorCount());
+          DEBUG_PRINTSTR(" attempt of  ");
+          DEBUG_PRINT(MAX_RETRIES);
+          DEBUG_PRINTLNSTR(" retries. ");
+          DEBUG_PRINTSTR("[CONTROLLER]");
+          DEBUG_PRINTLN(handle_ErrorMessages(ret));
           if (ret > 0) {
             DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:Deleting PumpHandler Class because ");
             DEBUG_PRINTSTR("of some Error in doWateringTasks()");
@@ -730,7 +731,7 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
   DEBUG_PRINTSTR("[TIME] : ");
   displayTimeFromUNIX(getCurrentTime(), 1);
   DEBUG_PRINTLNSTR(" ");
-  if (handler_ > 0) {
+  if (handler_ > 0) { //a pumphandler already exists
     if ((handler_->getID() == PumpNode_ID) && (handler_->getPumpTime() == pumpTime)) {
       handler_->reset();
       handler_->processPumpstate(pumpTime);
@@ -744,6 +745,7 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
       DEBUG_PRINT(pumpTime);
       DEBUG_PRINTLNSTR("ms");
       //the first communication with the pumpNode must be initiate here
+      write_cnt=RADIO_RESEND_NUMB;
       handlePumpCommunications();
       DEBUG_PRINTSTR("[CONTROLLER]");
       DEBUG_PRINTSTR("[doWateringTasks()]");
@@ -782,7 +784,7 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
         DEBUG_PRINT(handler->getPumpTime());
         DEBUG_PRINTLNSTR(" ms");
         //the first communication with the pumpNode must be initiate here
-
+        write_cnt=RADIO_RESEND_NUMB;
         handlePumpCommunications();
         DEBUG_PRINTSTR("[CONTROLLER]");
         DEBUG_PRINTSTR("[doWateringTasks()]");
@@ -834,7 +836,7 @@ void logData(void)
   // parse the data to the string:
   currentData += String(myData.ID);
   currentData += ",";
-  currentData += String(myData.realTime);
+  currentData += String(myData.Time);
   currentData += ",";
   currentData += String(myData.temperature);
   currentData += ",";
@@ -898,7 +900,7 @@ void handleRegistration(void)
   bool newNode = true;
   struct nodeListElement currentNode;
 
-  myResponse.ControllerTime = getCurrentTime();
+  myResponse.Time = getCurrentTime();
   DEBUG_PRINTLNSTR("[CONTROLLER][handleRegistration()] Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
   //  if (myData.ID > 0)                      // known node
@@ -910,7 +912,7 @@ void handleRegistration(void)
   else                                    // new node
   {
     myResponse.interval = 100 * myData.temperature + 20; // this is the session ID (we abused the temperature attribute here.)
-    myResponse.ID = myResponse.interval * myResponse.ControllerTime / 100;                       // this is the persistent ID.. Todo : it has to be compared to the node-list, to ensure no ID is used twice
+    myResponse.ID = myResponse.interval * myResponse.Time / 100;                       // this is the persistent ID.. Todo : it has to be compared to the node-list, to ensure no ID is used twice
     //newNode=true;
   }
 
@@ -961,7 +963,7 @@ void handleRegistration(void)
       DEBUG_PRINTSTR(", Persistent ID: ");
       DEBUG_PRINT(myResponse.ID);
       DEBUG_PRINTSTR(", Timestamp of controller: ");
-      DEBUG_PRINTLN(myResponse.ControllerTime);
+      DEBUG_PRINTLN(myResponse.Time);
       //now the node is online
       myNodeList.setNodeOnline(myResponse.ID);
     }
@@ -981,7 +983,7 @@ void handleRegistration(void)
       DEBUG_PRINTSTR(", Persistent ID: ");
       DEBUG_PRINTLN(myResponse.ID);
       DEBUG_PRINTSTR(", Time: ");
-      DEBUG_PRINTLN(myResponse.ControllerTime);
+      DEBUG_PRINTLN(myResponse.Time);
       //now the node is online
       myNodeList.setNodeOnline(myResponse.ID);
     }
@@ -1028,7 +1030,7 @@ void handleDataMessage(void)
     DEBUG_PRINTSTR(", VCC Voltage: ");
     DEBUG_PRINTDIG((float)myData.VCC / 100, 2);
     DEBUG_PRINTSTR(", Time: ");
-    DEBUG_PRINTLN(myData.realTime);
+    DEBUG_PRINTLN(myData.Time);
   //      DEBUG_PRINTSTR("Time: ");
   //      DEBUG_PRINTLN(myResponse.ControllerTime);
   }
@@ -1077,7 +1079,7 @@ void handleMotorMessage(void)
     DEBUG_PRINTSTR("[CONTROLLER]");
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Node does not exist - there seems to be a topology problem.");
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
-  } else if (isActive(nodeIndex))
+  } else if (myNodeList.isActive(nodeIndex))
   {
     DEBUG_PRINTSTR("[CONTROLLER]");
     DEBUG_PRINTLNSTR("[handleMotorMessage()]Iterate pump list and search for Pumphandler");
@@ -1093,14 +1095,17 @@ void handleMotorMessage(void)
         */
         if(myData.dummy8 ==  handler->getState())
         {
+          //before processing store state in which we send
+          myResponse.dummy8=handler->getState();
           handler->processPumpstate(myData.interval);
           DEBUG_PRINTSTR("[CONTROLLER]");
           DEBUG_PRINTLNSTR("[handleMotorMessage()]Iterate pump list and search for Pumphandler");
           if(handler->getState() < PUMPNODE_STATE_3_FINISHED)
           {
+            //after processing get results
             myResponse.ID = myData.ID;
             myResponse.interval = handler->getResponseData();
-            myResponse.dummy8=handler->getState();
+
             write_cnt=RADIO_RESEND_NUMB;
             bResponseNeeded=true;
             DEBUG_PRINTLNSTR("\tPumpHandler processed, we will send a respond.");

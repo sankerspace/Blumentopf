@@ -421,11 +421,33 @@ DO NOT CHANGE:
 void killID();
 
 
+/*sensor data and response data in one data structure*/
+
+struct Data
+{
+
+  
+  float temperature;//4byte		// should be shortended to uint16_t
+  float humidity;//4byte			// should be shortended to uint16_t
+
+  time_t Time;//4byte
+  uint16_t ID; //2 Byte
+  uint16_t interval = 2; //2 Byte
+  uint16_t voltage; //2 Byte
+  uint16_t VCC; //2 Byte
+  uint16_t moisture; //2 Byte
+  uint16_t moisture2;//2 Byte
+  uint16_t brightness; //2 Byte
+  uint16_t dummy16;  //2 Byte [0:Sensor Node Data, 1:Pum Node Data, 2:Controller Data] //Helmut@: damit kannst messages bequem ausfiltern
+  uint8_t state;		//1Byte	// could be moved to unused data bits...
+  uint8_t  dummy8;  //1 Byte  - used also in Pumphandler for state inidication
 
 
+};//30byte
 /*
  * stores all measurment data in 12 bytes. 32 bytes are available in a message.
 */
+/*
 struct sensorData
 {
 
@@ -457,7 +479,7 @@ struct responseData
   uint8_t  dummy8;  //1 Byte - used also in Pumphandler for state inidication
   uint8_t state; //1 Byte
 };// 12byte
-
+*/
 
 struct EEPROM_Data
 {
@@ -478,14 +500,14 @@ public:
 
   uint8_t init();
 //	uint8_t findIndex();
-  void add(struct sensorData);//Bernhard@:Rückgabewert war uint8_t
-  void getNext(struct sensorData *);
+  void add(struct Data);//Bernhard@:Rückgabewert war uint8_t
+  void getNext(struct Data *);
   uint8_t remove(uint16_t);
   void findQueueEnd();
   void delIndex();
   void printElements();
   void stashData();
-  void readNextItem(struct sensorData*);
+  void readNextItem(struct Data*);
   void freeNextItem();
   void unsetHeaders();
   bool getEmpty();
@@ -512,7 +534,7 @@ private:
  */
 struct nodeListElement
 {
-  sensorData nodeData;
+  Data nodeData;
   time_t   nextSlot;
   uint16_t ID;
   uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
@@ -656,7 +678,7 @@ public:
         pumpnode_dif=0;
         pumpnode_debugCounter=DEBUG_CYCLE;
         pumphandler_ID=0;
-        pumpnode_state_error_counter=0;
+        pumpnode_state_error_counter=1;
     }
 
     ~PumpNode_Handler(){}
@@ -674,22 +696,23 @@ public:
     uint8_t  getStateErrorCount(void);
 
 private:
-   // static uint8_t counter;
-    /*state variable*/
-    uint16_t pumpnode_ID;
-    uint16_t OnOff;                     //duration of pumping[sec]
-    int8_t pumpnode_status;                //in which status is the PUMP Node
-    uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
-    /*some timers for state observations*/
     uint32_t pumpnode_started_waiting_at;//
     uint32_t pumpnode_previousTime;      //needed by the software watchdog
     uint32_t pumpnode_dif;               //how many time passed is stored here,
                                          //only STATE 1 and STATE 2 (controller)
+   // static uint8_t counter;
+    /*state variable*/
+    uint16_t pumpnode_ID;
+    uint16_t OnOff;                     //duration of pumping[sec] 
+    uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
+    /*some timers for state observations*/
+   
     uint16_t pumpnode_debugCounter;
     uint16_t pumphandler_ID;
     uint8_t  pumpnode_state_error_counter;
-};//3*2byte,1*1byte,3*4byte
-//19byte
+    int8_t pumpnode_status;                //in which status is the PUMP Node
+};//5*2byte,2*1byte,3*4byte
+//24byte
 
 
 
@@ -719,4 +742,12 @@ private:
 int freeRam(void);
 
 void printFreeRam();
+
+/***************************************************************************************/
+/******************************  B U T T O N ******************************************/
+/**************************************************************************************/
+// standard routine
+
+
+
 

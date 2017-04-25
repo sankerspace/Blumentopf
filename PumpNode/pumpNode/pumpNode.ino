@@ -35,6 +35,7 @@ uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0;
 uint32_t pump_worktime = 0;
 const uint8_t pumpPin = 3;
 const uint8_t buttonPin = 4;
+uint8_t write_cnt = 1;
 int status; //normal states are positive numbers , erro states are negative
 int buttonstate = 0;
 //byte addresses[][6] = {"Pump", "Contr"};
@@ -43,8 +44,8 @@ const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};
 
 
 /******************************/
-struct sensorData myData;
-struct responseData myResponse;
+struct Data myData;
+struct Data myResponse;
 
 #if (DEBUG_RF24 == 1)
 uint32_t time_;
@@ -66,7 +67,7 @@ void setup() {
 
   killID();
   //radio.begin();
-  radio.begin(RADIO_AUTO_ACK,RADIO_DELAY, RADIO_RETRIES, RADIO_SPEED, RADIO_CRC, RADIO_CHANNEL, RADIO_PA_LEVEL);
+  radio.begin(RADIO_AUTO_ACK, RADIO_DELAY, RADIO_RETRIES, RADIO_SPEED, RADIO_CRC, RADIO_CHANNEL, RADIO_PA_LEVEL);
   //radio.setPALevel(RF24_PA_LOW);
   //radio.setChannel(RADIO_CHANNEL);
 
@@ -80,14 +81,21 @@ void setup() {
   radio.printDetails();
 #endif
 #if (DEBUG_INFO == 1)
-  
-    DEBUG_PRINTSTR("\n\tSize of myData: "); DEBUG_PRINTLN(sizeof(myData));
-    DEBUG_PRINTSTR("\n\tSize of myResponse: "); DEBUG_PRINTLN(sizeof(myResponse));
+
+  DEBUG_PRINTSTR("\n\tSize of myData: "); DEBUG_PRINTLN(sizeof(myData));
+  DEBUG_PRINTSTR("\n\tSize of myResponse: "); DEBUG_PRINTLN(sizeof(myResponse));
 #endif
 #endif
 
 
-
+  myData.humidity = 0.0f;
+  myData.moisture = 0;
+  myData.moisture2 = 0;
+  myData.brightness = 0;
+  myData.voltage = 0;
+  myData.VCC = 0;
+  myData.Time = 0;
+  myData.dummy16 = 0;
   //Print debug info
   //radio.printDetails();
 
@@ -220,10 +228,11 @@ void loop(void) {
         answer = OnOff;
         DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 0]Send acknowledgment to the pump request.");
         /********Sending acknowlegment,which is the same number as OnOff time request**************/
+        status = PUMPNODE_STATE_1_RESPONSE;// before sending to initialize dummy8 with the right state
         delay(WAIT_SEND_INTERVAL);//some time to wait
         sendData(answer);//will be received by Controller::Pump_handler in State 1
         /*******************************************************************************************/
-        status = PUMPNODE_STATE_1_RESPONSE;
+
         previousTime = millis();
       } else {
         DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node");
@@ -279,12 +288,12 @@ void loop(void) {
       sendData(answer);
       /*******************************************************************************************/
 
-      status = PUMPNODE_STATE_3_RESPONSE;
+      status = PUMPNODE_STATE_3_FINISHED;
       previousTime = millis();
       DEBUG_FLUSH;
     }
     /********STATE 2*******/
-  } else if (status == PUMPNODE_STATE_3_RESPONSE) {
+  } else if (status == PUMPNODE_STATE_3_FINISHED) {
     if (radio.available())
     {
       /********Receiving ACKNOWLEGMENT**************/
@@ -346,29 +355,36 @@ void sendData(uint16_t answer_)
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
 
   myData.interval = answer_;
-
-
+  myData.dummy16 = 1;//data from pumpnode
+  myData.dummy8=status;//mark that package with current state
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("\t[SENDING]Sending data "); DEBUG_PRINT(answer_);
   DEBUG_PRINTSTR(" with STATE:");
   DEBUG_PRINTLN(myData.state);
-  //  radio.write(&answer_, sizeof(struct sensorData));
+
   radio.stopListening();
-  radio.write(&myData, sizeof(struct sensorData));
+  while (write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
+  {
+    radio.write(&myData, sizeof(struct Data));
+    write_cnt--;
+  }
+  write_cnt=RADIO_RESEND_NUMB;
   radio.startListening();
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("done");
 
 }
 
-//struct sensorData myData;
-//struct responseData myResponse;
+
 
 uint16_t recvData(void)
 {
   //return 0 if message is not for us to keep state
-  //ID_INEXISTENT soll behandelt werden??????????????ß
+  //ID_INEXISTENT soll behandelt werden??????????????
   while (radio.available()) {
-    radio.read(&myResponse, sizeof(struct responseData) );          // Get the payload
+    radio.read(&myResponse, sizeof(struct Data) );          // Get the payload
   }
+  //incoming message must in correspondence to current state,
+  //otherwise it is a redundant message and will be skipped
+
   DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: Resp-interval:");
   DEBUG_PRINTDIG(myResponse.interval, DEC);
   DEBUG_PRINTSTR(", Resp-ID:");
@@ -382,11 +398,19 @@ uint16_t recvData(void)
 
   if (myResponse.ID == myData.ID)
   {
-    setTime(myResponse.ControllerTime);
+    //incoming message may be a redundant message
+    //in that case skip it
+    if (status == myResponse.dummy8)
+    {
+      setTime(myResponse.Time);
 
-    displayTimeFromUNIX(myResponse.ControllerTime);
-    return myResponse.interval;
+      displayTimeFromUNIX(myResponse.Time);
+      return myResponse.interval;
+    }
   }
+
+
+
   return 0;
 }
 
@@ -432,34 +456,7 @@ int registerNode(void)
   DEBUG_PRINTSTR(" ID: ");
   DEBUG_PRINTLN(myData.ID);
   /*********Sending registration request to the Controller***************************/
-  /*LÖSCHEN*/
 
-
-
-
-  DEBUG_PRINTLNSTR("Initialize struct sensorData with arbitrary values: ");
-  myData.humidity = 12000.234f;
-  myData.moisture = 13000;
-  myData.brightness = 21546;
-  myData.voltage = 45258;
-  myData.VCC = 55879;
-  myData.realTime = millis();
-
-  DEBUG_PRINTSTR(" humidity: ");
-  DEBUG_PRINTLN(myData.humidity);
-  DEBUG_PRINTSTR(" moisture: ");
-  DEBUG_PRINTLN(myData.moisture);
-  DEBUG_PRINTSTR(" brightness: ");
-  DEBUG_PRINTLN(myData.brightness);
-  DEBUG_PRINTSTR(" voltage: ");
-  DEBUG_PRINTLN(myData.voltage);
-  DEBUG_PRINTSTR(" VCC: ");
-  DEBUG_PRINTLN(myData.VCC);
-  DEBUG_PRINTSTR(" realTime: ");
-  DEBUG_PRINTLN(myData.realTime);
-  DEBUG_PRINTSTR("SIZE OF SENDING DATA STRUCTURE : ");
-  DEBUG_PRINTLN(sizeof(myData));
-  /*LÖSCHEN*/
   radio.stopListening();
   if (!radio.write( &myData, sizeof(myData) )) {
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:Sending data...");
@@ -493,7 +490,7 @@ int registerNode(void)
     radio.read(&myResponse , sizeof(myResponse));
   }
   /****************************************************************************/
-  displayTimeFromUNIX(myResponse.ControllerTime);
+  displayTimeFromUNIX(myResponse.Time);
   DEBUG_PRINTSTR("[PUMPNODE][registerNode()]received: ID: ");
   DEBUG_PRINT(myResponse.ID);
   DEBUG_PRINTSTR(", Status: ");
@@ -561,9 +558,9 @@ int registerNode(void)
     return 10;
   }////////
 
-  setTime(myResponse.ControllerTime);
+  setTime(myResponse.Time);
   return 0;   // all okay
-}
+}//registerNode()
 
 
 void registration(bool refreshID)
@@ -601,13 +598,7 @@ void registration(bool refreshID)
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Setup()]REGISTRATION SUCCEDD!!!");
   //set standard values
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data
-  myData.humidity = 0.0f;
-  myData.moisture = 0;
-  myData.moisture2 = 0;
-  myData.brightness = 0;
-  myData.voltage = 0;
-  myData.VCC = 0;
-  myData.realTime = 0;
+
 
   previousTime = millis();
   displayTimeFromUNIX(now());
