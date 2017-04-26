@@ -1,49 +1,63 @@
-/***********************************S T A T E  M A C H I N E**************************************
-   PUMPNode                                 Controller
-  ------------------------------------------------------------------------------------------
-  (PumpNode and Controller are performing tasks in the same state or divergent states
-  according the state plan below)
+/*************************S T A T E  M A C H I N E*****************************
+   P U M P N O D E                                   C O N T R O L L E R
+  ------------------------------------------------------------------------------
+  Notes:
+  (PumpNode and Controller are performing tasks in the same state or divergent 
+  states according the state plan below)
   (criticalTime should be higher in Controller than in PumpNode)
-
-  STATE 0:
-  recv() pump Time                <--       send() pumpTime 
-  (some delay)
   
+  (<--3   : send message 3 times)
+  
+  [variable and value send]
+  
+  A
+  |     go in both directions
+  v
+  
+  STATE 0:                  
+  recv() pump Time                <--3       send() pumpTime 
+  (some delay)                               [myResponse.interval=pumpTime]
+    
                                       
   STATE 1:                              
-   send() Acknowledgment           -->+                                  |
-                                      |
+   send() Acknowledgment           3-->+                                  |
+[myData.interval=myResponse.interval] |
                                       |
                                       |   
-                                      +-+-> recv(): Acknowledgment(PumpNode confirms Pumptime)
-                                        |          {if wait for response takes too long -> STATE -3}
+                                      +-+-> recv(): Acknowledgment
+                                        |   (PumpNode confirms Pumptime)
+                                        | {if wait for response takes too long 
+                                        |            -> STATE -3}
         TURN ON PUMP                    |
-  (possible error detection necessary)  |             .
-                                        |             .
-                                        A             .
-                                        |             .  <pump period time is passing>    
-  STATE 2:                              |             .  <waiting in STATE 2>
-                                        |             .
-       Wait for pump period time        |             .
-                                        v             .
+  (possible error detection necessary)  |        .
+                                        |        .
+                                        A        .
+                                        |        .<pump period time is passing>    
+  STATE 2:                              |        .  <waiting in STATE 2>
+                                        |        .
+       Wait for pump period time        |        .
+                                        v        .
        TURN OFF PUMP                  
-                                      +<---------send() Confirmation(Pump off)  
-                                      |       (Controller initiates communication)
-                                      | |     (maximum wait time = pumptime + timeoff)
+                                      +<---3-----send() Confirmation(Pump off)
+                                      |    [myResponse.interval=RandomNumber]  
+                                      |    (Controller initiates communication)
+                                      | | (maximum wait time=pumptime + timeoff)
 recv():Controller wants confirmation<-+ A
-       now                              v    
+       now that pump is really off      v    
                                         |  
                                         |
                                         |
                                         |    
   STATE 3:                              |
                                         |  
-send() Acknowledgment             --> + |                               
-                                      | |
+send() Acknowledgment            3--> + |                               
+[myData.interval=myResponse.interval] | |
                                       | |
                                       |   
-                                      +---> recv(): Acknowledgment(PumpNode confirms Pumptime)
-                                      |            {if wait for response takes too long -> STATE -4}
+                                      +---> recv(): Acknowledgment
+                                                    (PumpNode confirms Pumptime)
+                                      |    {if wait for response takes too long 
+                                      |      -> STATE -4}
                                       | |
                                       | |
                                       | |
@@ -56,9 +70,9 @@ send() Acknowledgment             --> + |
   recv() confirmation                 | |   
                                       | A
   STATE -3:(only controller)          | v
-                                      | |   We waited timeOFF ms for response in State 1
+                                      | |   We waited timeOFF ms for response 
                        -----------------+    Restart  State 1
 
   STATE -4:(only controller)          |
-                 <--------------------+      We waited timeOFF ms for response in State
+                 <--------------------+      We waited timeOFF ms for response 
                                             Restart  State 3
