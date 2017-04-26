@@ -36,6 +36,7 @@
 // For debugging the pump node
 
 #define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
+//#define TEST_PUMPSCHEDULE 1
 //#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
 
 
@@ -294,7 +295,16 @@ DO NOT CHANGE:
 // measurement policy
 #define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s]
 //PUMPSCHDULE TIMINGS
+/*
+* if progess in a state machine fails, what is the maximal attempt to restart
+* that state machine (afterwards node is offline)
+*/
 #define MAX_RETRIES                     3
+/*
+* What is the maximum time that a pump state machine is allowed to remain
+* Controller PumpHandler max state time  = PUMPNODE_CRITICAL_STATE_OCCUPATION
+* Pump Node max state time  = PUMPNODE_CRITICAL_STATE_OCCUPATION / 2
+*/
 #define PUMPNODE_CRITICAL_STATE_OCCUPATION 60000 // in Milliseconds
 
 
@@ -426,7 +436,7 @@ void killID();
 struct Data
 {
 
-  
+
   float temperature;//4byte		// should be shortended to uint16_t
   float humidity;//4byte			// should be shortended to uint16_t
 
@@ -644,14 +654,15 @@ class CommandHandler
 */
 
                                    /*who uses these states*/
-#define PUMPNODE_STATE_0_PUMPREQUEST    0 //(pumpNode and Controller)
-#define PUMPNODE_STATE_1_RESPONSE       1 //(pumpNode and Controller)
-#define PUMPNODE_STATE_2_PUMPACTIVE     2 //(pumpNode and Controller)
-#define PUMPNODE_STATE_3_FINISHED       3 //(pumpNode and Controller)-SUCCESFULL
+#define PUMPNODE_STATE_0_PUMPREQUEST      0 //(pumpNode and Controller)
+#define PUMPNODE_STATE_1_PUMPACTIVE       1 //(pumpNode and Controller)
+#define PUMPNODE_STATE_2_PUMPOFF          2 //(pumpNode and Controller)
+#define PUMPNODE_STATE_3_ACKNOWLEDGMENT   3 //(pumpNode and Controller)
+#define PUMPNODE_STATE_4_FINISHED         4 //(pumpNode and Controller)-SUCCESFULL
 
-#define PUMPNODE_STATE_ERROR            -1 //(Controller)            -ERROR
-#define PUMPNODE_STATE_3_RESP_FAILED    -2  //(Controller)
-#define PUMPNODE_STATE_4_RESP_FAILED    -3 //(Controller)
+#define PUMPNODE_STATE_ERROR             -1 //(Controller)            -ERROR
+#define PUMPNODE_STATE_3_RESP_FAILED     -2  //(Controller)
+#define PUMPNODE_STATE_4_RESP_FAILED     -3 //(Controller)
 
 
 
@@ -703,10 +714,10 @@ private:
    // static uint8_t counter;
     /*state variable*/
     uint16_t pumpnode_ID;
-    uint16_t OnOff;                     //duration of pumping[sec] 
+    uint16_t OnOff;                     //duration of pumping[sec]
     uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
     /*some timers for state observations*/
-   
+
     uint16_t pumpnode_debugCounter;
     uint16_t pumphandler_ID;
     uint8_t  pumpnode_state_error_counter;
@@ -747,7 +758,3 @@ void printFreeRam();
 /******************************  B U T T O N ******************************************/
 /**************************************************************************************/
 // standard routine
-
-
-
-

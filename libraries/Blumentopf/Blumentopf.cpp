@@ -1764,7 +1764,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
         //[STATE 0]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_0_PUMPREQUEST){
-    if(IncomeData>0)
+    if(IncomeData>0)//pumphandler triggered with new PumpTime=IncomeData
     {
       this->OnOff=IncomeData;//calculated from seconds in milliseconds
       this->pumpnode_response=this->OnOff;
@@ -1773,7 +1773,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINT(this->pumpnode_response);
       DEBUG_PRINTSTR("ms sent to PumPnode ");
       DEBUG_PRINTLN(this->pumpnode_ID);
-      this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
+      this->pumpnode_status=PUMPNODE_STATE_1_PUMPACTIVE;
 
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
       DEBUG_PRINTLNSTR("][State 0:]Start Listening for first confirmation from the pump...");
@@ -1795,7 +1795,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_debugCounter++;
     }
   }else //[STATE 1]-------------------------------------------------------------
-  if(this->pumpnode_status == PUMPNODE_STATE_1_RESPONSE){
+  if(this->pumpnode_status == PUMPNODE_STATE_1_PUMPACTIVE){
     if(IncomeData==0)
     {
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
@@ -1829,7 +1829,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     }
 
   }else //[STATE 2]------------------------------------------------------------
-  if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPACTIVE){
+  if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPOFF){
     if(IncomeData==0)
     {
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
@@ -1867,7 +1867,11 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
 
   }else //[STATE 3]------------------------------------------------------------
-  if(this->pumpnode_status == PUMPNODE_STATE_3_FINISHED){
+  if(this->pumpnode_status == PUMPNODE_STATE_3_ACKNOWLEDGMENT){
+      //Nothing to do
+      //PUMP CYCLE WAS SUCCESSFULL
+  }else //[STATE 3]------------------------------------------------------------
+  if(this->pumpnode_status == PUMPNODE_STATE_4_FINISHED){
       //Nothing to do
       //PUMP CYCLE WAS SUCCESSFULL
   }else //[STATE -1]------------------------------------------------------------

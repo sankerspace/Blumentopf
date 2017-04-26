@@ -105,7 +105,8 @@ void setup() {
 
   registration(true);
 
-
+  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
+  myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
 }
 
 
@@ -215,40 +216,33 @@ void loop(void) {
   if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time to turn on the pump
 
     if (radio.available() > 0) {
-      dif = 0;
+      dif = 0; //reset time difference for the next state
       DEBUG_PRINTLNSTR("------------------------------------------------------");
       DEBUG_PRINTLNSTR("Available radio ");
       /********Receiving next pumping time period**************/
       OnOff = recvData(); //receive pumptime[ms] from controller
       /*******************************************************/
 
-      DEBUG_PRINTSTR("[PUMPNODE][Status 0]Received payload "); DEBUG_PRINTLN(OnOff);
+      DEBUG_PRINTSTR("[PUMPNODE][Status 0]RECEIVED PAYLOAD : "); DEBUG_PRINTLN(OnOff);
 
-      if (OnOff > 0) {
-        answer = OnOff;
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 0]Send acknowledgment to the pump request.");
-        /********Sending acknowlegment,which is the same number as OnOff time request**************/
-        status = PUMPNODE_STATE_1_RESPONSE;// before sending to initialize dummy8 with the right state
-        delay(WAIT_SEND_INTERVAL);//some time to wait
-        sendData(answer);//will be received by Controller::Pump_handler in State 1
-        /*******************************************************************************************/
-
-        previousTime = millis();
+      if (OnOff > 0) { //Is that message for us and not redundant
+        answer = OnOff;//prepare data for sending in the next state
+        status = PUMPNODE_STATE_1_PUMPACTIVE;
       } else {
         DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node");
-        previousTime = millis();
       }
+      previousTime = millis();
       DEBUG_FLUSH;
     }
     /***************************STATE 1************************/
-  } else if (status == PUMPNODE_STATE_1_RESPONSE) { //In state 0 pumpNode send acknowledgment, now we get confirmation from controller
-
-    if (radio.available() > 0) {
-      /********Receiving ACKNOWLEGMENT**************/
-      //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
-      uint16_t recv = recvData();
-      if (recv > 0) {
-        if (recv == (2 * OnOff)) { //received from Controller in State 1
+  } else if (status == PUMPNODE_STATE_1_PUMPACTIVE) { //In state 0 pumpNode send acknowledgment, now we get confirmation from controller
+       /********Sending acknowlegment,which is the same number as OnOff time request**************/
+        
+        delay(WAIT_SEND_INTERVAL);//some time to wait
+        sendData(answer);//will be received by Controller::Pump_handler in State 1
+        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 0]Send acknowledgment to the pump request.");
+        /*******************************************************************************************/
+   
           digitalWrite(pumpPin, HIGH);
           DEBUG_PRINTSTR("[PUMPNODE][Status 1]Pump will work for");
           DEBUG_PRINT(OnOff);
@@ -256,12 +250,8 @@ void loop(void) {
           started_waiting_at = millis();
           previousTime = millis();
           status = PUMPNODE_STATE_2_PUMPACTIVE;
-        }
-      } else {
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 1]Received message was not dedicated to this Pump-Node");
-        previousTime = millis();
-      }
-    }
+      
+    previousTime = millis();
     /**************************STATE 2**************************/
   } else if (status == PUMPNODE_STATE_2_PUMPACTIVE) {
     dif = (currentTime - started_waiting_at);
@@ -350,16 +340,15 @@ void loop(void) {
 */
 void sendData(uint16_t answer_)
 {
-
-  myData.state |= (1 << NODE_TYPE);       // set node type to pump node
-  myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
-
+  //switches myData.state in setup()
   myData.interval = answer_;
   myData.dummy16 = 1;//data from pumpnode
   myData.dummy8=status;//mark that package with current state
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("\t[SENDING]Sending data "); DEBUG_PRINT(answer_);
-  DEBUG_PRINTSTR(" with STATE:");
-  DEBUG_PRINTLN(myData.state);
+  DEBUG_PRINTSTR("\t myData.state: ");
+  DEBUG_PRINTLN_D(myData.state,BIN);
+  DEBUG_PRINTSTR("\t myData.dummy8: ");
+  DEBUG_PRINTLN(myData.dummy8);
 
   radio.stopListening();
   while (write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
@@ -407,6 +396,7 @@ uint16_t recvData(void)
       displayTimeFromUNIX(myResponse.Time);
       return myResponse.interval;
     }
+    DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: REDUNDANT MESSAGE.");
   }
 
 
