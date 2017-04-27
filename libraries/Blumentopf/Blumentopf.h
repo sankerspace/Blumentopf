@@ -287,8 +287,18 @@ DO NOT CHANGE:
 /******************************  T I M I N G ******************************************/
 /**************************************************************************************/
 #define WAIT_SEND_INTERVAL           100
-#define REGISTRATION_TIMEOUT_INTERVAL	WAIT_SEND_INTERVAL*5  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
-#define WAIT_RESPONSE_INTERVAL        WAIT_SEND_INTERVAL*2 // in Milliseconds
+/*
+* How long we have to wait to receive an acknowledgment on a registration request
+* REGISTRATION_TIMEOUT_INTERVAL=Protocol_Usage + Round trip delay
+*/
+#define REGISTRATION_TIMEOUT_INTERVAL	5000  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
+/*
+* WAIT_RESPONSE_INTERVAL=Protocol_Usage + Round trip delay
+*     Its the time from sending a message to another node
+*     and receiving an acknowledgment with little protocol overhead which could
+*     be disregarded
+*/
+#define WAIT_RESPONSE_INTERVAL       4000// in Milliseconds
 
 #define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -430,7 +440,10 @@ DO NOT CHANGE:
 
 void killID();
 
-
+#define DATA_NODE_BIT   (0)   //identifiy as Sensor Node or Pump Node Packet
+#define DATA_CONTROLLER_BIT   (1) //identifiy as Controller Packet
+#define DATA_REGISTRATION_BIT  (8) //identifiy as packet for registration purpose
+                                  // used by Controller or a Node
 /*sensor data and response data in one data structure*/
 
 struct Data
@@ -448,7 +461,9 @@ struct Data
   uint16_t moisture; //2 Byte
   uint16_t moisture2;//2 Byte
   uint16_t brightness; //2 Byte
-  uint16_t dummy16;  //2 Byte [0:Sensor Node Data, 1:Pum Node Data, 2:Controller Data] //Helmut@: damit kannst messages bequem ausfiltern
+  uint16_t dummy16;  //2 Byte Low Byte [0:Sensor Node Data, 1:Pump Node Data, 2:Controller Data]
+                    //        High Byte [0:Registration , 1:Normal Data ]
+  //Helmut@: damit kannst messages bequem ausfiltern
   uint8_t state;		//1Byte	// could be moved to unused data bits...
   uint8_t  dummy8;  //1 Byte  - used also in Pumphandler for state inidication
 
@@ -661,8 +676,8 @@ class CommandHandler
 #define PUMPNODE_STATE_4_FINISHED         4 //(pumpNode and Controller)-SUCCESFULL
 
 #define PUMPNODE_STATE_ERROR             -1 //(Controller)            -ERROR
-#define PUMPNODE_STATE_3_RESP_FAILED     -2  //(Controller)
-#define PUMPNODE_STATE_4_RESP_FAILED     -3 //(Controller)
+#define PUMPNODE_STATE_1_RESP_FAILED     -3  //(Controller)
+#define PUMPNODE_STATE_3_RESP_FAILED     -4 //(Controller)
 
 
 
@@ -686,15 +701,16 @@ public:
         pumpnode_response=0;
         pumpnode_started_waiting_at=millis();
         pumpnode_previousTime=millis();
+        pumpnode_waitforPump=0;
         pumpnode_dif=0;
         pumpnode_debugCounter=DEBUG_CYCLE;
         pumphandler_ID=0;
         pumpnode_state_error_counter=1;
+        pumpnode_reponse_available=false;
     }
 
     ~PumpNode_Handler(){}
 
-    void     setPumpTime(uint16_t pumptime);
     uint16_t getPumpTime(void);
     int      getState(void);
     uint16_t getID(void);
@@ -705,12 +721,14 @@ public:
     uint16_t getPumpHandlerID(void);
     /*How many times I reached the state error*/
     uint8_t  getStateErrorCount(void);
+    bool     getResponseAvailability(void);
 
 private:
     uint32_t pumpnode_started_waiting_at;//
     uint32_t pumpnode_previousTime;      //needed by the software watchdog
     uint32_t pumpnode_dif;               //how many time passed is stored here,
                                          //only STATE 1 and STATE 2 (controller)
+    uint32_t pumpnode_waitforPump;
    // static uint8_t counter;
     /*state variable*/
     uint16_t pumpnode_ID;
@@ -722,6 +740,8 @@ private:
     uint16_t pumphandler_ID;
     uint8_t  pumpnode_state_error_counter;
     int8_t pumpnode_status;                //in which status is the PUMP Node
+    bool pumpnode_reponse_available;
+
 };//5*2byte,2*1byte,3*4byte
 //24byte
 

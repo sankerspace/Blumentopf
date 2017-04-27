@@ -35,9 +35,10 @@ uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0;
 uint32_t pump_worktime = 0;
 const uint8_t pumpPin = 3;
 const uint8_t buttonPin = 4;
-uint8_t write_cnt = 1;
+uint8_t write_cnt = RADIO_RESEND_NUMB;
 int status; //normal states are positive numbers , erro states are negative
 int buttonstate = 0;
+bool pumpOn = false;
 //byte addresses[][6] = {"Pump", "Contr"};
 //const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
 const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};
@@ -96,6 +97,8 @@ void setup() {
   myData.VCC = 0;
   myData.Time = 0;
   myData.dummy16 = 0;
+  myData.dummy16 |= (1 << DATA_NODE_BIT); //packet is identified as pump packet
+  myData.dummy16 |= (1 << DATA_REGISTRATION_BIT); //packet is identified registration packet
   //Print debug info
   //radio.printDetails();
 
@@ -107,6 +110,7 @@ void setup() {
 
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
+  myData.dummy16 &= ~(1 << DATA_REGISTRATION_BIT);
 }
 
 
@@ -229,54 +233,78 @@ void loop(void) {
         answer = OnOff;//prepare data for sending in the next state
         status = PUMPNODE_STATE_1_PUMPACTIVE;
       } else {
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node");
+        DEBUG_PRINTSTR("[PUMPNODE]");
+        DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node or it was a redundant message");
       }
       previousTime = millis();
       DEBUG_FLUSH;
     }
     /***************************STATE 1************************/
   } else if (status == PUMPNODE_STATE_1_PUMPACTIVE) { //In state 0 pumpNode send acknowledgment, now we get confirmation from controller
-       /********Sending acknowlegment,which is the same number as OnOff time request**************/
-        
-        delay(WAIT_SEND_INTERVAL);//some time to wait
-        sendData(answer);//will be received by Controller::Pump_handler in State 1
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 0]Send acknowledgment to the pump request.");
-        /*******************************************************************************************/
-   
-          digitalWrite(pumpPin, HIGH);
-          DEBUG_PRINTSTR("[PUMPNODE][Status 1]Pump will work for");
-          DEBUG_PRINT(OnOff);
-          DEBUG_PRINTLNSTR("ms");
-          started_waiting_at = millis();
-          previousTime = millis();
-          status = PUMPNODE_STATE_2_PUMPACTIVE;
-      
+
+    /********Sending acknowlegment,which is the same number as OnOff time request**************/
+
+    delay(WAIT_SEND_INTERVAL);//some time to wait
+    sendData(answer);
+    DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 1]Send acknowledgment to the pump request.");
+    /*******************************************************************************************/
+
+    digitalWrite(pumpPin, HIGH);  // TURN PUMP ON
+    pumpOn = true;
+    DEBUG_PRINTSTR("[PUMPNODE][Status 1]Pump will work for");
+    DEBUG_PRINT(OnOff);
+    DEBUG_PRINTLNSTR("ms");
+
+    status = PUMPNODE_STATE_2_PUMPACTIVE;
+
+    started_waiting_at = millis();
     previousTime = millis();
     /**************************STATE 2**************************/
   } else if (status == PUMPNODE_STATE_2_PUMPACTIVE) {
     dif = (currentTime - started_waiting_at);
 
     if ((dif > OnOff)) {
+      if (pumpOn) {
+        digitalWrite(pumpPin, LOW);
+        pumpOn = false;
+        DEBUG_PRINTSTR("[PUMPNODE][Status 2]"); DEBUG_PRINTLNSTR("Turn off the pump ");
+        DEBUG_PRINTSTR("[PUMPNODE][Status 2]ElapseTime[");
+        DEBUG_PRINT(dif);
+        DEBUG_PRINTSTR("] greater than Interval[");
+        DEBUG_PRINT(OnOff);
+        DEBUG_PRINTLNSTR("]");
+      } else if (radio.available())
+      {
+        /********Receiving ACKNOWLEGMENT**************/
+        uint16_t recv = recvData();
+        if (recv > 0)//are data adressed to this node
+        {
+          answer=recv;
+          //if message was not dedicated to this pumpNode recvData returns -1
+          DEBUG_PRINTSTR("[PUMPNODE]"); 
+          DEBUG_PRINTLNSTR("[State 2]RECEIVED CONFIRMATION REQUEST FROM CONTROLLER.");
+          DEBUG_PRINTSTR("[PUMPNODE]"); 
+          DEBUG_PRINTLNSTR("-------------------------------------------------------------");
+          status = PUMPNODE_STATE_3_ACKNOWLEDGMENT;
+          dif = 0;
+          previousTime = millis();
+          pump_worktime += OnOff;
+          DEBUG_PRINTSTR("[PUMPNODE]");
+          DEBUG_PRINTSTR("OVERALL PUMPTIME :");
+          DEBUG_PRINT(pump_worktime / 1000);
+          DEBUG_PRINTLNSTR(" seconds.");
+          DEBUG_FLUSH;
+
+        } else {
+          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 2]Received message was not dedicated to this Pump-Node");
+          previousTime = millis();
+        }
+      }
 
 
-      DEBUG_PRINTSTR("[PUMPNODE][Status 2]ElapseTime[");
-      DEBUG_PRINT(dif);
-      DEBUG_PRINTSTR("] greater than Interval[");
-      DEBUG_PRINT(OnOff);
-      DEBUG_PRINTLNSTR("]");
-      answer = dif; //send him the total time needed
-      DEBUG_PRINTSTR("[PUMPNODE][Status 2]"); DEBUG_PRINTLNSTR("Turn off the pump "); delay(50);
-      digitalWrite(pumpPin, LOW);
 
-      DEBUG_PRINTSTR("[PUMPNODE][Status 2]Send final confirmation that pump is OFF: ");
-      DEBUG_PRINTLN(answer);
 
-      /********Sending final confirmation,which is the total time measured during pump activation**/
-      //no delay necessary because of pumptime
-      if (dif < WAIT_SEND_INTERVAL)
-        delay(WAIT_SEND_INTERVAL);//some time to wait
-      sendData(answer);
-      /*******************************************************************************************/
+
 
       status = PUMPNODE_STATE_3_FINISHED;
       previousTime = millis();
@@ -289,26 +317,7 @@ void loop(void) {
       /********Receiving ACKNOWLEGMENT**************/
       uint16_t recv = recvData();
       //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
-      if (recv > 0)//are data adressed to this node
-      {
-        if (recv == 0xffff)
-        { //if message was not dedicated to this pumpNode recvData returns -1
-          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[State 3]Received confirmation.");
-          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("-------------------------------------------------------------");
-          status = PUMPNODE_STATE_0_PUMPREQUEST;
-          dif = 0;
-          previousTime = millis();
-          pump_worktime += OnOff;
-          DEBUG_PRINTSTR("[PUMPNODE]");
-          DEBUG_PRINTSTR("OVERALL PUMPTIME :");
-          DEBUG_PRINT(pump_worktime / 1000);
-          DEBUG_PRINTLNSTR(" seconds.");
-          DEBUG_FLUSH;
-        }
-      } else {
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 3]Received message was not dedicated to this Pump-Node");
-        previousTime = millis();
-      }
+
     }
   }
 
@@ -342,11 +351,10 @@ void sendData(uint16_t answer_)
 {
   //switches myData.state in setup()
   myData.interval = answer_;
-  myData.dummy16 = 1;//data from pumpnode
-  myData.dummy8=status;//mark that package with current state
+  myData.dummy8 = status; //mark that package with current state
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("\t[SENDING]Sending data "); DEBUG_PRINT(answer_);
   DEBUG_PRINTSTR("\t myData.state: ");
-  DEBUG_PRINTLN_D(myData.state,BIN);
+  DEBUG_PRINTLN_D(myData.state, BIN);
   DEBUG_PRINTSTR("\t myData.dummy8: ");
   DEBUG_PRINTLN(myData.dummy8);
 
@@ -356,7 +364,7 @@ void sendData(uint16_t answer_)
     radio.write(&myData, sizeof(struct Data));
     write_cnt--;
   }
-  write_cnt=RADIO_RESEND_NUMB;
+  write_cnt = RADIO_RESEND_NUMB;
   radio.startListening();
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("done");
 
