@@ -401,11 +401,13 @@ void loop(void)
 
     if (myNodeList.mnNodeCount > 0) {
       if(i_ >= myNodeList.mnNodeCount)
+      {
         i_= 0;
+      }
       nTestWatering++;
     }
 
-    if ((nTestWatering % 10000) == 0 )
+    if ((nTestWatering % 1000) == 0 )
     {
 
       if (myNodeList.getNodeType(myNodeList.myNodes[i_].ID) == 1)
@@ -417,9 +419,10 @@ void loop(void)
         {
           ret = doWateringTasks(myNodeList.myNodes[i_].ID, 10000, 0); //here a new order to a pump Node has to be planned
           if (ret > 0) {
+            DEBUG_PRINTLNSTR("\t[CONTROLLER]ERROR: DOWATERING FAILED!!!!! ");
             DEBUG_PRINTSTR("\t[CONTROLLER]");
             DEBUG_PRINTLN(handle_ErrorMessages(ret));
-
+            /*Marko@: Some more Error handling necessary???????????*/
           }
         } else
         DEBUG_PRINTLNSTR("\t[CONTROLLER][TEST] ERROR: Node already in use.");
@@ -494,7 +497,8 @@ if (bProcessPumps == false)
 
                 ret = doWateringTasks(myNodeList.myNodes[myNodeList.mnActivePump].ID, POL_WATERING_DEFAULT_DURATION*1000, 0); //here a new order to a pump Node has to be planned
                 if (ret > 0)
-                {
+                {/*Marko@: Some more Error handling necessary???????????*/
+                  DEBUG_PRINTLNSTR("\t[CONTROLLER]ERROR: DOWATERING FAILED!!!!! ");
                   DEBUG_PRINTSTR("\t[CONTROLLER]");
                   DEBUG_PRINTLN(handle_ErrorMessages(ret));
                 }
@@ -601,7 +605,6 @@ if (bProcessPumps == false)
             { if_begin
             DEBUG_PRINTLNSTR("Deleting node form active pump list!");
 
-            //Marko@ : eine active pump list habe ich bereits erstellt -> myNodeList.setPumpInactive(handler->getID());
       */
       if (handler->getState() == PUMPNODE_STATE_4_FINISHED)
       {
@@ -637,7 +640,9 @@ if (bProcessPumps == false)
           DEBUG_PRINTSTR("[CONTROLLER]");
           DEBUG_PRINTLN(handle_ErrorMessages(ret));
           if (ret > 0) {
-            DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:Deleting PumpHandler Class because ");
+
+            DEBUG_PRINTSTR("[CONTROLLER]");
+            DEBUG_PRINTSTR("ERROR:Deleting PumpHandler Class because ");
             DEBUG_PRINTSTR("of some Error in doWateringTasks()");
 
             removePumphandler(i, handler);
@@ -733,6 +738,7 @@ String handle_ErrorMessages(uint8_t ret)
    return 20: Node ID PumpNode_ID, is not a pumpNode
    return 30: Pump already active
   NOTIFICATION: (01.02.2017)Changed requirement for pumpTime to be in Milliseconds not in seconds
+  Precondition: doWateringTasks() triggers a chain of communication events
 
 */
 uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handler *handler_)
@@ -752,7 +758,7 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
       DEBUG_PRINT(pumpTime);
       DEBUG_PRINTLNSTR("ms");
       //the first communication with the pumpNode must be initiate here
-      handlePumpCommunications(handler);
+      handlePumpCommunications(handler_);
 
       DEBUG_PRINTSTR("[CONTROLLER]");
       DEBUG_PRINTSTR("[doWateringTasks()]");
@@ -822,7 +828,7 @@ void handlePumpCommunications(PumpNode_Handler *handler)
   myResponse.dummy8=handler->getState();
   myResponse.state &= ~(1 << ID_INEXISTENT);
   write_cnt=RADIO_RESEND_NUMB;
-  radio.stopListening();//!!!!!!!!!!!!!!!!! KEEP ATTENTION OF TIME SLOT, IAM ALLOWED TO SEND here??
+  radio.stopListening();
   while(write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
   {
     radio.write(&myResponse, sizeof(myResponse));

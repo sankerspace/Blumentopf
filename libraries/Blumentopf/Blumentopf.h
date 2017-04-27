@@ -673,7 +673,7 @@ class CommandHandler
 #define PUMPNODE_STATE_1_PUMPACTIVE       1 //(pumpNode and Controller)
 #define PUMPNODE_STATE_2_PUMPOFF          2 //(pumpNode and Controller)
 #define PUMPNODE_STATE_3_ACKNOWLEDGMENT   3 //(pumpNode and Controller)
-#define PUMPNODE_STATE_4_FINISHED         4 //(pumpNode and Controller)-SUCCESFULL
+#define PUMPNODE_STATE_4_FINISHED         4 //Controller-SUCCESFULL
 
 #define PUMPNODE_STATE_ERROR             -1 //(Controller)            -ERROR
 #define PUMPNODE_STATE_1_RESP_FAILED     -3  //(Controller)

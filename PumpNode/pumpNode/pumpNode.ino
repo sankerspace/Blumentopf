@@ -31,7 +31,7 @@ RF24 radio(9, 10);
 /****************** User Config ***************************/
 bool bounce = false;
 uint16_t OnOff = 0, answer = 0;
-uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0;
+uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0, waitonPump=0;;
 uint32_t pump_worktime = 0;
 const uint8_t pumpPin = 3;
 const uint8_t buttonPin = 4;
@@ -220,7 +220,6 @@ void loop(void) {
   if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time to turn on the pump
 
     if (radio.available() > 0) {
-      dif = 0; //reset time difference for the next state
       DEBUG_PRINTLNSTR("------------------------------------------------------");
       DEBUG_PRINTLNSTR("Available radio ");
       /********Receiving next pumping time period**************/
@@ -232,11 +231,12 @@ void loop(void) {
       if (OnOff > 0) { //Is that message for us and not redundant
         answer = OnOff;//prepare data for sending in the next state
         status = PUMPNODE_STATE_1_PUMPACTIVE;
+        previousTime = millis();
       } else {
         DEBUG_PRINTSTR("[PUMPNODE]");
         DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node or it was a redundant message");
       }
-      previousTime = millis();
+      
       DEBUG_FLUSH;
     }
     /***************************STATE 1************************/
@@ -251,16 +251,18 @@ void loop(void) {
 
     digitalWrite(pumpPin, HIGH);  // TURN PUMP ON
     pumpOn = true;
+    //pump time plus half of roundTripDelay
+    waitonPump= OnOff + (WAIT_RESPONSE_INTERVAL >> 1); 
     DEBUG_PRINTSTR("[PUMPNODE][Status 1]Pump will work for");
     DEBUG_PRINT(OnOff);
     DEBUG_PRINTLNSTR("ms");
 
-    status = PUMPNODE_STATE_2_PUMPACTIVE;
+    status = PUMPNODE_STATE_2_PUMPOFF;
 
     started_waiting_at = millis();
     previousTime = millis();
     /**************************STATE 2**************************/
-  } else if (status == PUMPNODE_STATE_2_PUMPACTIVE) {
+  } else if (status == PUMPNODE_STATE_2_PUMPOFF) {
     dif = (currentTime - started_waiting_at);
 
     if ((dif > OnOff)) {
@@ -277,6 +279,7 @@ void loop(void) {
       {
         /********Receiving ACKNOWLEGMENT**************/
         uint16_t recv = recvData();
+         /*******************************************/
         if (recv > 0)//are data adressed to this node
         {
           answer=recv;
@@ -286,8 +289,8 @@ void loop(void) {
           DEBUG_PRINTSTR("[PUMPNODE]"); 
           DEBUG_PRINTLNSTR("-------------------------------------------------------------");
           status = PUMPNODE_STATE_3_ACKNOWLEDGMENT;
-          dif = 0;
           previousTime = millis();
+          waitonPump=0;
           pump_worktime += OnOff;
           DEBUG_PRINTSTR("[PUMPNODE]");
           DEBUG_PRINTSTR("OVERALL PUMPTIME :");
@@ -297,39 +300,36 @@ void loop(void) {
 
         } else {
           DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 2]Received message was not dedicated to this Pump-Node");
-          previousTime = millis();
         }
       }
-
-
-
-
-
-
-      status = PUMPNODE_STATE_3_FINISHED;
-      previousTime = millis();
       DEBUG_FLUSH;
     }
     /********STATE 2*******/
-  } else if (status == PUMPNODE_STATE_3_FINISHED) {
-    if (radio.available())
-    {
-      /********Receiving ACKNOWLEGMENT**************/
-      uint16_t recv = recvData();
-      //!!!!!! i COULD BE POSSIBLE THAT IT WAIT TOO LONG IN THAT STATE
+  } else if (status == PUMPNODE_STATE_3_ACKNOWLEDGMENT) {
+     /********Sending acknowlegment,which is the same number as OnOff time request**************/
 
-    }
-  }
+    delay(WAIT_SEND_INTERVAL);//some time to wait
+    sendData(answer);
+    DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 3]Send last acknowledgment to the pump request.");
+    /*******************************************************************************************/
+
+    status = PUMPNODE_STATE_0_PUMPREQUEST;
+    previousTime = millis();
+ 
+  } 
 
 
   /******************S O F T W A R E   W A T C H D O G *****************************/
 
 
   //radio.printDetails();
-  if ((millis() - previousTime) > (criticalTime + dif))
+  if ((millis() - previousTime) > (criticalTime + waitonPump))
   {
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
     status = PUMPNODE_STATE_0_PUMPREQUEST;
+    waitonPump=0;
+    pumpOn=false;
+    write_cnt = RADIO_RESEND_NUMB;
     previousTime = millis(); //A change of state occured here
     digitalWrite(pumpPin, LOW);//for security reasons
   }
