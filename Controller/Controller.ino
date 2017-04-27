@@ -444,7 +444,7 @@ void loop(void)
 
     if ((nTestWatering % DEBUG_CYCLE) == 0 )    // Delays the program flow..only once a second this will be executed:
     {
-//      DEBUG_PRINTSTR("[TIME] : ");
+      //      DEBUG_PRINTSTR("[TIME] : ");
       myCurrentTime = getCurrentTime();
 //      displayTimeFromUNIX(myCurrentTime, 1);
 
@@ -546,6 +546,7 @@ if (bProcessPumps == false)
   }
   */
 #else
+    /*IF NOT TEST IS PERFORMED*/
     /*perform normal operation, there is no Testcase*/
     nICA = myCommandHandler.getInteractiveCommands();        // checks whether the user requested watering with its app.
     // The following is the actual scheduling algorithm, but commented out as the above test section tests the pump communication for now. Afterwards the scheduling can be tested, debugged and implementation finished:
@@ -594,6 +595,9 @@ if (bProcessPumps == false)
       handler->processPumpstate(0);//there is no Income Data (0), only process the state machine
       if(handler->getResponseAvailability())
       {
+        DEBUG_PRINTSTR("[CONTROLLER]");
+        DEBUG_PRINTLNSTR("SENDING IN NORMAL MODE!!!!");
+
         handlePumpCommunications(handler);
       }
 
@@ -825,7 +829,7 @@ void handlePumpCommunications(PumpNode_Handler *handler)
   myResponse.dummy16  &= ~(1 << DATA_REGISTRATION_BIT);//normal Data packet
   myResponse.ID=handler->getID();
   myResponse.interval=handler->getResponseData();
-  myResponse.dummy8=handler->getState();
+  myResponse.dummy8=handler->getPacketState();
   myResponse.state &= ~(1 << ID_INEXISTENT);
   write_cnt=RADIO_RESEND_NUMB;
   radio.stopListening();
@@ -836,6 +840,8 @@ void handlePumpCommunications(PumpNode_Handler *handler)
   }
   radio.startListening();
   write_cnt=1;
+
+
   // delay(100);   // ist das delay notwendig?
 }
 
@@ -1113,13 +1119,16 @@ void handleMotorMessage(void)
         {
 
           handler->processPumpstate(myData.interval);
-          myResponse.dummy8=handler->getState();
+
           DEBUG_PRINTSTR("[CONTROLLER]");
           DEBUG_PRINTLNSTR("[handleMotorMessage()]Iterate pump list and search for Pumphandler");
 
           myResponse.ID = myData.ID;
           if(handler->getResponseAvailability())
           {
+            DEBUG_PRINTSTR("[CONTROLLER]");
+            DEBUG_PRINTLNSTR("[handleMotorMessage()]SENDING OVER HANDLEMOTORMESSAGE()!!!!");
+            myResponse.dummy8=handler->getPacketState();
             myResponse.interval = handler->getResponseData();
             write_cnt=RADIO_RESEND_NUMB;
             bResponseNeeded=true;

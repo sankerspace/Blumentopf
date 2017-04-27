@@ -707,12 +707,14 @@ public:
         pumphandler_ID=0;
         pumpnode_state_error_counter=1;
         pumpnode_reponse_available=false;
+        pumpnode_status_packet=pumpnode_status;
     }
 
     ~PumpNode_Handler(){}
 
     uint16_t getPumpTime(void);
     int      getState(void);
+    int      getPacketState(void);
     uint16_t getID(void);
     uint16_t getResponseData(void);
     void     processPumpstate(uint16_t IncomeData);
@@ -740,6 +742,12 @@ private:
     uint16_t pumphandler_ID;
     uint8_t  pumpnode_state_error_counter;
     int8_t pumpnode_status;                //in which status is the PUMP Node
+    /*packet which is send contains a state footprint
+    * must not be equal to pumpnode_status, pumpnode_status variable changes
+    * to create a control flow and pumpnode_status_packet indicates that state
+    * to which it is associated 
+    */
+    int8_t pumpnode_status_packet;
     bool pumpnode_reponse_available;
 
 };//5*2byte,2*1byte,3*4byte

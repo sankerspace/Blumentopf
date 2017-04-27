@@ -1697,6 +1697,12 @@ uint16_t nodeList::getPumpEpochLength()
   int PumpNode_Handler::getState(void){
     return this->pumpnode_status;
   }
+	/**
+ * state of a packet must be in the same state in which pumpnode remains
+ */
+   int PumpNode_Handler::getPacketState(void){
+     return this->pumpnode_status_packet;
+   }
 /**
 * what is the ID of the PumpNode the controller is speaking to
 */
@@ -1733,7 +1739,7 @@ bool PumpNode_Handler::getResponseAvailability(void)
     this->pumpnode_dif=0;
     this->pumpnode_debugCounter=DEBUG_CYCLE;
 		this->pumpnode_reponse_available=false;
-
+		this->pumpnode_status_packet=this->pumpnode_status;
  }
  /*only for debug purposes*/
  void PumpNode_Handler::setPumpHandlerID(uint16_t ID_)
@@ -1774,6 +1780,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINT(this->pumpnode_response);
       DEBUG_PRINTSTR("ms sent to PumPnode ");
       DEBUG_PRINTLN(this->pumpnode_ID);
+			this->pumpnode_status_packet=this->pumpnode_status;
       this->pumpnode_status=PUMPNODE_STATE_1_PUMPACTIVE;
 
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
@@ -1834,7 +1841,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
   }else //[STATE 2]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPOFF){
-    if(IncomeData==0 && this->pumpnode_reponse_available==false)
+    if(IncomeData==0)
     {
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
       if(this->pumpnode_dif > this->pumpnode_waitforPump)
@@ -1842,29 +1849,26 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 				 //PUMPTIME PASSED SO NOW SEND CONFIRMATION
 				 this->pumpnode_response=pumphandler_ID;//some usefull check
 				 this->pumpnode_reponse_available=true;
+				 this->pumpnode_status_packet=this->pumpnode_status;
 				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
 	       DEBUG_PRINTSTR("][State 2]-SEND CONFIRMATION REQUEST to Node-ID ");
 	       DEBUG_PRINT(this->pumpnode_ID);
 	       DEBUG_PRINTSTR(" with respond:");DEBUG_PRINTLN(this->pumpnode_response);
-       }else if((this->pumpnode_dif % 2000)==0)
+
+
+				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+	 			 DEBUG_PRINT(pumphandler_ID);
+	       DEBUG_PRINTLNSTR("][State 2]-Switch to State 3 and wait for Acknowledgment");
+				 this->pumpnode_status=PUMPNODE_STATE_3_ACKNOWLEDGMENT;
+				 this->pumpnode_previousTime=millis();//A change of state occured here
+	 			 this->pumpnode_started_waiting_at = millis();//in the next state we wait for the pump
+	       this->pumpnode_debugCounter=DEBUG_CYCLE;
+
+			 }else if((this->pumpnode_dif % 2000)==0)
 			 {
 				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
 				DEBUG_PRINTLNSTR("][State 2]-WAIT FOR PUMP TO FINISH PUMPING.");
 			 }
-    }else
-    if(IncomeData==0 && this->pumpnode_reponse_available==true)//receive the total time needed
-    {
-			this->pumpnode_status=PUMPNODE_STATE_3_ACKNOWLEDGMENT;
-			this->pumpnode_reponse_available=false;
-
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
-			DEBUG_PRINT(pumphandler_ID);
-      DEBUG_PRINTLNSTR("][State 2]-Switch to State 3 and wait for Acknowledgment");
-
-
-      this->pumpnode_previousTime=millis();//A change of state occured here
-			this->pumpnode_started_waiting_at = millis();//in the next state we wait for the pump
-      this->pumpnode_debugCounter=DEBUG_CYCLE;
     }else{
       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
@@ -1893,7 +1897,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINTSTR("][State 3]-Got Respond from PumpNode ");
       DEBUG_PRINT(this->pumpnode_ID);
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(IncomeData);
-
+			this->pumpnode_waitforPump=0;
       this->pumpnode_status=PUMPNODE_STATE_4_FINISHED;
       this->pumpnode_previousTime=millis();//A change of state occured here
       this->pumpnode_debugCounter=DEBUG_CYCLE;
