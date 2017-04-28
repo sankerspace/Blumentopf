@@ -43,8 +43,8 @@
 //#define INTERVAL (600)
 
 
-struct Data myResponse; //9byte
-struct Data myData; //25byte
+struct Data myResponse; //32byte
+struct Data myData; //32byte
 class CommandHandler myCommandHandler;
 
 //marko@: wozu brauchen wir diese variable?
@@ -139,7 +139,7 @@ DEBUG_PRINTLNSTR("\r\n****************");
   myNodeList.getNodeList();
 
   //mark every response as Controller packet
-  myResponse.dummy16 |= (1 << DATA_CONTROLLER_BIT);
+  setDATA_ControllerPacket(&myResponse);//Helmut@: for Logging
 
 #if (SD_AVAILABLE == 1)
 
@@ -286,14 +286,22 @@ void loop(void)
       DEBUG_PRINTDIG(myData.state, BIN);
       DEBUG_PRINTSTR(" from ID: ");
       DEBUG_PRINT(myData.ID);
-      DEBUG_PRINTSTR(" with Interval: ");
-      DEBUG_PRINTLN(myData.interval);
+      DEBUG_PRINTSTR(" PACKETINFO BITS: ");
+      DEBUG_PRINT_D(myData.packetInfo,BIN);
       if(DEBUG_MESSAGE_HEADER_2 > 0)
       {
+        DEBUG_PRINTSTR("PumpTime: ");
+        DEBUG_PRINTLN(myData.pumpTime);
+        DEBUG_PRINTSTR("Interval: ");
+        DEBUG_PRINTLN(myData.interval);
+        DEBUG_PRINTSTR("temperature: ");
+        DEBUG_PRINTLN(myData.temperature);
         DEBUG_PRINTSTR("humidity: ");
         DEBUG_PRINTLN(myData.humidity);
         DEBUG_PRINTSTR("moisture: ");
         DEBUG_PRINTLN(myData.moisture);
+        DEBUG_PRINTSTR("moisture2: ");
+        DEBUG_PRINTLN(myData.moisture2);
         DEBUG_PRINTSTR("brightness: ");
         DEBUG_PRINTLN(myData.brightness);
         DEBUG_PRINTSTR("voltage: ");
@@ -315,24 +323,29 @@ void loop(void)
     {
       DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("Registration request");
       handleRegistration();                 // answer the registration request. There is no difference between sensor nodes and motor nodes.
-      myResponse.dummy16 |= (1 << DATA_REGISTRATION_BIT);
+      setDATA_RegistrationPacket(&myResponse);//Helmut@: for Logging
+      //myResponse.dummy16 |= (1 << DATA_REGISTRATION_BIT);
+
     }
     else                                    // This is a data message
     {
-      myResponse.dummy16  &= ~(1 << DATA_REGISTRATION_BIT);//normal Data packet
+      setDATA_NO_RegistrationPacket(&myResponse);//Helmut@: for Logging
+      //myResponse.dummy16  &= ~(1 << DATA_REGISTRATION_BIT);//normal Data packet
       myResponse.Time = getCurrentTime();
       if ((myData.state & (1 << NODE_TYPE)) == false) // it is a sensor node
       {
 
         DEBUG_PRINTLNSTR("[CONTROLLER] SENSOR MESSAGE");
         handleDataMessage();
+        setDATA_SensorPacket(&myResponse);//Helmut@: for Logging
       }
       else                                  // it is a motor node message
       {
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("MOTOR MESSAGE:ID:");
         DEBUG_PRINT(myData.ID); DEBUG_PRINTSTR(", Data:");
-        DEBUG_PRINTLN(myData.interval);
+        DEBUG_PRINTLN(myData.pumpTime);
         handleMotorMessage();
+        setDATA_PumpPacket(&myResponse);//Helmut@: for Logging
 
         //        bResponseNeeded = false;
       }
@@ -352,10 +365,10 @@ void loop(void)
       DEBUG_PRINT(myResponse.ID);
       DEBUG_PRINTSTR(", STATUS-BYTE:");
       DEBUG_PRINTLN(String(myResponse.state, BIN));
-      DEBUG_PRINTSTR(", dummy8:");
-      DEBUG_PRINTLN(String(myResponse.dummy8, BIN));
-      DEBUG_PRINTSTR(", PACKET-ID:");
-      DEBUG_PRINTLN(String(myResponse.dummy16, BIN));
+      //DEBUG_PRINTSTR(", dummy8:");
+      //DEBUG_PRINTLN(String(getData_PumpState(&myResponse), DEC));
+      DEBUG_PRINTSTR(", PACKET-INFO:");
+      DEBUG_PRINTLN(String(myResponse.packetInfo, BIN));
       delay(WAIT_SEND_INTERVAL);//ther is some time to, to ensure that node is prepared to receive messages     // 20170312 - Berhnard: Can we find another way for this as this solution slows down the communication and is suspected to leading to timeouts.
       radio.stopListening();
       while(write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
@@ -425,7 +438,7 @@ void loop(void)
             /*Marko@: Some more Error handling necessary???????????*/
           }
         } else
-        DEBUG_PRINTLNSTR("\t[CONTROLLER][TEST] ERROR: Node already in use.");
+        DEBUG_PRINTLNSTR("\t[CONTROLLER][TEST] WARNING: Node already in use.");
       }
       i_++;
 
@@ -633,7 +646,7 @@ if (bProcessPumps == false)
         DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:"); DEBUG_PRINT(handler->getID());
         DEBUG_PRINTSTR(" ,PumpTime: "); DEBUG_PRINTLN(handler->getPumpTime());
         //@Marko should PUMP always be restarted, maybe it is OFFLINE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        if (handler->getStateErrorCount() <= MAX_RETRIES) {
+        if (handler->getStateErrorCount() < MAX_RETRIES) {
           uint8_t ret = doWateringTasks(handler->getID(), handler->getPumpTime(), handler);//getPumpTime is in ms
           DEBUG_PRINTSTR("[CONTROLLER]");
           DEBUG_PRINTSTR("This is the pumpnode_state_error_counter: ");
@@ -826,13 +839,22 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint16_t pumpTime, PumpNode_Handle
 void handlePumpCommunications(PumpNode_Handler *handler)
 {
   myResponse.Time = getCurrentTime();
-  myResponse.dummy16  &= ~(1 << DATA_REGISTRATION_BIT);//normal Data packet
+  setDATA_NO_RegistrationPacket(&myResponse);
+  setDATA_PumpPacket(&myResponse);
+
   myResponse.ID=handler->getID();
-  myResponse.interval=handler->getResponseData();
-  myResponse.dummy8=handler->getPacketState();
+  myResponse.pumpTime=handler->getResponseData();
+  setDATA_Pumpstate(&myResponse,handler->getPacketState());
   myResponse.state &= ~(1 << ID_INEXISTENT);
   write_cnt=RADIO_RESEND_NUMB;
   radio.stopListening();
+  DEBUG_PRINTSTR("\t[CONTROLLER][HandlePumpCommunication()] Sending Pump Data to pump Node:[");
+  DEBUG_PRINT(write_cnt);
+  DEBUG_PRINTLNSTR(" times]");
+  DEBUG_PRINTSTR("\t ID:");DEBUG_PRINTLN(myResponse.ID);
+  DEBUG_PRINTSTR("\t PumpTime:");DEBUG_PRINTLN(myResponse.pumpTime);
+  DEBUG_PRINTSTR("\t PumpState snapshot:");DEBUG_PRINTLN(getData_PumpState(&myResponse));
+  DEBUG_PRINTSTR("\t PacketInfo:");DEBUG_PRINTLN_D(myResponse.packetInfo, BIN);
   while(write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
   {
     radio.write(&myResponse, sizeof(myResponse));
@@ -877,6 +899,11 @@ void logData(void)
   currentData += String(myData.state);
   currentData += ",";
   currentData += String(myData.interval);
+  currentData += ",";
+  currentData += String(myData.pumpTime);
+  currentData += ",";
+  currentData += String(myData.packetInfo);
+
 #endif
   if (HW == HW_ARDUINO)
   {
@@ -1115,31 +1142,34 @@ void handleMotorMessage(void)
         *dummy8 contains state from pumpnode, if the message state  is not equal
         *pumphandler state, we have a redundant message here, which will be skipped
         */
-        if(myData.dummy8 ==  handler->getState())
+        if(getData_PumpState(&myData) ==  handler->getState())
         {
 
-          handler->processPumpstate(myData.interval);
+          handler->processPumpstate(myData.pumpTime);
 
           DEBUG_PRINTSTR("[CONTROLLER]");
           DEBUG_PRINTLNSTR("[handleMotorMessage()]Iterate pump list and search for Pumphandler");
 
           myResponse.ID = myData.ID;
           if(handler->getResponseAvailability())
-          {
+          {  //Marko@: dieser Codeteil könnte gelöscht werden, da es nie ausgeführt wird!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             DEBUG_PRINTSTR("[CONTROLLER]");
             DEBUG_PRINTLNSTR("[handleMotorMessage()]SENDING OVER HANDLEMOTORMESSAGE()!!!!");
-            myResponse.dummy8=handler->getPacketState();
-            myResponse.interval = handler->getResponseData();
+
+            setDATA_Pumpstate(&myResponse,handler->getPacketState());
+            myResponse.pumpTime = handler->getResponseData();
             write_cnt=RADIO_RESEND_NUMB;
             bResponseNeeded=true;
             DEBUG_PRINTLNSTR("\tPumpHandler processed, we will send a respond.");
           }else{
-            myResponse.interval = 0;
+            myResponse.pumpTime = 0;
             bResponseNeeded=false;
             DEBUG_PRINTLNSTR("\tPumpHandler processed, but we will not send.");
           }
         }else{
-          DEBUG_PRINTLNSTR("\tA Retransmitted Message, will be skipped.");
+          DEBUG_PRINTSTR("[CONTROLLER]");
+          DEBUG_PRINTLNSTR("[handleMotorMessage()]INFO:SKIP REDUNDANT MESSAGE!!!!!!!!!!!!");
+
         }
         i = PumpList.size(); //get out of the for lopp, we are finished
 

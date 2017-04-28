@@ -291,14 +291,14 @@ DO NOT CHANGE:
 * How long we have to wait to receive an acknowledgment on a registration request
 * REGISTRATION_TIMEOUT_INTERVAL=Protocol_Usage + Round trip delay
 */
-#define REGISTRATION_TIMEOUT_INTERVAL	5000  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
+#define REGISTRATION_TIMEOUT_INTERVAL	1000//5000  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
 /*
 * WAIT_RESPONSE_INTERVAL=Protocol_Usage + Round trip delay
 *     Its the time from sending a message to another node
 *     and receiving an acknowledgment with little protocol overhead which could
 *     be disregarded
 */
-#define WAIT_RESPONSE_INTERVAL       4000// in Milliseconds
+#define WAIT_RESPONSE_INTERVAL       500//4000// in Milliseconds
 
 #define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -315,7 +315,7 @@ DO NOT CHANGE:
 * Controller PumpHandler max state time  = PUMPNODE_CRITICAL_STATE_OCCUPATION
 * Pump Node max state time  = PUMPNODE_CRITICAL_STATE_OCCUPATION / 2
 */
-#define PUMPNODE_CRITICAL_STATE_OCCUPATION 60000 // in Milliseconds
+#define PUMPNODE_CRITICAL_STATE_OCCUPATION 5000//60000 // in Milliseconds
 
 
 
@@ -437,13 +437,43 @@ DO NOT CHANGE:
 #define EEPROM_HEADER_STATUS_VALID 15	// indicates this data is valid. Unset when the EEPROM header is initialized
 //#define EEPROM_DATA_STATUS_LAST 14		// indicates this is the last data element in the list.
 
+/*
+* Bit values packetInfo in struct Data
+*/
 
+#define DATA_PUMP_STATE_BIT_0  (0) //used with pumpNode
+#define DATA_PUMP_STATE_BIT_1  (1) //used with pumpNode
+/*identifiy as Sensor Node or Pump Node Packet
+*in case if send from Controller we instantly know if that packet
+*is send to a sensor node or a pumpnode
+  Sensor Node [0] or its a Pump Node [1]
+*/
+#define DATA_NODE_BIT          (2)
+//identifiy as Packet from Controller Node
+#define DATA_CONTROLLER_BIT    (3) //if packet send by Controller
+//identifiy as packet for registration purpose or its a normal data packet
+#define DATA_REGISTRATION_BIT  (4)
+                                  // used by Controller or a Node
+int setDATA_Pumpstate(struct Data *packet,uint8_t pumpState);
+void setDATA_SensorPacket(struct Data *packet);
+void setDATA_PumpPacket(struct Data *packet);
+
+void setDATA_ControllerPacket(struct Data *packet);
+void setDATA_NormalDatapacket(struct Data *packet);
+void setDATA_RegistrationPacket(struct Data *packet);
+void setDATA_NO_RegistrationPacket(struct Data *packet);
+
+uint8_t getData_PumpState(struct Data *packet);
+
+bool    isPumpPacket(struct Data *packet);
+bool    isSensorPacket(struct Data *packet);
+bool    isPumpPacket(struct Data *packet);
+bool    isControllerPacket(struct Data *packet);
+bool    isRegistrationPacket(struct Data *packet);
 void killID();
 
-#define DATA_NODE_BIT   (0)   //identifiy as Sensor Node or Pump Node Packet
-#define DATA_CONTROLLER_BIT   (1) //identifiy as Controller Packet
-#define DATA_REGISTRATION_BIT  (8) //identifiy as packet for registration purpose
-                                  // used by Controller or a Node
+
+
 /*sensor data and response data in one data structure*/
 
 struct Data
@@ -452,20 +482,33 @@ struct Data
 
   float temperature;//4byte		// should be shortended to uint16_t
   float humidity;//4byte			// should be shortended to uint16_t
-
   time_t Time;//4byte
+  uint32_t pumpTime;// 4byte    ---> interval
   uint16_t ID; //2 Byte
-  uint16_t interval = 2; //2 Byte
+
+  uint16_t interval; // 2byte
   uint16_t voltage; //2 Byte
   uint16_t VCC; //2 Byte
   uint16_t moisture; //2 Byte
   uint16_t moisture2;//2 Byte
   uint16_t brightness; //2 Byte
-  uint16_t dummy16;  //2 Byte Low Byte [0:Sensor Node Data, 1:Pump Node Data, 2:Controller Data]
-                    //        High Byte [0:Registration , 1:Normal Data ]
+  uint8_t state;		//1Byte	// could be moved to unused data bits..
   //Helmut@: damit kannst messages bequem ausfiltern
-  uint8_t state;		//1Byte	// could be moved to unused data bits...
-  uint8_t  dummy8;  //1 Byte  - used also in Pumphandler for state inidication
+  /*
+  * früher dummy16
+  *
+           -  Bit 1 and Bit 2
+              controller/pumpnode state snapshot before sending [0-3]
+  *           sender and receiver must be in the same state
+  *           redundant messages have sanpshots of older states and can be
+              easily recognized as a redundant message
+  *        -  Bit 3 its a Sensor Node [0] or its a Pump Node [1]
+  *        -  Bit 4 its a Controller Node [1] or some other Node(Sensor/Pump) [0]
+  *        -  Bit 5 Registration Packet [1] or Normal Data Packet [0]
+  *
+  */
+
+  uint8_t  packetInfo;//dummy8;  //1 Byte  - used also in Pumphandler for state inidication
 
 
 };//30byte
@@ -745,7 +788,7 @@ private:
     /*packet which is send contains a state footprint
     * must not be equal to pumpnode_status, pumpnode_status variable changes
     * to create a control flow and pumpnode_status_packet indicates that state
-    * to which it is associated 
+    * to which it is associated
     */
     int8_t pumpnode_status_packet;
     bool pumpnode_reponse_available;

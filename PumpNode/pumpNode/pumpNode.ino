@@ -30,8 +30,8 @@ RF24 radio(9, 10);
 
 /****************** User Config ***************************/
 bool bounce = false;
-uint16_t OnOff = 0, answer = 0;
-uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0, waitonPump=0;;
+
+uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0, waitonPump = 0, OnOff = 0, answer = 0;;
 uint32_t pump_worktime = 0;
 const uint8_t pumpPin = 3;
 const uint8_t buttonPin = 4;
@@ -96,9 +96,13 @@ void setup() {
   myData.voltage = 0;
   myData.VCC = 0;
   myData.Time = 0;
-  myData.dummy16 = 0;
-  myData.dummy16 |= (1 << DATA_NODE_BIT); //packet is identified as pump packet
-  myData.dummy16 |= (1 << DATA_REGISTRATION_BIT); //packet is identified registration packet
+  myData.packetInfo = 0;
+  setDATA_PumpPacket(&myData);
+  setDATA_NormalDatapacket(&myData);
+  setDATA_RegistrationPacket(&myData);
+  //myData.dummy16 |= (1 << DATA_NODE_BIT); //packet is identified as pump packet
+  //myData.dummy16 |= (1 << DATA_REGISTRATION_BIT); //packet is identified registration packet
+  
   //Print debug info
   //radio.printDetails();
 
@@ -110,7 +114,8 @@ void setup() {
 
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
-  myData.dummy16 &= ~(1 << DATA_REGISTRATION_BIT);
+  setDATA_NO_RegistrationPacket(&myData);
+  //myData.dummy16 &= ~(1 << DATA_REGISTRATION_BIT);
 }
 
 
@@ -236,7 +241,7 @@ void loop(void) {
         DEBUG_PRINTSTR("[PUMPNODE]");
         DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node or it was a redundant message");
       }
-      
+
       DEBUG_FLUSH;
     }
     /***************************STATE 1************************/
@@ -252,7 +257,7 @@ void loop(void) {
     digitalWrite(pumpPin, HIGH);  // TURN PUMP ON
     pumpOn = true;
     //pump time plus half of roundTripDelay
-    waitonPump= OnOff + (WAIT_RESPONSE_INTERVAL >> 1); 
+    waitonPump = OnOff + (WAIT_RESPONSE_INTERVAL >> 1);
     DEBUG_PRINTSTR("[PUMPNODE][Status 1]Pump will work for");
     DEBUG_PRINT(OnOff);
     DEBUG_PRINTLNSTR("ms");
@@ -279,24 +284,19 @@ void loop(void) {
       {
         /********Receiving ACKNOWLEGMENT**************/
         uint16_t recv = recvData();
-         /*******************************************/
+        /*******************************************/
         if (recv > 0)//are data adressed to this node
         {
-          answer=recv;
+          answer = recv;
           //if message was not dedicated to this pumpNode recvData returns -1
-          DEBUG_PRINTSTR("[PUMPNODE]"); 
+          DEBUG_PRINTSTR("[PUMPNODE]");
           DEBUG_PRINTLNSTR("[State 2]RECEIVED CONFIRMATION REQUEST FROM CONTROLLER.");
-          DEBUG_PRINTSTR("[PUMPNODE]"); 
-          DEBUG_PRINTLNSTR("-------------------------------------------------------------");
+          DEBUG_PRINTSTR("[PUMPNODE]");
+         
           status = PUMPNODE_STATE_3_ACKNOWLEDGMENT;
           previousTime = millis();
-          waitonPump=0;
-          pump_worktime += OnOff;
-          DEBUG_PRINTSTR("[PUMPNODE]");
-          DEBUG_PRINTSTR("OVERALL PUMPTIME :");
-          DEBUG_PRINT(pump_worktime / 1000);
-          DEBUG_PRINTLNSTR(" seconds.");
-          DEBUG_FLUSH;
+          waitonPump = 0;
+
 
         } else {
           DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 2]Received message was not dedicated to this Pump-Node");
@@ -306,17 +306,23 @@ void loop(void) {
     }
     /********STATE 2*******/
   } else if (status == PUMPNODE_STATE_3_ACKNOWLEDGMENT) {
-     /********Sending acknowlegment,which is the same number as OnOff time request**************/
+    /********Sending acknowlegment,which is the same number as OnOff time request**************/
 
     delay(WAIT_SEND_INTERVAL);//some time to wait
     sendData(answer);
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 3]Send last acknowledgment to the pump request.");
     /*******************************************************************************************/
-
+    DEBUG_PRINTLNSTR("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    pump_worktime += OnOff;
+    DEBUG_PRINTSTR("[PUMPNODE]");
+    DEBUG_PRINTSTR("OVERALL PUMPTIME :");
+    DEBUG_PRINT(pump_worktime / 1000);
+    DEBUG_PRINTLNSTR(" seconds.");
+    DEBUG_FLUSH;
     status = PUMPNODE_STATE_0_PUMPREQUEST;
     previousTime = millis();
- 
-  } 
+
+  }
 
 
   /******************S O F T W A R E   W A T C H D O G *****************************/
@@ -327,8 +333,8 @@ void loop(void) {
   {
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("NO ANSWER, WE WILL RESET THE STATE MACHINE!!");
     status = PUMPNODE_STATE_0_PUMPREQUEST;
-    waitonPump=0;
-    pumpOn=false;
+    waitonPump = 0;
+    pumpOn = false;
     write_cnt = RADIO_RESEND_NUMB;
     previousTime = millis(); //A change of state occured here
     digitalWrite(pumpPin, LOW);//for security reasons
@@ -350,13 +356,16 @@ void loop(void) {
 void sendData(uint16_t answer_)
 {
   //switches myData.state in setup()
-  myData.interval = answer_;
-  myData.dummy8 = status; //mark that package with current state
+  myData.pumpTime = answer_;
+  setDATA_Pumpstate(&myData,status);
+  //myData.dummy8 = status; //mark that package with current state
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("\t[SENDING]Sending data "); DEBUG_PRINT(answer_);
   DEBUG_PRINTSTR("\t myData.state: ");
   DEBUG_PRINTLN_D(myData.state, BIN);
-  DEBUG_PRINTSTR("\t myData.dummy8: ");
-  DEBUG_PRINTLN(myData.dummy8);
+  DEBUG_PRINTSTR("\t pumpState: ");
+  DEBUG_PRINTLN(status);
+  DEBUG_PRINTSTR("\t myData.packetInfo: ");
+  DEBUG_PRINTLN_D(myData.packetInfo,BIN);
 
   radio.stopListening();
   while (write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
@@ -383,7 +392,7 @@ uint16_t recvData(void)
   //otherwise it is a redundant message and will be skipped
 
   DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: Resp-interval:");
-  DEBUG_PRINTDIG(myResponse.interval, DEC);
+  DEBUG_PRINTDIG(myResponse.pumpTime, DEC);
   DEBUG_PRINTSTR(", Resp-ID:");
   DEBUG_PRINTDIG(myResponse.ID, DEC);
   DEBUG_PRINTSTR(", Data-ID:");
@@ -397,12 +406,12 @@ uint16_t recvData(void)
   {
     //incoming message may be a redundant message
     //in that case skip it
-    if (status == myResponse.dummy8)
+    if (status == getData_PumpState(&myResponse))
     {
       setTime(myResponse.Time);
 
       displayTimeFromUNIX(myResponse.Time);
-      return myResponse.interval;
+      return myResponse.pumpTime;
     }
     DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: REDUNDANT MESSAGE.");
   }

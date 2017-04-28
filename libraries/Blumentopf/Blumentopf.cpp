@@ -1847,7 +1847,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       if(this->pumpnode_dif > this->pumpnode_waitforPump)
        {
 				 //PUMPTIME PASSED SO NOW SEND CONFIRMATION
-				 this->pumpnode_response=pumphandler_ID;//some usefull check
+				 this->pumpnode_response=this->pumphandler_ID;//some usefull check
 				 this->pumpnode_reponse_available=true;
 				 this->pumpnode_status_packet=this->pumpnode_status;
 				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
@@ -2013,4 +2013,84 @@ void killID()
   struct EEPROM_Data myEEPROMData;
   myEEPROMData.ID = 0xffff;
   EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // resetting the ID
+}
+
+
+
+/*
+* Functions to handle  packetInfo in struct Data
+*
+*/
+
+int setDATA_Pumpstate(struct Data *packet,uint8_t pumpState){
+	if(pumpState<PUMPNODE_STATE_0_PUMPREQUEST || pumpState > PUMPNODE_STATE_3_ACKNOWLEDGMENT)
+		return -1;
+	uint8_t a = (pumpState & 0x1) << DATA_PUMP_STATE_BIT_0 ;
+	uint8_t b = ((pumpState & 0x2) >> 1) << DATA_PUMP_STATE_BIT_1 ;
+
+	packet->packetInfo = a | b;
+
+	return 0;
+}
+void setDATA_SensorPacket(struct Data *packet)
+{
+	packet->packetInfo &= ~(1 << DATA_NODE_BIT);
+}
+void setDATA_PumpPacket(struct Data *packet)
+{
+	packet->packetInfo |= (1 << DATA_NODE_BIT);
+}
+void setDATA_ControllerPacket(struct Data *packet)
+{
+	packet->packetInfo |= (1 << DATA_CONTROLLER_BIT);
+}
+void setDATA_NormalDatapacket(struct Data *packet)
+{
+	packet->packetInfo &= ~(1 << DATA_CONTROLLER_BIT);
+}
+void setDATA_RegistrationPacket(struct Data *packet)
+{
+	packet->packetInfo |= (1 << DATA_REGISTRATION_BIT);
+}
+void setDATA_NO_RegistrationPacket(struct Data *packet)
+{
+	packet->packetInfo &= ~(1 << DATA_REGISTRATION_BIT);
+}
+
+uint8_t getData_PumpState(struct Data *packet)
+{
+	uint8_t value = ((packet->packetInfo & (1 << DATA_PUMP_STATE_BIT_0))>>DATA_PUMP_STATE_BIT_0);
+	value |=(((packet->packetInfo & (1 << DATA_PUMP_STATE_BIT_1))>>DATA_PUMP_STATE_BIT_1) << 1);
+	return value;
+}
+bool    isPumpPacket(struct Data *packet)
+{
+	uint8_t value = packet->packetInfo & (1 << DATA_NODE_BIT);
+	if(value>0)
+		return true;
+	return false;
+}
+bool    isSensorPacket(struct Data *packet)
+{
+	uint8_t value = packet->packetInfo & (1 << DATA_NODE_BIT);
+	if(value==0)
+		return true;
+	return false;
+}
+
+bool    isControllerPacket(struct Data *packet)
+{
+	uint8_t value = packet->packetInfo & (1 << DATA_CONTROLLER_BIT);
+	if(value>0)
+		return true;
+	return false;
+
+}
+
+bool    isRegistrationPacket(struct Data *packet)
+{
+	uint8_t value = packet->packetInfo & (1 << DATA_REGISTRATION_BIT);
+	if(value>0)
+		return true;
+	return false;
 }
