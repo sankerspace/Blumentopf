@@ -14,63 +14,6 @@
 #include "Time.h"
 
 /***************************************************************************************/
-/****************************** D E B U G **********************************************/
-/**************************************************************************************/
-// General debug messages:
-#define DEBUG_ 1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
-#define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
-#define DEBUG_MESSAGE_HEADER 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
-#define DEBUG_MESSAGE_HEADER_2 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
-#define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
-#define DEBUG_SENSOR_SCHEDULING 0		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
-#define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
-#define DEBUG_FREE_MEMORY 0			// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
-#define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
-#define DEBUG_RF24 1           // 0: disabled		1: show nRF24L01 infos
-#define DEBUG_INFO 1           // 0: disabled		1: show infos
-#define DEBUG_CYCLE 10000     // Debug information after all X ms in the loop() function
-// For debugging the sensor node
-#define DEBUG_DATA_STORAGE 0				// 0: disabled		1: for analysing the EEPROM Data class internals
-#define DEBUG_SENSOR_MESSAGE_HEADER 0		// 0: disabled		1:
-
-// For debugging the pump node
-
-#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
-//#define TEST_PUMPSCHEDULE 1
-//#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
-
-
-// For getting rid of serial communication in the release version:
-#if (DEBUG_ == 1)
-  #define DEBUG_PRINT(x)        		Serial.print(x)
-  #define DEBUG_PRINT_D(x, d)   		if(d>0){ Serial.print(x);}
-  #define DEBUG_PRINTSTR(x)     		Serial.print(F(x))
-  #define DEBUG_PRINTSTR_D(x, d)     	if(d>0){ Serial.print(x);}
-  #define DEBUG_PRINTDIG(x, c)  		Serial.print (x, c)
-  #define DEBUG_PRINTLN(x)      		Serial.println(x)
-  #define DEBUG_PRINTLN_D(x, d)    		if(d>0){ Serial.println(x);}
-  #define DEBUG_PRINTLNSTR(x)   		Serial.println(F(x))
-  #define DEBUG_PRINTLNSTR_D(x, d)		if(d>0){ Serial.println(F(x));}
-  #define DEBUG_FLUSH           		Serial.flush()
-  #define DEBUG_SERIAL_INIT_WAIT 		Serial.begin(BAUD);while (!Serial) {}
-  #define DEBUG_PRINT_MEM
-#else
-  #define DEBUG_PRINT(x)
-  #define DEBUG_PRINT_D(x, d)
-  #define DEBUG_PRINTSTR(x)
-  #define DEBUG_PRINTSTR_D(x, d)
-  #define DEBUG_PRINTDIG(x, c)
-  #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINTLN_D(x, d)
-  #define DEBUG_PRINTLNSTR(x)
-  #define DEBUG_PRINTLNSTR_D(x, d)
-  #define DEBUG_FLUSH
-  #define DEBUG_SERIAL_INIT_WAIT
-#endif
-
-
-
-/***************************************************************************************/
 /****************************** PARTICLE/ARDUINO **************************************/
 /**************************************************************************************/
 // sets Particle or photon:
@@ -102,6 +45,74 @@
   #endif
    #include "particle-rf24.h"
 #endif
+
+
+/***************************************************************************************/
+/****************************** D E B U G **********************************************/
+/**************************************************************************************/
+// General debug messages:
+#define DEBUG_ 1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
+#define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
+#define DEBUG_MESSAGE_HEADER 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
+#define DEBUG_MESSAGE_HEADER_2 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
+#define DEBUG_MESSAGE 1
+#define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
+#define DEBUG_SENSOR_SCHEDULING 0		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
+#define DEBUG_LIST_SENSOR_SCHEDULING 0	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
+#define DEBUG_FREE_MEMORY 0			// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
+#define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
+#define DEBUG_INFO 1           // 0: disabled		1: show infos
+  #define DEBUG_PUMP 1      //DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
+  #define DEBUG_PUMP_ROUNDTRIPTIME 1
+  #define DEBUG_RF24 1           //DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
+  #define DEBUG_TIMING_LOOP 1  //DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
+#define DEBUG_CYCLE 10000     // Debug information after all X ms in the loop() function
+// For debugging the sensor node
+#define DEBUG_DATA_STORAGE 0				// 0: disabled		1: for analysing the EEPROM Data class internals
+#define DEBUG_SENSOR_MESSAGE_HEADER 0		// 0: disabled		1:  //only in SensorNode.ino
+
+// For debugging the pump node
+
+#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
+//#define TEST_PUMPSCHEDULE 1
+//#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
+
+
+// For getting rid of serial communication in the release version:
+#if (DEBUG_ == 1)
+  #define DEBUG_PRINT(x)        		Serial.print(x)
+  #define DEBUG_PRINT_D(x, d)   		if(d>0){ Serial.print(x);}
+  #define DEBUG_PRINTSTR(x)     		Serial.print(F(x))
+  #define DEBUG_PRINTSTR_D(x, d)     	if(d>0){ Serial.print(x);}
+  #define DEBUG_PRINTDIG(x, c)  		Serial.print (x, c)
+  #define DEBUG_PRINTLN(x)      		Serial.println(x)
+  #define DEBUG_PRINTLN_D(x, d)    		if(d>0){ Serial.println(x);}
+  #define DEBUG_PRINTLNSTR(x)   		Serial.println(F(x))
+  #define DEBUG_PRINTLNSTR_D(x, d)		if(d>0){ Serial.println(F(x));}
+  #define DEBUG_FLUSH           		Serial.flush()
+  #if (HW_ARDUINO>0)
+  #define DEBUG_SERIAL_INIT_WAIT 		Serial.begin(BAUD);while (!Serial) {}
+  #elif(HW_PHOTON>0)
+  #define DEBUG_SERIAL_INIT_WAIT 		Serial.begin(BAUD);while (!Serial) {Particle.process();}
+  #endif
+  #define DEBUG_PRINT_MEM
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINT_D(x, d)
+  #define DEBUG_PRINTSTR(x)
+  #define DEBUG_PRINTSTR_D(x, d)
+  #define DEBUG_PRINTDIG(x, c)
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINTLN_D(x, d)
+  #define DEBUG_PRINTLNSTR(x)
+  #define DEBUG_PRINTLNSTR_D(x, d)
+  #define DEBUG_FLUSH
+  #define DEBUG_SERIAL_INIT_WAIT
+#endif
+
+
+
+
 /***************************************************************************************/
 /****************************** R T C **********************************************/
 /**************************************************************************************/
@@ -286,7 +297,7 @@ DO NOT CHANGE:
 /***************************************************************************************/
 /******************************  T I M I N G ******************************************/
 /**************************************************************************************/
-#define WAIT_SEND_INTERVAL           100
+#define WAIT_SEND_INTERVAL           200
 /*
 * How long we have to wait to receive an acknowledgment on a registration request
 * REGISTRATION_TIMEOUT_INTERVAL=Protocol_Usage + Round trip delay
@@ -298,7 +309,7 @@ DO NOT CHANGE:
 *     and receiving an acknowledgment with little protocol overhead which could
 *     be disregarded
 */
-#define WAIT_RESPONSE_INTERVAL       500//4000// in Milliseconds
+#define WAIT_RESPONSE_INTERVAL       1000//4000// in Milliseconds
 
 #define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -454,7 +465,7 @@ DO NOT CHANGE:
 //identifiy as packet for registration purpose or its a normal data packet
 #define DATA_REGISTRATION_BIT  (4)
                                   // used by Controller or a Node
-int setDATA_Pumpstate(struct Data *packet,uint8_t pumpState);
+int setDATA_Pumpstate(struct Data *packet,int pumpState);
 void setDATA_SensorPacket(struct Data *packet);
 void setDATA_PumpPacket(struct Data *packet);
 
@@ -751,9 +762,24 @@ public:
         pumpnode_state_error_counter=1;
         pumpnode_reponse_available=false;
         pumpnode_status_packet=pumpnode_status;
+        #if (DEBUG_PUMP>0)
+        #if (DEBUG_PUMP_ROUNDTRIPTIME)
+        pumpNode_RoundTripTime=0;
+        #endif
+        pumpnode_HandlerGenerationTime=millis();
+        #endif
     }
 
-    ~PumpNode_Handler(){}
+    ~PumpNode_Handler()
+    {
+      #if (DEBUG_PUMP>0)
+      DEBUG_PRINTSTR("\t\t[PUMPHANDLER ");
+      DEBUG_PRINT(pumpnode_ID);
+      DEBUG_PRINTSTR("]NOTIFY:HANDLER DESCTRUCTION AFTER ");
+      DEBUG_PRINT(millis()-pumpnode_HandlerGenerationTime);
+      DEBUG_PRINTLNSTR(" ms OF LIFETIME.");
+      #endif
+    }
 
     uint16_t getPumpTime(void);
     int      getState(void);
@@ -769,6 +795,12 @@ public:
     bool     getResponseAvailability(void);
 
 private:
+    #if (DEBUG_PUMP>0)
+    uint32_t pumpnode_HandlerGenerationTime;
+    #if (DEBUG_PUMP_ROUNDTRIPTIME)
+    uint32_t pumpNode_RoundTripTime;
+    #endif
+    #endif
     uint32_t pumpnode_started_waiting_at;//
     uint32_t pumpnode_previousTime;      //needed by the software watchdog
     uint32_t pumpnode_dif;               //how many time passed is stored here,
@@ -793,8 +825,8 @@ private:
     int8_t pumpnode_status_packet;
     bool pumpnode_reponse_available;
 
-};//5*2byte,2*1byte,3*4byte
-//24byte
+};//5*2byte,4*1byte,5*4byte
+//34byte
 
 
 

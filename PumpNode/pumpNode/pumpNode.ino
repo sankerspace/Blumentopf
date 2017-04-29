@@ -97,12 +97,13 @@ void setup() {
   myData.VCC = 0;
   myData.Time = 0;
   myData.packetInfo = 0;
+
   setDATA_PumpPacket(&myData);
   setDATA_NormalDatapacket(&myData);
   setDATA_RegistrationPacket(&myData);
   //myData.dummy16 |= (1 << DATA_NODE_BIT); //packet is identified as pump packet
   //myData.dummy16 |= (1 << DATA_REGISTRATION_BIT); //packet is identified registration packet
-  
+  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[MYDATA PACKETINFO before REGISTRATION]:"); DEBUG_PRINTLN(myData.packetInfo);
   //Print debug info
   //radio.printDetails();
 
@@ -116,6 +117,7 @@ void setup() {
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
   setDATA_NO_RegistrationPacket(&myData);
   //myData.dummy16 &= ~(1 << DATA_REGISTRATION_BIT);
+  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[MYDATA PACKETINFO]:"); DEBUG_PRINTLN(myData.packetInfo);
 }
 
 
@@ -242,14 +244,13 @@ void loop(void) {
         DEBUG_PRINTLNSTR("[Status 0]Received message was not dedicated to this Pump-Node or it was a redundant message");
       }
 
-      DEBUG_FLUSH;
+
     }
     /***************************STATE 1************************/
   } else if (status == PUMPNODE_STATE_1_PUMPACTIVE) { //In state 0 pumpNode send acknowledgment, now we get confirmation from controller
 
     /********Sending acknowlegment,which is the same number as OnOff time request**************/
-
-    delay(WAIT_SEND_INTERVAL);//some time to wait
+    //NO WAIT_SEND_INTERVAL , it should send as fast as possible, the controller take care of regular timing
     sendData(answer);
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 1]Send acknowledgment to the pump request.");
     /*******************************************************************************************/
@@ -292,7 +293,7 @@ void loop(void) {
           DEBUG_PRINTSTR("[PUMPNODE]");
           DEBUG_PRINTLNSTR("[State 2]RECEIVED CONFIRMATION REQUEST FROM CONTROLLER.");
           DEBUG_PRINTSTR("[PUMPNODE]");
-         
+
           status = PUMPNODE_STATE_3_ACKNOWLEDGMENT;
           previousTime = millis();
           waitonPump = 0;
@@ -302,13 +303,13 @@ void loop(void) {
           DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 2]Received message was not dedicated to this Pump-Node");
         }
       }
-      DEBUG_FLUSH;
+      
     }
     /********STATE 2*******/
   } else if (status == PUMPNODE_STATE_3_ACKNOWLEDGMENT) {
     /********Sending acknowlegment,which is the same number as OnOff time request**************/
 
-    delay(WAIT_SEND_INTERVAL);//some time to wait
+      //NO WAIT_SEND_INTERVAL , it should send as fast as possible, the controller take care of regular timing
     sendData(answer);
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 3]Send last acknowledgment to the pump request.");
     /*******************************************************************************************/
@@ -318,7 +319,7 @@ void loop(void) {
     DEBUG_PRINTSTR("OVERALL PUMPTIME :");
     DEBUG_PRINT(pump_worktime / 1000);
     DEBUG_PRINTLNSTR(" seconds.");
-    DEBUG_FLUSH;
+  
     status = PUMPNODE_STATE_0_PUMPREQUEST;
     previousTime = millis();
 
@@ -340,7 +341,7 @@ void loop(void) {
     digitalWrite(pumpPin, LOW);//for security reasons
   }
 
-
+  DEBUG_FLUSH;
 }//LOOP
 
 
@@ -357,7 +358,7 @@ void sendData(uint16_t answer_)
 {
   //switches myData.state in setup()
   myData.pumpTime = answer_;
-  setDATA_Pumpstate(&myData,status);
+  setDATA_Pumpstate(&myData, status);
   //myData.dummy8 = status; //mark that package with current state
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("\t[SENDING]Sending data "); DEBUG_PRINT(answer_);
   DEBUG_PRINTSTR("\t myData.state: ");
@@ -365,7 +366,7 @@ void sendData(uint16_t answer_)
   DEBUG_PRINTSTR("\t pumpState: ");
   DEBUG_PRINTLN(status);
   DEBUG_PRINTSTR("\t myData.packetInfo: ");
-  DEBUG_PRINTLN_D(myData.packetInfo,BIN);
+  DEBUG_PRINTLN_D(myData.packetInfo, BIN);
 
   radio.stopListening();
   while (write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
@@ -399,21 +400,25 @@ uint16_t recvData(void)
   DEBUG_PRINTDIG(myData.ID, DEC);
   DEBUG_PRINTSTR(", Resp-state:");
   DEBUG_PRINTDIG(myResponse.state, BIN);
-  DEBUG_PRINTLNSTR("");
+  DEBUG_PRINTSTR(", PacketInfo:");
+  DEBUG_PRINTLN_D(myResponse.packetInfo, BIN);
 
 
   if (myResponse.ID == myData.ID)
   {
+    uint8_t packetstate = getData_PumpState(&myResponse);
     //incoming message may be a redundant message
     //in that case skip it
-    if (status == getData_PumpState(&myResponse))
+    if (status == packetstate)
     {
       setTime(myResponse.Time);
 
       displayTimeFromUNIX(myResponse.Time);
       return myResponse.pumpTime;
     }
-    DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: REDUNDANT MESSAGE.");
+    DEBUG_PRINTLNSTR("[PUMPNODE][RECEIVING]: REDUNDANT MESSAGE");
+    DEBUG_PRINTSTR("\t RECEIVED PACKET STATE : ");
+    DEBUG_PRINTLN(packetstate);
   }
 
 

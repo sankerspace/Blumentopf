@@ -1792,7 +1792,9 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINTSTR("][State 0:]previousTime=");
       DEBUG_PRINTLN(this->pumpnode_previousTime);
       this->pumpnode_debugCounter=DEBUG_CYCLE;
-
+			#if (DEBUG_PUMP_ROUNDTRIPTIME)
+			this->pumpNode_RoundTripTime=micros();
+			#endif
     }else{
       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
@@ -1817,17 +1819,25 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     }else if(IncomeData==this->OnOff)
     {//RECEIVED INCOME DATA
 
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+			DEBUG_PRINT(pumphandler_ID);
       DEBUG_PRINTSTR("][State 1]-Got Respond from PumpNode ");
       DEBUG_PRINT(this->pumpnode_ID);
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(IncomeData);
-
+			#if (DEBUG_PUMP_ROUNDTRIPTIME)
+			DEBUG_PRINTSTR("\t\t[ROUNDTRIP TIME (State0 - State 1)] ");
+			DEBUG_PRINT_D(micros()-this->pumpNode_RoundTripTime,DEC);
+			DEBUG_PRINTLNSTR(" us.");
+			#endif
       this->pumpnode_status=PUMPNODE_STATE_2_PUMPOFF;
       this->pumpnode_previousTime=millis();//A change of state occured here
       this->pumpnode_started_waiting_at = millis();//in the next state we wait for the pump
       this->pumpnode_debugCounter=DEBUG_CYCLE;
 			//pump time plus half of roundTripDelay
 			this->pumpnode_waitforPump=this->OnOff+(WAIT_RESPONSE_INTERVAL >> 1); //division durch 2
+			  DEBUG_PRINTSTR("\t\t[PumpNode_Handler]Waiting at least ");
+				DEBUG_PRINT_D(this->pumpnode_waitforPump,DEC);
+				DEBUG_PRINTLNSTR(" ms, then pumping should be finished");
     }else{
        if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
@@ -1863,7 +1873,9 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 				 this->pumpnode_previousTime=millis();//A change of state occured here
 	 			 this->pumpnode_started_waiting_at = millis();//in the next state we wait for the pump
 	       this->pumpnode_debugCounter=DEBUG_CYCLE;
-
+				 #if (DEBUG_PUMP_ROUNDTRIPTIME)
+	 			 this->pumpNode_RoundTripTime=micros();
+	 			#endif
 			 }else if((this->pumpnode_dif % 2000)==0)
 			 {
 				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
@@ -1897,6 +1909,11 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINTSTR("][State 3]-Got Respond from PumpNode ");
       DEBUG_PRINT(this->pumpnode_ID);
       DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(IncomeData);
+			#if (DEBUG_PUMP_ROUNDTRIPTIME)
+			DEBUG_PRINTSTR("\t\t[ROUNDTRIP TIME (State2 - State 3)] ");
+			DEBUG_PRINT_D(micros()-this->pumpNode_RoundTripTime,DEC);
+			DEBUG_PRINTLNSTR(" us.");
+			#endif
 			this->pumpnode_waitforPump=0;
       this->pumpnode_status=PUMPNODE_STATE_4_FINISHED;
       this->pumpnode_previousTime=millis();//A change of state occured here
@@ -2000,11 +2017,18 @@ void printFreeRam()
 {
   if (DEBUG_FREE_MEMORY > 0)
   {
-    DEBUG_PRINTSTR("[CONTROLLER][MEMORY]:Between Heap and Stack still ");
+
     #if (HW==HW_ARDUINO)
+		 DEBUG_PRINTSTR("[CONTROLLER][MEMORY]:Between Heap and Stack still ");
       DEBUG_PRINT(freeRam());
+			DEBUG_PRINTLNSTR(" bytes available.");
+		#elif(HW==HW_PHOTON)
+		 DEBUG_PRINTSTR("[CONTROLLER][MEMORY]:Free Memory is  ");
+			uint32_t freemem = System.freeMemory();
+			DEBUG_PRINT(freemem);
+			DEBUG_PRINTLNSTR(" bytes on the PHOTON.");
     #endif
-	DEBUG_PRINTLNSTR(" bytes available.");
+
   }
 }
 
@@ -2022,11 +2046,12 @@ void killID()
 *
 */
 
-int setDATA_Pumpstate(struct Data *packet,uint8_t pumpState){
+int setDATA_Pumpstate(struct Data *packet,int pumpState){
 	if(pumpState<PUMPNODE_STATE_0_PUMPREQUEST || pumpState > PUMPNODE_STATE_3_ACKNOWLEDGMENT)
 		return -1;
-	uint8_t a = (pumpState & 0x1) << DATA_PUMP_STATE_BIT_0 ;
-	uint8_t b = ((pumpState & 0x2) >> 1) << DATA_PUMP_STATE_BIT_1 ;
+  uint8_t value=(uint8_t)pumpState;
+	uint8_t a = (value & 0x1) << DATA_PUMP_STATE_BIT_0 ;
+	uint8_t b = ((value & 0x2) >> 1) << DATA_PUMP_STATE_BIT_1 ;
 
 	packet->packetInfo = a | b;
 
