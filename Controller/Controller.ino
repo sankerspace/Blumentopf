@@ -313,7 +313,8 @@ void loop(void)
     DEBUG_PRINTSTR(" from ID: ");
     DEBUG_PRINT(myData.ID);
     DEBUG_PRINTSTR(" PACKETINFO BITS: ");
-    DEBUG_PRINT_D(myData.packetInfo,BIN);
+    DEBUG_PRINTDIG(myData.packetInfo,BIN);
+      DEBUG_PRINTLNSTR("  . ");
     #if(DEBUG_MESSAGE_HEADER_2 > 0)
 
     DEBUG_PRINTSTR("PumpTime: ");
@@ -455,7 +456,7 @@ void loop(void)
       nTestWatering++;
     }
 
-    if ((nTestWatering % 1000) == 0 )
+    if ((nTestWatering % 10000) == 0 )
     {
 
       if (myNodeList.getNodeType(myNodeList.myNodes[i_].ID) == 1)
@@ -1034,8 +1035,10 @@ void handleRegistration(void)
   }
   else                                    // new node
   {
-    myResponse.interval = 100 * myData.temperature + 20; // this is the session ID (we abused the temperature attribute here.)
-    myResponse.ID = myResponse.interval * myResponse.Time / 100;                       // this is the persistent ID.. Todo : it has to be compared to the node-list, to ensure no ID is used twice
+  // this is the session ID (we abused the temperature attribute here.)
+    myResponse.interval = 100 * myData.temperature + 20;
+// this is the persistent ID.. Todo : it has to be compared to the node-list, to ensure no ID is used twice
+    myResponse.ID = myResponse.interval * myResponse.Time / 100;
     //newNode=true;
   }
 
@@ -1050,6 +1053,7 @@ void handleRegistration(void)
 
   if ((myData.state & (1 << NODE_TYPE)) == 0)
   {
+    setDATA_SensorPacket(&myResponse);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]SensorNode");
     currentNode.state &= ~(1 << NODELIST_NODETYPE);  // SensorNode
     myNodeList.mnLastAddedSensorNode = currentNode.ID;
@@ -1059,7 +1063,9 @@ void handleRegistration(void)
   else
   {
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]PumpNode");
+    setDATA_PumpPacket(&myResponse);
     currentNode.state |= (1 << NODELIST_NODETYPE);  // MotorNode
+    //Bernhard@(2017.April):Gibts hier eine Prüfung ob ein SensorNode auch da ist?
     currentNode.sensorID = myNodeList.mnLastAddedSensorNode;
     DEBUG_PRINTSTR("\t\tUsing current last SensorNode - ID: ");
     DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
