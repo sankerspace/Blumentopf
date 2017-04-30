@@ -284,7 +284,7 @@ int RTC_DS3232::init(uint8_t* state)
 	DEBUG_PRINTSTR("Initializing the RTC DS3232...");
 	DEBUG_PRINTLNSTR("done");
   }
-
+  //Bernhard@: wozu war das nochmal???
 	//*state |= (1 << RTC_RUNNING_BIT);			// set it to valid, otherwise adjust will not react..
 }
 

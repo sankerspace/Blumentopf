@@ -117,7 +117,6 @@ void setup(void)
 
   DEBUG_PRINTLNSTR("\r\n****************");
 
-
   //Initiate Real Time Clock
   #if (HW_RTC > NONE)
 
@@ -134,6 +133,18 @@ void setup(void)
   digitalWrite(HW_RTC_PIN, HIGH);
   //Bernhard@: anschauen ob myrepsonse.state oder mydata.state
   //displayTime(RTC.get());
+  /*
+   tmElements_t tm;
+    tm.Second=00;
+    tm.Minute=25;
+    tm.Hour=15;
+    tm.Wday=1;   // day of week, sunday is day 1
+    tm.Day=30;
+    tm.Month=4;
+    tm.Year=CalendarYrToTm(2017);//y2kYearToTm(2017) ;   // offset from 1970;
+    //setTime(makeTime(tm));
+    myRTC.setTime(makeTime(tm));
+*/
   myRTC.init(&(myResponse.state));
   //  displayTime(myRTC.getTime());
   #endif
@@ -222,12 +233,7 @@ void loop(void)
 {
 
   #if (DEBUG_==1)
-  #if(DEBUG_TIMING_LOOP==1)
-  duration_tmp=micros()-duration_loop;
-  duration_max=((duration_max>duration_tmp) ? duration_max : duration_tmp);
   duration_loop=micros();
-  #endif
-
 
   #if(DEBUG_INFO>0)
   if((millis()-time_)>20000)
@@ -251,7 +257,7 @@ void loop(void)
     #if(DEBUG_TIMING_LOOP==1)
     DEBUG_PRINTSTR("[CONTROLLER][TIMING LOOP]Maximal loop time:");
     DEBUG_PRINT_D(duration_max, DEC);
-    DEBUG_PRINTLNSTR(" ms.");
+    DEBUG_PRINTLNSTR(" microseconds.");
     duration_tmp=micros()-duration_loop;
     duration_max=(duration_max>duration_tmp ? duration_max :duration_tmp);
     duration_loop=micros();
@@ -769,6 +775,14 @@ if ((nTestWatering % DEBUG_CYCLE) == 0) {
   #endif
   printFreeRam();
 }
+#endif
+
+
+
+#if(DEBUG_ > 0 && DEBUG_TIMING_LOOP==1)
+duration_tmp=micros()-duration_loop;
+duration_max=((duration_max>duration_tmp) ? duration_max : duration_tmp);
+
 #endif
 DEBUG_FLUSH;
 }//loop()

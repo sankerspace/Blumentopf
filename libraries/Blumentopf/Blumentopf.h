@@ -123,8 +123,8 @@
 #define RTC_3232	3
 
 // SET THE RTC TYPE HERE:
-#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
-//#define HW_RTC RTC_3232      // kind of RTC. NONE for disable it.
+//#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
+#define HW_RTC RTC_3232      // kind of RTC. NONE for disable it.
 #if (HW_RTC > NONE)
 //  #include <Time.h>		// if it's included here, some functions will miss it
 //  #include "Wire.h"

@@ -103,13 +103,18 @@ void setup() {
   setDATA_RegistrationPacket(&myData);
   //myData.dummy16 |= (1 << DATA_NODE_BIT); //packet is identified as pump packet
   //myData.dummy16 |= (1 << DATA_REGISTRATION_BIT); //packet is identified registration packet
-  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[MYDATA PACKETINFO before REGISTRATION]:"); DEBUG_PRINTLN(myData.packetInfo);
+  DEBUG_PRINTSTR("[PUMPNODE]"); 
+  DEBUG_PRINTSTR("[MYDATA PACKETINFO before REGISTRATION]:"); 
+  DEBUG_PRINTDIG(myData.packetInfo,BIN);
+  DEBUG_PRINTLNSTR("");
   //Print debug info
   //radio.printDetails();
 
   //criticalTime = PUMPNODE_CRITICAL_STATE_OCCUPATION/2; //software watchdog looks for freesing states
   criticalTime = (uint32_t)(PUMPNODE_CRITICAL_STATE_OCCUPATION / 2); //software watchdog looks for freesing states
-  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("CRITICALTIME:"); DEBUG_PRINTLN(criticalTime);
+  DEBUG_PRINTSTR("[PUMPNODE]"); 
+  DEBUG_PRINTSTR("CRITICALTIME:"); 
+  DEBUG_PRINTLN(criticalTime);
 
   registration(true);
 
@@ -117,7 +122,10 @@ void setup() {
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
   setDATA_NO_RegistrationPacket(&myData);
   //myData.dummy16 &= ~(1 << DATA_REGISTRATION_BIT);
-  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[MYDATA PACKETINFO]:"); DEBUG_PRINTLN(myData.packetInfo);
+  DEBUG_PRINTSTR("[PUMPNODE]"); 
+  DEBUG_PRINTSTR("[MYDATA PACKETINFO]:"); 
+  DEBUG_PRINTDIG(myData.packetInfo,BIN);
+  DEBUG_PRINTLNSTR("");
 }
 
 
