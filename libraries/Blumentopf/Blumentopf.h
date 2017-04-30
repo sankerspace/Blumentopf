@@ -83,10 +83,10 @@
   #define DEBUG_PRINT(x)        		Serial.print(x)
   #define DEBUG_PRINT_D(x, d)   		if(d>0){ Serial.print(x);}
   #define DEBUG_PRINTSTR(x)     		Serial.print(F(x))
-  #define DEBUG_PRINTSTR_D(x, d)     	if(d>0){ Serial.print(x);}
+  #define DEBUG_PRINTSTR_D(x, d)     	if(d>0){ Serial.print(x);}//BNernhard@(2017 April): Was soll das hier bedeuten?
   #define DEBUG_PRINTDIG(x, c)  		Serial.print (x, c)
   #define DEBUG_PRINTLN(x)      		Serial.println(x)
-  #define DEBUG_PRINTLN_D(x, d)    		if(d>0){ Serial.println(x);}
+  #define DEBUG_PRINTLN_D(x, d)    	if(d>0){ Serial.println(x);}//??? DEBUG_PRINTDIG(x, c);DEBUG_PRINTLNSTR(""); }//Serial.println(x, c)//	
   #define DEBUG_PRINTLNSTR(x)   		Serial.println(F(x))
   #define DEBUG_PRINTLNSTR_D(x, d)		if(d>0){ Serial.println(F(x));}
   #define DEBUG_FLUSH           		Serial.flush()

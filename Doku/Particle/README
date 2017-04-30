@@ -63,4 +63,5 @@ Pin Configuration:
     autocomplete
     autocomplete-clang
     autocomplete-paths
+    minimap
   

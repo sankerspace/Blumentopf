@@ -400,7 +400,7 @@ uint16_t recvData(void)
   //incoming message must in correspondence to current state,
   //otherwise it is a redundant message and will be skipped
 
-  DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: Resp-interval:");
+  DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: Resp-Data:");
   DEBUG_PRINTDIG(myResponse.pumpTime, DEC);
   DEBUG_PRINTSTR(", Resp-ID:");
   DEBUG_PRINTDIG(myResponse.ID, DEC);
@@ -422,6 +422,7 @@ uint16_t recvData(void)
       setTime(myResponse.Time);
 
       displayTimeFromUNIX(myResponse.Time);
+      displayTimeFromUNIX(now());
       return myResponse.pumpTime;
     }
     DEBUG_PRINTLNSTR("[PUMPNODE][RECEIVING]: REDUNDANT MESSAGE");
@@ -471,10 +472,12 @@ int registerNode(void)
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
 
   // Send the measurement results
-  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:Sending data...");
-  DEBUG_PRINT(myData.state);
-  DEBUG_PRINTSTR(" ID: ");
+  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:SENDING MYDATA \n\t STATE:");
+  DEBUG_PRINTDIG(myData.state,BIN);
+  DEBUG_PRINTSTR("\t ID: ");
   DEBUG_PRINTLN(myData.ID);
+  DEBUG_PRINTSTR("\t SESSION-ID: ");
+  DEBUG_PRINTLN(myData.temperature);
   /*********Sending registration request to the Controller***************************/
 
   radio.stopListening();

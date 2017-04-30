@@ -2049,14 +2049,21 @@ void killID()
 int setDATA_Pumpstate(struct Data *packet,int pumpState){
 	if(pumpState<PUMPNODE_STATE_0_PUMPREQUEST || pumpState > PUMPNODE_STATE_3_ACKNOWLEDGMENT)
 		return -1;
-  uint8_t value=(uint8_t)pumpState;
-	uint8_t a = (value & 0x1) << DATA_PUMP_STATE_BIT_0 ;
-	uint8_t b = ((value & 0x2) >> 1) << DATA_PUMP_STATE_BIT_1 ;
+	uint8_t value=(uint8_t)pumpState;
 
-	packet->packetInfo = a | b;
+	if((value & 0x1) > 0)
+		packet->packetInfo |= (1 << DATA_PUMP_STATE_BIT_0) ;
+	else
+		packet->packetInfo &= ~(1 << DATA_PUMP_STATE_BIT_0) ;
+
+	if((value & 0x2) > 0)
+		packet->packetInfo |= (1 << DATA_PUMP_STATE_BIT_1) ;
+	else
+		packet->packetInfo &= ~(1 << DATA_PUMP_STATE_BIT_1) ;
 
 	return 0;
 }
+
 void setDATA_SensorPacket(struct Data *packet)
 {
 	packet->packetInfo &= ~(1 << DATA_NODE_BIT);
