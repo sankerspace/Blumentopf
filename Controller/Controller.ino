@@ -115,8 +115,26 @@ void setup(void)
   radio.startListening();
   pinMode(LED_BUILTIN, OUTPUT);
 
-  DEBUG_PRINTLNSTR("\r\n****************");
+  DEBUG_PRINTLNSTR("\r\n****************************************************");
+  /*The Photon Board is not able to print messages from Setup() from Startup
+  * Some time must pass to be able to see Serial prints
+   */
+  #if(HW==HW_PHOTON  && DEBUG_==1)
 
+    uint16_t max_cnt=30000;
+    uint32_t _timer_=millis();
+    uint32_t dif=0;
+    while((dif=(millis()-_timer_))<max_cnt)
+    {
+      if((dif>10000) && ((dif % 5000)==0))
+      {
+        DEBUG_PRINTLNSTR("PARTICLE PHOTON DELAYED STARTUP.................");
+        DEBUG_PRINTSTR("SETUP WILL BE CONTINUED IN ");
+        DEBUG_PRINT(max_cnt-dif);
+        DEBUG_PRINTLNSTR(" ms.");
+      }
+    }
+  #endif
   //Initiate Real Time Clock
   #if (HW_RTC > NONE)
 
@@ -158,6 +176,7 @@ void setup(void)
   //mark every response as Controller packet
   setDATA_ControllerPacket(&myResponse);//Helmut@: for Logging
   DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("[MYRESPONSE PACKETINFO]:"); DEBUG_PRINTLN(myResponse.packetInfo);
+
   #if (SD_AVAILABLE == 1)
 
   if (initStorage() == false)
@@ -258,9 +277,6 @@ void loop(void)
     DEBUG_PRINTSTR("[CONTROLLER][TIMING LOOP]Maximal loop time:");
     DEBUG_PRINT_D(duration_max, DEC);
     DEBUG_PRINTLNSTR(" microseconds.");
-    duration_tmp=micros()-duration_loop;
-    duration_max=(duration_max>duration_tmp ? duration_max :duration_tmp);
-    duration_loop=micros();
     #endif
   }//if((millis()-time_)>20000)
   #endif//#if(DEBUG_INFO>0)
@@ -359,8 +375,7 @@ void loop(void)
       #endif
       handleRegistration();                 // answer the registration request. There is no difference between sensor nodes and motor nodes.
       setDATA_RegistrationPacket(&myResponse);//Helmut@: for Logging
-      //myResponse.dummy16 |= (1 << DATA_REGISTRATION_BIT);
-
+      //myResponse.dummy16 |= (1 << DATA_REGISTRATION_BIT)
     }
     else                                    // This is a data message
     {
@@ -399,7 +414,7 @@ void loop(void)
 
       // Send back response, controller real time and the next sleep interval:
       #if(DEBUG_MESSAGE>0)
-      DEBUG_PRINTSTR("\tSending back response - interval: ");
+      DEBUG_PRINTSTR("[CONTROLLER][SENDING RESPONSE] - interval: ");
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", ID:");
       DEBUG_PRINT(myResponse.ID);
@@ -409,8 +424,8 @@ void loop(void)
       //DEBUG_PRINTLN(String(getData_PumpState(&myResponse), DEC));
       DEBUG_PRINTSTR(", PACKET-INFO:");
       DEBUG_PRINTLN(String(myResponse.packetInfo, BIN));
-
       #endif
+
       delay(WAIT_SEND_INTERVAL);//ther is some time to, to ensure that node is prepared to receive messages     // 20170312 - Berhnard: Can we find another way for this as this solution slows down the communication and is suspected to leading to timeouts.
       radio.stopListening();
       while(write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
@@ -1086,7 +1101,8 @@ void handleRegistration(void)
   }
   DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]Storing node..");
 
-  if (newNode) {
+  if (newNode)
+  {
 
     //Bit NODELIST_NODEONLINE in currentNode.state should stay 0 in the EEPROM forever
     nRet = myNodeList.addNode(currentNode);

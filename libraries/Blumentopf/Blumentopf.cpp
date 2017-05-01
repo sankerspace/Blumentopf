@@ -1740,6 +1740,7 @@ bool PumpNode_Handler::getResponseAvailability(void)
     this->pumpnode_debugCounter=DEBUG_CYCLE;
 		this->pumpnode_reponse_available=false;
 		this->pumpnode_status_packet=this->pumpnode_status;
+		this->pumpnode_state_error_counter++;
  }
  /*only for debug purposes*/
  void PumpNode_Handler::setPumpHandlerID(uint16_t ID_)
@@ -1947,7 +1948,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   if(this->pumpnode_status == PUMPNODE_STATE_ERROR){
       //Nothing to do
       //PUMP CYCLE WAS NOT SUCCESSFULL
-      pumpnode_state_error_counter++;
+
 			this->pumpnode_status = PUMPNODE_STATE_0_PUMPREQUEST;
 			this->pumpnode_previousTime=millis();
 			DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
@@ -1987,11 +1988,14 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     this->pumpnode_status=PUMPNODE_STATE_ERROR;
     this->pumpnode_waitforPump=0;
 
-    DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-    DEBUG_PRINTSTR("][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!");
-    DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-    DEBUG_PRINTSTR("][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!");
-    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+		DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTLNSTR("][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!");
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+		DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTLNSTR("][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!");
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+		DEBUG_PRINT(pumphandler_ID);
     DEBUG_PRINTSTR("][WATCHDOG]Dif=");
     DEBUG_PRINT(dif);
     DEBUG_PRINTSTR(" ms, previousTime=");

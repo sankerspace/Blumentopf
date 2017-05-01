@@ -73,7 +73,7 @@
 
 // For debugging the pump node
 
-#define TEST_PUMP 1 //Testcase every 30 seconds turn on first pump in the list
+#define TEST_PUMP 1 //Testcase every 10 seconds turn on first pump in the list
 //#define TEST_PUMPSCHEDULE 1
 //#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
 
@@ -86,7 +86,7 @@
   #define DEBUG_PRINTSTR_D(x, d)     	if(d>0){ Serial.print(x);}//BNernhard@(2017 April): Was soll das hier bedeuten?
   #define DEBUG_PRINTDIG(x, c)  		Serial.print (x, c)
   #define DEBUG_PRINTLN(x)      		Serial.println(x)
-  #define DEBUG_PRINTLN_D(x, d)    	if(d>0){ Serial.println(x);}//??? DEBUG_PRINTDIG(x, c);DEBUG_PRINTLNSTR(""); }//Serial.println(x, c)//	
+  #define DEBUG_PRINTLN_D(x, d)    	if(d>0){ Serial.println(x);}//??? DEBUG_PRINTDIG(x, c);DEBUG_PRINTLNSTR(""); }//Serial.println(x, c)//
   #define DEBUG_PRINTLNSTR(x)   		Serial.println(F(x))
   #define DEBUG_PRINTLNSTR_D(x, d)		if(d>0){ Serial.println(F(x));}
   #define DEBUG_FLUSH           		Serial.flush()
@@ -123,8 +123,8 @@
 #define RTC_3232	3
 
 // SET THE RTC TYPE HERE:
-//#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
-#define HW_RTC RTC_3232      // kind of RTC. NONE for disable it.
+#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
+//#define HW_RTC RTC_3232      // kind of RTC. NONE for disable it.
 #if (HW_RTC > NONE)
 //  #include <Time.h>		// if it's included here, some functions will miss it
 //  #include "Wire.h"
@@ -297,12 +297,28 @@ DO NOT CHANGE:
 /***************************************************************************************/
 /******************************  T I M I N G ******************************************/
 /**************************************************************************************/
-#define WAIT_SEND_INTERVAL           200
+//PUMPSCHDULE TIMINGS
+/*
+* if progess in a state machine fails, what is the maximal attempt to restart
+* that state machine (afterwards node is offline)
+*/
+#define MAX_RETRIES                     3
+
+/*
+*If CONTROLLER sends  request to a node, it should wait at least WAIT_SEND_INTERVAL
+* to receive a acknowledgmentfrom that node.
+* Send and receive should be managable in that time, because there is NO
+* WAIT_SEND_INTERVAL on the node side(send a response as fast as possible)
+* Attention: Also depends on the number of retries, because if some
+* requests didnt passed to the node, waiting period should ba factor longer
+*/
+
+#define WAIT_SEND_INTERVAL           500//300 * MAX_RETRIES  // depend also on retries
 /*
 * How long we have to wait to receive an acknowledgment on a registration request
 * REGISTRATION_TIMEOUT_INTERVAL=Protocol_Usage + Round trip delay
 */
-#define REGISTRATION_TIMEOUT_INTERVAL	1000//5000  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
+#define REGISTRATION_TIMEOUT_INTERVAL	5000  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
 /*
 * WAIT_RESPONSE_INTERVAL=Protocol_Usage + Round trip delay
 *     Its the time from sending a message to another node
@@ -315,12 +331,7 @@ DO NOT CHANGE:
 
 // measurement policy
 #define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s]
-//PUMPSCHDULE TIMINGS
-/*
-* if progess in a state machine fails, what is the maximal attempt to restart
-* that state machine (afterwards node is offline)
-*/
-#define MAX_RETRIES                     3
+
 /*
 * What is the maximum time that a pump state machine is allowed to remain
 * Controller PumpHandler max state time  = PUMPNODE_CRITICAL_STATE_OCCUPATION

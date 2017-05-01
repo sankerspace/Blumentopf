@@ -103,17 +103,17 @@ void setup() {
   setDATA_RegistrationPacket(&myData);
   //myData.dummy16 |= (1 << DATA_NODE_BIT); //packet is identified as pump packet
   //myData.dummy16 |= (1 << DATA_REGISTRATION_BIT); //packet is identified registration packet
-  DEBUG_PRINTSTR("[PUMPNODE]"); 
-  DEBUG_PRINTSTR("[MYDATA PACKETINFO before REGISTRATION]:"); 
-  DEBUG_PRINTDIG(myData.packetInfo,BIN);
+  DEBUG_PRINTSTR("[PUMPNODE]");
+  DEBUG_PRINTSTR("[MYDATA PACKETINFO before REGISTRATION]:");
+  DEBUG_PRINTDIG(myData.packetInfo, BIN);
   DEBUG_PRINTLNSTR("");
   //Print debug info
   //radio.printDetails();
 
   //criticalTime = PUMPNODE_CRITICAL_STATE_OCCUPATION/2; //software watchdog looks for freesing states
   criticalTime = (uint32_t)(PUMPNODE_CRITICAL_STATE_OCCUPATION / 2); //software watchdog looks for freesing states
-  DEBUG_PRINTSTR("[PUMPNODE]"); 
-  DEBUG_PRINTSTR("CRITICALTIME:"); 
+  DEBUG_PRINTSTR("[PUMPNODE]");
+  DEBUG_PRINTSTR("CRITICALTIME:");
   DEBUG_PRINTLN(criticalTime);
 
   registration(true);
@@ -122,9 +122,9 @@ void setup() {
   myData.state |= (1 << MSG_TYPE_BIT);    // set message to data (to ensure in case it got overwritten)
   setDATA_NO_RegistrationPacket(&myData);
   //myData.dummy16 &= ~(1 << DATA_REGISTRATION_BIT);
-  DEBUG_PRINTSTR("[PUMPNODE]"); 
-  DEBUG_PRINTSTR("[MYDATA PACKETINFO]:"); 
-  DEBUG_PRINTDIG(myData.packetInfo,BIN);
+  DEBUG_PRINTSTR("[PUMPNODE]");
+  DEBUG_PRINTSTR("[MYDATA PACKETINFO]:");
+  DEBUG_PRINTDIG(myData.packetInfo, BIN);
   DEBUG_PRINTLNSTR("");
 }
 
@@ -311,13 +311,13 @@ void loop(void) {
           DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 2]Received message was not dedicated to this Pump-Node");
         }
       }
-      
+
     }
     /********STATE 2*******/
   } else if (status == PUMPNODE_STATE_3_ACKNOWLEDGMENT) {
     /********Sending acknowlegment,which is the same number as OnOff time request**************/
 
-      //NO WAIT_SEND_INTERVAL , it should send as fast as possible, the controller take care of regular timing
+    //NO WAIT_SEND_INTERVAL , it should send as fast as possible, the controller take care of regular timing
     sendData(answer);
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 3]Send last acknowledgment to the pump request.");
     /*******************************************************************************************/
@@ -327,7 +327,7 @@ void loop(void) {
     DEBUG_PRINTSTR("OVERALL PUMPTIME :");
     DEBUG_PRINT(pump_worktime / 1000);
     DEBUG_PRINTLNSTR(" seconds.");
-  
+
     status = PUMPNODE_STATE_0_PUMPREQUEST;
     previousTime = millis();
 
@@ -400,7 +400,7 @@ uint16_t recvData(void)
   //incoming message must in correspondence to current state,
   //otherwise it is a redundant message and will be skipped
 
-  DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: Resp-Data:");
+  DEBUG_PRINTSTR("[PUMPNODE][RECEIVING]: Resp-interval:");
   DEBUG_PRINTDIG(myResponse.pumpTime, DEC);
   DEBUG_PRINTSTR(", Resp-ID:");
   DEBUG_PRINTDIG(myResponse.ID, DEC);
@@ -422,7 +422,6 @@ uint16_t recvData(void)
       setTime(myResponse.Time);
 
       displayTimeFromUNIX(myResponse.Time);
-      displayTimeFromUNIX(now());
       return myResponse.pumpTime;
     }
     DEBUG_PRINTLNSTR("[PUMPNODE][RECEIVING]: REDUNDANT MESSAGE");
@@ -434,8 +433,9 @@ uint16_t recvData(void)
 
   return 0;
 }
-
-
+/*******************************************************************************/
+/****************R E G I S T R A T I O N***************************************/
+/*******************************************************************************/
 int registerNode(void)
 {
 
@@ -472,12 +472,10 @@ int registerNode(void)
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
 
   // Send the measurement results
-  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:SENDING MYDATA \n\t STATE:");
-  DEBUG_PRINTDIG(myData.state,BIN);
-  DEBUG_PRINTSTR("\t ID: ");
+  DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:Sending data...");
+  DEBUG_PRINT(myData.state);
+  DEBUG_PRINTSTR(" ID: ");
   DEBUG_PRINTLN(myData.ID);
-  DEBUG_PRINTSTR("\t SESSION-ID: ");
-  DEBUG_PRINTLN(myData.temperature);
   /*********Sending registration request to the Controller***************************/
 
   radio.stopListening();
@@ -521,61 +519,65 @@ int registerNode(void)
   DEBUG_PRINTLNSTR("");
   if ((myResponse.state & (1 << ID_REGISTRATION_ERROR)) == false)
   {
-    if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
-    {
-
-      DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("  [registerNode()]:Got response!");
-      DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("  [registerNode()]Received Session ID: ");
-      DEBUG_PRINT((int)(myResponse.interval / 100));
-
-      DEBUG_PRINTSTR(",  expected: ");
-      DEBUG_PRINTLN(myData.temperature);
-
-      /* is the response for us? (yes, we stored the session ID in the temperature to keep the message small
-          and reception easy...it could be changed to a struct in a "struct payload"
-         which can be casted in the receiver depending on the status flags)
-      */
-      if (((int)(myResponse.interval / 100)) == (int) (myData.temperature))
+    if (isControllerPacket(&myResponse) && isRegistrationPacket(&myResponse)) {
+      if (myData.state & (1 << NEW_NODE_BIT))       // This is a new node!
       {
-        myData.ID = myResponse.ID;
-        myData.interval = (myResponse.interval % 100);
-        myEEPROMData.ID = myResponse.ID;
-        EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);  // writing the data (ID) back to EEPROM...
 
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("  [registerNode()]...ID matches");
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("  [registerNode()]Persistent ID: ");
-        DEBUG_PRINT(myResponse.ID);
-        DEBUG_PRINTSTR(", Interval: ");
-        DEBUG_PRINTLN(myData.interval);
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("  [registerNode()]Stored Persistent ID in EEPROM...");
-      }
-      else                                                  // not our response
+        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("  [registerNode()]:Got response!");
+        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("  [registerNode()]Received Session ID: ");
+        DEBUG_PRINT((int)(myResponse.interval / 100));
+
+        DEBUG_PRINTSTR(",  expected: ");
+        DEBUG_PRINTLN(myData.temperature);
+
+        /* is the response for us? (yes, we stored the session ID in the temperature to keep the message small
+            and reception easy...it could be changed to a struct in a "struct payload"
+           which can be casted in the receiver depending on the status flags)
+        */
+        if (((int)(myResponse.interval / 100)) == (int) (myData.temperature))
+        {
+          myData.ID = myResponse.ID;
+          myData.interval = (myResponse.interval % 100);
+          myEEPROMData.ID = myResponse.ID;
+          EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);  // writing the data (ID) back to EEPROM...
+
+          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("  [registerNode()]...ID matches");
+          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("  [registerNode()]Persistent ID: ");
+          DEBUG_PRINT(myResponse.ID);
+          DEBUG_PRINTSTR(", Interval: ");
+          DEBUG_PRINTLN(myData.interval);
+          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("  [registerNode()]Stored Persistent ID in EEPROM...");
+        }
+        else                                                  // not our response
+        {
+          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("  [registerNode()]ID missmatch! Ignore response...");
+          return 11;
+        }
+
+
+      }//if (myData.state & (1 << NEW_NODE_BIT))
+      else                                              // this is a known node
       {
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("  [registerNode()]ID missmatch! Ignore response...");
-        return 11;
-      }
+        if (myResponse.ID == myData.ID)                     // is the response for us?
+        {
+          myData.interval = myResponse.interval;
 
-
-    }//if (myData.state & (1 << NEW_NODE_BIT))
-    else                                              // this is a known node
-    {
-      if (myResponse.ID == myData.ID)                     // is the response for us?
-      {
-        myData.interval = myResponse.interval;
-
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
-        DEBUG_PRINT(myResponse.ID);
-        DEBUG_PRINTSTR("...ID matches, registration successful! Interval: ");
-        DEBUG_PRINTLN(myData.interval);
+          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
+          DEBUG_PRINT(myResponse.ID);
+          DEBUG_PRINTSTR("...ID matches, registration successful! Interval: ");
+          DEBUG_PRINTLN(myData.interval);
+        }
+        else                                                  // not our response
+        {
+          DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
+          DEBUG_PRINT(myResponse.ID);
+          DEBUG_PRINTLNSTR("  ...ID missmatch! Ignore response...");
+          return 12;
+        }
       }
-      else                                                  // not our response
-      {
-        DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("  [registerNode()]:Got response for ID: ");
-        DEBUG_PRINT(myResponse.ID);
-        DEBUG_PRINTLNSTR("  ...ID missmatch! Ignore response...");
-        return 12;
+    }else{
+        return 5;
       }
-    }
   } else
   {
     return 10;
@@ -585,7 +587,7 @@ int registerNode(void)
   return 0;   // all okay
 }//registerNode()
 
-
+/*REGISTRATION PROCEDURE**********************************************************/
 void registration(bool refreshID)
 {
   struct EEPROM_Data myEEPROMData;
