@@ -1,0 +1,20 @@
+Das Pinout ist ein Kompromiss zwischen dem was der Ezio auf seinen Platinen hat und dem was
+wir in dem Programm verwenden. Außerdem können dann die DS_1302 und DS_3231/3232 RTCs leicht
+ausgetauscht werden.
+
+/*
+**** pinout
+***           |    2    |    3    |    4    |    5    |    6    |    7    |    8    |  9-13   | 
+===============================================================================================
+* Controller  | DS_1302 | DS_1302 | DS_1302 |         |         | Button  | RTC_PWR |  RF24   |
+* SensorNode  | DS_1302 | DS_1302 | DS_1302 |  DHT11  |         | Button  |SENS_PWR |  RF24   |
+* PumpNode    | DS_1302 | DS_1302 | DS_1302 |  Pump1  |  Pump2  | Button  |         |  RF24   |
+* Particle	  | ??
+
+*             |    A0   |    A1   |    A2   |    A3   |    A4   |    A5   |    A6   |    A7   |
+===============================================================================================
+* Controller  |         |         |         |         | DS_3231 | DS_3231 |  -----  |  -----  |
+* SensorNode  | Battery |  Light  |Moisture1|Moisture2| DS_3231 | DS_3231 |  -----  |  -----  |
+* PumpNode    |         |         |         |         | DS_3231 | DS_3231 |  -----  |  -----  |
+*/
+
