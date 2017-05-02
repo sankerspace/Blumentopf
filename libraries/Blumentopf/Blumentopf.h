@@ -51,12 +51,12 @@
 /****************************** D E B U G **********************************************/
 /**************************************************************************************/
 // General debug messages:
-#define DEBUG_ 1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
+#define DEBUG_ 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
 #define DEBUG_MESSAGE_HEADER 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE_HEADER_2 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE 1
-#define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
+#define DEBUG_DATA_CONTENT 0//1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
 #define DEBUG_SENSOR_SCHEDULING 0		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
 #define DEBUG_LIST_SENSOR_SCHEDULING 0	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
 #define DEBUG_FREE_MEMORY 0			// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
@@ -808,9 +808,9 @@ public:
 private:
     #if (DEBUG_PUMP>0)
     uint32_t pumpnode_HandlerGenerationTime;
+    #endif
     #if (DEBUG_PUMP_ROUNDTRIPTIME)
     uint32_t pumpNode_RoundTripTime;
-    #endif
     #endif
     uint32_t pumpnode_started_waiting_at;//
     uint32_t pumpnode_previousTime;      //needed by the software watchdog

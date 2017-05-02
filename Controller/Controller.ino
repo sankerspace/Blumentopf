@@ -38,10 +38,11 @@ RTC_DS3232 myRTC;
 uint32_t time_;
 #endif
 uint16_t nDummyCount=0;
-#if(DEBUG_TIMING_LOOP == 1)
+#if(DEBUG_TIMING_LOOP > 0)
 long unsigned duration_loop=0;
 long unsigned duration_max=0;
 long unsigned duration_tmp=0;
+long unsigned duration_sending=0;
 #endif
 
 #endif
@@ -102,6 +103,25 @@ void setup(void)
 {
   DEBUG_SERIAL_INIT_WAIT;
 
+  #if(HW==HW_PHOTON  && DEBUG_==1)
+
+  uint16_t max_cnt=30000;
+  uint32_t _timer_=millis();
+  uint32_t dif=0;
+  while((dif=(millis()-_timer_))<max_cnt)
+  {
+    if((dif>10000) && ((dif % 5000)==0))
+    {
+      DEBUG_PRINTLNSTR("PARTICLE PHOTON DELAYED STARTUP.................");
+      DEBUG_PRINTSTR("SETUP WILL BE CONTINUED IN ");
+      DEBUG_PRINT(max_cnt-dif);
+      DEBUG_PRINTLNSTR(" ms.");
+    }
+  }
+  #endif
+  //Initiate Real Time Clock
+
+
   //radio.begin();
   //Marko@ : want to ensure that all three node types use the same settings
   radio.begin(RADIO_AUTO_ACK,RADIO_DELAY,RADIO_RETRIES,RADIO_SPEED,RADIO_CRC,RADIO_CHANNEL,RADIO_PA_LEVEL);
@@ -118,24 +138,14 @@ void setup(void)
   DEBUG_PRINTLNSTR("\r\n****************************************************");
   /*The Photon Board is not able to print messages from Setup() from Startup
   * Some time must pass to be able to see Serial prints
-   */
-  #if(HW==HW_PHOTON  && DEBUG_==1)
+  */
 
-    uint16_t max_cnt=30000;
-    uint32_t _timer_=millis();
-    uint32_t dif=0;
-    while((dif=(millis()-_timer_))<max_cnt)
-    {
-      if((dif>10000) && ((dif % 5000)==0))
-      {
-        DEBUG_PRINTLNSTR("PARTICLE PHOTON DELAYED STARTUP.................");
-        DEBUG_PRINTSTR("SETUP WILL BE CONTINUED IN ");
-        DEBUG_PRINT(max_cnt-dif);
-        DEBUG_PRINTLNSTR(" ms.");
-      }
-    }
-  #endif
-  //Initiate Real Time Clock
+
+
+
+
+
+
   #if (HW_RTC > NONE)
 
   #if (HW_RTC == RTC_1302)
@@ -152,17 +162,17 @@ void setup(void)
   //Bernhard@: anschauen ob myrepsonse.state oder mydata.state
   //displayTime(RTC.get());
   /*
-   tmElements_t tm;
-    tm.Second=00;
-    tm.Minute=25;
-    tm.Hour=15;
-    tm.Wday=1;   // day of week, sunday is day 1
-    tm.Day=30;
-    tm.Month=4;
-    tm.Year=CalendarYrToTm(2017);//y2kYearToTm(2017) ;   // offset from 1970;
-    //setTime(makeTime(tm));
-    myRTC.setTime(makeTime(tm));
-*/
+  tmElements_t tm;
+  tm.Second=00;
+  tm.Minute=25;
+  tm.Hour=15;
+  tm.Wday=1;   // day of week, sunday is day 1
+  tm.Day=30;
+  tm.Month=4;
+  tm.Year=CalendarYrToTm(2017);//y2kYearToTm(2017) ;   // offset from 1970;
+  //setTime(makeTime(tm));
+  myRTC.setTime(makeTime(tm));
+  */
   myRTC.init(&(myResponse.state));
   //  displayTime(myRTC.getTime());
   #endif
@@ -191,7 +201,7 @@ void setup(void)
   #endif
 
 
- DEBUG_FLUSH;
+  DEBUG_FLUSH;
 
 }//setup
 
@@ -336,7 +346,7 @@ void loop(void)
     DEBUG_PRINT(myData.ID);
     DEBUG_PRINTSTR(" PACKETINFO BITS: ");
     DEBUG_PRINTDIG(myData.packetInfo,BIN);
-      DEBUG_PRINTLNSTR("  . ");
+    DEBUG_PRINTLNSTR("  . ");
     #if(DEBUG_MESSAGE_HEADER_2 > 0)
 
     DEBUG_PRINTSTR("PumpTime: ");
@@ -375,12 +385,12 @@ void loop(void)
       #endif
       handleRegistration();                 // answer the registration request. There is no difference between sensor nodes and motor nodes.
       setDATA_RegistrationPacket(&myResponse);//Helmut@: for Logging
-      //myResponse.dummy16 |= (1 << DATA_REGISTRATION_BIT)
+
     }
     else                                    // This is a data message
     {
       setDATA_NO_RegistrationPacket(&myResponse);//Helmut@: for Logging
-      //myResponse.dummy16  &= ~(1 << DATA_REGISTRATION_BIT);//normal Data packet
+
       myResponse.Time = getCurrentTime();
       if ((myData.state & (1 << NODE_TYPE)) == false) // it is a sensor node
       {
@@ -427,6 +437,9 @@ void loop(void)
       #endif
 
       delay(WAIT_SEND_INTERVAL);//ther is some time to, to ensure that node is prepared to receive messages     // 20170312 - Berhnard: Can we find another way for this as this solution slows down the communication and is suspected to leading to timeouts.
+      #if (DEBUG_TIMING_LOOP>0)
+      duration_sending=micros();
+      #endif
       radio.stopListening();
       while(write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
       {
@@ -434,7 +447,13 @@ void loop(void)
         write_cnt--;
       }
       radio.startListening();
-
+      #if (DEBUG_TIMING_LOOP>0)
+      DEBUG_PRINTSTR("[TIMING][to PumpNode ID: ");
+      DEBUG_PRINT(myResponse.ID);
+      DEBUG_PRINTSTR(" ][Duration - before stopListening - after startList.]: ");
+      DEBUG_PRINT(micros() - duration_sending);
+      DEBUG_PRINTLNSTR(" microseconds.");
+      #endif
     }
     #if(DEBUG_MESSAGE>0)
     else{
@@ -951,20 +970,32 @@ void handlePumpCommunications(PumpNode_Handler *handler)
   myResponse.state &= ~(1 << ID_INEXISTENT);
   write_cnt=RADIO_RESEND_NUMB;
   delay(WAIT_SEND_INTERVAL);
-  radio.stopListening();
   DEBUG_PRINTSTR("\t[CONTROLLER][HandlePumpCommunication()] Sending Pump Data to pump Node:[");
   DEBUG_PRINT(write_cnt);
   DEBUG_PRINTLNSTR(" times]");
   DEBUG_PRINTSTR("\t ID:");DEBUG_PRINTLN(myResponse.ID);
   DEBUG_PRINTSTR("\t PumpTime:");DEBUG_PRINTLN(myResponse.pumpTime);
   DEBUG_PRINTSTR("\t PumpState snapshot:");DEBUG_PRINTLN(getData_PumpState(&myResponse));
-  DEBUG_PRINTSTR("\t PacketInfo:");DEBUG_PRINTLN_D(myResponse.packetInfo, BIN);
+  DEBUG_PRINTSTR("\t PacketInfo:");DEBUG_PRINTDIG(myResponse.packetInfo, BIN);
+  DEBUG_PRINTSTR("\n\t TIME:");DEBUG_PRINTLN(myResponse.Time);
+
+  #if (DEBUG_TIMING_LOOP>0)
+  duration_sending=micros();
+  #endif
+  radio.stopListening();
   while(write_cnt > 0) //handleDataMessage and handleMotorMessage could manipulate write_cnt
   {
     radio.write(&myResponse, sizeof(myResponse));
     write_cnt--;
   }
   radio.startListening();
+  #if (DEBUG_TIMING_LOOP>0)
+  DEBUG_PRINTSTR("[TIMING][to PumpNode ID: ");
+  DEBUG_PRINT(myResponse.ID);
+  DEBUG_PRINTSTR(" ][Duration - before stopListening - after startList.]: ");
+  DEBUG_PRINT(micros() - duration_sending);
+  DEBUG_PRINTLNSTR(" microseconds.");
+  #endif
   write_cnt=1;
 
 
@@ -1064,9 +1095,9 @@ void handleRegistration(void)
   }
   else                                    // new node
   {
-  // this is the session ID (we abused the temperature attribute here.)
+    // this is the session ID (we abused the temperature attribute here.)
     myResponse.interval = 100 * myData.temperature + 20;
-// this is the persistent ID.. Todo : it has to be compared to the node-list, to ensure no ID is used twice
+    // this is the persistent ID.. Todo : it has to be compared to the node-list, to ensure no ID is used twice
     myResponse.ID = myResponse.interval * myResponse.Time / 100;
     //newNode=true;
   }
@@ -1092,6 +1123,8 @@ void handleRegistration(void)
   else
   {
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]PumpNode");
+    DEBUG_PRINTSTR("\t How many registration attempts from that node: ");
+    DEBUG_PRINTLN(myData.VCC);
     setDATA_PumpPacket(&myResponse);
     currentNode.state |= (1 << NODELIST_NODETYPE);  // MotorNode
     //Bernhard@(2017.April):Gibts hier eine Prüfung ob ein SensorNode auch da ist?

@@ -33,6 +33,9 @@ bool bounce = false;
 
 uint32_t started_waiting_at = 0, previousTime = 0, dif = 0, criticalTime = 0, waitonPump = 0, OnOff = 0, answer = 0;;
 uint32_t pump_worktime = 0;
+#if (DEBUG_TIMING_LOOP>0)
+uint32_t timing_ = 0;
+#endif
 const uint8_t pumpPin = 3;
 const uint8_t buttonPin = 4;
 uint8_t write_cnt = RADIO_RESEND_NUMB;
@@ -235,6 +238,9 @@ void loop(void) {
   if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time to turn on the pump
 
     if (radio.available() > 0) {
+#if (DEBUG_TIMING_LOOP>0)
+      timing_ = micros();
+#endif
       DEBUG_PRINTLNSTR("------------------------------------------------------");
       DEBUG_PRINTLNSTR("Available radio ");
       /********Receiving next pumping time period**************/
@@ -259,7 +265,23 @@ void loop(void) {
 
     /********Sending acknowlegment,which is the same number as OnOff time request**************/
     //NO WAIT_SEND_INTERVAL , it should send as fast as possible, the controller take care of regular timing
+#if (DEBUG_TIMING_LOOP>0)
+    DEBUG_PRINTSTR("[TIMING][PumpNode ID: ");
+    DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR(" ][State 0->1 - from recv - before send]: ");
+    DEBUG_PRINT(micros() - timing_);
+    DEBUG_PRINTLNSTR(" microseconds.");
+
+#endif
     sendData(answer);
+#if (DEBUG_TIMING_LOOP>0)
+    DEBUG_PRINTSTR("[TIMING][PumpNode ID: ");
+    DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR(" ][State 0->1 - from recv - until send]: ");
+    DEBUG_PRINT(micros() - timing_);
+    DEBUG_PRINTLNSTR(" microseconds.");
+
+#endif
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 1]Send acknowledgment to the pump request.");
     /*******************************************************************************************/
 
@@ -291,6 +313,9 @@ void loop(void) {
         DEBUG_PRINTLNSTR("]");
       } else if (radio.available())
       {
+#if (DEBUG_TIMING_LOOP>0)
+        timing_ = micros();
+#endif
         /********Receiving ACKNOWLEGMENT**************/
         uint16_t recv = recvData();
         /*******************************************/
@@ -318,7 +343,23 @@ void loop(void) {
     /********Sending acknowlegment,which is the same number as OnOff time request**************/
 
     //NO WAIT_SEND_INTERVAL , it should send as fast as possible, the controller take care of regular timing
+#if (DEBUG_TIMING_LOOP>0)
+    DEBUG_PRINTSTR("[TIMING][PumpNode ID: ");
+    DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR(" ][State 2->3 - from recv - BEFORE send]: ");
+    DEBUG_PRINT(micros() - timing_);
+    DEBUG_PRINTLNSTR(" microseconds.");
+
+#endif
     sendData(answer);
+#if (DEBUG_TIMING_LOOP>0)
+    DEBUG_PRINTSTR("[TIMING][PumpNode ID: ");
+    DEBUG_PRINT(myData.ID);
+    DEBUG_PRINTSTR(" ][State 2->3 - from recv - until send]: ");
+    DEBUG_PRINT(micros() - timing_);
+    DEBUG_PRINTLNSTR(" microseconds.");
+
+#endif
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 3]Send last acknowledgment to the pump request.");
     /*******************************************************************************************/
     DEBUG_PRINTLNSTR("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -409,7 +450,8 @@ uint16_t recvData(void)
   DEBUG_PRINTSTR(", Resp-state:");
   DEBUG_PRINTDIG(myResponse.state, BIN);
   DEBUG_PRINTSTR(", PacketInfo:");
-  DEBUG_PRINTLN_D(myResponse.packetInfo, BIN);
+  DEBUG_PRINTDIG(myResponse.packetInfo, BIN);
+  DEBUG_PRINTLNSTR(" .");
 
 
   if (myResponse.ID == myData.ID)
@@ -443,6 +485,7 @@ int registerNode(void)
   long numb = 0;
 
   myData.state |= (1 << NODE_TYPE);       // set node type to pump node
+  myData.VCC++; //for debug purposes, how many Debug attempts 
   // A NODE WITH IDE=0 IS VALID????
   if ((myData.ID < 0xffff) && (myData.ID > 0))                        // this is a known node - 20170110... this is the new check..
   {
@@ -475,7 +518,9 @@ int registerNode(void)
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTSTR("[registerNode()]:Sending data...");
   DEBUG_PRINT(myData.state);
   DEBUG_PRINTSTR(" ID: ");
-  DEBUG_PRINTLN(myData.ID);
+  DEBUG_PRINT(myData.ID);
+  DEBUG_PRINTSTR(" Registration-Request: ");
+  DEBUG_PRINTLN(myData.VCC);
   /*********Sending registration request to the Controller***************************/
 
   radio.stopListening();
@@ -575,9 +620,9 @@ int registerNode(void)
           return 12;
         }
       }
-    }else{
-        return 5;
-      }
+    } else {
+      return 5;
+    }
   } else
   {
     return 10;
