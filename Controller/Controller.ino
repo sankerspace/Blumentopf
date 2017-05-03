@@ -1,9 +1,9 @@
 /*
-Project: NESE_Blumentopf
-File:    Controller.ino
-Authors: Bernhard Fritz  (0828317@student.tuwien.ac.at)
-Marko Stanisic  (0325230@student.tuwien.ac.at)
-Helmut Bergmann (0325535@student.tuwien.ac.at)
+Project:  NESE_Blumentopf
+File:     Controller.ino
+Authors:  Bernhard Fritz  (0828317@student.tuwien.ac.at)
+          Marko Stanisic  (0325230@student.tuwien.ac.at)
+          Helmut Bergmann (0325535@student.tuwien.ac.at)
 The copyright for the software is by the mentioned authors.
 
 The purpose of the module is to coordinate the network of
@@ -151,14 +151,18 @@ void setup(void)
   #if (HW_RTC == RTC_1302)
   myRTC.init(&myData.state);
   #elif (HW_RTC == RTC_3231)
-  #if(HW == HW_PHOTON)
-  pinMode(D4, OUTPUT);
-  digitalWrite(D4, HIGH);
-  #endif
+//  #if(HW == HW_PHOTON)
+//  pinMode(D4, OUTPUT);
+//  digitalWrite(D4, HIGH);
+//  #endif
+  pinMode(HW_RTC_PIN, OUTPUT);
+  digitalWrite(HW_RTC_PIN, HIGH);
+  delay(20);
   myRTC.init(&myData.state);
   #elif (HW_RTC == RTC_3232)
   pinMode(HW_RTC_PIN, OUTPUT);
   digitalWrite(HW_RTC_PIN, HIGH);
+  delay(20);
   //Bernhard@: anschauen ob myrepsonse.state oder mydata.state
   //displayTime(RTC.get());
   /*
@@ -261,6 +265,9 @@ END LOOP
 void loop(void)
 {
 
+//DEBUG_PRINT(":");
+//  DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
+    
   #if (DEBUG_==1)
   duration_loop=micros();
 

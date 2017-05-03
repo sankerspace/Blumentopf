@@ -53,29 +53,29 @@
 // General debug messages:
 #define DEBUG_ 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
-#define DEBUG_MESSAGE_HEADER 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
-#define DEBUG_MESSAGE_HEADER_2 1			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
+#define DEBUG_MESSAGE_HEADER 0			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
+#define DEBUG_MESSAGE_HEADER_2 0		// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE 1
 #define DEBUG_DATA_CONTENT 0//1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
-#define DEBUG_SENSOR_SCHEDULING 0		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
-#define DEBUG_LIST_SENSOR_SCHEDULING 0	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
-#define DEBUG_FREE_MEMORY 0			// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
+#define DEBUG_SENSOR_SCHEDULING 1		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
+#define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
+#define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
-#define DEBUG_INFO 1           // 0: disabled		1: show infos
-  #define DEBUG_PUMP 1      //DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
-  #define DEBUG_PUMP_ROUNDTRIPTIME 1
-  #define DEBUG_RF24 1           //DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
-  #define DEBUG_TIMING_LOOP 1  //DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
-#define DEBUG_CYCLE 10000     // Debug information after all X ms in the loop() function
+#define DEBUG_INFO 1         			// 0: disabled		1: show infos
+#define DEBUG_PUMP 1					//DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
+#define DEBUG_PUMP_ROUNDTRIPTIME 1
+#define DEBUG_RF24 0					//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
+#define DEBUG_TIMING_LOOP 1				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
+#define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function
 // For debugging the sensor node
-#define DEBUG_DATA_STORAGE 0				// 0: disabled		1: for analysing the EEPROM Data class internals
-#define DEBUG_SENSOR_MESSAGE_HEADER 0		// 0: disabled		1:  //only in SensorNode.ino
+#define DEBUG_DATA_STORAGE 0			// 0: disabled		1: for analysing the EEPROM Data class internals
+#define DEBUG_SENSOR_MESSAGE_HEADER 0	// 0: disabled		1:  //only in SensorNode.ino
 
 // For debugging the pump node
 
-#define TEST_PUMP 1 //Testcase every 10 seconds turn on first pump in the list
+//#define TEST_PUMP 1 //Testcase every 10 seconds turn on first pump in the list
 //#define TEST_PUMPSCHEDULE 1
-//#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
+#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
 
 
 // For getting rid of serial communication in the release version:
@@ -123,7 +123,7 @@
 #define RTC_3232	3
 
 // SET THE RTC TYPE HERE:
-#define HW_RTC RTC_3231      // kind of RTC. NONE for disable it.
+#define HW_RTC RTC_1302      // kind of RTC. NONE for disable it.
 //#define HW_RTC RTC_3232      // kind of RTC. NONE for disable it.
 #if (HW_RTC > NONE)
 //  #include <Time.h>		// if it's included here, some functions will miss it
@@ -148,7 +148,6 @@
 //    #include <TimeLib.h>
   #elif(HW_RTC == RTC_3232 && HW != HW_PHOTON)
     #include "DS3232RTC.h"
-    #define HW_RTC_PIN (8)
   #endif
 #endif
 
@@ -375,15 +374,20 @@ DO NOT CHANGE:
 
 
 // Values for Sensor Node
+#if (HW == HW_PHOTON)
+  #define HW_RTC_PIN  D4			// for turning on/off the RTC at the Particle
+#else
+  #define HW_RTC_PIN  8				// for turning on/off the RTC at the Arduino
+#endif
 #define randomPIN A6
-#define BATTERY_SENSE_PIN A3      // Pin for Battery voltage
-#define DHT11PIN 5                // Pin number for temperature/humidity sensor
-#define MOISTURE_THRESHOLD (1000) // wet/dry threshold
-#define LIGHT_THRESHOLD (512)     // day/nigth threshold
-#define BAUD (57600)               // serial BAUD rate
-#define PRE_SLEEP_DELAY (100)     // time to finish serial communication before sleep
-#define IREF  (1.1)               // 1V1 voltage of the ADC
-#define RTC_SYNC_THRESHOLD (10)    // How many seconds the Controller and Node clocks can drift apart before resynchronization
+#define BATTERY_SENSE_PIN A3		// Pin for Battery voltage
+#define DHT11PIN 5					// Pin number for temperature/humidity sensor
+#define MOISTURE_THRESHOLD (1000)	// wet/dry threshold
+#define LIGHT_THRESHOLD (512)		// day/nigth threshold
+#define BAUD (57600)				// serial BAUD rate
+#define PRE_SLEEP_DELAY (100)		// time to finish serial communication before sleep
+#define IREF  (1.1)					// 1V1 voltage of the ADC
+#define RTC_SYNC_THRESHOLD (10)		// How many seconds the Controller and Node clocks can drift apart before resynchronization
 #define REF_VAL	(1.1)				// actual voltage of the 1.1 regulator
 #define V_max (6.0)
 #define R1 (109300.0)
