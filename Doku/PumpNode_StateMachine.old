@@ -1,0 +1,60 @@
+/***********************************S T A T E  M A C H I N E******************
+   PUMPNode                                 Controller
+  -----------------------------------------------------------------------------
+  (PumpNode and Controller are performing tasks in the same state or divergent 
+  states   according the state plan below)
+  (criticalTime should be higher in Controller than in PumpNode)
+
+  STATE 0:
+  recv() pump Time                <--       send() pumpTime
+  (some delay)
+  send() Acknowledgment           --> +
+   (Data: OnOff)                      |
+  STATE 1:                            |     {if wait for response takes too long
+                                      |         -> STATE -3}
+                                      +->    recv() Acknowledgment
+                                              (PumpNode confirms Pumptime)
+                                      
+                                      
+                                      
+  recv() Response(by protocoll)  <---   +----send() Response
+                                        |    (by Protocol of Blumentopf)
+  (possible error detection necessary)| |   (Data: 2*OnOff)
+                                      | |
+       TURN ON PUMP                   | |
+                                      | |
+  STATE 2:                            | |
+                                      | |
+       Wait for pump period time      | |
+                                      | |
+       TURN OFF PUMP                  | |
+                                      |   (maximum wait time=Pumptime + timeoff)
+  send() Confirmation(Pump off) ------->  recv() Controller knows that Pump is Off now
+  (Data: dif)                         |       {if wait for response takes too long -> STATE -4}
+                                      | |  +<--send() Response(by Protocol of Blumentopf)
+                                      | |  |   (Data:0xffff))
+  STATE 3:                            | |  |
+  recv() Response(by protocoll) <----------+
+  (possible error detection necessary)| |
+                                      | |
+                                      | |
+                                      | |
+   |
+                                        |
+                                        |
+  STATE -2:                             |
+                                        |
+  recv() confirmation               <--
+
+  STATE -3:(only controller)
+                                            We waited timeOFF ms for response in State 1
+                                            Restart  State 1
+
+  STATE -4:(only controller)
+                                            We waited timeOFF ms for response in State
+                                            Restart  State 2
+
+**************************************************************************************************/
+/************************************************************************************************/
+/*********************************L O O P*******************************************************/
+/***********************************************************************************************/

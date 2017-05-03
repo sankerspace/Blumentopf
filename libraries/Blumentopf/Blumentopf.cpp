@@ -33,10 +33,10 @@
 #include "Blumentopf.h"
 
 //for compilation on spark processor problematic
-#if (HW == 1)
+#if (HW == HW_ARDUINO)
 	#include <DS1302RTC.h>
 	#include <EEPROM.h>
-	#include <dht11.h> //Bernhard@: brauch ma das im Controller?
+	#include <dht11.h>	// can be excluded for controller/pumpnode
 #endif
 
 
@@ -122,7 +122,7 @@ int RTC_DS1302::setAlarm(time_t)
  * The RC1302 doesn't support direct subsecond synchronisation. So I just the real time second and also do not transmit milliseconds between the nodes.
  * If the difference between the real time clocks is bigger than a certain threshold, the SensorNode clock gets updated.
 */
-int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
+int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t Time)
 {
 // (nDelay - 110)     / eigentliche Laufzeit. Server und Node machen in Summe 110ms Pause
 // (nDelay - 110) /2  / Laufzeit pro Richtung
@@ -135,9 +135,9 @@ int RTC_DS1302::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
   if ((*state & (1 << RTC_RUNNING_BIT))  == true)     // only sync if the clock is working.
   {
     tLocalTime = RTC.get();
-    if (abs(tLocalTime - controllerTime) > RTC_SYNC_THRESHOLD)
+    if (abs(tLocalTime - Time) > RTC_SYNC_THRESHOLD)
     {
-      RTC.set(controllerTime);
+      RTC.set(Time);
     }
   }
 
@@ -215,7 +215,7 @@ int RTC_DS3231::setAlarm(time_t)
 	return 0;
 }
 
-int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
+int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t Time)
 {
 	time_t tLocalTime;
 	time_t tDifference;
@@ -226,18 +226,18 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
 	tLocalTime = getTime();
 
 
-	if (tLocalTime > controllerTime)
+	if (tLocalTime > Time)
 	{
-	  tDifference = tLocalTime - controllerTime;
+	  tDifference = tLocalTime - Time;
 	}
 	else
 	{
-	  tDifference = controllerTime - tLocalTime;
+	  tDifference = Time - tLocalTime;
 	}
 
 
 	DEBUG_PRINTSTR("\tController time: ");
-	DEBUG_PRINT(controllerTime);
+	DEBUG_PRINT(Time);
 	DEBUG_PRINTSTR(" Our time: ");
 	DEBUG_PRINT(tLocalTime);
 	DEBUG_PRINTSTR(", Deviation: ");
@@ -247,7 +247,7 @@ int RTC_DS3231::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerT
     if (tDifference > RTC_SYNC_THRESHOLD)
     {
 		DEBUG_PRINTSTR("\tRTC deviation too big. Adjusting RTC...");
-		breakTime(controllerTime, tm);
+		breakTime(Time, tm);
 		setDS3231time(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tm.Year);
 		DEBUG_PRINTLNSTR("done");
     }
@@ -284,7 +284,7 @@ int RTC_DS3232::init(uint8_t* state)
 	DEBUG_PRINTSTR("Initializing the RTC DS3232...");
 	DEBUG_PRINTLNSTR("done");
   }
-
+  //Bernhard@: wozu war das nochmal???
 	//*state |= (1 << RTC_RUNNING_BIT);			// set it to valid, otherwise adjust will not react..
 }
 
@@ -320,7 +320,7 @@ int RTC_DS3232::setAlarm(time_t)
   DEBUG_PRINTLNSTR("Still not implemented!!!! ");
 }
 
-int RTC_DS3232::adjustRTC(int roundTripDelay, uint8_t* state, time_t controllerTime)
+int RTC_DS3232::adjustRTC(int roundTripDelay, uint8_t* state, time_t Time)
 {
 /*
 	time_t tLocalTime;
@@ -531,14 +531,11 @@ void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOf
 
 void displayTimeFromUNIX(time_t showTime, uint8_t nDepth)
 {
-//Bernhard@:Funktionsaufrufe verschwenden Speicher(und wir haben echt wenig),
-//überdenke das nochmal, wennst meinst das unbedingt notwenidg dann ok
-#if (DEBUG_ == 1)
+#if (DEBUG == 1)
 	tmElements_t tm;
 	breakTime(showTime, tm);
-	//marko@: -1970?????
+
 	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, (tm.Year - 30), nDepth);	// -30 to convert von 00 to 1970 format
-    //displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tmYearToY2k(tm.Year), nDepth);
 #endif
 }
 // Convert normal decimal numbers to binary coded decimal
@@ -627,7 +624,7 @@ uint8_t DataStorage::init()
 	  }
 
 // find next usable data block
-//Bernhard@:Wieso erstellts du funktionen die im Endeffekt nix zurückgeben?
+
 
 		findQueueEnd();
       return 0;
@@ -639,17 +636,17 @@ uint8_t DataStorage::init()
 
   // if it reaches this point, no index was found. Set random index:
   uint16_t EEPROM_data_start = INDEXBEGIN + sizeof(myEEPROMHeader) * INDEXELEMENTS;
-  uint16_t modul = (DATARANGE_END - EEPROM_data_start) / sizeof(struct sensorData);
+  uint16_t modul = (DATARANGE_END - EEPROM_data_start) / sizeof(struct Data);
 
 
 
-  mnDataBlockBegin = EEPROM_data_start + sizeof(struct sensorData) * (analogRead(17) % modul);     // This is the new index Position;
+  mnDataBlockBegin = EEPROM_data_start + sizeof(struct Data) * (analogRead(17) % modul);     // This is the new index Position;
   myEEPROMHeader.DataStartPosition =  mnDataBlockBegin;
   myEEPROMHeader.DataStartPosition |= (1<<EEPROM_HEADER_STATUS_VALID);    // Set this as the position of the first EEPROM data
 
 
   EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the data (ID) back to EEPROM...
-  struct sensorData dummy;
+  struct Data dummy;
   EEPROM.get(mnDataBlockBegin, dummy);   // reading a struct, so it is flexible...
 
   if (DEBUG_DATA_STORAGE > 0)
@@ -710,9 +707,6 @@ void DataStorage::unsetHeaders()
 /*
 * go through the queue and find the last item
 */
-//Bernhard@:: Sollte da nicht etwas zurückgegeben werden???
-//Marko: Hab das jetzt so geändert damit ich es für den Spark(Photon)
-//compilieren kann, warum hat die Arduino IDE da nicht regiert?
 void DataStorage::findQueueEnd()
 {
 	uint16_t nCurrentAddress;
@@ -721,9 +715,11 @@ void DataStorage::findQueueEnd()
 	nCurrentAddress = mnDataBlockBegin;
 
 	uint16_t nAddressOfOldestElement=0;
-	uint16_t nAddressBeforeOldestElement = 0;
 
-	struct sensorData currentElement;
+	//Bernhard@: Variablen initialisieren bitte
+	uint16_t nAddressBeforeOldestElement=0;
+	struct Data currentElement;
+
   uint16_t nPreviousOldestElement=0;
 
 
@@ -741,9 +737,9 @@ void DataStorage::findQueueEnd()
 		{
 			nCurrentAddress = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;
 		}
-		if (firstItemTimestamp > currentElement.realTime)		// remember the timestamp and address of the oldest element
+		if (firstItemTimestamp > currentElement.Time)		// remember the timestamp and address of the oldest element
 		{
-			firstItemTimestamp = currentElement.realTime;
+			firstItemTimestamp = currentElement.Time;
       nPreviousOldestElement = firstItemTimestamp;
 			nAddressOfOldestElement = nCurrentAddress;
 			nAddressBeforeOldestElement = nPreviousAddress;
@@ -787,9 +783,9 @@ void DataStorage::findQueueEnd()
 /*
 *	storing new data:
 */
-void DataStorage::add(struct sensorData currentData)
+void DataStorage::add(struct Data currentData)
 {
-	struct sensorData lastElement;
+	struct Data lastElement;
 	uint16_t nNextData;   // at this address the data will be inserted
 
 // calculate next data address, once we arrive at the end of the memory, wrap around..
@@ -833,7 +829,7 @@ void DataStorage::add(struct sensorData currentData)
 	if (DEBUG_DATA_STORAGE > 0)
 	{
 	  DEBUG_PRINTSTR("\tAdding ");
-	  DEBUG_PRINT(currentData.realTime);
+	  DEBUG_PRINT(currentData.Time);
 	  DEBUG_PRINTSTR(" at address ");
 	  DEBUG_PRINTLN(nNextData);
 	}
@@ -878,7 +874,7 @@ void DataStorage::delIndex()
   EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
 }
 
-void DataStorage::getNext(struct sensorData * currentData)
+void DataStorage::getNext(struct Data * currentData)
 {
 
 }
@@ -895,7 +891,7 @@ void DataStorage::getNext(struct sensorData * currentData)
  * mbOverflow
  *
  */
-void DataStorage::readNextItem(struct sensorData* dataElement)
+void DataStorage::readNextItem(struct Data* dataElement)
 {
   // kann man das einfach anhand der Pointer zurückdrehen? :-O
 
@@ -1059,7 +1055,7 @@ void DataStorage::incrementHeaderAddress(uint16_t* headerAddress)
  */
 void DataStorage::incrementDataAddress(uint16_t* dataAddress)
 {
-  *dataAddress += sizeof(struct sensorData);  // go one element forward
+  *dataAddress += sizeof(struct Data);  // go one element forward
   if (*dataAddress >= DATARANGE_END)          // is it out of the address range?
   {
     *dataAddress = INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS;   // go to the beginning of the address range
@@ -1073,22 +1069,22 @@ void DataStorage::incrementDataAddress(uint16_t* dataAddress)
  */
 void DataStorage::decrementDataAddress(uint16_t* dataAddress)
 {
-  *dataAddress -= sizeof(struct sensorData);  // go one element back
+  *dataAddress -= sizeof(struct Data);  // go one element back
   if (*dataAddress < INDEXBEGIN + sizeof(struct EEPROM_Header) * INDEXELEMENTS)          // is it out of the address range?
   {
     // find the last possible address in the range:
     do
     {
-      *dataAddress += sizeof(struct sensorData);
+      *dataAddress += sizeof(struct Data);
     }
     while(*dataAddress < DATARANGE_END);
-    *dataAddress -= sizeof(struct sensorData);
+    *dataAddress -= sizeof(struct Data);
   }
 }
 
 void DataStorage::setDataAsLast(uint16_t dataAddress)   // wie sind die flags gesetzt, wenn kein element valid ist??
 {
-  struct sensorData data;
+  struct Data data;
   EEPROM.get(dataAddress, data);   // reading the data
   data.state |= (1 << EEPROM_DATA_LAST);
   EEPROM.put(dataAddress, data);   // writing the data back
@@ -1096,7 +1092,7 @@ void DataStorage::setDataAsLast(uint16_t dataAddress)   // wie sind die flags ge
 
 void DataStorage::setDataAsNotLast(uint16_t dataAddress)
 {
-  struct sensorData data;
+  struct Data data;
   EEPROM.get(dataAddress, data);   // reading the data
   data.state &= ~(1 << EEPROM_DATA_LAST);
   EEPROM.put(dataAddress, data);   // writing the data back
@@ -1121,8 +1117,8 @@ void DataStorage::stashData()
     DEBUG_PRINT(mnIndexBegin);
     myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);
     EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
-    DEBUG_PRINTSTR_D(" to ", DEBUG_DATA_STORAGE);
-    DEBUG_PRINTLN_D(myEEPROMHeader.DataStartPosition, DEBUG_DATA_STORAGE);
+    DEBUG_PRINTSTR(" to ");
+    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
   }
 
   myEEPROMHeader.DataStartPosition = mnNextDataBlock;	// the next data block is the new start address
@@ -1150,7 +1146,7 @@ void DataStorage::stashData()
 void DataStorage::printElements()
 {
 	uint16_t currentDataAddress;
-	struct sensorData currentElement;
+	struct Data currentElement;
 
 	currentDataAddress = mnDataBlockBegin;
 
@@ -1160,7 +1156,7 @@ void DataStorage::printElements()
 		DEBUG_PRINTSTR("Address: ");
 		DEBUG_PRINT(currentDataAddress);
 		DEBUG_PRINTSTR(" - time: ");
-		DEBUG_PRINT(currentElement.realTime);
+		DEBUG_PRINT(currentElement.Time);
 		DEBUG_PRINTSTR(" - overflow: ");
 		DEBUG_PRINTLN(mbOverflow);
 		currentDataAddress += sizeof(currentElement);
@@ -1425,7 +1421,10 @@ void nodeList::clearEEPROM_Nodelist()
   {
     myNodes[i].ID = 0xffff;
     myNodes[i].state = 0;
-    myNodes[i].sensorID = 0;
+    myNodes[i].sensorID1 = 0;
+	myNodes[i].sensorID2 = 0;
+	myNodes[i].state &= ~(1 << SENSOR_PUMP1);	// assign to sensor1 to pump1
+	myNodes[i].state &= ~(1 << SENSOR_PUMP2);	// assign to sensor1 to pump2
     myNodes[i].watering_policy = 0;
     EEPROM.put(nCurrentAddress, myNodes[i]);   // reading a struct, so it is flexible...
     nCurrentAddress += sizeof(struct nodeListElement);
@@ -1678,14 +1677,7 @@ uint16_t nodeList::getPumpEpochLength()
  */
 
 
-/**
-* For a pumpNode setup an activation duration
-*/
- void PumpNode_Handler::setPumpTime(uint16_t pumptime){
 
-    if(pumptime>0)
-        this->OnOff = pumptime;
- }
 
 
 /**
@@ -1701,6 +1693,12 @@ uint16_t nodeList::getPumpEpochLength()
   int PumpNode_Handler::getState(void){
     return this->pumpnode_status;
   }
+	/**
+ * state of a packet must be in the same state in which pumpnode remains
+ */
+   int PumpNode_Handler::getPacketState(void){
+     return this->pumpnode_status_packet;
+   }
 /**
 * what is the ID of the PumpNode the controller is speaking to
 */
@@ -1716,6 +1714,12 @@ uint16_t PumpNode_Handler::getID(void)
   return this->pumpnode_response;
  }
 
+
+bool PumpNode_Handler::getResponseAvailability(void)
+{
+	  return this->pumpnode_reponse_available;
+}
+
  /**
 * Reset State machine
 */
@@ -1727,10 +1731,12 @@ uint16_t PumpNode_Handler::getID(void)
     this->pumpnode_response=0;
     this->pumpnode_started_waiting_at=millis();
     this->pumpnode_previousTime=millis();
+		this->pumpnode_waitforPump=0;
     this->pumpnode_dif=0;
     this->pumpnode_debugCounter=DEBUG_CYCLE;
-
-
+		this->pumpnode_reponse_available=false;
+		this->pumpnode_status_packet=this->pumpnode_status;
+		this->pumpnode_state_error_counter++;
  }
  /*only for debug purposes*/
  void PumpNode_Handler::setPumpHandlerID(uint16_t ID_)
@@ -1761,16 +1767,18 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
         //[STATE 0]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_0_PUMPREQUEST){
-    if(IncomeData>0)
+    if(IncomeData>0)//pumphandler triggered with new PumpTime=IncomeData
     {
       this->OnOff=IncomeData;//calculated from seconds in milliseconds
       this->pumpnode_response=this->OnOff;
+			this->pumpnode_reponse_available=true;
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
       DEBUG_PRINTSTR("][State 0:]Pump time of ");
       DEBUG_PRINT(this->pumpnode_response);
       DEBUG_PRINTSTR("ms sent to PumPnode ");
       DEBUG_PRINTLN(this->pumpnode_ID);
-      this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
+			this->pumpnode_status_packet=this->pumpnode_status;
+      this->pumpnode_status=PUMPNODE_STATE_1_PUMPACTIVE;
 
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
       DEBUG_PRINTLNSTR("][State 0:]Start Listening for first confirmation from the pump...");
@@ -1781,7 +1789,9 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINTSTR("][State 0:]previousTime=");
       DEBUG_PRINTLN(this->pumpnode_previousTime);
       this->pumpnode_debugCounter=DEBUG_CYCLE;
-
+			#if (DEBUG_PUMP_ROUNDTRIPTIME)
+			this->pumpNode_RoundTripTime=micros();
+			#endif
     }else{
       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
@@ -1792,28 +1802,39 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_debugCounter++;
     }
   }else //[STATE 1]-------------------------------------------------------------
-  if(this->pumpnode_status == PUMPNODE_STATE_1_RESPONSE){
+  if(this->pumpnode_status == PUMPNODE_STATE_1_PUMPACTIVE){
+		this->pumpnode_reponse_available=false;
     if(IncomeData==0)
-    {
+    {//WAIT FOR INCOME DATA
+
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
       if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
        {
 
-          this->pumpnode_status=PUMPNODE_STATE_3_RESP_FAILED;
+          this->pumpnode_status=PUMPNODE_STATE_1_RESP_FAILED;
        }
     }else if(IncomeData==this->OnOff)
-    {
-      this->pumpnode_response=2*this->OnOff;//some usefull check
+    {//RECEIVED INCOME DATA
 
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-      DEBUG_PRINTSTR("][State 1]-Send Response to Node-ID");
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+			DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTSTR("][State 1]-Got Respond from PumpNode ");
       DEBUG_PRINT(this->pumpnode_ID);
-      DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response);
-
-      this->pumpnode_status=PUMPNODE_STATE_2_PUMPACTIVE;
+      DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(IncomeData);
+			#if (DEBUG_PUMP_ROUNDTRIPTIME)
+			DEBUG_PRINTSTR("\t\t[ROUNDTRIP TIME (State0 - State 1)] ");
+			DEBUG_PRINT_D(micros()-this->pumpNode_RoundTripTime,DEC);
+			DEBUG_PRINTLNSTR(" us.");
+			#endif
+      this->pumpnode_status=PUMPNODE_STATE_2_PUMPOFF;
       this->pumpnode_previousTime=millis();//A change of state occured here
-      this->pumpnode_started_waiting_at = millis();
+      this->pumpnode_started_waiting_at = millis();//in the next state we wait for the pump
       this->pumpnode_debugCounter=DEBUG_CYCLE;
+			//pump time plus half of roundTripDelay
+			this->pumpnode_waitforPump=this->OnOff+(WAIT_RESPONSE_INTERVAL >> 1); //division durch 2
+			  DEBUG_PRINTSTR("\t\t[PumpNode_Handler]Waiting at least ");
+				DEBUG_PRINT_D(this->pumpnode_waitforPump,DEC);
+				DEBUG_PRINTLNSTR(" ms, then pumping should be finished");
     }else{
        if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
@@ -1826,92 +1847,154 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     }
 
   }else //[STATE 2]------------------------------------------------------------
-  if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPACTIVE){
+  if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPOFF){
     if(IncomeData==0)
     {
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
-      if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
+      if(this->pumpnode_dif > this->pumpnode_waitforPump)
        {
+				 //PUMPTIME PASSED SO NOW SEND CONFIRMATION
+				 this->pumpnode_response=this->pumphandler_ID;//some usefull check
+				 this->pumpnode_reponse_available=true;
+				 this->pumpnode_status_packet=this->pumpnode_status;
+				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+	       DEBUG_PRINTSTR("][State 2]-SEND CONFIRMATION REQUEST to Node-ID ");
+	       DEBUG_PRINT(this->pumpnode_ID);
+	       DEBUG_PRINTSTR(" with respond:");DEBUG_PRINTLN(this->pumpnode_response);
 
-          this->pumpnode_status=PUMPNODE_STATE_4_RESP_FAILED;
-       }
-    }else
-    if(IncomeData>this->OnOff)//receive the total time needed
-    {
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-      DEBUG_PRINTSTR("][State 2]-Received Response from node-ID ");
-      DEBUG_PRINT(this->pumpnode_ID);DEBUG_PRINTSTR(" ,Response: ");
-      DEBUG_PRINTLN(IncomeData);
-      this->pumpnode_response=0xffff;//some usefull check
-      this->pumpnode_status=PUMPNODE_STATE_3_RESPONSE;
 
-      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-      DEBUG_PRINTSTR("][State 2]-Send Response to Node-ID ");
-      DEBUG_PRINT(this->pumpnode_ID);
-      DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(this->pumpnode_response);
-
-      this->pumpnode_previousTime=millis();//A change of state occured here
-      this->pumpnode_debugCounter=DEBUG_CYCLE;
+				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+	 			 DEBUG_PRINT(pumphandler_ID);
+	       DEBUG_PRINTLNSTR("][State 2]-Switch to State 3 and wait for Acknowledgment");
+				 this->pumpnode_status=PUMPNODE_STATE_3_ACKNOWLEDGMENT;
+				 this->pumpnode_previousTime=millis();//A change of state occured here
+	 			 this->pumpnode_started_waiting_at = millis();//in the next state we wait for the pump
+	       this->pumpnode_debugCounter=DEBUG_CYCLE;
+				 #if (DEBUG_PUMP_ROUNDTRIPTIME)
+	 			 this->pumpNode_RoundTripTime=micros();
+	 			#endif
+			 }else if((this->pumpnode_dif % 2000)==0)
+			 {
+				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+				DEBUG_PRINTLNSTR("][State 2]-WAIT FOR PUMP TO FINISH PUMPING.");
+			 }
     }else{
       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-        DEBUG_PRINTLNSTR("][State 2]-ERROR INCOME DATA FROM PUMP NODE!!!!!!!");
+        DEBUG_PRINTLNSTR("][State 2]-ERROR INCOME DATA , FALSE PARAMETER!!!!!!!");
+
       }
       this->pumpnode_debugCounter++;
     }
 
-
-
-
   }else //[STATE 3]------------------------------------------------------------
-  if(this->pumpnode_status == PUMPNODE_STATE_3_RESPONSE){
+  if(this->pumpnode_status == PUMPNODE_STATE_3_ACKNOWLEDGMENT){
+		this->pumpnode_reponse_available=false;
+    if(IncomeData==0)
+    {//WAIT FOR INCOME DATA
+
+      this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
+      if(this->pumpnode_dif > WAIT_RESPONSE_INTERVAL)
+       {
+
+          this->pumpnode_status=PUMPNODE_STATE_3_RESP_FAILED;
+       }
+    }else if(IncomeData==this->pumphandler_ID)
+    {//RECEIVED INCOME DATA
+
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTSTR("][State 3]-Got Respond from PumpNode ");
+      DEBUG_PRINT(this->pumpnode_ID);
+      DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(IncomeData);
+			#if (DEBUG_PUMP_ROUNDTRIPTIME)
+			DEBUG_PRINTSTR("\t\t[ROUNDTRIP TIME (State2 - State 3)] ");
+			DEBUG_PRINT_D(micros()-this->pumpNode_RoundTripTime,DEC);
+			DEBUG_PRINTLNSTR(" us.");
+			#endif
+			this->pumpnode_waitforPump=0;
+      this->pumpnode_status=PUMPNODE_STATE_4_FINISHED;
+      this->pumpnode_previousTime=millis();//A change of state occured here
+      this->pumpnode_debugCounter=DEBUG_CYCLE;
+
+
+    }else{
+       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
+        DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+        DEBUG_PRINTSTR("][State 3]-ERROR INCOME DATA (");
+        DEBUG_PRINT(IncomeData);
+        DEBUG_PRINTSTR(") FROM PUMP NODE with ID:");
+        DEBUG_PRINTLN(this->pumpnode_ID);
+      }
+      this->pumpnode_debugCounter++;
+    }
+
+  }else //[STATE 4]------------------------------------------------------------
+  if(this->pumpnode_status == PUMPNODE_STATE_4_FINISHED){
       //Nothing to do
       //PUMP CYCLE WAS SUCCESSFULL
+			if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
+			 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+			 DEBUG_PRINT(pumphandler_ID);
+			 DEBUG_PRINTSTR("][State 4]-SUCCESS STATE!!!!!");
+			 DEBUG_PRINTSTR("\t\tFOR PUMP NODE with ID:");
+			 DEBUG_PRINTLN(this->pumpnode_ID);
+		 }
+		 this->pumpnode_debugCounter++;
   }else //[STATE -1]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_ERROR){
       //Nothing to do
       //PUMP CYCLE WAS NOT SUCCESSFULL
-      pumpnode_state_error_counter++;
-      DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-      DEBUG_PRINTSTR("][State -1]-ERROR STATE COUNTER IS ");DEBUG_PRINTLN(pumpnode_state_error_counter);
+
+			this->pumpnode_status = PUMPNODE_STATE_0_PUMPREQUEST;
+			this->pumpnode_previousTime=millis();
+			DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+			DEBUG_PRINT(pumphandler_ID);
+      DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+			DEBUG_PRINT(pumphandler_ID);
+			DEBUG_PRINTLNSTR("][State -1]-PUMPHANDLER IN ERROR STATE!!!!!!!!");
+      DEBUG_PRINTLNSTR("][State -1]-ERROR STATE COUNTER IS ");DEBUG_PRINTLN(pumpnode_state_error_counter);
 
   }
-  else //[STATE -2]---------------------------------------------------------
+  else //[STATE -3]---------------------------------------------------------
+  if(this->pumpnode_status == PUMPNODE_STATE_1_RESP_FAILED){
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTSTR("][State -1:]Failed, response timed out[wait:");
+    DEBUG_PRINT(this->pumpnode_dif);
+    DEBUG_PRINTSTR(" ms],ID:");DEBUG_PRINT(this->pumpnode_ID);
+    DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff);
+    this->pumpnode_started_waiting_at = millis();
+    this->pumpnode_status=PUMPNODE_STATE_1_PUMPACTIVE;
+
+  }else //[STATE -4]----------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_3_RESP_FAILED){
     DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
     DEBUG_PRINTSTR("][State -3:]Failed, response timed out[wait:");
     DEBUG_PRINT(this->pumpnode_dif);
-    DEBUG_PRINTSTR(",ID:");DEBUG_PRINT(this->pumpnode_ID);
+    DEBUG_PRINTSTR(" ms],ID:");DEBUG_PRINT(this->pumpnode_ID);
     DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff);
     this->pumpnode_started_waiting_at = millis();
-    this->pumpnode_status=PUMPNODE_STATE_1_RESPONSE;
-
-  }else //[STATE -3]----------------------------------------------------------
-  if(this->pumpnode_status == PUMPNODE_STATE_4_RESP_FAILED){
-    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-    DEBUG_PRINTSTR("][State -4:]Failed, response timed out[wait:");
-    DEBUG_PRINT(this->pumpnode_dif);
-    DEBUG_PRINTSTR(",ID:");DEBUG_PRINT(this->pumpnode_ID);
-    DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff);
-    this->pumpnode_started_waiting_at = millis();
-    this->pumpnode_status=PUMPNODE_STATE_2_PUMPACTIVE;
+    this->pumpnode_status=PUMPNODE_STATE_3_ACKNOWLEDGMENT;
 
   }
 
  /*Software Watch Dog*/
   uint32_t dif=(millis()-this->pumpnode_previousTime);
-  if(dif>(PUMPNODE_CRITICAL_STATE_OCCUPATION+this->pumpnode_dif)){
+  if(dif>(PUMPNODE_CRITICAL_STATE_OCCUPATION+this->pumpnode_waitforPump)){
 
     this->pumpnode_status=PUMPNODE_STATE_ERROR;
+    this->pumpnode_waitforPump=0;
 
-    DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-    DEBUG_PRINTSTR("][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!");
-    DEBUG_PRINTLNSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-    DEBUG_PRINTSTR("][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!");
-    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+		DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTLNSTR("][WATCHDOG]NO ANSWER, WE WILL GO TO ERROR STATE!");
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+		DEBUG_PRINT(pumphandler_ID);
+    DEBUG_PRINTLNSTR("][WATCHDOG]STATEMACHINE FOR THE CAN BE RESTARTED!");
+    DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
+		DEBUG_PRINT(pumphandler_ID);
     DEBUG_PRINTSTR("][WATCHDOG]Dif=");
     DEBUG_PRINT(dif);
-    DEBUG_PRINTSTR("ms, previousTime=");
+    DEBUG_PRINTSTR(" ms, previousTime=");
     DEBUG_PRINT(this->pumpnode_previousTime);
     DEBUG_PRINTLNSTR("ms");
   }
@@ -1934,11 +2017,18 @@ void printFreeRam()
 {
   if (DEBUG_FREE_MEMORY > 0)
   {
-    DEBUG_PRINTSTR("[CONTROLLER][MEMORY]:Between Heap and Stack still ");
+
     #if (HW==HW_ARDUINO)
+		 DEBUG_PRINTSTR("[CONTROLLER][MEMORY]:Between Heap and Stack still ");
       DEBUG_PRINT(freeRam());
+			DEBUG_PRINTLNSTR(" bytes available.");
+		#elif(HW==HW_PHOTON)
+		 DEBUG_PRINTSTR("[CONTROLLER][MEMORY]:Free Memory is  ");
+			uint32_t freemem = System.freeMemory();
+			DEBUG_PRINT(freemem);
+			DEBUG_PRINTLNSTR(" bytes on the PHOTON.");
     #endif
-	DEBUG_PRINTLNSTR(" bytes available.");
+
   }
 }
 
@@ -1947,4 +2037,92 @@ void killID()
   struct EEPROM_Data myEEPROMData;
   myEEPROMData.ID = 0xffff;
   EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // resetting the ID
+}
+
+
+
+/*
+* Functions to handle  packetInfo in struct Data
+*
+*/
+
+int setDATA_Pumpstate(struct Data *packet,int pumpState){
+	if(pumpState<PUMPNODE_STATE_0_PUMPREQUEST || pumpState > PUMPNODE_STATE_3_ACKNOWLEDGMENT)
+		return -1;
+	uint8_t value=(uint8_t)pumpState;
+
+	if((value & 0x1) > 0)
+		packet->packetInfo |= (1 << DATA_PUMP_STATE_BIT_0) ;
+	else
+		packet->packetInfo &= ~(1 << DATA_PUMP_STATE_BIT_0) ;
+
+	if((value & 0x2) > 0)
+		packet->packetInfo |= (1 << DATA_PUMP_STATE_BIT_1) ;
+	else
+		packet->packetInfo &= ~(1 << DATA_PUMP_STATE_BIT_1) ;
+
+	return 0;
+}
+
+void setDATA_SensorPacket(struct Data *packet)
+{
+	packet->packetInfo &= ~(1 << DATA_NODE_BIT);
+}
+void setDATA_PumpPacket(struct Data *packet)
+{
+	packet->packetInfo |= (1 << DATA_NODE_BIT);
+}
+void setDATA_ControllerPacket(struct Data *packet)
+{
+	packet->packetInfo |= (1 << DATA_CONTROLLER_BIT);
+}
+void setDATA_NormalDatapacket(struct Data *packet)
+{
+	packet->packetInfo &= ~(1 << DATA_CONTROLLER_BIT);
+}
+void setDATA_RegistrationPacket(struct Data *packet)
+{
+	packet->packetInfo |= (1 << DATA_REGISTRATION_BIT);
+}
+void setDATA_NO_RegistrationPacket(struct Data *packet)
+{
+	packet->packetInfo &= ~(1 << DATA_REGISTRATION_BIT);
+}
+
+uint8_t getData_PumpState(struct Data *packet)
+{
+	uint8_t value = ((packet->packetInfo & (1 << DATA_PUMP_STATE_BIT_0))>>DATA_PUMP_STATE_BIT_0);
+	value |=(((packet->packetInfo & (1 << DATA_PUMP_STATE_BIT_1))>>DATA_PUMP_STATE_BIT_1) << 1);
+	return value;
+}
+bool    isPumpPacket(struct Data *packet)
+{
+	uint8_t value = packet->packetInfo & (1 << DATA_NODE_BIT);
+	if(value>0)
+		return true;
+	return false;
+}
+bool    isSensorPacket(struct Data *packet)
+{
+	uint8_t value = packet->packetInfo & (1 << DATA_NODE_BIT);
+	if(value==0)
+		return true;
+	return false;
+}
+
+bool    isControllerPacket(struct Data *packet)
+{
+	uint8_t value = packet->packetInfo & (1 << DATA_CONTROLLER_BIT);
+	if(value>0)
+		return true;
+	return false;
+
+}
+
+bool    isRegistrationPacket(struct Data *packet)
+{
+	uint8_t value = packet->packetInfo & (1 << DATA_REGISTRATION_BIT);
+	if(value>0)
+		return true;
+	return false;
 }

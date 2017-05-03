@@ -44,4 +44,24 @@ Pin Configuration:
   so i cannot choose the most actual firmware version and have to
   compile for version 0.6.0
    
+4) Use particle-cli (for use on command line and with better error output)
 
+    sudo npm install -g particle-cli
+   
+  but you have to install nodejs before!
+  
+  
+  
+  Tips Atom IDE:
+  
+    packets you should install: 
+    (https://benmccormick.org/2016/01/11/the-most-interesting-atom-packages-ive-found-so-far/)
+    git-time-machine
+    language-particle
+    todo-show  
+    git-plus
+    autocomplete
+    autocomplete-clang
+    autocomplete-paths
+    minimap
+  

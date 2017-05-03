@@ -1,0 +1,33 @@
+-)
+For some reasons messages got lost.
+assumption:
+if the controller sends three redundat messages in one pass and the pumpnode
+answers immediately, is it possible that the pumpnode already answer a repsonse
+in time the controller is still sending?
+
+
+  Controller  -------------->   PumpNode (receives already the first message)
+              -------------->
+              <-------------
+              -------------->
+  Problem:    <--------------
+              <--------------
+Controller is
+in listening mode
+and CANNOT receive
+
+Measured Timing:
+                            
+Controller   -------------->  PumpNode(dont know which of them is receeived)
+             -------------->   begin measure:
+             --------------> 
+                      
+             <--------------
+             <--------------
+             <--------------
+                            measured: ~75ms
+If radio.available() is true time measured until all respond send -> ~75ms
+The controller should send three message in less than 75ms.
+(PumpNode has not delays, no WAIT_SEND_INTERVAL)
+
+Controller: before stopListening until after startListening -> ~ 3ms 
