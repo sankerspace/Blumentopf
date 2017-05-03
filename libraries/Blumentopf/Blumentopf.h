@@ -51,17 +51,18 @@
 /****************************** D E B U G **********************************************/
 /**************************************************************************************/
 // General debug messages:
-#define DEBUG_ 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
+#define DEBUG 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
 #define DEBUG_MESSAGE_HEADER 0			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE_HEADER_2 0		// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE 1
+#define DEBUG_PUMP_SCHEDULING 1			// 0: disabled		1: show details about the pump scheduler
 #define DEBUG_DATA_CONTENT 0//1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
 #define DEBUG_SENSOR_SCHEDULING 1		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
 #define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
-#define DEBUG_INFO 1         			// 0: disabled		1: show infos
+#define DEBUG_INFO 0         			// 0: disabled		1: show infos
 #define DEBUG_PUMP 1					//DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
 #define DEBUG_PUMP_ROUNDTRIPTIME 1
 #define DEBUG_RF24 0					//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
@@ -79,7 +80,7 @@
 
 
 // For getting rid of serial communication in the release version:
-#if (DEBUG_ == 1)
+#if (DEBUG == 1)
   #define DEBUG_PRINT(x)        		Serial.print(x)
   #define DEBUG_PRINT_D(x, d)   		if(d>0){ Serial.print(x);}
   #define DEBUG_PRINTSTR(x)     		Serial.print(F(x))
@@ -369,6 +370,8 @@ DO NOT CHANGE:
 #define NODELIST_NODETYPE       (0)
 #define NODELIST_PUMPACTIVE     (1)
 #define NODELIST_NODEONLINE     (2)
+#define SENSOR_PUMP1	        (3)		// 0: sensor1		1: sensor2
+#define SENSOR_PUMP2    	    (4)		// 0: sensor1		1: sensor2
 
 
 
@@ -631,11 +634,14 @@ struct nodeListElement
   Data nodeData;
   time_t   nextSlot;
   uint16_t ID;
-  uint16_t sensorID;    // in case it is a motor node, the corresponding SensorNode is stored here.
+  uint16_t sensorID1;    // in case it is a motor node, the SensorNode corresponding to the pump1 is stored here.
+  uint16_t sensorID2;    // in case it is a motor node, the SensorNode corresponding to the pump2 is stored here.
   uint8_t state;
   // Bit 0: NODELIST_NODETYPE:   0...this is a SensorNode, 1...this is a MotorNode
   // Bit 1: NODELIST_PUMPACTIVE: 0...inactive, 1...active (is currently pumping[1] or not[0])
-  // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE, 1...ONLINE (the node has performed a registration)
+  // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE,  1...ONLINE (the node has performed a registration)
+  // Bit 3: SENSOR_PUMP1:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 1. Every SensorNode has two moisture sensors..)
+  // Bit 4: SENSOR_PUMP2:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 2. Every SensorNode has two moisture sensors..)
   byte     watering_policy;
 
 };

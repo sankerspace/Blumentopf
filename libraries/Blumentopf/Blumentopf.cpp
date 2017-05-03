@@ -33,10 +33,10 @@
 #include "Blumentopf.h"
 
 //for compilation on spark processor problematic
-#if (HW == 1)
+#if (HW == HW_ARDUINO)
 	#include <DS1302RTC.h>
 	#include <EEPROM.h>
-	#include <dht11.h> //Bernhard@: brauch ma das im Controller?
+	#include <dht11.h>	// can be excluded for controller/pumpnode
 #endif
 
 
@@ -531,14 +531,11 @@ void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOf
 
 void displayTimeFromUNIX(time_t showTime, uint8_t nDepth)
 {
-//Bernhard@:Funktionsaufrufe verschwenden Speicher(und wir haben echt wenig),
-//überdenke das nochmal, wennst meinst das unbedingt notwenidg dann ok
-#if (DEBUG_ == 1)
+#if (DEBUG == 1)
 	tmElements_t tm;
 	breakTime(showTime, tm);
-	//marko@: -1970?????
+
 	displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, (tm.Year - 30), nDepth);	// -30 to convert von 00 to 1970 format
-    //displayTime(tm.Second, tm.Minute, tm.Hour, tm.Wday, tm.Day, tm.Month, tmYearToY2k(tm.Year), nDepth);
 #endif
 }
 // Convert normal decimal numbers to binary coded decimal
@@ -627,7 +624,7 @@ uint8_t DataStorage::init()
 	  }
 
 // find next usable data block
-//Bernhard@:Wieso erstellts du funktionen die im Endeffekt nix zurückgeben?
+
 
 		findQueueEnd();
       return 0;
@@ -710,9 +707,6 @@ void DataStorage::unsetHeaders()
 /*
 * go through the queue and find the last item
 */
-//Bernhard@:: Sollte da nicht etwas zurückgegeben werden???
-//Marko: Hab das jetzt so geändert damit ich es für den Spark(Photon)
-//compilieren kann, warum hat die Arduino IDE da nicht regiert?
 void DataStorage::findQueueEnd()
 {
 	uint16_t nCurrentAddress;
@@ -1120,8 +1114,8 @@ void DataStorage::stashData()
     DEBUG_PRINT(mnIndexBegin);
     myEEPROMHeader.DataStartPosition &= ~(1<<EEPROM_HEADER_STATUS_VALID);
     EEPROM.put(mnIndexBegin, myEEPROMHeader);   // writing the new header with removed index
-    DEBUG_PRINTSTR_D(" to ", DEBUG_DATA_STORAGE);
-    DEBUG_PRINTLN_D(myEEPROMHeader.DataStartPosition, DEBUG_DATA_STORAGE);
+    DEBUG_PRINTSTR(" to ");
+    DEBUG_PRINTLN(myEEPROMHeader.DataStartPosition);
   }
 
   myEEPROMHeader.DataStartPosition = mnNextDataBlock;	// the next data block is the new start address
@@ -1424,7 +1418,10 @@ void nodeList::clearEEPROM_Nodelist()
   {
     myNodes[i].ID = 0xffff;
     myNodes[i].state = 0;
-    myNodes[i].sensorID = 0;
+    myNodes[i].sensorID1 = 0;
+	myNodes[i].sensorID2 = 0;
+	myNodes[i].state &= ~(1 << SENSOR_PUMP1);	// assign to sensor1 to pump1
+	myNodes[i].state &= ~(1 << SENSOR_PUMP2);	// assign to sensor1 to pump2
     myNodes[i].watering_policy = 0;
     EEPROM.put(nCurrentAddress, myNodes[i]);   // reading a struct, so it is flexible...
     nCurrentAddress += sizeof(struct nodeListElement);
