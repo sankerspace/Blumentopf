@@ -103,7 +103,7 @@ void setup(void)
 {
   DEBUG_SERIAL_INIT_WAIT;
 
-  #if(HW==HW_PHOTON  && DEBUG= =1)
+  #if(HW==HW_PHOTON  && DEBUG==1)
 
   uint16_t max_cnt=30000;
   uint32_t _timer_=millis();
@@ -268,7 +268,7 @@ void loop(void)
 //DEBUG_PRINT(":");
 //  DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
 
-  #if (DEBUG= =1)
+  #if (DEBUG==1)
   duration_loop=micros();
 
   #if(DEBUG_INFO>0)
@@ -546,7 +546,7 @@ void loop(void)
         myCurrentTime = getCurrentTime();
         //      displayTimeFromUNIX(myCurrentTime, 1);
 
-        if (bProcessPumps == false)///////////////////////////////////
+        if (bProcessPumps == false)
         {
 
           if (myNodeList.mnPumpSlot <= myCurrentTime)      // The sensorNode-slots are over. Now it's time to go through the pumps and activate them if needed.
@@ -569,6 +569,7 @@ void loop(void)
 
         if (bProcessPumps == true)    // The pumps have to be processed?
         {
+          //Bernhard@ only checkl PumpList.size()==0 and else is under Debug wrapping, can be optionally compiled
           if (PumpList.size() > 0)    // are there still active pumps?
           {
             //Bernhard@: Finde das ist Bad practice, ein if für eine Debug message
@@ -581,6 +582,9 @@ void loop(void)
             DEBUG_PRINTLNSTR_D("\t\t No currently active pump.. Next pump can be started.", DEBUG_MESSAGE);
 
             // Now the pumps have to be processed, one after the other.
+            //Bernhard@:but not all pumpNodes should get commands at once, one pumpnode start, finish, THEN NEXT pumpnode
+              //for loop shpudl be deleted and "if ((nTestWatering % DEBUG_CYCLE) == 0 )", so in every loop cycle
+              //a check is performed here and ntestwatering is mnActivePump will be increased
             for(myNodeList.mnActivePump; myNodeList.mnActivePump < myNodeList.mnNodeCount; myNodeList.mnActivePump++)
             {
 
@@ -594,9 +598,12 @@ void loop(void)
 
                 // if commands are sent to active pumps only, an inactive pump will never become active again, except if it registers itself again through a manual restart.
                 // Therefore it seems also inactive pumpnodes should be addressed here.
+
                 SensorNode_Pump1 = myNodeList.findNodeByID(myNodeList.myNodes[myNodeList.mnActivePump].sensorID1);   // this is the connected Sensor
                 SensorNode_Pump2 = myNodeList.findNodeByID(myNodeList.myNodes[myNodeList.mnActivePump].sensorID2);   // this is the connected Sensor
                 #if(DEBUG_PUMP_SCHEDULING>0)
+                //Marko@: maybe a pump has to be restarted(check errorCounter in the Pumphandler), then there is no check necessary
+                //or a restart is even not necessary because the moisture didnt increase, maybe that fact is easier
                   if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP1)) == 0) // pump 1 is attached to moisture sensor 1
                   {
                     DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
@@ -647,7 +654,7 @@ void loop(void)
                   DEBUG_PRINTLNSTR("\t\tNo watering needed.");
                 }
                 #endif
-              }
+              }//end check if it is a pump
               #if(DEBUG_MESSAGE>0)
               else
               {
@@ -657,7 +664,7 @@ void loop(void)
               }
               #endif
             }//for
-          }//else
+          }//else of  if (PumpList.size() > 0)
 
           // If the loop finishes, all pumps have been processed
           if (myNodeList.mnActivePump >= myNodeList.mnNodeCount)
@@ -668,8 +675,8 @@ void loop(void)
           }
 
           nTestWatering = 0;
-        }
-      }
+        }//if (bProcessPumps == true)
+      }//if ((nTestWatering % DEBUG_CYCLE) == 0 )
 
     }//if (myNodeList.mnPumpSlotEnable == true)
     else
