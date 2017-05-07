@@ -374,15 +374,6 @@ DO NOT CHANGE:
 #endif
 
 
-/*The following are defines for the nodeListElement state variable*/
-
-#define NODELIST_NODETYPE       (0)
-#define NODELIST_PUMPACTIVE     (1)
-#define NODELIST_NODEONLINE     (2)
-#define SENSOR_PUMP1	        (3)		// 0: sensor1		1: sensor2
-#define SENSOR_PUMP2    	    (4)		// 0: sensor1		1: sensor2
-
-
 
 
 // Values for Sensor Node
@@ -635,6 +626,19 @@ private:
   bool empty;
 };
 
+
+
+/*The following are defines for the nodeListElement state variable*/
+
+#define NODELIST_NODETYPE       (0)
+#define NODELIST_PUMPACTIVE     (1)
+#define NODELIST_NODEONLINE     (2)
+#define SENSOR_PUMP1	        (3)		// 0: sensor1		1: sensor2
+#define SENSOR_PUMP2    	    (4)		// 0: sensor1		1: sensor2
+
+
+
+
 /*
  * In this struct all information about the nodes is stored.
  * It lists the node IDs, whether it is a sensor or motor node,
@@ -655,7 +659,11 @@ struct nodeListElement
   // Bit 3: SENSOR_PUMP1:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 1. Every SensorNode has two moisture sensors..)
   // Bit 4: SENSOR_PUMP2:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 2. Every SensorNode has two moisture sensors..)
   byte     watering_policy;
-  uint8_t  pumpnode_state_error_counter;//instead in pumphandler I put it here to count no reachability
+  /*instead in pumphandler I put it here to count no reachability of a node
+  * increases when a connection to a node failed
+  * reset to zero when a connection is successfull
+  */
+  uint8_t  pumpnode_state_error_counter;
 
 };
 
@@ -665,7 +673,7 @@ class nodeList
 {
 public:
   nodeList(){mnNodeCount=0; mnCycleCount = 0; mnPreviouslyScheduledNode = NODELISTSIZE;
-    mnPumpSlot = 0; mnPumpSlotEnable = false; mnCurrentInterval = 0;pumpnode_state_error_counter=0;}
+    mnPumpSlot = 0; mnPumpSlotEnable = false; mnCurrentInterval = 0;}
   struct nodeListElement myNodes[NODELISTSIZE];
   time_t   mnPumpSlot;
   uint16_t mnNodeCount;
@@ -679,7 +687,7 @@ public:
 
   void     getNodeList();
   uint8_t  addNode(struct nodeListElement);
-  uint16_t findNodeByID(uint16_t);         // checks if the node exists
+  uint16_t findNodeByID(uint16_t);         // checks if the node ID exists,returns his index in nodelist or 0xffff
   void     clearEEPROM_Nodelist();
   uint16_t getNumberOfNodesByType(uint8_t);
 //  uint16_t getNumberOfSensorNodes();

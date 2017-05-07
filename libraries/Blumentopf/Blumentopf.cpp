@@ -1481,33 +1481,34 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
 // otherwise add the node to the list and to the memory:
   if (mnNodeCount < NODELISTSIZE)
   {
-	DEBUG_PRINTLNSTR_D("\t\tList isn't full yet.", DEBUG_NODE_LIST);
+		DEBUG_PRINTLNSTR_D("\t\tList isn't full yet.", DEBUG_NODE_LIST);
     myNodes[mnNodeCount] = newElement;      // copy new element
-	myNodes[mnNodeCount].nextSlot = 0;		// no slot yet
+		myNodes[mnNodeCount].nextSlot = 0;		// no slot yet
+		myNodes[mnNodeCount].pumpnode_state_error_counter=0;
     mnNodeCount++;                          // keep track of the number of elements
-
+		//write new Data element to EEPROM or SD Card
     if (HW == HW_ARDUINO)
     {
       DEBUG_PRINT("\tHW = Arduino ");
              // write it to SD
-#if (SD_AVAILABLE == 1)
-        DEBUG_PRINTLNSTR("(SD version)");
+#if (SD_AVAILABLE == 1) //ARDUINO@: ToDo
+      DEBUG_PRINTLNSTR("(SD version)");
         // todo
 
 #else
         // write it to EEPROM
 
-        DEBUG_PRINTLNSTR("(non SD version)");
-        nCurrentAddress = NODELIST_ADDRESS + ((mnNodeCount-1) * sizeof(struct nodeListElement));    // calculating the next EEPROM node list address
-        EEPROM.put(nCurrentAddress, newElement);                                               // writing the node to EEPROM
-        DEBUG_PRINT("\tStored node to EEPROM at address ");
-        DEBUG_PRINTLN(nCurrentAddress);
+      DEBUG_PRINTLNSTR("(non SD version)");
+      nCurrentAddress = NODELIST_ADDRESS + ((mnNodeCount-1) * sizeof(struct nodeListElement));    // calculating the next EEPROM node list address
+      EEPROM.put(nCurrentAddress, newElement);                                               // writing the node to EEPROM
+      DEBUG_PRINT("\tStored node to EEPROM at address ");
+      DEBUG_PRINTLN(nCurrentAddress);
 #endif
 
     }
     else            // on a particle: write it to the flash memory
     {
-      DEBUG_PRINTLNSTR("Particle");
+      DEBUG_PRINTLNSTR("Particle"); //Particle@:ToDo
       // todo
     }
 
@@ -1515,6 +1516,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
   else
   {
     DEBUG_PRINTLNSTR("\tNode list is full! Node cannot be added!");
+		//Marko@ Outside DEBUG mode, there should be a logging for that!!!!!
     return 2;
   }
   return 0;

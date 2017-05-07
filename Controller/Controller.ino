@@ -542,148 +542,147 @@ void loop(void)
     if (myNodeList.mnPumpSlotEnable == true)
     {
 
-      if ((nTestWatering % DEBUG_CYCLE) == 0 )    // Delays the program flow..only once a second this will be executed:
-      {
-        //      DEBUG_PRINTSTR("[TIME] : ");
-        myCurrentTime = getCurrentTime();
-        //      displayTimeFromUNIX(myCurrentTime, 1);
+      //      DEBUG_PRINTSTR("[TIME] : ");
+      myCurrentTime = getCurrentTime();
+      //      displayTimeFromUNIX(myCurrentTime, 1);
 
-        if (bProcessPumps == false)
+      if (bProcessPumps == false)
+      {
+
+        if (myNodeList.mnPumpSlot <= myCurrentTime)      // The sensorNode-slots are over. Now it's time to go through the pumps and activate them if needed.
         {
 
-          if (myNodeList.mnPumpSlot <= myCurrentTime)      // The sensorNode-slots are over. Now it's time to go through the pumps and activate them if needed.
-          {
+          DEBUG_PRINTLNSTR_D("\r\n\tAll data arrived. Activating the pumps...", DEBUG_MESSAGE);
 
-            DEBUG_PRINTLNSTR_D("\r\n\tAll data arrived. Activating the pumps...", DEBUG_MESSAGE);
-
-            bProcessPumps = true;
-            myNodeList.mnActivePump = 0;
-
-          }
-          #if(DEBUG_MESSAGE>0)
-          else
-          {
-            DEBUG_PRINTLNSTR("\tWaiting until the pump timeslot starts..");
-          }
-          #endif
+          bProcessPumps = true;
+          myNodeList.mnActivePump = 0;
 
         }
-
-        if (bProcessPumps == true)    // The pumps have to be processed?
+        #if(DEBUG_MESSAGE>0)
+        else
         {
-          //Bernhard@ only checkl PumpList.size()==0 and else is under Debug wrapping, can be optionally compiled
-          if (PumpList.size() == 0)    // are there still active pumps?
-          {
-            DEBUG_PRINTLNSTR_D("\t\t No currently active pump.. Next pump can be started.", DEBUG_MESSAGE);
+          DEBUG_PRINTLNSTR("\tWaiting until the pump timeslot starts..");
+        }
+        #endif
 
-            // Now the pumps have to be processed, one after the other.
-            //Bernhard@:but not all pumpNodes should get commands at once, one pumpnode start, finish, THEN NEXT pumpnode
-              //for loop shpudl be deleted and "if ((nTestWatering % DEBUG_CYCLE) == 0 )", so in every loop cycle
-              //a check is performed here and ntestwatering is mnActivePump will be increased
-            for(myNodeList.mnActivePump; myNodeList.mnActivePump < myNodeList.mnNodeCount; myNodeList.mnActivePump++)
+      }
+
+      if (bProcessPumps == true)    // The pumps have to be processed?
+      {
+        //Bernhard@ only checkl PumpList.size()==0 and else is under Debug wrapping, can be optionally compiled
+        if (PumpList.size() == 0)    // are there still active pumps?
+        {
+          DEBUG_PRINTLNSTR_D("\t\t No currently active pump.. Next pump can be started.", DEBUG_MESSAGE);
+
+          // Now the pumps have to be processed, one after the other.
+          //Bernhard@:but not all pumpNodes should get commands at once, one pumpnode start, finish, THEN NEXT pumpnode
+          //for loop shpudl be deleted and "if ((nTestWatering % DEBUG_CYCLE) == 0 )", so in every loop cycle
+          //a check is performed here and ntestwatering is mnActivePump will be increased
+          for(myNodeList.mnActivePump; myNodeList.mnActivePump < myNodeList.mnNodeCount; myNodeList.mnActivePump++)
+          {
+
+            if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<NODELIST_NODETYPE)) == 1)       // it is a pump node
             {
 
-              if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<NODELIST_NODETYPE)) == 1)       // it is a pump node
+
+              #if(DEBUG_MESSAGE>0)
+              DEBUG_PRINTSTR("\t\t Node ID: ");
+              DEBUG_PRINT(myNodeList.mnActivePump);
+              DEBUG_PRINTLNSTR(" is a pump node.\r\n\t\tActivating the pump...");
+              #endif
+
+              // if commands are sent to active pumps only, an inactive pump will never become active again, except if it registers itself again through a manual restart.
+              // Therefore it seems also inactive pumpnodes should be addressed here.
+
+              SensorNode_Pump1 = myNodeList.findNodeByID(myNodeList.myNodes[myNodeList.mnActivePump].sensorID1);   // this is the connected Sensor
+              SensorNode_Pump2 = myNodeList.findNodeByID(myNodeList.myNodes[myNodeList.mnActivePump].sensorID2);   // this is the connected Sensor
+              #if(DEBUG_PUMP_SCHEDULING>0)
+              //Marko@: maybe a pump has to be restarted(check errorCounter in the Pumphandler), then there is no check necessary
+              //or a restart is even not necessary because the moisture didnt increase, maybe that fact is easier
+              //Bernhard@: Where is the assignment of a pump to a moisture sensor
+              if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP1)) == 0) // pump 1 is attached to moisture sensor 1
               {
+                DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
+                DEBUG_PRINT(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture);
+              }
+              else                      // pump 1 is attached to moisture sensor 2
+              {
+                DEBUG_PRINTSTR("\t\t\tMoisture 2: ");
+                DEBUG_PRINTLN(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2);
+              }
 
+              if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP2)) == 0) // pump 2 is attached to moisture sensor 1
+              {
+                DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
+                DEBUG_PRINT(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture);
+              }
+              else                      // pump 2 is attached to moisture sensor 2
+              {
+                DEBUG_PRINTSTR("\t\t\tMoisture 2: ");
+                DEBUG_PRINTLN(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2);
+              }
+              #endif
 
-                #if(DEBUG_MESSAGE>0)
-                DEBUG_PRINTSTR("\t\t Node ID: ");
-                DEBUG_PRINT(myNodeList.mnActivePump);
-                DEBUG_PRINTLNSTR(" is a pump node.\r\n\t\tActivating the pump...");
-                #endif
-
-                // if commands are sent to active pumps only, an inactive pump will never become active again, except if it registers itself again through a manual restart.
-                // Therefore it seems also inactive pumpnodes should be addressed here.
-
-                SensorNode_Pump1 = myNodeList.findNodeByID(myNodeList.myNodes[myNodeList.mnActivePump].sensorID1);   // this is the connected Sensor
-                SensorNode_Pump2 = myNodeList.findNodeByID(myNodeList.myNodes[myNodeList.mnActivePump].sensorID2);   // this is the connected Sensor
-                #if(DEBUG_PUMP_SCHEDULING>0)
-                //Marko@: maybe a pump has to be restarted(check errorCounter in the Pumphandler), then there is no check necessary
-                //or a restart is even not necessary because the moisture didnt increase, maybe that fact is easier
-                  if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP1)) == 0) // pump 1 is attached to moisture sensor 1
-                  {
-                    DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
-                    DEBUG_PRINT(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture);
-                  }
-                  else                      // pump 1 is attached to moisture sensor 2
-                  {
-                    DEBUG_PRINTSTR("\t\t\tMoisture 2: ");
-                    DEBUG_PRINTLN(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2);
-                  }
-
-                  if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP2)) == 0) // pump 2 is attached to moisture sensor 1
-                  {
-                    DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
-                    DEBUG_PRINT(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture);
-                  }
-                  else                      // pump 2 is attached to moisture sensor 2
-                  {
-                    DEBUG_PRINTSTR("\t\t\tMoisture 2: ");
-                    DEBUG_PRINTLN(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2);
-                  }
-                #endif
-
-      /* Here is the actual watering logic:
-       *  It checks whether watering is needed for any of the two pumps.
-       *  If so, it starts the pump handler for the corresponding pumpnode
-       *  and transmits the watering instructions.
-      */
-                if ((myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture <= WATERING_THRESHOLD) || (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture <= WATERING_THRESHOLD))
-                //if (1)
-                {
-                  DEBUG_PRINTLNSTR_D("\t\tWatering needed.", DEBUG_PUMP_SCHEDULING);
-                  ret = doWateringTasks(myNodeList.myNodes[myNodeList.mnActivePump].ID, POL_WATERING_DEFAULT_DURATION*1000, 0, 0); //here a new order to a pump Node has to be planned
-                  if (ret > 0)
-                  {/*Marko@: Some more Error handling necessary?*/
-                    #if(DEBUG_MESSAGE>0)
-                      DEBUG_PRINTLNSTR("\t[CONTROLLER]ERROR: DOWATERING FAILED! ");
-                      DEBUG_PRINTSTR("\t[CONTROLLER]");
-                      DEBUG_PRINTLN(handle_ErrorMessages(ret));
-                    #endif
-                  }
-                  myNodeList.mnActivePump++;
-                  break;
+              /* Here is the actual watering logic:
+              *  It checks whether watering is needed for any of the two pumps.
+              *  If so, it starts the pump handler for the corresponding pumpnode
+              *  and transmits the watering instructions.
+              */
+              if ((myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture <= WATERING_THRESHOLD) || (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture <= WATERING_THRESHOLD))
+              //if (1)
+              {
+                DEBUG_PRINTLNSTR_D("\t\tWatering needed.", DEBUG_PUMP_SCHEDULING);
+                ret = doWateringTasks(myNodeList.myNodes[myNodeList.mnActivePump].ID, POL_WATERING_DEFAULT_DURATION*1000, 0, 0); //here a new order to a pump Node has to be planned
+                if (ret > 0)
+                {/*Marko@: Some more Error handling necessary?*/
+                  #if(DEBUG_MESSAGE>0)
+                  DEBUG_PRINTLNSTR("\t[CONTROLLER]ERROR: DOWATERING FAILED! ");
+                  DEBUG_PRINTSTR("\t[CONTROLLER]");
+                  DEBUG_PRINTLN(handle_ErrorMessages(ret));
+                  #endif
                 }
-                #if(DEBUG_MESSAGE>0)
-                else
-                {
-                  DEBUG_PRINTLNSTR("\t\tNo watering needed.");
-                }
-                #endif
-
-
-
-              }//end check if it is a pump node
+                myNodeList.mnActivePump++;
+                break;
+              }
               #if(DEBUG_MESSAGE>0)
               else
               {
-                DEBUG_PRINTSTR("\t\t Node ID: ");
-                DEBUG_PRINTLN(myNodeList.mnActivePump);
-
+                DEBUG_PRINTLNSTR("\t\tNo watering needed.");
               }
               #endif
-            }//for
-          }//  if (PumpList.size() == 0)
-          #if (DEBUG_PUMP_SCHEDULING>0)
-          else{
-            //Bernhard@: Hab das runtergegeben
-            DEBUG_PRINTLNSTR("\t\t Waiting for pump to finish pumping...");
 
-          }
-          #endif
 
-          // If the loop finishes, all pumps have been processed
-          if (myNodeList.mnActivePump >= myNodeList.mnNodeCount)
-          {
-            DEBUG_PRINTLNSTR_D("\t\tAll pumpnodes are processed", DEBUG_PUMP_SCHEDULING);
-            myNodeList.mnPumpSlotEnable = false;
-            bProcessPumps = false;
-          }
 
-          nTestWatering = 0;
-        }//if (bProcessPumps == true)
-      }//if ((nTestWatering % DEBUG_CYCLE) == 0 )
+            }//end check if it is a pump node
+            #if(DEBUG_MESSAGE>0)
+            else
+            {
+              DEBUG_PRINTSTR("\t\t Node ID: ");
+              DEBUG_PRINTLN(myNodeList.mnActivePump);
+
+            }
+            #endif
+          }//for
+        }//  if (PumpList.size() == 0)
+        #if (DEBUG_PUMP_SCHEDULING>0)
+        else{
+          //Bernhard@: Hab das runtergegeben
+          DEBUG_PRINTLNSTR("\t\t Waiting for pump to finish pumping...");
+
+        }
+        #endif
+
+        // If the loop finishes, all pumps have been processed
+        if (myNodeList.mnActivePump >= myNodeList.mnNodeCount)
+        {
+          DEBUG_PRINTLNSTR_D("\t\tAll pumpnodes are processed", DEBUG_PUMP_SCHEDULING);
+          myNodeList.mnPumpSlotEnable = false;
+          bProcessPumps = false;
+        }
+
+        nTestWatering = 0;
+      }//if (bProcessPumps == true)
+
 
     }//if (myNodeList.mnPumpSlotEnable == true)
     else
@@ -736,16 +735,7 @@ if (PumpList.size() > 0)
   PumpNode_Handler *handler;
   for (int i = 0; i < PumpList.size(); i++) {
     handler = PumpList.get(i);
-    #if (TEST_PUMP == 1)
-    if ((nTestWatering % DEBUG_CYCLE) == 0) {
-      #if(DEBUG_MESSAGE>0)
-      DEBUG_PRINTSTR("[TIME] : ");
-      displayTimeFromUNIX(getCurrentTime(), 1);
-      DEBUG_PRINTSTR("\r\n\t[CONTROLLER]"); DEBUG_PRINTSTR("Processing PumpHandler for NODE-ID:");
-      DEBUG_PRINTLN(handler->getID());
-      #endif
-    }
-    #endif
+
     handler->processPumpstate(0);//there is no Income Data (0), only process the state machine
     if(handler->getResponseAvailability())
     {
@@ -755,15 +745,7 @@ if (PumpList.size() > 0)
       handlePumpCommunications(handler);
     }
 
-    // This commented section is for the real pump scheduling. It is commented for now to not influence the pump protocol testing.
-    /*    nDummyCount++;
-    DEBUG_PRINTSTR("Dummy: ");
-    DEBUG_PRINTLN(nDummyCount );
-    if (nDummyCount >= 20) // pumping done
-    { if_begin
-    DEBUG_PRINTLNSTR("Deleting node form active pump list!");
 
-    */
     if (handler->getState() == PUMPNODE_STATE_4_FINISHED)
     {
       #if(DEBUG_MESSAGE>0)
@@ -773,6 +755,8 @@ if (PumpList.size() > 0)
       DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("Deleting PumpHandler Class because Watering finished ");
       DEBUG_PRINTLN(handler->getID());
       #endif
+      //reset error counter for that node
+      myNodeList.myNodes[myNodeList.findNodeByID(handler->getID())].pumpnode_state_error_counter=0;
       removePumphandler(i, handler);
       i--;
 
@@ -780,18 +764,22 @@ if (PumpList.size() > 0)
 
     } else if (handler->getState() == PUMPNODE_STATE_ERROR)
     {
+      uint8_t cnt_error=(++myNodeList.myNodes[myNodeList.findNodeByID(handler->getID())].pumpnode_state_error_counter);
       #if(DEBUG_MESSAGE>0)
       DEBUG_PRINTSTR("[TIME] : ");
       displayTimeFromUNIX(getCurrentTime(), 1);
       DEBUG_PRINTSTR("\n[CONTROLLER]Number of PumpHandlers:"); DEBUG_PRINTLN(PumpList.size());
       DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("ERROR:PUMP STATEHANDLER IS IN ERROR STATE");
-      DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:"); DEBUG_PRINT(handler->getID());
+      DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:PUMP ID:"); DEBUG_PRINT(handler->getID());
       DEBUG_PRINTSTR(" ,PumpTime: "); DEBUG_PRINTLN(handler->getPumpTime());
       #endif
 
 
-
-      //myNodeList.setNodeOffline(handler->getID());
+      if(cnt_error>MAX_RETRIES)
+      {
+        myNodeList.setNodeOffline(handler->getID());
+        myNodeList.myNodes[myNodeList.findNodeByID(handler->getID())].pumpnode_state_error_counter=0;
+      }
       removePumphandler(i, handler);
       i--;
 
@@ -805,7 +793,7 @@ if (PumpList.size() > 0)
 //only informatve, can be deleted later
 if ((nTestWatering % DEBUG_CYCLE) == 0) {
   #if(DEBUG_MESSAGE>0)
-  DEBUG_PRINTSTR("[TIME] : ");
+  DEBUG_PRINTSTR("[TIME][DEBUG_CYCLE]: ");
   displayTimeFromUNIX(getCurrentTime(), 1);
   DEBUG_PRINTLNSTR(" ");
   //    DEBUG_PRINTSTR("\r\n\t[CONTROLLER]"); DEBUG_PRINTSTR("nTestWatering="); DEBUG_PRINTLN(nTestWatering);     // It is sufficient and clearer to just print the time.
@@ -1108,18 +1096,16 @@ void handleRegistration(void)
     // this is the persistent ID.. Todo : it has to be compared to the node-list, to ensure no ID is used twice
     myResponse.ID = myResponse.interval * myResponse.Time / 100;
     //newNode=true;
+    currentNode.ID = myResponse.ID;
+
   }
 
-  // store the node in the list if it doesn't exist yet.
-  //  DEBUG_PRINTSTR("ID:");
-  //  DEBUG_PRINTLN(myResponse.ID);
-  //  DEBUG_PRINTSTR("state: ");
-  //  DEBUG_PRINTLN(myData.state);
+  currentNode.sensorID1 = 0xffff;//Marko@: if arbitrary value, then it should be sen as not valid
+  currentNode.sensorID2 = 0xffff;
+  currentNode.pumpnode_state_error_counter=0;
 
-  currentNode.ID = myResponse.ID;
-  currentNode.sensorID1 = 0;
-  currentNode.sensorID2 = 1;
-
+  //bernhard@: Here we still dont know if new registrated node or still available
+  //but we make assignments and Debug outputs which can follow to irritation
   if ((myData.state & (1 << NODE_TYPE)) == 0)
   {
     /*Bernhard@: At regigstration the Sensor Node gets NO scheduled Time in variable myResponse.Interval
@@ -1129,7 +1115,7 @@ void handleRegistration(void)
     setDATA_SensorPacket(&myResponse);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]SensorNode");
     currentNode.state &= ~(1 << NODELIST_NODETYPE);  // SensorNode
-    myNodeList.mnLastAddedSensorNode = currentNode.ID;
+    myNodeList.mnLastAddedSensorNode = currentNode.ID;//Bernhard@ if Old sensor and reregistrate this would be false
     DEBUG_PRINTSTR("\t\tNew last SensorNode - ID: ");
     DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
   }
@@ -1175,7 +1161,8 @@ void handleRegistration(void)
     }
   } else
   {
-    if (myNodeList.findNodeByID(myData.ID) == 0xffff)
+    uint16_t index=0;
+    if ((index=myNodeList.findNodeByID(myData.ID)) == 0xffff)
     {
       myResponse.state |= (1 << ID_REGISTRATION_ERROR);
       DEBUG_PRINTSTR("[CONTROLLER]");
@@ -1184,6 +1171,8 @@ void handleRegistration(void)
       DEBUG_PRINTLNSTR("[handleRegistration()]ERROR:Node registration aborted!");
     } else
     { //succefull registration of a known node
+      //Bernhard@: old assignment of an PumpNode to SensorNode is still valid??
+      currentNode.ID=myData.ID;
       DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]Session-ID and interval: ");
       DEBUG_PRINT(myResponse.interval);
       DEBUG_PRINTSTR(", Persistent ID: ");
@@ -1192,6 +1181,10 @@ void handleRegistration(void)
       DEBUG_PRINTLN(myResponse.Time);
       //now the node is online
       myNodeList.setNodeOnline(myResponse.ID);
+      //myNodeList.myNodes[index].pumpnode_state_error_counter=0;
+      myNodeList.myNodes[index]=currentNode;//Bernhard@: It should be defined which values a node has if he re-registrate
+      //           to avoid undefined states if program runs
+
     }
   }
 
