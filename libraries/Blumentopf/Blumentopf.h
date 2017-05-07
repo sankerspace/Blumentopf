@@ -84,12 +84,19 @@
   #define DEBUG_PRINT(x)        		Serial.print(x)
   #define DEBUG_PRINT_D(x, d)   		if(d>0){ Serial.print(x);}
   #define DEBUG_PRINTSTR(x)     		Serial.print(F(x))
-  #define DEBUG_PRINTSTR_D(x, d)     	if(d>0){ Serial.print(x);}//BNernhard@(2017 April): Was soll das hier bedeuten?
+  #define DEBUG_PRINTSTR_D(x, d)    if(d>0){ Serial.print(x);} //output depending of a define
   #define DEBUG_PRINTDIG(x, c)  		Serial.print (x, c)
+  #define DEBUG_PRINTLNDIG(x, c)  	Serial.println (x, c)
   #define DEBUG_PRINTLN(x)      		Serial.println(x)
-  #define DEBUG_PRINTLN_D(x, d)    	if(d>0){ Serial.println(x);}//??? DEBUG_PRINTDIG(x, c);DEBUG_PRINTLNSTR(""); }//Serial.println(x, c)//
+  #define DEBUG_PRINTLN_D(x, d)    	if(d>0){ Serial.println(x);}
   #define DEBUG_PRINTLNSTR(x)   		Serial.println(F(x))
-  #define DEBUG_PRINTLNSTR_D(x, d)		if(d>0){ Serial.println(F(x));}
+  #define DEBUG_PRINTLNSTR_D(x, d)	if(d>0){ Serial.println(F(x));}
+  #define DEBUG_PRINT_T(x ,l,c)     if((c%l)== 0){Serial.print(x);}//output depending of point in time of a runnung variable
+  #define DEBUG_PRINTSTR_T(x, l, c)	if((c%l)== 0){Serial.print(F(x));}
+  #define DEBUG_PRINTLN_T(x, l, c)	if((c%l)== 0){Serial.println(x);}
+  #define DEBUG_PRINTLNSTR_T(x, l, c)	if((c%l)== 0){Serial.println(F(x));}
+
+
   #define DEBUG_FLUSH           		Serial.flush()
   #if (HW_ARDUINO>0)
   #define DEBUG_SERIAL_INIT_WAIT 		Serial.begin(BAUD);while (!Serial) {}
@@ -97,16 +104,22 @@
   #define DEBUG_SERIAL_INIT_WAIT 		Serial.begin(BAUD);while (!Serial) {Particle.process();}
   #endif
   #define DEBUG_PRINT_MEM
+
 #else
   #define DEBUG_PRINT(x)
   #define DEBUG_PRINT_D(x, d)
   #define DEBUG_PRINTSTR(x)
   #define DEBUG_PRINTSTR_D(x, d)
   #define DEBUG_PRINTDIG(x, c)
+  #define DEBUG_PRINTLNDIG(x, c) 
   #define DEBUG_PRINTLN(x)
   #define DEBUG_PRINTLN_D(x, d)
   #define DEBUG_PRINTLNSTR(x)
   #define DEBUG_PRINTLNSTR_D(x, d)
+  #define DEBUG_PRINT_T(x ,l,c)
+  #define DEBUG_PRINTSTR_T(x, l, c)
+  #define DEBUG_PRINTLN_T(x, l, c)
+  #define DEBUG_PRINTLNSTR_T(x, l, c)
   #define DEBUG_FLUSH
   #define DEBUG_SERIAL_INIT_WAIT
 #endif
