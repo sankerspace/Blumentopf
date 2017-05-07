@@ -1523,7 +1523,7 @@ uint8_t nodeList::addNode(struct nodeListElement newElement)
 /*
  * returns the number of sensor- or pump nodes contained in the node list
  *
- * Sensornode: nodeType == 0 
+ * Sensornode: nodeType == 0
  * Pumpnode:   nodeType == 1
  */
 uint16_t nodeList::getNumberOfNodesByType(uint8_t nodeType)
@@ -1531,7 +1531,7 @@ uint16_t nodeList::getNumberOfNodesByType(uint8_t nodeType)
 
   uint16_t i, nNumberOfTypedNodes;
   nNumberOfTypedNodes = 0;
-  
+
 
   for(i = 0; i < mnNodeCount; i++)
   {
@@ -1555,7 +1555,9 @@ uint16_t nodeList::getLastScheduledSensorNode()
 //      DEBUG_PRINT(i);
 //      DEBUG_PRINT(": ");
 //      DEBUG_PRINTLN(myNodes[i].nextSlot);
-      if (myNodes[i].nextSlot > tLastScheduledNodeTime)   // found new last node
+//Marko@: ">=":at least one sensornode will be used, bec. when tLastScheduledNodeTime=0
+//	and every .nextSlot=0 initialised, no sensornode will be choosed
+      if (myNodes[i].nextSlot >= tLastScheduledNodeTime)   // found new last node
       {
 //        DEBUG_PRINTSTR("\t\tNew last Node - ");
 //        DEBUG_PRINTLN(i);
@@ -1564,14 +1566,16 @@ uint16_t nodeList::getLastScheduledSensorNode()
       }
     }
   }
-  return nLastScheduledNodeIndex;
+
+  return nLastScheduledNodeIndex;//Failure
 }
 
 
 uint16_t nodeList::getPumpEpochLength()
 {
   uint16_t nPumpNodeCount = getNumberOfNodesByType(PUMPNODE);
-  return nPumpNodeCount * INTERVAL / 10;
+	//Bernhard@: Sollt ma die net ausschließen, die Offline sind?
+  return nPumpNodeCount * INTERVAL / 10;  //Bernhard@:returns second??
 }
 
  /*
@@ -1736,7 +1740,7 @@ bool PumpNode_Handler::getResponseAvailability(void)
     this->pumpnode_debugCounter=DEBUG_CYCLE;
 		this->pumpnode_reponse_available=false;
 		this->pumpnode_status_packet=this->pumpnode_status;
-		this->pumpnode_state_error_counter++;
+		//this->pumpnode_state_error_counter++;
  }
  /*only for debug purposes*/
  void PumpNode_Handler::setPumpHandlerID(uint16_t ID_)
@@ -1749,12 +1753,12 @@ bool PumpNode_Handler::getResponseAvailability(void)
   return pumphandler_ID;
  }
 
-
+/*
  uint8_t  PumpNode_Handler::getStateErrorCount(void)
  {
   return pumpnode_state_error_counter;
  }
-
+*/
  /**
 * That function controls the state machine of a Pump Node,
 * in such a way that it receives Responses from Pump by IncomeData
@@ -1952,7 +1956,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
 			DEBUG_PRINT(pumphandler_ID);
 			DEBUG_PRINTLNSTR("][State -1]-PUMPHANDLER IN ERROR STATE!!!!!!!!");
-      DEBUG_PRINTLNSTR("][State -1]-ERROR STATE COUNTER IS ");DEBUG_PRINTLN(pumpnode_state_error_counter);
+      //DEBUG_PRINTLNSTR("][State -1]-ERROR STATE COUNTER IS ");DEBUG_PRINTLN(pumpnode_state_error_counter);
 
   }
   else //[STATE -3]---------------------------------------------------------

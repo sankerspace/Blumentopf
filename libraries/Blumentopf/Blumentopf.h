@@ -309,6 +309,7 @@ DO NOT CHANGE:
 #define MAX_RETRIES                     3
 
 /*
+* Controller define
 *If CONTROLLER sends  request to a node, it should wait at least WAIT_SEND_INTERVAL
 * to receive a acknowledgmentfrom that node.
 * Send and receive should be managable in that time, because there is NO
@@ -319,11 +320,13 @@ DO NOT CHANGE:
 
 #define WAIT_SEND_INTERVAL           500//300 * MAX_RETRIES  // depend also on retries
 /*
+* PUMP ,SENSOR  and Controller define
 * How long we have to wait to receive an acknowledgment on a registration request
 * REGISTRATION_TIMEOUT_INTERVAL=Protocol_Usage + Round trip delay
 */
 #define REGISTRATION_TIMEOUT_INTERVAL	5000  // in Milliseconds    // wäre cool, wenn wir das noch kürzer gestalten könnten.. 6s ist lange
 /*
+* PUMP DEFINE
 * WAIT_RESPONSE_INTERVAL=Protocol_Usage + Round trip delay
 *     Its the time from sending a message to another node
 *     and receiving an acknowledgment with little protocol overhead which could
@@ -331,12 +334,14 @@ DO NOT CHANGE:
 */
 #define WAIT_RESPONSE_INTERVAL       1000//4000// in Milliseconds
 
+//maximal duration for one slot of a pump  [INTERVAL/10] seconds
 #define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // measurement policy
 #define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s]
 
 /*
+* PUMP DEFINE
 * What is the maximum time that a pump state machine is allowed to remain
 * Controller PumpHandler max state time  = PUMPNODE_CRITICAL_STATE_OCCUPATION
 * Pump Node max state time  = PUMPNODE_CRITICAL_STATE_OCCUPATION / 2
@@ -650,6 +655,7 @@ struct nodeListElement
   // Bit 3: SENSOR_PUMP1:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 1. Every SensorNode has two moisture sensors..)
   // Bit 4: SENSOR_PUMP2:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 2. Every SensorNode has two moisture sensors..)
   byte     watering_policy;
+  uint8_t  pumpnode_state_error_counter;//instead in pumphandler I put it here to count no reachability
 
 };
 
@@ -658,7 +664,8 @@ struct nodeListElement
 class nodeList
 {
 public:
-  nodeList(){mnNodeCount=0; mnCycleCount = 0; mnPreviouslyScheduledNode = NODELISTSIZE; mnPumpSlot = 0; mnPumpSlotEnable = false; mnCurrentInterval = 0;}
+  nodeList(){mnNodeCount=0; mnCycleCount = 0; mnPreviouslyScheduledNode = NODELISTSIZE;
+    mnPumpSlot = 0; mnPumpSlotEnable = false; mnCurrentInterval = 0;pumpnode_state_error_counter=0;}
   struct nodeListElement myNodes[NODELISTSIZE];
   time_t   mnPumpSlot;
   uint16_t mnNodeCount;
@@ -666,7 +673,7 @@ public:
   uint16_t mnPreviouslyScheduledNode;
   uint16_t mnActivePump;
   uint16_t mnLastAddedSensorNode;
-  uint16_t mnCurrentInterval;
+  uint16_t mnCurrentInterval;//Bernhard@: Brauch ma das, nimmt Speicherplatz weg
   bool     mnPumpSlotEnable;
 
 
@@ -789,7 +796,7 @@ public:
         pumpnode_dif=0;
         pumpnode_debugCounter=DEBUG_CYCLE;
         pumphandler_ID=0;
-        pumpnode_state_error_counter=1;
+        //pumpnode_state_error_counter=1;
         pumpnode_reponse_available=false;
         pumpnode_status_packet=pumpnode_status;
         #if (DEBUG_PUMP>0)
@@ -821,7 +828,7 @@ public:
     void     setPumpHandlerID(uint16_t ID_);
     uint16_t getPumpHandlerID(void);
     /*How many times I reached the state error*/
-    uint8_t  getStateErrorCount(void);
+    //uint8_t  getStateErrorCount(void);
     bool     getResponseAvailability(void);
 
 private:
@@ -845,7 +852,7 @@ private:
 
     uint16_t pumpnode_debugCounter;
     uint16_t pumphandler_ID;
-    uint8_t  pumpnode_state_error_counter;
+    //uint8_t  pumpnode_state_error_counter;
     int8_t pumpnode_status;                //in which status is the PUMP Node
     /*packet which is send contains a state footprint
     * must not be equal to pumpnode_status, pumpnode_status variable changes

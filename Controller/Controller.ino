@@ -72,8 +72,10 @@ bool bResponseNeeded = true;
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
 //function to initiate radio device with radio(CE pin,CS pin)
 RF24 radio(D6,A2);
+#define LED_BUILTIN D7
 #else
 RF24 radio(9, 10);
+//#define LED_BUILTIN D13 is already defined in Arduino.h
 #endif
 
 //brauchen wir 3 pipes!!!!!!!!!!??
@@ -463,7 +465,7 @@ void loop(void)
       DEBUG_PRINTSTR_D("\tResponse sending is skipped: ", DEBUG_MESSAGE);
       DEBUG_PRINTLNSTR_D("[CONTROLLER] Listening now...", DEBUG_MESSAGE);
 
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_BUILTIN, HIGH);
     write_cnt=1;//reset
   }//  if (radio.available())
 
@@ -570,14 +572,7 @@ void loop(void)
         if (bProcessPumps == true)    // The pumps have to be processed?
         {
           //Bernhard@ only checkl PumpList.size()==0 and else is under Debug wrapping, can be optionally compiled
-          if (PumpList.size() > 0)    // are there still active pumps?
-          {
-            //Bernhard@: Finde das ist Bad practice, ein if für eine Debug message
-            //falls ma Debug abdrehen, beleiben solche Code Konstrukte übrig, abhängig wie der Compiler das handhabt
-            DEBUG_PRINTLNSTR_D("\t\t Waiting for pump to finish pumping...", DEBUG_MESSAGE);
-
-          }
-          else
+          if (PumpList.size() == 0)    // are there still active pumps?
           {
             DEBUG_PRINTLNSTR_D("\t\t No currently active pump.. Next pump can be started.", DEBUG_MESSAGE);
 
@@ -590,6 +585,8 @@ void loop(void)
 
               if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<NODELIST_NODETYPE)) == 1)       // it is a pump node
               {
+
+
                 #if(DEBUG_MESSAGE>0)
                 DEBUG_PRINTSTR("\t\t Node ID: ");
                 DEBUG_PRINT(myNodeList.mnActivePump);
@@ -627,11 +624,11 @@ void loop(void)
                   }
                 #endif
 
-/* Here is the actual watering logic:
- *  It checks whether watering is needed for any of the two pumps.
- *  If so, it starts the pump handler for the corresponding pumpnode
- *  and transmits the watering instructions.
-*/
+      /* Here is the actual watering logic:
+       *  It checks whether watering is needed for any of the two pumps.
+       *  If so, it starts the pump handler for the corresponding pumpnode
+       *  and transmits the watering instructions.
+      */
                 if ((myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture <= WATERING_THRESHOLD) || (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture <= WATERING_THRESHOLD))
                 //if (1)
                 {
@@ -654,7 +651,10 @@ void loop(void)
                   DEBUG_PRINTLNSTR("\t\tNo watering needed.");
                 }
                 #endif
-              }//end check if it is a pump
+
+
+
+              }//end check if it is a pump node
               #if(DEBUG_MESSAGE>0)
               else
               {
@@ -664,7 +664,14 @@ void loop(void)
               }
               #endif
             }//for
-          }//else of  if (PumpList.size() > 0)
+          }//  if (PumpList.size() == 0)
+          #if (DEBUG_PUMP_SCHEDULING>0)
+          else{
+            //Bernhard@: Hab das runtergegeben
+            DEBUG_PRINTLNSTR("\t\t Waiting for pump to finish pumping...");
+
+          }
+          #endif
 
           // If the loop finishes, all pumps have been processed
           if (myNodeList.mnActivePump >= myNodeList.mnNodeCount)
@@ -781,44 +788,15 @@ if (PumpList.size() > 0)
       DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:RESTART PUMP ID:"); DEBUG_PRINT(handler->getID());
       DEBUG_PRINTSTR(" ,PumpTime: "); DEBUG_PRINTLN(handler->getPumpTime());
       #endif
-      //@Marko should PUMP always be restarted, maybe it is OFFLINE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      if (handler->getStateErrorCount() < MAX_RETRIES) {
-        uint8_t ret = doWateringTasks(handler->getID(), handler->getPumpTime(), 0, handler);//getPumpTime is in ms
-        #if(DEBUG_MESSAGE>0)
-        DEBUG_PRINTSTR("[CONTROLLER]");
-        DEBUG_PRINTSTR("This is the pumpnode_state_error_counter: ");
-        DEBUG_PRINT(handler->getStateErrorCount());
-        DEBUG_PRINTSTR(" attempt of  ");
-        DEBUG_PRINT(MAX_RETRIES);
-        DEBUG_PRINTLNSTR(" retries. ");
-        DEBUG_PRINTSTR("[CONTROLLER]");
-        DEBUG_PRINTLN(handle_ErrorMessages(ret));
-        #endif
-        if (ret > 0) {
-          #if(DEBUG_MESSAGE>0)
-          DEBUG_PRINTSTR("[CONTROLLER]");
-          DEBUG_PRINTSTR("ERROR:Deleting PumpHandler Class because ");
-          DEBUG_PRINTSTR("of some Error in doWateringTasks()");
-          #endif
-          removePumphandler(i, handler);
-          i--;
 
-          printFreeRam();
-        }
-      } else {
-        #if(DEBUG_MESSAGE>0)
-        DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTSTR("ERROR:PUMP IS NOT RESPONDING(");
-        DEBUG_PRINT(MAX_RETRIES);
-        DEBUG_PRINTSTR(" RETRIES), ");
-        DEBUG_PRINTSTR("DELETE PUMPHANDLER AND SET PUMP NODE "); DEBUG_PRINT(handler->getID());
-        DEBUG_PRINTLNSTR(" OFFLINE, THAT PUMP NODE MUST REGISTRATE AGAIN.");
-        #endif
-        myNodeList.setNodeOffline(handler->getID());
-        removePumphandler(i, handler);
-        i--;
 
-        printFreeRam();
-      }
+
+      //myNodeList.setNodeOffline(handler->getID());
+      removePumphandler(i, handler);
+      i--;
+
+      printFreeRam();
+
     }
   }//for
 
@@ -1144,6 +1122,10 @@ void handleRegistration(void)
 
   if ((myData.state & (1 << NODE_TYPE)) == 0)
   {
+    /*Bernhard@: At regigstration the Sensor Node gets NO scheduled Time in variable myResponse.Interval
+    *           ,the session ID is not a valid time schedule
+    *           Until SensorNode sends his new Data it has to wait for its regular schedule, think thats wrong
+    */
     setDATA_SensorPacket(&myResponse);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]SensorNode");
     currentNode.state &= ~(1 << NODELIST_NODETYPE);  // SensorNode
@@ -1314,16 +1296,10 @@ void handleMotorMessage(void)
       if (handler->getID() == myData.ID)
       {
         /*
-        *dummy8 contains state from pumpnode, if the message state  is not equal
+        *handler->getState() contains state from pumpnode, if the message state  is not equal
         *pumphandler state, we have a redundant message here, which will be skipped
         */
-        /*LÖSCHEN*/
-        DEBUG_PRINTSTR("[CONTROLLER]");
-        DEBUG_PRINTSTR("[handleMotorMessage()]NOTIFY:MYDATA->PUMPSTATE :");
-        DEBUG_PRINTLN(getData_PumpState(&myData));
-        DEBUG_PRINTSTR("\t HANDLER->STATE:");
-        DEBUG_PRINTLN(handler->getState());
-        /*LÖSCHEN*/
+
         if(getData_PumpState(&myData) ==  handler->getState())
         {
 
@@ -1424,7 +1400,8 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
 
   DEBUG_PRINTSTR_D("\t\tNumber of Sensor Nodes: ", DEBUG_SENSOR_SCHEDULING);
   DEBUG_PRINTLN_D(myNodeList.getNumberOfNodesByType(SENSORNODE), DEBUG_SENSOR_SCHEDULING);
-
+  //Bernhard@:
+  //Cycle is (number of registrated sensornodes * INTERVAL / 10)*WATERING_CYCLES_TO_WAIT + (# of pumps)*INTERVAL/60 ?????
   time_t tLastScheduledSensorNode = myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot;   // get the last scheduled time slot of all sensor nodes
   DEBUG_PRINTSTR_D("\t\tTime of last scheduled sensor node: ", DEBUG_SENSOR_SCHEDULING);
   DEBUG_PRINTLN_D(tLastScheduledSensorNode, DEBUG_SENSOR_SCHEDULING);
@@ -1443,7 +1420,7 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
   //  myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL;
 
   // are there active tasks? (Including the current one)
-  if (tLastScheduledSensorNode > currentTime - 7)  // yes
+  if (tLastScheduledSensorNode > currentTime - 7)  // yes   //Bernhard@: 7 ?
   {
     DEBUG_PRINTLNSTR_D("\t\tThere are tasks active", DEBUG_SENSOR_SCHEDULING);
     myNodeList.myNodes[nodeIndex].nextSlot = tLastScheduledSensorNode + INTERVAL / 10;
@@ -1501,7 +1478,7 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
 }
 
 
-void printNodeList(time_t currentTime)
+void printNodeList(time_t currentTime)//Bernhard@: wozu parameter currentTime???????????
 {
   uint16_t i;
   if (DEBUG_LIST_SENSOR_SCHEDULING == 0)
