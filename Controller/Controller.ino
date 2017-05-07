@@ -537,6 +537,7 @@ void loop(void)
     static bool bProcessPumps = false;
     uint16_t SensorNode_Pump1;
     uint16_t SensorNode_Pump2;
+    bool sens1_mo1=false,sens1_mo2=false,sens2_mo1=false,sens2_mo2=false;
 
     nTestWatering++;
 
@@ -605,22 +606,30 @@ void loop(void)
             {
               DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
               DEBUG_PRINT(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture);
+              if (myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture <= WATERING_THRESHOLD)
+                sens1_mo1=true;
             }
             else                      // pump 1 is attached to moisture sensor 2
             {
               DEBUG_PRINTSTR("\t\t\tMoisture 2: ");
               DEBUG_PRINTLN(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2);
+              if (myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2 <= WATERING_THRESHOLD)
+                sens1_mo2=true;
             }
 
             if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP2)) == 0) // pump 2 is attached to moisture sensor 1
             {
               DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
               DEBUG_PRINT(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture);
+              if (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture <= WATERING_THRESHOLD)
+                sens2_mo1=true;
             }
             else                      // pump 2 is attached to moisture sensor 2
             {
               DEBUG_PRINTSTR("\t\t\tMoisture 2: ");
               DEBUG_PRINTLN(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2);
+              if (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2 <= WATERING_THRESHOLD)
+                sens2_mo2=true;
             }
             #endif
 
@@ -629,10 +638,9 @@ void loop(void)
             *  If so, it starts the pump handler for the corresponding pumpnode
             *  and transmits the watering instructions.
             */
-            if ((myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture <= WATERING_THRESHOLD) ||
-            (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture <= WATERING_THRESHOLD) ||
-            myNodeList.myNodes[myNodeList.mnActivePump].pumpnode_state_error_counter>0) //Marko@: here is my restart mechanism of a pump
-            //if (1)
+            //Marko@ I adapted for alle sensornodes and moisture sensors configiration, hope thats correct
+            if ( sens1_mo1 || sens1_mo2 || sens2_mo1 || sens2_mo2 ||
+              myNodeList.myNodes[myNodeList.mnActivePump].pumpnode_state_error_counter>0) //Marko@: here is my restart mechanism of a pump
             {
               DEBUG_PRINTLNSTR_D("[TEST_PUMP==2]\t\tWatering needed.", DEBUG_PUMP_SCHEDULING);
               DEBUG_PRINTSTR("\t\tTurn on Pump with ID ");DEBUG_PRINTLN(myNodeList.myNodes[myNodeList.mnActivePump].ID);
