@@ -57,8 +57,8 @@
 #define DEBUG_MESSAGE_HEADER_2 0		// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE 1
 #define DEBUG_PUMP_SCHEDULING 1			// 0: disabled		1: show details about the pump scheduler
-#define DEBUG_DATA_CONTENT 0//1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
-#define DEBUG_SENSOR_SCHEDULING 1		// 0: disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
+#define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
+#define DEBUG_SENSOR_SCHEDULING 1		// 0 : disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
 #define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
@@ -111,7 +111,7 @@
   #define DEBUG_PRINTSTR(x)
   #define DEBUG_PRINTSTR_D(x, d)
   #define DEBUG_PRINTDIG(x, c)
-  #define DEBUG_PRINTLNDIG(x, c) 
+  #define DEBUG_PRINTLNDIG(x, c)
   #define DEBUG_PRINTLN(x)
   #define DEBUG_PRINTLN_D(x, d)
   #define DEBUG_PRINTLNSTR(x)
@@ -393,11 +393,16 @@ DO NOT CHANGE:
 #if (HW == HW_PHOTON)
   #define HW_RTC_PIN  D4			// for turning on/off the RTC at the Particle
 #else
-  #define HW_RTC_PIN  8				// for turning on/off the RTC at the Arduino
+  #define SENSOR_POWER  8
+  #define HW_RTC_PIN  SENSOR_POWER				// for turning on/off the RTC at the Arduino
 #endif
-#define randomPIN A6
+
+#define randomPIN         A6
 #define BATTERY_SENSE_PIN A3		// Pin for Battery voltage
 #define DHT11PIN 5					// Pin number for temperature/humidity sensor
+#define MOISTURE_PIN      A0
+#define MOISTURE_PIN_2    A2
+#define LIGHT_PIN         A1
 #define MOISTURE_THRESHOLD (1000)	// wet/dry threshold
 #define LIGHT_THRESHOLD (512)		// day/nigth threshold
 #define BAUD (57600)				// serial BAUD rate
@@ -405,10 +410,10 @@ DO NOT CHANGE:
 #define IREF  (1.1)					// 1V1 voltage of the ADC
 #define RTC_SYNC_THRESHOLD (10)		// How many seconds the Controller and Node clocks can drift apart before resynchronization
 #define REF_VAL	(1.1)				// actual voltage of the 1.1 regulator
-#define V_max (6.0)
+#define V_max (6.6) //Marko@: to reach V_ADC_max=1,1V : Failure between measured and read value now only ~ 1%
 #define R1 (109300.0)
 #define R2 (497000.0)
-#define V_ADC_max (R1*V_max / ((R1+R2)))
+#define V_ADC_max (R1*V_max / ((R1+R2))) //marko@: should be 1,1 V because of analog internal reference, which is the max
 #define VOLTAGE_GAP (IREF - V_ADC_max)
 #define MAX_OFFSET (VOLTAGE_GAP / (IREF - V_ADC_max))
 #define VOLTS_PER_SCALE (IREF / 1024.0)
