@@ -186,9 +186,6 @@
 class RTCLayer
 {
 public:
-  //Bernhard@: Ich frage mich cht was das für ein Compiler  in der AArduino IDE
-  //da der
-	//virtual RTCLayer() {}
   virtual ~RTCLayer() {}
 	virtual int init(uint8_t* state)=0;
 	virtual	uint8_t setTime(time_t)=0;
@@ -354,7 +351,7 @@ DO NOT CHANGE:
 #define WAIT_RESPONSE_INTERVAL       1000//4000// in Milliseconds
 
 //maximal duration for one slot of a pump  [INTERVAL/10] seconds
-#define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]!
 
 // measurement policy
 #define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s]
@@ -425,7 +422,6 @@ DO NOT CHANGE:
 #define VOLTS_PER_SCALE (IREF / 1024.0)
 #define SCALE_OFFSET (VOLTAGE_GAP / VOLTS_PER_SCALE)
 #define VOLTAGE_DIVIDER_FACTOR ((R1+R2)/R1)	// division factor by the resistors
-#define REMAINING_FLAG_SPACE (5)    // number of flags left in the EEPROM settings (6 bit max, because we want to merge some addresses in future)
 
 
 
@@ -463,9 +459,6 @@ DO NOT CHANGE:
 #define FETCH_EEPROM_DATA1    (1)
 #define FETCH_EEPROM_DATA2    (2)
 #define ID_INEXISTENT         (3)       // there is no such ID
-//#define EEPROM_OVERFLOW_OFFSET_BIT (1<<5*6-5)
-#define EEPROM_OVERFLOW_OFFSET_BIT (1L<<5*REMAINING_FLAG_SPACE)
-#define NODE_TYPE_MISMATCH    (6)
 #define ID_REGISTRATION_ERROR (7)
 
 
@@ -626,7 +619,7 @@ public:
 
   uint8_t init();
 //	uint8_t findIndex();
-  void add(struct Data);//Bernhard@:Rückgabewert war uint8_t
+  void add(struct Data);
   void getNext(struct Data *);
   uint8_t remove(uint16_t);
   void findQueueEnd();
@@ -710,7 +703,7 @@ public:
   uint16_t mnPreviouslyScheduledNode;
   uint16_t mnActivePump;
   uint16_t mnLastAddedSensorNode;
-  uint16_t mnCurrentInterval;//Bernhard@: Brauch ma das, nimmt Speicherplatz weg
+  uint16_t mnCurrentInterval;
   bool     mnPumpSlotEnable;
 
 
@@ -785,7 +778,7 @@ class CommandHandler
 {
   public:
     CommandHandler();
-    void getInteractiveCommands();//Bernhard@::rückgabetyp war uint8_t
+    void getInteractiveCommands();
     uint8_t checkSchedule(struct nodeList, uint16_t*, uint16_t*, time_t);
   private:
     uint16_t mnCurrentIndex;

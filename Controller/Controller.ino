@@ -536,7 +536,6 @@ void loop(void)
     #elif (TEST_PUMP == 2)
     /* second test .. or real mode..we will see*/
     time_t myCurrentTime;
-    //static time_t myPreviousTime;//Bernhard@: use memory and is not used
     static bool bProcessPumps = false;
     uint16_t SensorNode_Pump1;
     uint16_t SensorNode_Pump2;
@@ -581,6 +580,7 @@ void loop(void)
           DEBUG_PRINTLNSTR_D("\t\t No currently active pump.. Next pump can be started.", DEBUG_MESSAGE);
 
           // Now the pumps have to be processed, one after the other.
+
           //for loop shpudl be deleted and "if ((nTestWatering % DEBUG_CYCLE) == 0 )", so in every loop cycle
           //a check is performed here and ntestwatering is mnActivePump will be increased
 
@@ -603,7 +603,7 @@ void loop(void)
             #if(DEBUG_PUMP_SCHEDULING>0)
             //Marko@: maybe a pump has to be restarted(check errorCounter in the Pumphandler), then there is no check necessary
             //or a restart is even not necessary because the moisture didnt increase, maybe that fact is easier
-            //Bernhard@: Where is the assignment of a pump to a moisture sensor
+
             if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP1)) == 0) // pump 1 is attached to moisture sensor 1
             {
               DEBUG_PRINTSTR("\t\t\tMoisture 1: ");

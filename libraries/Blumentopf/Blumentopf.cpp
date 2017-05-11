@@ -165,7 +165,7 @@ int RTC_DS3231::init(uint8_t* state)
 
 	//turn off 32kHz pin:
 	  //byte temp_buffer = temp_buffer & 0b11110111;
-		//Bernhard@: temp_buffer uinitialised
+
 		byte temp_buffer = 0b11110111;
 	  writeControlByte(temp_buffer, 1);
 
@@ -211,7 +211,6 @@ time_t RTC_DS3231::getTime()
 }
 int RTC_DS3231::setAlarm(time_t)
 {
-	//Bernhard@: Funktion leer???
 	return 0;
 }
 
@@ -284,8 +283,6 @@ int RTC_DS3232::init(uint8_t* state)
 	DEBUG_PRINTSTR("Initializing the RTC DS3232...");
 	DEBUG_PRINTLNSTR("done");
   }
-  //Bernhard@: wozu war das nochmal???
-	//*state |= (1 << RTC_RUNNING_BIT);			// set it to valid, otherwise adjust will not react..
 }
 
 /*
@@ -715,13 +712,9 @@ void DataStorage::findQueueEnd()
 	nCurrentAddress = mnDataBlockBegin;
 
 	uint16_t nAddressOfOldestElement=0;
-
-	//Bernhard@: Variablen initialisieren bitte
 	uint16_t nAddressBeforeOldestElement=0;
+	uint16_t nPreviousOldestElement=0;
 	struct Data currentElement;
-
-  uint16_t nPreviousOldestElement=0;
-
 
 
 	firstItemTimestamp = 0;
@@ -1545,6 +1538,11 @@ uint16_t nodeList::getNumberOfNodesByType(uint8_t nodeType)
   return nNumberOfTypedNodes;
 }
 
+/*
+*  Returns the node which is the last in the scheduling plan.
+*  It's important to know which node is the last in order to 
+*  calculate the scheduling point of the next node.
+*/
 uint16_t nodeList::getLastScheduledSensorNode()
 {
   uint16_t i, nLastScheduledNodeIndex = 0;
@@ -1569,15 +1567,22 @@ uint16_t nodeList::getLastScheduledSensorNode()
     }
   }
 
-  return nLastScheduledNodeIndex;//Failure
+  return nLastScheduledNodeIndex;
 }
 
 
+/*
+*  Calculates how long the pumping epoch will last.
+*  This is needed, as the sensor nodes have to be scheduled before the pump epoch.
+* It returns the duration in seconds.
+*/
 uint16_t nodeList::getPumpEpochLength()
 {
   uint16_t nPumpNodeCount = getNumberOfNodesByType(PUMPNODE);
-	//Bernhard@: Sollt ma die net ausschließen, die Offline sind?
-  return nPumpNodeCount * INTERVAL / 10;  //Bernhard@:returns second??
+  // todo : should be extended to getNumberOfNodesByType(PUMPNODE, online);
+  
+  
+  return nPumpNodeCount * INTERVAL / 10;	// [s]
 }
 
  /*
