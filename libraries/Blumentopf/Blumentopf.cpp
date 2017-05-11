@@ -753,12 +753,6 @@ void DataStorage::findQueueEnd()
 	//	mnLastData = nCurrentAddress - sizeof(currentElement);		// the address of the last item is the address we have been looking for
 		mnLastData = nPreviousAddress;
 
-    if (nPreviousOldestElement & EEPROM_OVERFLOW_OFFSET_BIT)    // offset reached, reset it!
-    {
-      struct EEPROM_Data myEEPROMData;    // reset the ID, since the offset is reached
-      myEEPROMData.ID = 1;
-      EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // writing the data (ID) back to EEPROM...
-    }
 	}
 
 	DEBUG_PRINTSTR_D("Next: ", DEBUG_DATA_STORAGE);
