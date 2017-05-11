@@ -753,8 +753,9 @@ void DataStorage::findQueueEnd()
 	//	mnLastData = nCurrentAddress - sizeof(currentElement);		// the address of the last item is the address we have been looking for
 		mnLastData = nPreviousAddress;
 
-    if (nPreviousOldestElement & EEPROM_OVERFLOW_OFFSET_BIT)    // offset reached, reset it!
-    {
+    //if (nPreviousOldestElement & EEPROM_OVERFLOW_OFFSET_BIT)    // offset reached, reset it!
+		if (nPreviousOldestElement)
+		{
       struct EEPROM_Data myEEPROMData;    // reset the ID, since the offset is reached
       myEEPROMData.ID = 1;
       EEPROM.put(EEPROM_ID_ADDRESS,myEEPROMData);   // writing the data (ID) back to EEPROM...
@@ -1540,7 +1541,7 @@ uint16_t nodeList::getNumberOfNodesByType(uint8_t nodeType)
 
 /*
 *  Returns the node which is the last in the scheduling plan.
-*  It's important to know which node is the last in order to 
+*  It's important to know which node is the last in order to
 *  calculate the scheduling point of the next node.
 */
 uint16_t nodeList::getLastScheduledSensorNode()
@@ -1580,8 +1581,8 @@ uint16_t nodeList::getPumpEpochLength()
 {
   uint16_t nPumpNodeCount = getNumberOfNodesByType(PUMPNODE);
   // todo : should be extended to getNumberOfNodesByType(PUMPNODE, online);
-  
-  
+
+
   return nPumpNodeCount * INTERVAL / 10;	// [s]
 }
 

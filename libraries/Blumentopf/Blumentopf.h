@@ -74,6 +74,9 @@
 #define DEBUG_RF24 0				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
 #define DEBUG_TIMING_LOOP 1				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
 #define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function
+#ifdef PARTICLE_CLOUD
+  #define DEBUG_PARTICLE_CLOUD 1
+#endif
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0			// 0: disabled		1: for analysing the EEPROM Data class internals
 #define DEBUG_SENSOR_MESSAGE_HEADER 0	// 0: disabled		1:  //only in SensorNode.ino
@@ -459,9 +462,9 @@ DO NOT CHANGE:
 #define FETCH_EEPROM_DATA1    (1)
 #define FETCH_EEPROM_DATA2    (2)
 #define ID_INEXISTENT         (3)       // there is no such ID
-#define ID_REGISTRATION_ERROR (7)
-
-
+#define ID_REGISTRATION_ERROR (4)
+#define PUMP1_USED            (5)
+#define PUMP2_USED            (6)
 
 #define FETCH_EEPROM_REG_SKIP     (0)
 #define FETCH_EEPROM_REG_SEND     (2)
@@ -957,7 +960,7 @@ void printFreeRam();
 #define LWAT_TXT      "Last Watering:"
 #define P_TXT         "PumpID:"
 
-#define MAX_TRACKED_SENSORS 2  //mAXIMUM IS 20
+#define MAX_TRACKED_SENSORS 3  //mAXIMUM IS 20
 #define SENSOR_TRACKNAME_PREFIX "SensorData"
 /*
 struct SensorD {
@@ -995,20 +998,25 @@ class HomeWatering {
       for(int i=0;i<MAX_TRACKED_SENSORS;i++)
       {
 
-          String name=(String::format("%s%d",SENSOR_TRACKNAME_PREFIX,i));
+          String name=(String::format("%s_%d",SENSOR_TRACKNAME_PREFIX,i));
+
           int len=name.length()+1;
           char buf[len];
           name.toCharArray(buf,len);
           buf[len-1]='\0';
           const char* buf_=buf;
+          DEBUG_PRINTSTR_D("[PARTICLE][Variable]:",DEBUG_PARTICLE_CLOUD);
+          DEBUG_PRINTLN_D(buf,DEBUG_PARTICLE_CLOUD);
 
 
-
-          ret&=Particle.variable(buf_, &(Particle_SensorData[i].SensorTXT),STRING);
+          ret &= Particle.variable(buf_, &(Particle_SensorData[i].SensorTXT),STRING);
           Particle_SensorData[i].SensorID=0;
+          DEBUG_PRINTLN_D(ret,DEBUG_PARTICLE_CLOUD);
       }
-      if(!ret)
-        DEBUG_PRINTSTR("[PARTICLE]"); DEBUG_PRINTLNSTR("VARIABLE NOT REGISTERED.");
+      if(ret==false)
+      {
+        DEBUG_PRINTSTR_D("[PARTICLE]",DEBUG_PARTICLE_CLOUD); DEBUG_PRINTLNSTR_D("VARIABLE NOT REGISTERED.",DEBUG_PARTICLE_CLOUD);
+      }
       //Particle.function("brew", &CoffeeMaker::brew, this);
     }
 

@@ -91,12 +91,13 @@ uint8_t i_=0;
 #endif
 
 
-
-/**************PARTICLE CLOUD*****************************************/
 #ifdef PARTICLE_CLOUD
-HomeWatering myHomeWatering;
+
+  /**************PARTICLE CLOUD*****************************************/
+  HomeWatering* myHomeWatering;
+  /**********************************************************************/
 #endif
-/**********************************************************************/
+
 
 /*
 SETUP
@@ -113,7 +114,7 @@ void setup(void)
 {
   DEBUG_SERIAL_INIT_WAIT;
 
-  #if(HW==HW_PHOTON  && DEBUG==1)
+  #if(HW==HW_PHOTON  && DEBUG_==1)
 
   uint16_t max_cnt=30000;
   uint32_t _timer_=millis();
@@ -144,6 +145,7 @@ void setup(void)
   radio.openWritingPipe(pipes[0]);
   radio.startListening();
   pinMode(LED_BUILTIN, OUTPUT);
+
 
   DEBUG_PRINTLNSTR("\r\n****************************************************");
   /*The Photon Board is not able to print messages from Setup() from Startup
@@ -210,7 +212,12 @@ void setup(void)
 
   DEBUG_FLUSH;
 
-
+  #ifdef PARTICLE_CLOUD
+    DEBUG_PRINTLNSTR("\r\n***************with PARTICLE CLOUD********************");
+    /**************PARTICLE CLOUD*****************************************/
+    myHomeWatering=new HomeWatering();
+    /**********************************************************************/
+  #endif
 
 }//setup
 
@@ -273,7 +280,7 @@ void loop(void)
   //DEBUG_PRINT(":");
   //  DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
 
-  #if (DEBUG==1)
+  #if (DEBUG_==1)
   duration_loop=micros();
 
   #if(DEBUG_INFO>0)
@@ -302,7 +309,7 @@ void loop(void)
     #endif
   }//if((millis()-time_)>20000)
   #endif//#if(DEBUG_INFO>0)
-  #endif//#if (DEBUG==1)
+  #endif//#if (DEBUG_==1)
 
   //uint8_t nPipenum;
 
@@ -1292,7 +1299,7 @@ void handleDataMessage(void)
 
 /*******************PARTICLE ***********************************/
 #ifdef PARTICLE_CLOUD
-  myHomeWatering.setParticleVariableString(&myNodeList,nodeIndex);
+  myHomeWatering->setParticleVariableString(&myNodeList,nodeIndex);
 #endif
 /*****************************************************************/
 
