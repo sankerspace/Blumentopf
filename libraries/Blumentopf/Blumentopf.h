@@ -19,6 +19,8 @@
 // sets Particle or photon:
 #define HW_ARDUINO  1
 #define HW_PHOTON   2
+#define USEParticleCloud 1 //sitch only used in case of particle photon
+
 
 #if defined(SPARK) || defined(PLATFORM_ID)
   #define HW  HW_PHOTON  // tells whether to compile for Arduino or Photon
@@ -36,6 +38,9 @@
 #endif
 
 #if (HW == HW_PHOTON)
+  #if (USEParticleCloud==1)
+    #define PARTICLE_CLOUD
+  #endif
   #include <application.h>
   #ifdef F
     #undef F  //because its defined in application.h and that cannot handle const string
@@ -51,7 +56,8 @@
 /****************************** D E B U G **********************************************/
 /**************************************************************************************/
 // General debug messages:
-#define DEBUG 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
+//Marko@:dont change DEBUG_ i have a warning about redundant definition
+#define DEBUG_ 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
 #define DEBUG_MESSAGE_HEADER 0			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE_HEADER_2 0		// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
@@ -65,7 +71,7 @@
 #define DEBUG_INFO 0         			// 0: disabled		1: show infos
 #define DEBUG_PUMP 1					//DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
 #define DEBUG_PUMP_ROUNDTRIPTIME 1
-#define DEBUG_RF24 0					//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
+#define DEBUG_RF24 0				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
 #define DEBUG_TIMING_LOOP 1				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
 #define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function
 // For debugging the sensor node
@@ -80,7 +86,7 @@
 
 
 // For getting rid of serial communication in the release version:
-#if (DEBUG == 1)
+#if (DEBUG_== 1)
   #define DEBUG_PRINT(x)        		Serial.print(x)
   #define DEBUG_PRINT_D(x, d)   		if(d>0){ Serial.print(x);}
   #define DEBUG_PRINTSTR(x)     		Serial.print(F(x))
@@ -671,6 +677,9 @@ struct nodeListElement
   uint16_t sensorID1;    // in case it is a motor node, the SensorNode corresponding to the pump1 is stored here.
   uint16_t sensorID2;    // in case it is a motor node, the SensorNode corresponding to the pump2 is stored here.
   uint8_t state;
+  String name;  //Moisture 1
+  String name2; //Moisture 2
+  String location;
   // Bit 0: NODELIST_NODETYPE:   0...this is a SensorNode, 1...this is a MotorNode
   // Bit 1: NODELIST_PUMPACTIVE: 0...inactive, 1...active (is currently pumping[1] or not[0])
   // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE,  1...ONLINE (the node has performed a registration)
@@ -683,7 +692,7 @@ struct nodeListElement
   */
   uint8_t  pumpnode_state_error_counter;
 
-};
+};//4+2+221
 
 // 7258155010
 // 1490033280
@@ -738,6 +747,13 @@ public:
   *0x01 .. Sensor or Pump Node has performed a registration(and responds always)
   */
   uint8_t isOnline(uint16_t ID); // PumpNode currently active or not
+
+  void setNodeName(uint16_t ID,String name);
+  String getNodeName(uint16_t ID);
+  void setNodeName2(uint16_t ID,String name2);
+  String getNodeName2(uint16_t ID);
+  void setNodeLocation(uint16_t ID,String location);
+  String getNodeLocation(uint16_t ID);
 };
 
 
@@ -924,3 +940,94 @@ void printFreeRam();
 /******************************  B U T T O N ******************************************/
 /**************************************************************************************/
 // standard routine
+
+
+
+
+/***************************************************************************************/
+/******************************  P A R T I C L E ******************************************/
+/**************************************************************************************/
+
+#ifdef PARTICLE_CLOUD
+
+
+#define S_ID_TXT      "Sensor NodeID:"
+#define PL_TXT        "PlantName:"
+#define LOC_TXT       "Location:"
+#define TEMP_TXT      "Temperature:"
+#define MOI_TXT       "Moisture:"
+#define HU_TEXT       "Humidity:"
+#define BR_TXT        "Brightness:"
+#define BAT_TXT       "Battery:"
+#define LWAT_TXT      "Last Watering:"
+#define P_TXT         "PumpID:"
+
+#define MAX_TRACKED_SENSORS 2  //mAXIMUM IS 20
+#define SENSOR_TRACKNAME_PREFIX "SensorData"
+/*
+struct SensorD {
+  float temperature;//4byte		// should be shortended to uint16_t
+  float humidity;//4byte			// should be shortended to uint16_t
+  time_t Time;//4byte
+  uint32_t pumpTime;// 4byte    ---> interval
+  uint16_t ID; //2 Byte
+
+  uint16_t interval; // 2byte
+  uint16_t voltage; //2 Byte
+  uint16_t VCC; //2 Byte
+  uint16_t moisture; //2 Byte
+  uint16_t moisture2;//2 Byte
+  uint16_t brightness; //2 Byte
+};
+*/
+/*
+*Particle
+* All interaction with pArticle Cloud is concentrated in this class
+*/
+struct Particle_Node
+{
+  String SensorTXT;
+  uint16_t SensorID;
+};
+
+class HomeWatering {
+  public:
+    HomeWatering() {
+
+
+
+      bool ret=true;
+      for(int i=0;i<MAX_TRACKED_SENSORS;i++)
+      {
+
+          String name=(String::format("%s%d",SENSOR_TRACKNAME_PREFIX,i));
+          int len=name.length()+1;
+          char buf[len];
+          name.toCharArray(buf,len);
+          buf[len-1]='\0';
+          const char* buf_=buf;
+
+
+
+          ret&=Particle.variable(buf_, &(Particle_SensorData[i].SensorTXT),STRING);
+          Particle_SensorData[i].SensorID=0;
+      }
+      if(!ret)
+        DEBUG_PRINTSTR("[PARTICLE]"); DEBUG_PRINTLNSTR("VARIABLE NOT REGISTERED.");
+      //Particle.function("brew", &CoffeeMaker::brew, this);
+    }
+
+    //int brew(String command) {
+      // do stuff
+  //    return 1;
+  //  }
+    int8_t isTrackedSensor(uint16_t ID);//if tracked return number of
+    void setParticleVariableString(nodeList* list,uint16_t index);
+
+    struct Particle_Node Particle_SensorData[MAX_TRACKED_SENSORS];
+
+
+
+};
+
+#endif //#ifdef PARTICLE_CLOUD

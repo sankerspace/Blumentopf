@@ -531,7 +531,7 @@ void displayTime(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOf
 
 void displayTimeFromUNIX(time_t showTime, uint8_t nDepth)
 {
-#if (DEBUG == 1)
+#if (DEBUG_== 1)
 	tmElements_t tm;
 	breakTime(showTime, tm);
 
@@ -1676,7 +1676,57 @@ uint16_t nodeList::getPumpEpochLength()
     return 0xff;
   }
 
+	void nodeList::setNodeName(uint16_t ID,String name)
+	{
+		for(int index=0;index<mnNodeCount;index++)
+    {
+      if(myNodes[index].ID==ID){
+				myNodes[index].name=name;
+      }
+    }
+	}
 
+	void nodeList::setNodeName2(uint16_t ID,String name2)
+	{
+		for(int index=0;index<mnNodeCount;index++)
+    {
+      if(myNodes[index].ID==ID){
+				myNodes[index].name2=name2;
+      }
+    }
+	}
+
+	String nodeList::getNodeName(uint16_t ID)
+	{
+		for(int index=0;index<mnNodeCount;index++)
+    {
+      if(myNodes[index].ID==ID){
+				return myNodes[index].name2;
+      }
+    }
+		return "";
+	}
+
+	void nodeList::setNodeLocation(uint16_t ID,String location)
+	{
+		for(int index=0;index<mnNodeCount;index++)
+		{
+			if(myNodes[index].ID==ID){
+				myNodes[index].location=location;
+			}
+		}
+	}
+
+	String nodeList::getNodeLocation(uint16_t ID)
+	{
+		for(int index=0;index<mnNodeCount;index++)
+		{
+			if(myNodes[index].ID==ID){
+				return myNodes[index].location;
+			}
+		}
+		return "";
+	}
 
 /*
  * PumpNode_Handler is a list of all nodes which have to pump at the moment
@@ -2132,3 +2182,58 @@ bool    isRegistrationPacket(struct Data *packet)
 		return true;
 	return false;
 }
+/*
+float temperature;//4byte		// should be shortended to uint16_t
+float humidity;//4byte			// should be shortended to uint16_t
+time_t Time;//4byte
+uint32_t pumpTime;// 4byte    ---> interval
+uint16_t ID; //2 Byte
+
+uint16_t interval; // 2byte
+uint16_t voltage; //2 Byte
+uint16_t VCC; //2 Byte
+uint16_t moisture; //2 Byte
+uint16_t moisture2;//2 Byte
+uint16_t brightness; //2 Byte
+
+*/
+#ifdef PARTICLE_CLOUD
+
+
+void HomeWatering::setParticleVariableString(nodeList* list,uint16_t index)
+{
+
+	String* tmp;
+	bool isTracked=false;
+	for(int i=0;i<MAX_TRACKED_SENSORS;i++)
+	{
+		if(Particle_SensorData[i].SensorID==list->myNodes[index].ID)
+		isTracked=true;
+		tmp=&(Particle_SensorData[i].SensorTXT);
+		break;
+	}
+
+	if(isTracked)
+	{
+		struct nodeListElement *node = &(list->myNodes[index]);
+		(*tmp) = String(node->ID)+ ","+String(node->name)+ ","+String(node->location)
+		+ ","+String(node->nodeData.temperature)+ ","+String(node->nodeData.moisture)
+		+ ","+String(node->nodeData.moisture2)+ ","+String(node->nodeData.moisture)
+		+ ","+String(node->nodeData.humidity)+ ","+String(node->nodeData.brightness)
+		+ ","+String(node->nodeData.voltage)+ ","+String(node->nodeData.Time)
+		+ ","+String(node->nodeData.ID);
+	}
+}
+
+int8_t HomeWatering::isTrackedSensor(uint16_t ID)
+{
+	for(int8_t i=0;i<MAX_TRACKED_SENSORS;i++)
+	{
+		if(Particle_SensorData[i].SensorID==ID)
+		return i;
+	}
+	return -1;
+}
+
+
+#endif //#ifdef PARTICLE_CLOUD

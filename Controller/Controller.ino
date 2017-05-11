@@ -304,8 +304,8 @@ void loop(void)
   #endif//#if(DEBUG_INFO>0)
   #endif//#if (DEBUG==1)
 
-
   //uint8_t nPipenum;
+
   #if (TEST_PUMP == 0) //Bernhard@: LÖSCHEN ????
   uint8_t nICA;   // Interactive Command Answer
   uint8_t nSCA;   // Scheduled Command Answer

@@ -1,0 +1,54 @@
+**********PARTICLE CLI*****************************
+Aufruf commandline of particle:
+
+Compile:
+particle compile photon src/*
+
+
+particle compile photon src/* lib/particle-rf24
+
+
+particle compile photon src/* lib/particle-rf24/src/* --target 0.6.0
+
+
+
+
+*********************MEMORY***************************
+
+last Output (Controller.ino - 11.05.17):
+
+Memory use: 
+   text	   data	    bss	    dec	    hex	filename
+  32292	     16	  26152	  58460	   e45c	/workspace/target/workspace.elf
+
+Output Arduino compile:
+Sketch uses 28,488 bytes (92%) of program storage space. Maximum is 30,720 bytes.
+Global variables use 1,440 bytes (70%) of dynamic memory, leaving 608 bytes for local variables. Maximum is 2,048 bytes.
+
+32292 bytes <-> 28488 bytes (flash  photon <-> arduino pro mini)
+26152 bytes <-> 1440 bytes  (RAM photon(mx 128kB) <-> SRAM arduino(max 2 kB))
+Compile succeeded.
+
+
+Compile Output Description:
+[https://mcuoneclipse.com/2013/04/14/text-data-and-bss-code-and-data-size-explained/]
+text+data=flash
+data+bss=RAM
+
+
+text: program text(code), functions(code), CONSTANTS (values)
+data: used for initlialized data;
+  Example(global/extern variable): int32_t myVar = 0x12345678;
+    -> 0x12345678 is 4 byte and comes in data
+     -> myVar is 4 byte and comes in RAM
+    -> use space in FLASH and RAM (twice 4 byte)
+    
+bss: unitilialized data (global or statically allocated data)
+  Example(global/extern variable): int32_t myGlobal;
+    -> increases bss portion by 4 byte
+    (Remember bss as BETTER SAVE SPACE, because it ends up in RAM)
+    (keep the amount of variables which end up in the .bss at the absolute minimum)
+    
+dec= sum of text+data+bss
+hex= DEC IN HEXIMAL
+
