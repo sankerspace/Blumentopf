@@ -33,7 +33,7 @@ RTC_DS3231 myRTC;
 RTC_DS3232 myRTC;
 #endif
 
-#if (DEBUG==1)
+#if (DEBUG_>0)
 uint32_t time_;
 uint16_t nDummyCount=0;
 #if(DEBUG_TIMING_LOOP > 0)
@@ -50,8 +50,9 @@ long unsigned duration_sending=0;
 
 struct Data myResponse; //32byte
 struct Data myData; //32byte
+#if (TEST_PUMP==0)
 class CommandHandler myCommandHandler;
-
+#endif
 //marko@: wozu brauchen wir diese variable?
 //verwende sie jetzt Um Pumphandler zu zählen
 
@@ -89,6 +90,13 @@ uint16_t nTestWatering = 1000;
 uint8_t i_=0;
 #endif
 
+
+
+/**************PARTICLE CLOUD*****************************************/
+#ifdef PARTICLE_CLOUD
+HomeWatering myHomeWatering;
+#endif
+/**********************************************************************/
 
 /*
 SETUP
@@ -141,12 +149,6 @@ void setup(void)
   /*The Photon Board is not able to print messages from Setup() from Startup
   * Some time must pass to be able to see Serial prints
   */
-
-
-
-
-
-
 
   #if (HW_RTC > NONE)
 
@@ -207,6 +209,7 @@ void setup(void)
   #endif
 
   DEBUG_FLUSH;
+
 
 
 }//setup
@@ -302,7 +305,7 @@ void loop(void)
   #endif//#if (DEBUG==1)
 
 
-  uint8_t nPipenum;
+  //uint8_t nPipenum;
   #if (TEST_PUMP == 0) //Bernhard@: LÖSCHEN ????
   uint8_t nICA;   // Interactive Command Answer
   uint8_t nSCA;   // Scheduled Command Answer
@@ -607,29 +610,50 @@ void loop(void)
               DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
               DEBUG_PRINT(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture);
               if (myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture <= WATERING_THRESHOLD)
+              {
                 sens1_mo1=true;
+                myNodeList.myNodes[SensorNode_Pump1].nodeData.ID=myNodeList.myNodes[myNodeList.mnActivePump].ID;
+                myNodeList.myNodes[SensorNode_Pump1].nodeData.Time=millis();
+                myNodeList.myNodes[SensorNode_Pump1].nodeData.pumpTime=POL_WATERING_DEFAULT_DURATION*1000;
+              }
             }
             else                      // pump 1 is attached to moisture sensor 2
             {
               DEBUG_PRINTSTR("\t\t\tMoisture 2: ");
               DEBUG_PRINTLN(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2);
               if (myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2 <= WATERING_THRESHOLD)
+              {
                 sens1_mo2=true;
+                myNodeList.myNodes[SensorNode_Pump1].nodeData.ID=myNodeList.myNodes[myNodeList.mnActivePump].ID;
+                myNodeList.myNodes[SensorNode_Pump1].nodeData.Time=millis();
+                myNodeList.myNodes[SensorNode_Pump1].nodeData.pumpTime=POL_WATERING_DEFAULT_DURATION*1000;
+              }
             }
+
 
             if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP2)) == 0) // pump 2 is attached to moisture sensor 1
             {
               DEBUG_PRINTSTR("\t\t\tMoisture 1: ");
               DEBUG_PRINT(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture);
               if (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture <= WATERING_THRESHOLD)
+              {
                 sens2_mo1=true;
+                myNodeList.myNodes[SensorNode_Pump2].nodeData.ID=myNodeList.myNodes[myNodeList.mnActivePump].ID;
+                myNodeList.myNodes[SensorNode_Pump2].nodeData.Time=millis();
+                myNodeList.myNodes[SensorNode_Pump2].nodeData.pumpTime=POL_WATERING_DEFAULT_DURATION*1000;
+              }
             }
             else                      // pump 2 is attached to moisture sensor 2
             {
               DEBUG_PRINTSTR("\t\t\tMoisture 2: ");
               DEBUG_PRINTLN(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2);
               if (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2 <= WATERING_THRESHOLD)
+              {
                 sens2_mo2=true;
+                myNodeList.myNodes[SensorNode_Pump2].nodeData.ID=myNodeList.myNodes[myNodeList.mnActivePump].ID;
+                myNodeList.myNodes[SensorNode_Pump2].nodeData.Time=millis();
+                myNodeList.myNodes[SensorNode_Pump2].nodeData.pumpTime=POL_WATERING_DEFAULT_DURATION*1000;
+              }
             }
             #endif
 
@@ -644,6 +668,7 @@ void loop(void)
             {
               DEBUG_PRINTLNSTR_D("[TEST_PUMP==2]\t\tWatering needed.", DEBUG_PUMP_SCHEDULING);
               DEBUG_PRINTSTR("\t\tTurn on Pump with ID ");DEBUG_PRINTLN(myNodeList.myNodes[myNodeList.mnActivePump].ID);
+
               ret = doWateringTasks(myNodeList.myNodes[myNodeList.mnActivePump].ID, POL_WATERING_DEFAULT_DURATION*1000, 0, 0); //here a new order to a pump Node has to be planned
               if (ret > 0)
               {/*Marko@: Some more Error handling necessary?*/
@@ -814,7 +839,7 @@ if ((nTestWatering % DEBUG_CYCLE) == 0) {
 
 
 
-#if(DEBUG > 0 && DEBUG_TIMING_LOOP==1)
+#if(DEBUG_> 0 && DEBUG_TIMING_LOOP==1)
 duration_tmp=micros()-duration_loop;
 duration_max=((duration_max>duration_tmp) ? duration_max : duration_tmp);
 
@@ -1251,9 +1276,24 @@ void handleDataMessage(void)
 
   myResponse.ID = myData.ID;
 
-  // copying the data to the nodelist
-  myNodeList.myNodes[nodeIndex].nodeData = myData;
+  // copying the data to the nodelist //Marko@: I dont want to overwrite all data, need some other variables as storage
+  myNodeList.myNodes[nodeIndex].nodeData.temperature = myData.temperature;
+  myNodeList.myNodes[nodeIndex].nodeData.humidity = myData.humidity;
+  //Marko@: Time,pumpTime,ID skipped, need it as storage for pumpData
+  myNodeList.myNodes[nodeIndex].nodeData.interval = myData.interval;
+  myNodeList.myNodes[nodeIndex].nodeData.voltage = myData.voltage;
+  myNodeList.myNodes[nodeIndex].nodeData.VCC = myData.VCC;
+  myNodeList.myNodes[nodeIndex].nodeData.moisture = myData.moisture;
+  myNodeList.myNodes[nodeIndex].nodeData.moisture2 = myData.moisture2;
+  myNodeList.myNodes[nodeIndex].nodeData.brightness = myData.brightness;
+  myNodeList.myNodes[nodeIndex].nodeData.state = myData.state;
+  myNodeList.myNodes[nodeIndex].nodeData.packetInfo = myData.packetInfo;
 
+/*******************PARTICLE ***********************************/
+#ifdef PARTICLE_CLOUD
+  myHomeWatering.setParticleVariableString(&myNodeList,nodeIndex);
+#endif
+/*****************************************************************/
 
   if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
   {
