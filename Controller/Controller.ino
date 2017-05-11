@@ -581,7 +581,6 @@ void loop(void)
           DEBUG_PRINTLNSTR_D("\t\t No currently active pump.. Next pump can be started.", DEBUG_MESSAGE);
 
           // Now the pumps have to be processed, one after the other.
-          //Bernhard@:but not all pumpNodes should get commands at once, one pumpnode start, finish, THEN NEXT pumpnode
           //for loop shpudl be deleted and "if ((nTestWatering % DEBUG_CYCLE) == 0 )", so in every loop cycle
           //a check is performed here and ntestwatering is mnActivePump will be increased
 
@@ -1444,7 +1443,7 @@ uint16_t getNextMeasurementSlot(uint16_t nodeIndex)
 
   DEBUG_PRINTSTR_D("\t\tNumber of Sensor Nodes: ", DEBUG_SENSOR_SCHEDULING);
   DEBUG_PRINTLN_D(myNodeList.getNumberOfNodesByType(SENSORNODE), DEBUG_SENSOR_SCHEDULING);
-  //Bernhard@:
+
   //Cycle is (number of registrated sensornodes * INTERVAL / 10)*WATERING_CYCLES_TO_WAIT + (# of pumps)*INTERVAL/60 ?????
   time_t tLastScheduledSensorNode = myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot;   // get the last scheduled time slot of all sensor nodes
   DEBUG_PRINTSTR_D("\t\tTime of last scheduled sensor node: ", DEBUG_SENSOR_SCHEDULING);

@@ -509,6 +509,8 @@ DO NOT CHANGE:
 #define DATA_CONTROLLER_BIT    (3) //if packet send by Controller
 //identifiy as packet for registration purpose or its a normal data packet
 #define DATA_REGISTRATION_BIT  (4)
+
+
                                   // used by Controller or a Node
 int setDATA_Pumpstate(struct Data *packet,int pumpState);
 void setDATA_SensorPacket(struct Data *packet);
@@ -679,7 +681,7 @@ struct nodeListElement
   uint8_t state;
   String name;  //Moisture 1
   String name2; //Moisture 2
-  String location;
+  String location;//SensorNode
   // Bit 0: NODELIST_NODETYPE:   0...this is a SensorNode, 1...this is a MotorNode
   // Bit 1: NODELIST_PUMPACTIVE: 0...inactive, 1...active (is currently pumping[1] or not[0])
   // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE,  1...ONLINE (the node has performed a registration)
