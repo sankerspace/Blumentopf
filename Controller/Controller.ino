@@ -1161,8 +1161,10 @@ void handleRegistration(void)
     setDATA_PumpPacket(&myResponse);
     currentNode.state |= (1 << NODELIST_NODETYPE);  // MotorNode
     //Bernhard@(2017.April):Gibts hier eine Prüfung ob ein SensorNode auch da ist?
-    currentNode.sensorID1 = myNodeList.mnLastAddedSensorNode;
-    currentNode.sensorID2 = myNodeList.mnLastAddedSensorNode;
+    currentNode.sensorID1 = myNodeList.mnLastAddedSensorNode; // Set sensornode for pump 1
+    currentNode.state &= ~(1<<SENSOR_PUMP1);                  // Set sensor for pump 1
+    currentNode.sensorID2 = myNodeList.mnLastAddedSensorNode; // Set sensornode for pump 2
+    currentNode.state &= ~(1<<SENSOR_PUMP2);                  // Set sensor for pump 2
     DEBUG_PRINTSTR("\t\tUsing current last SensorNode - ID: ");
     DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
   }

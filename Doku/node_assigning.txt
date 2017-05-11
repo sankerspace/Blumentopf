@@ -1,0 +1,39 @@
+Wo wird gespeichert welcher Sensor welcher Pumpe zugeordnet ist?
+
+Diese Information steht im struct nodeListElement.
+Für jeden Pumpknoten gibt es in dem zugehörigen nodeListElement einen sensorID1 und sensorID2 Wert. Das sind die IDs der Sensornodes die mit Pupe 1 bzw. Pumpe 2 verknüpft sind.
+Nachdem alle Sensorknoten bis zu zwei Moisture Sensoren unterstützen, muss zusätzlich angegeben werden welche der beiden Moisture Sensoren der Pumpe 1 zugeordnet ist. In der Membervariable "state" gibt es zwei bit (1<<SENSOR_PUMP1) und (1<<SENSOR_PUMP2), die festlegen welchen Sensoren die Pumpen zugewisen sind.
+
+
+Example:
+
+if ((myNodeList.state & (1<<NODELIST_NODETYPE)) == 1)	// This is a pump node
+{
+  if (myNodeList.sensorID1 != 0xffff)			// There is a sensorNode assigned to pump 1
+  {
+    if ((myNodeList.state & (1<<SENSOR_PUMP1)) == 1)	// The moisture sensor 2 is assigned to pump 1
+    {
+      // pump one is assigned to moisture sensor 2 of the sensornode with ID myNodeList.sensorID1
+    }
+  }
+
+  if (myNodeList.sensorID2 != 0xffff)			// There is a sensorNode assigned to pump 2
+  {
+    if ((myNodeList.state & (1<<SENSOR_PUMP2)) == 0)	// The moisture sensor 1 is assigned to pump 2
+    {
+      // pump two is assigned to moisture sensor 1 of the sensornode with ID myNodeList.sensorID2
+    }
+}
+
+
+
+Where is the sensor node assigned to a pump node?
+As a pump node registers the last registered sensor node is assigned to the pump node.
+Per default moisture sensor 1 is chosen.
+
+    currentNode.sensorID1 = myNodeList.mnLastAddedSensorNode;	// Set sensornode for pump 1
+    currentNode.state &= ~(1<<SENSOR_PUMP1);			// Set sensor for pump 1
+    currentNode.sensorID2 = myNodeList.mnLastAddedSensorNode;	// Set sensornode for pump 2
+    currentNode.state &= ~(1<<SENSOR_PUMP2);			// Set sensor for pump 2
+
+
