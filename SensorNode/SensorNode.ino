@@ -52,7 +52,7 @@ class nodeList myNodeList;
 
 // Set up nRF24L01 radio on SPI bus plus pins 9 & 10
 
-RF24 radio(9, 10);
+RF24 radio(CE_PIN, CS_PIN);
 DataStorage myEEPROM;
 
 // Init the DS1302
@@ -68,10 +68,10 @@ RTC_DS3232 myRTC;
 #endif
 
 // Setting the Sensor Pins
-int moisturePin = A0;
-int moisturePin2 = A2;
-int lightPin = A1;
-int sensorPower = 8;
+int moisturePin = MOISTURE_PIN;//A0
+int moisturePin2 = MOISTURE_PIN_2;//A2
+int lightPin = LIGHT_PIN;//A1
+int sensorPower = SENSOR_POWER;//8
 
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};

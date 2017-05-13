@@ -1736,12 +1736,22 @@ uint16_t nodeList::getPumpEpochLength()
 
 
 /**
-* For a pumpNode get the current Pump duration
+* For a pumpNode get the pumptime from  a pump
 */
- uint16_t PumpNode_Handler::getPumpTime(void){
+ uint32_t PumpNode_Handler::getFirstPumpTime(void){
 
-    return this->OnOff;
+    return this->OnOff_1;
  }
+
+ /**
+ * For a pumpNode get the pumptime from  a pump
+ */
+  uint32_t PumpNode_Handler::getSecondPumpTime(void){
+
+     return this->OnOff_2;
+  }
+
+
  /**
 * get current state of Interaction between Controller and PumpNode
 */
@@ -1764,16 +1774,21 @@ uint16_t PumpNode_Handler::getID(void)
 /**
 * get Response for the pump Node
 */
- uint16_t PumpNode_Handler::getResponseData(void)
+ uint32_t PumpNode_Handler::getResponseData_1(void)
  {
-  return this->pumpnode_response;
+  return this->pumpnode_response_1;
  }
 
+ uint32_t PumpNode_Handler::getResponseData_2(void)
+ {
+  return this->pumpnode_response_2;
+ }
 
 bool PumpNode_Handler::getResponseAvailability(void)
 {
 	  return this->pumpnode_reponse_available;
 }
+
 
  /**
 * Reset State machine
@@ -1782,8 +1797,10 @@ bool PumpNode_Handler::getResponseAvailability(void)
 
     this->pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
 
-    this->OnOff=0;
-    this->pumpnode_response=0;
+    this->OnOff_1=0;
+		this->OnOff_2=0;
+    this->pumpnode_response_1=0;
+		this->pumpnode_response_2=0;
     this->pumpnode_started_waiting_at=millis();
     this->pumpnode_previousTime=millis();
 		this->pumpnode_waitforPump=0;
@@ -1818,19 +1835,27 @@ bool PumpNode_Handler::getResponseAvailability(void)
 * IncomeData is the response Data from PumpNode if there is some data
 *
 */
-void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
+void PumpNode_Handler::processPumpstate(uint32_t IncomeData_1,uint32_t IncomeData_2){  //  [ms]
 
         //[STATE 0]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_0_PUMPREQUEST){
-    if(IncomeData>0)//pumphandler triggered with new PumpTime=IncomeData
+    if((IncomeData_1>0)||(IncomeData_2>0))//pumphandler triggered with new PumpTime=IncomeData
     {
-      this->OnOff=IncomeData;//calculated from seconds in milliseconds
-      this->pumpnode_response=this->OnOff;
+      this->OnOff_1=IncomeData_1;
+			this->OnOff_2=IncomeData_2;
+      this->pumpnode_response_1=this->OnOff_1;
+			this->pumpnode_response_2=this->OnOff_2;
 			this->pumpnode_reponse_available=true;
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-      DEBUG_PRINTSTR("][State 0:]Pump time of ");
-      DEBUG_PRINT(this->pumpnode_response);
-      DEBUG_PRINTSTR("ms sent to PumPnode ");
+      DEBUG_PRINTSTR("][State 0:]\n\t\t   [Pump_1]");
+			DEBUG_PRINTSTR("Pump time of ");
+      DEBUG_PRINT(this->pumpnode_response_1);
+      DEBUG_PRINTSTR("ms sent to Pump1 of PumpNode with ID ");
+      DEBUG_PRINTLN(this->pumpnode_ID);
+			DEBUG_PRINTSTR("\t\t   [Pump_2]");
+			DEBUG_PRINTSTR("Pump time of ");
+      DEBUG_PRINT(this->pumpnode_response_2);
+      DEBUG_PRINTSTR("ms sent to Pump2 of PumpNode with ID ");
       DEBUG_PRINTLN(this->pumpnode_ID);
 			this->pumpnode_status_packet=this->pumpnode_status;
       this->pumpnode_status=PUMPNODE_STATE_1_PUMPACTIVE;
@@ -1850,16 +1875,18 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     }else{
       if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
-        DEBUG_PRINTSTR("][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData ");
-        DEBUG_PRINT(IncomeData);
-        DEBUG_PRINTLNSTR("]\n");
+        DEBUG_PRINTSTR("][State 0]-ERROR INCOME DATA PARAMETER:[IncomeData_1 ");
+        DEBUG_PRINT(IncomeData_1);
+        DEBUG_PRINTSTR("]and [IncomeData_2 ");
+				DEBUG_PRINT(IncomeData_2);
+				DEBUG_PRINTLNSTR("]");
       }
       this->pumpnode_debugCounter++;
     }
   }else //[STATE 1]-------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_1_PUMPACTIVE){
 		this->pumpnode_reponse_available=false;
-    if(IncomeData==0)
+    if((IncomeData_1==0)&&(IncomeData_2==0))
     {//WAIT FOR INCOME DATA
 
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
@@ -1868,14 +1895,15 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
           this->pumpnode_status=PUMPNODE_STATE_1_RESP_FAILED;
        }
-    }else if(IncomeData==this->OnOff)
+    }else if((IncomeData_1 == this->OnOff_1)||(IncomeData_2 == this->OnOff_2))
     {//RECEIVED INCOME DATA
 
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
 			DEBUG_PRINT(pumphandler_ID);
       DEBUG_PRINTSTR("][State 1]-Got Respond from PumpNode ");
       DEBUG_PRINT(this->pumpnode_ID);
-      DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(IncomeData);
+      DEBUG_PRINTSTR(",respond_1:");DEBUG_PRINT(IncomeData_1);
+			DEBUG_PRINTSTR(",respond_2:");DEBUG_PRINT(IncomeData_2);
 			#if (DEBUG_PUMP_ROUNDTRIPTIME)
 			DEBUG_PRINTSTR("\t\t[ROUNDTRIP TIME (State0 - State 1)] ");
 			DEBUG_PRINT_D(micros()-this->pumpNode_RoundTripTime,DEC);
@@ -1885,8 +1913,13 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
       this->pumpnode_previousTime=millis();//A change of state occured here
       this->pumpnode_started_waiting_at = millis();//in the next state we wait for the pump
       this->pumpnode_debugCounter=DEBUG_CYCLE;
+			//no matter if both pumpnodes are pumped or only one
+			//no matter if pumpnode decides to pump both pumps in series AND
+			//no matter if pumpNode decides to pump both pumps parallel
+			//IncomeData_1 and IncomeData_2 contains waiting time for Controller
+			this->pumpnode_waitforPump=IncomeData_1+IncomeData_2;
 			//pump time plus half of roundTripDelay
-			this->pumpnode_waitforPump=this->OnOff+(WAIT_RESPONSE_INTERVAL >> 1); //division durch 2
+			this->pumpnode_waitforPump+=(WAIT_RESPONSE_INTERVAL >> 1); //division durch 2
 			  DEBUG_PRINTSTR("\t\t[PumpNode_Handler]Waiting at least ");
 				DEBUG_PRINT_D(this->pumpnode_waitforPump,DEC);
 				DEBUG_PRINTLNSTR(" ms, then pumping should be finished");
@@ -1894,7 +1927,9 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
        if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
         DEBUG_PRINTSTR("][State 1]-ERROR INCOME DATA (");
-        DEBUG_PRINT(IncomeData);
+        DEBUG_PRINT(IncomeData_1);
+				DEBUG_PRINTSTR(" , ");
+				DEBUG_PRINT(IncomeData_2);
         DEBUG_PRINTSTR(") FROM PUMP NODE with ID:");
         DEBUG_PRINTLN(this->pumpnode_ID);
       }
@@ -1903,20 +1938,21 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
   }else //[STATE 2]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_2_PUMPOFF){
-    if(IncomeData==0)
+    if((IncomeData_1==0)&&(IncomeData_2==0))
     {
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
       if(this->pumpnode_dif > this->pumpnode_waitforPump)
        {
 				 //PUMPTIME PASSED SO NOW SEND CONFIRMATION
-				 this->pumpnode_response=this->pumphandler_ID;//some usefull check
+				 this->pumpnode_response_1=this->pumphandler_ID;//some usefull check
+				 this->pumpnode_response_2=this->pumphandler_ID;//some usefull check
 				 this->pumpnode_reponse_available=true;
 				 this->pumpnode_status_packet=this->pumpnode_status;
 				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
 	       DEBUG_PRINTSTR("][State 2]-SEND CONFIRMATION REQUEST to Node-ID ");
 	       DEBUG_PRINT(this->pumpnode_ID);
-	       DEBUG_PRINTSTR(" with respond:");DEBUG_PRINTLN(this->pumpnode_response);
-
+	       DEBUG_PRINTSTR(" with respond_1:");DEBUG_PRINT(this->pumpnode_response_1);
+				 DEBUG_PRINTSTR(" and respond_2:");DEBUG_PRINT(this->pumpnode_response_2);
 
 				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
 	 			 DEBUG_PRINT(pumphandler_ID);
@@ -1945,7 +1981,7 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
   }else //[STATE 3]------------------------------------------------------------
   if(this->pumpnode_status == PUMPNODE_STATE_3_ACKNOWLEDGMENT){
 		this->pumpnode_reponse_available=false;
-    if(IncomeData==0)
+    if((IncomeData_1==0)&&(IncomeData_2==0))
     {//WAIT FOR INCOME DATA
 
       this->pumpnode_dif=millis()-this->pumpnode_started_waiting_at;
@@ -1954,13 +1990,14 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
 
           this->pumpnode_status=PUMPNODE_STATE_3_RESP_FAILED;
        }
-    }else if(IncomeData==this->pumphandler_ID)
+    }else if((IncomeData_1==this->pumphandler_ID)&&(IncomeData_2==this->pumphandler_ID))
     {//RECEIVED INCOME DATA
 
       DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
       DEBUG_PRINTSTR("][State 3]-Got Respond from PumpNode ");
       DEBUG_PRINT(this->pumpnode_ID);
-      DEBUG_PRINTSTR(",respond:");DEBUG_PRINTLN(IncomeData);
+      DEBUG_PRINTSTR(",respond:1:");DEBUG_PRINT(IncomeData_1);
+			DEBUG_PRINTSTR(",respond:2:");DEBUG_PRINTLN(IncomeData_2);
 			#if (DEBUG_PUMP_ROUNDTRIPTIME)
 			DEBUG_PRINTSTR("\t\t[ROUNDTRIP TIME (State2 - State 3)] ");
 			DEBUG_PRINT_D(micros()-this->pumpNode_RoundTripTime,DEC);
@@ -1976,7 +2013,9 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
        if((this->pumpnode_debugCounter % DEBUG_CYCLE)==0){
         DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler "); DEBUG_PRINT(pumphandler_ID);
         DEBUG_PRINTSTR("][State 3]-ERROR INCOME DATA (");
-        DEBUG_PRINT(IncomeData);
+        DEBUG_PRINT(IncomeData_1);
+				DEBUG_PRINT(IncomeData_2);
+				DEBUG_PRINTSTR(" , ");
         DEBUG_PRINTSTR(") FROM PUMP NODE with ID:");
         DEBUG_PRINTLN(this->pumpnode_ID);
       }
@@ -2016,7 +2055,8 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     DEBUG_PRINTSTR("][State -1:]Failed, response timed out[wait:");
     DEBUG_PRINT(this->pumpnode_dif);
     DEBUG_PRINTSTR(" ms],ID:");DEBUG_PRINT(this->pumpnode_ID);
-    DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff);
+    DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff_1);
+		DEBUG_PRINTSTR(" and second duration:");DEBUG_PRINTLN(this->OnOff_2);
     this->pumpnode_started_waiting_at = millis();
     this->pumpnode_status=PUMPNODE_STATE_1_PUMPACTIVE;
 
@@ -2026,7 +2066,8 @@ void PumpNode_Handler::processPumpstate(uint16_t IncomeData){
     DEBUG_PRINTSTR("][State -3:]Failed, response timed out[wait:");
     DEBUG_PRINT(this->pumpnode_dif);
     DEBUG_PRINTSTR(" ms],ID:");DEBUG_PRINT(this->pumpnode_ID);
-    DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff);
+    DEBUG_PRINTSTR(",duration:");DEBUG_PRINTLN(this->OnOff_1);
+		DEBUG_PRINTSTR(" and second duration:");DEBUG_PRINTLN(this->OnOff_2);
     this->pumpnode_started_waiting_at = millis();
     this->pumpnode_status=PUMPNODE_STATE_3_ACKNOWLEDGMENT;
 
@@ -2086,6 +2127,22 @@ void printFreeRam()
 
   }
 }
+
+
+uint32_t getCombinedData(uint16_t HighByte,uint16_t LowByte)
+{
+	uint32_t Value=(uint32_t)(HighByte << 8);
+	Value |= (uint32_t)LowByte;
+	return Value;
+}
+void   setCombinedData(uint32_t Data_,uint16_t& HighByte,uint16_t& LowByte)
+{
+
+	HighByte= (uint16_t)((Data_ & (0xffff0000)) >> 8);
+	LowByte = (uint16_t)(Data_ & (0xffff));
+}
+
+
 
 void killID()
 {
@@ -2181,6 +2238,12 @@ bool    isRegistrationPacket(struct Data *packet)
 		return true;
 	return false;
 }
+
+
+
+
+
+
 /*
 float temperature;//4byte		// should be shortended to uint16_t
 float humidity;//4byte			// should be shortended to uint16_t

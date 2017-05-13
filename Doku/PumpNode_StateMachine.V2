@@ -1,0 +1,94 @@
+/*************************S T A T E  M A C H I N E*****************************
+   P U M P N O D E                                   C O N T R O L L E R
+  ------------------------------------------------------------------------------
+  Notes:
+  VERSION 2 is modified in a way to work with two pumps on ONE PUMPNODE 
+  simultaenously.
+  (PumpNode and Controller are performing tasks in the same state or divergent 
+  states according the state plan below)
+  (criticalTime should be higher in Controller than in PumpNode)
+  
+  (<--3   : send message 3 times)
+  
+  [variable and value send]
+  
+  A
+  |     go in both directions
+  v
+  
+  WAIT TIME = pumptime1 or pumptime2 (pumpnode decides that)
+              or pumptime1 + pumptime2 
+  
+  STATE 0:                  
+  recv() pump Time                <--3       send() pumpTime 
+  (some delay)                               [myResponse.Time_1=pumpTime_1]
+                                             [myResponse.Time_2=pumpTime_2]
+                                      
+  STATE 1:                              
+   send() Acknowledgment           3-->+                                  
+[myData.Time_1=Wait 1]                |
+[myData.Time_2=Wait 2]                |
+                                      |
+                                      |
+                                      |   
+                                      +-+-> recv(): Acknowledgment and WAIT TIME
+                                        |   (PumpNode confirms Pumptime for both)
+                                        | (Response contains ms how long Contr-
+                                        |  oller has to wait until PumpNode
+                                        |  finishes pumping)
+                                        | (PumpNode organize parallel 
+                                        |  pumping or in series) 
+                                        | (WAIT TIME = Wait 1 + Wait 2)
+                                        | {if wait for response takes too long 
+                                        |            -> STATE -3}
+        TURN ON PUMP                    |
+  (possible error detection necessary)  |        .
+                                        |        .
+                                        A        .
+                                        |        .<WAIT TIME time is passing>    
+  STATE 2:                              |        .  <waiting in STATE 2>
+                                        |        .
+       Wait for pump period time        |        .
+                                        v        .
+       TURN OFF PUMP                  
+                                      +<---3-----send() Confirmation(Pump off)
+                                      |    [myResponse.Time=RandomNumber]  
+                                      | |  [myResponse.Time_2=RandomNumber]  
+                                      | |  (Controller initiates communication)
+                                      | | (maximum wait time=WAIT TIME + timeoff)
+                                      | |
+recv():Controller wants confirmation<-+ A
+       now that pump is really off      v    
+                                        |  
+                                        |
+                                        |
+                                        |    
+  STATE 3:                              |
+                                        |  
+send() Acknowledgment            3--> + |                               
+[myData.Time_1=myResponse.Time]       | |
+[myData.Time_2=myResponse.Time_1]     | |
+                                      | |
+                                      |   
+                                      +---> recv(): Acknowledgment
+                                                    (PumpNode confirms Pumps off)
+                                      |    {if wait for response takes too long 
+                                      |      -> STATE -4}
+                                      | |
+                                      | |
+                                      | |
+  STATE 4:                            | |
+                                      | |
+     SUCCESSFULL STATE                | |
+                                      | |
+  STATE -2:                           | |
+                                      | |
+  recv() confirmation                 | |   
+                                      | A
+  STATE -3:(only controller)          | v
+                                      | |   We waited timeOFF ms for response 
+                       -----------------+    Restart  State 1
+
+  STATE -4:(only controller)          |
+                 <--------------------+      We waited timeOFF ms for response 
+                                            Restart  State 3

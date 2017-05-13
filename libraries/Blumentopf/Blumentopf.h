@@ -85,7 +85,7 @@
 
 //#define TEST_PUMP 1 //Testcase every 10 seconds turn on first pump in the list
 //#define TEST_PUMPSCHEDULE 1
-#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
+#define TEST_PUMP 1 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
 
 
 // For getting rid of serial communication in the release version:
@@ -372,6 +372,36 @@ DO NOT CHANGE:
 /***************************************************************************************/
 /******************************  P R O T O C O L ***************************************/
 /**************************************************************************************/
+
+
+//PIN definition
+//RF24 PIN
+#define CE_PIN 9
+#define CS_PIN 10
+#define PHOTON_CS_PIN D6
+#define PHOTON_CE_PIN A2
+
+//Controller
+#define PHOTON_LED_BUILTIN D7
+
+// Values for Sensor Node
+#if (HW == HW_PHOTON)
+  #define HW_RTC_PIN  D4			// for turning on/off the RTC at the Particle
+#else
+  #define SENSOR_POWER  8
+  #define HW_RTC_PIN  SENSOR_POWER				// for turning on/off the RTC at the Arduino
+#endif
+//SensorNode
+#define randomPIN         A6
+#define BATTERY_SENSE_PIN A3		// Pin for Battery voltage
+#define DHT11PIN 5					// Pin number for temperature/humidity sensor
+#define MOISTURE_PIN      A0
+#define MOISTURE_PIN_2    A2
+#define LIGHT_PIN         A1
+
+#define PUMP1_PIN         3
+#define PUMP2_PIN         2
+#define BUTTON_PIN        4
 // SD Availability check
 #define SD_AVAILABLE  (0)
 #if (SD_AVAILABLE ==1)
@@ -395,20 +425,7 @@ DO NOT CHANGE:
 
 
 
-// Values for Sensor Node
-#if (HW == HW_PHOTON)
-  #define HW_RTC_PIN  D4			// for turning on/off the RTC at the Particle
-#else
-  #define SENSOR_POWER  8
-  #define HW_RTC_PIN  SENSOR_POWER				// for turning on/off the RTC at the Arduino
-#endif
 
-#define randomPIN         A6
-#define BATTERY_SENSE_PIN A3		// Pin for Battery voltage
-#define DHT11PIN 5					// Pin number for temperature/humidity sensor
-#define MOISTURE_PIN      A0
-#define MOISTURE_PIN_2    A2
-#define LIGHT_PIN         A1
 #define MOISTURE_THRESHOLD (1000)	// wet/dry threshold
 #define LIGHT_THRESHOLD (512)		// day/nigth threshold
 #define BAUD (57600)				// serial BAUD rate
@@ -536,8 +553,9 @@ struct Data
 
   float temperature;//4byte		// should be shortended to uint16_t
   float humidity;//4byte			// should be shortended to uint16_t
-  time_t Time;//4byte
-  uint32_t pumpTime;// 4byte    ---> interval
+   //used as pumptime on second pump of a pumpnode
+  uint32_t Time;//4byte
+  uint32_t Time_2;// 4byte  //used as pumptime on first pump of a pumpnode
   uint16_t ID; //2 Byte
 
   uint16_t interval; // 2byte
@@ -795,6 +813,9 @@ class CommandHandler
 /***************************************************************************************/
 /******************************  PUMPNODE HANDLE **************************************/
 /**************************************************************************************/
+//Strateg if two Pumps on ONE PumpNode should work in parallel
+#define PUMPNODE_PUMPS_PARALLEL           0 //[1]-yes [0]-no(work in series)
+
 /*
 *  PumpNode defines
 */
@@ -827,9 +848,12 @@ public:
     PumpNode_Handler(uint16_t pumpNodeID)
     {
         pumpnode_ID=pumpNodeID;
-        OnOff=0;
+        OnOff_1=0;
+        OnOff_2=0;
+
         pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
-        pumpnode_response=0;
+        pumpnode_response_1=0;
+        pumpnode_response_2=0;
         pumpnode_started_waiting_at=millis();
         pumpnode_previousTime=millis();
         pumpnode_waitforPump=0;
@@ -858,19 +882,23 @@ public:
       #endif
     }
 
-    uint16_t getPumpTime(void);
+
+    uint32_t getFirstPumpTime(void);
+    uint32_t getSecondPumpTime(void);
     int      getState(void);
     int      getPacketState(void);
     uint16_t getID(void);
-    uint16_t getResponseData(void);
-    void     processPumpstate(uint16_t IncomeData);
+    uint32_t getResponseData_1(void);
+    uint32_t getResponseData_2(void);
+    void     processPumpstate(uint32_t IncomeData_1,uint32_t IncomeData_2);
     void     reset(void);
     void     setPumpHandlerID(uint16_t ID_);
     uint16_t getPumpHandlerID(void);
     /*How many times I reached the state error*/
     //uint8_t  getStateErrorCount(void);
     bool     getResponseAvailability(void);
-
+    //bool     isPump1_active(void);
+    //bool     isPump2_active(void);
 private:
     #if (DEBUG_PUMP>0)
     uint32_t pumpnode_HandlerGenerationTime;
@@ -886,8 +914,10 @@ private:
    // static uint8_t counter;
     /*state variable*/
     uint16_t pumpnode_ID;
-    uint16_t OnOff;                     //duration of pumping[sec]
-    uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
+    uint32_t OnOff_1;                     //duration of pumping[sec]
+    uint32_t OnOff_2;
+    uint32_t pumpnode_response_1;         //response Data (Controller send to PumpNode)
+    uint32_t pumpnode_response_2;         //response Data (Controller send to PumpNode)
     /*some timers for state observations*/
 
     uint16_t pumpnode_debugCounter;
@@ -901,7 +931,8 @@ private:
     */
     int8_t pumpnode_status_packet;
     bool pumpnode_reponse_available;
-
+    //bool activate_pump_1;
+    //bool activate_pump_2;
 };//5*2byte,4*1byte,5*4byte
 //34byte
 
@@ -935,10 +966,11 @@ int freeRam(void);
 void printFreeRam();
 
 /***************************************************************************************/
-/******************************  B U T T O N ******************************************/
+/************* H E L P E R F U N T I O N / T O O L S ***********************************/
 /**************************************************************************************/
-// standard routine
 
+uint32_t getCombinedData(uint16_t HighByte,uint16_t LowByte);
+void   setCombinedData(uint32_t Data_,uint16_t& HighByte,uint16_t& LowByte);
 
 
 
