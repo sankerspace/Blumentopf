@@ -516,7 +516,7 @@ void loop(void)
       nTestWatering++;
     }
 
-    if ((nTestWatering % 10000) == 0 )
+    if ((nTestWatering % 1000) == 0 )
     {
       if(PumpList.size()==0)
       {
@@ -527,7 +527,14 @@ void loop(void)
 
           if (myNodeList.isActive(myNodeList.myNodes[i_].ID) == 0)//check if the first node (index=0)in the list is active
           {
-            ret = doWateringTasks(myNodeList.myNodes[i_].ID, 10000,10000, 0); //here a new order to a pump Node has to be planned
+            if(nTestWatering<15000)
+              ret = doWateringTasks(myNodeList.myNodes[i_].ID, 0,10000, 0); //here a new order to a pump Node has to be planned
+            else if(nTestWatering<25000)
+              ret = doWateringTasks(myNodeList.myNodes[i_].ID, 10000,0, 0);
+            else if(nTestWatering<40000)
+                ret = doWateringTasks(myNodeList.myNodes[i_].ID, 10000,5000, 0);
+            else if(nTestWatering<60000)
+                ret = doWateringTasks(myNodeList.myNodes[i_].ID, 5000,10000, 0);
             #if(DEBUG_MESSAGE>0)
             if (ret > 0) {
 
@@ -683,7 +690,7 @@ void loop(void)
               DEBUG_PRINTLNSTR_D("[TEST_PUMP==2]\t\tWatering needed.", DEBUG_PUMP_SCHEDULING);
               DEBUG_PRINTSTR("\t\tTurn on Pump with ID ");DEBUG_PRINTLN(myNodeList.myNodes[myNodeList.mnActivePump].ID);
 
-              ret = doWateringTasks(myNodeList.myNodes[myNodeList.mnActivePump].ID, POL_WATERING_DEFAULT_DURATION*1000, 0, 0); //here a new order to a pump Node has to be planned
+              ret = doWateringTasks(myNodeList.myNodes[myNodeList.mnActivePump].ID, POL_WATERING_DEFAULT_DURATION*1000, POL_WATERING_DEFAULT_DURATION*1000, 0); //here a new order to a pump Node has to be planned
               if (ret > 0)
               {/*Marko@: Some more Error handling necessary?*/
                 #if(DEBUG_MESSAGE>0)
@@ -754,7 +761,7 @@ void loop(void)
   {
     //@marko  CHECK RETURN VALUE with
     //ATTENTION: parameter for nDuration must be in ms, but for workaround I multiplied with 1000
-    doWateringTasks(nID, nDuration * 1000, 0, 0);               //  the node is added to the "active pumps"-list and the pump is notified
+    //doWateringTasks(nID, nDuration * 1000, 0, 0);               //  the node is added to the "active pumps"-list and the pump is notified
   }
   /*    if (nICA == INTERACTIVE_COMMAND_AVAILABLE )                                     // some IOT watering needs to be done
   {
@@ -1012,9 +1019,19 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint32_t pumpTime_Motor1, uint32_t
 
 void handlePumpCommunications(PumpNode_Handler *handler)
 {
-
+  uint32_t currentTime_=getCurrentTime();
+  DEBUG_PRINTSTR("[TIME][getcurrentTime()]:");
+  DEBUG_PRINTDIG(currentTime_,HEX);
   //send Controller Time over Moisture 1 and Moisture 2
-  setCombinedData(getCurrentTime(),myResponse.moisture2, myResponse.moisture);
+  DEBUG_PRINTSTR("\n[TIME][before]myResponse.moisture2: ");
+  DEBUG_PRINTDIG(myResponse.moisture2,HEX);
+  DEBUG_PRINTSTR("\n[TIME][before]myResponse.moisture: ");
+  DEBUG_PRINTDIG(myResponse.moisture2,HEX);
+  setCombinedData(currentTime_,myResponse.moisture2, myResponse.moisture);
+  DEBUG_PRINTSTR("\n[TIME][after]myResponse.moisture2: ");
+  DEBUG_PRINTDIG(myResponse.moisture2,HEX);
+  DEBUG_PRINTSTR("\n[TIME][after]myResponse.moisture: ");
+  DEBUG_PRINTDIG(myResponse.moisture,HEX);
   setDATA_NO_RegistrationPacket(&myResponse);
   setDATA_PumpPacket(&myResponse);
 
@@ -1025,7 +1042,7 @@ void handlePumpCommunications(PumpNode_Handler *handler)
   myResponse.state &= ~(1 << ID_INEXISTENT);
   write_cnt=RADIO_RESEND_NUMB;
   delay(WAIT_SEND_INTERVAL);//THAT DELAY IS IMPORTANT!!!!!
-  DEBUG_PRINTSTR("\t[CONTROLLER][HandlePumpCommunication()] Sending Pump Data to pump Node:[");
+  DEBUG_PRINTSTR("\n\t[CONTROLLER][HandlePumpCommunication()] Sending Pump Data to pump Node:[");
   DEBUG_PRINT(write_cnt);
   DEBUG_PRINTLNSTR(" times]");
   DEBUG_PRINTSTR("\t ID:");DEBUG_PRINTLN(myResponse.ID);

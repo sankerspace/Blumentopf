@@ -205,8 +205,6 @@ void loop(void) {
   {
     radio.printDetails();
     time_ = millis();
-
-
   }
 #endif
   buttonstate = digitalRead(buttonPin);
@@ -242,7 +240,7 @@ void loop(void) {
   /*******************************STATE 0*****************************/
   /*******************************STATE 0*****************************/
   if (status == PUMPNODE_STATE_0_PUMPREQUEST) { //state: get new period time to turn on the pump
-    int ret = 0;
+
     if (radio.available() > 0) {
 #if (DEBUG_TIMING_LOOP>0)
       timing_ = micros();
@@ -250,24 +248,25 @@ void loop(void) {
       DEBUG_PRINTLNSTR("------------------------------------------------------");
       DEBUG_PRINTLNSTR("Available radio ");
       /********Receiving next pumping time period**************/
-      ret = recvData(); //receive pumptime[ms] from controller
+      int ret = recvData(); //receive pumptimes [ms] from controller
       /*******************************************************/
 
-      DEBUG_PRINTSTR("[PUMPNODE][Status 0]RECEIVED PAYLOAD : "); 
+      DEBUG_PRINTSTR("[PUMPNODE][Status 0]RECEIVED PAYLOAD : ");
       DEBUG_PRINT(OnOff_1);
       DEBUG_PRINTSTR(" AND ");
       DEBUG_PRINTLN(OnOff_2);
 
       if (ret > 0) { //Is that message for us and not redundant
 #if(PUMPNODE_PUMPS_PARALLEL>0)
-        if (OnOff_1 >= On_Off_2)
+        if (OnOff_1 >= OnOff_2)
+        {
           answer_1 = OnOff_1;//prepare data for sending in the next state
-        answer_2 = 0;
-        //On_Off_2=0;
-        else
+          answer_2 = 0;
+        } else
+        {
           answer_1 = 0;
-        //On_Off_1=0;
-        answer_2 = OnOff_2;//prepare data for sending in the next state
+          answer_2 = OnOff_2;//prepare data for sending in the next state
+        }
 #else
         answer_1 = OnOff_1;//prepare data for sending in the next state
         answer_2 = OnOff_2;//prepare data for sending in the next state
@@ -299,21 +298,21 @@ void loop(void) {
 #if (DEBUG_TIMING_LOOP>0)
     DEBUG_PRINTSTR("[TIMING][PumpNode ID: ");
     DEBUG_PRINT(myData.ID);
-    DEBUG_PRINTSTR(" ][State 0->1 - from recv - until send]: ");
+    DEBUG_PRINTSTR(" ][State 0->1 - from recv - after send]: ");
     DEBUG_PRINT(micros() - timing_);
     DEBUG_PRINTLNSTR(" microseconds.");
 
 #endif
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 1]Send acknowledgment to the pump request.");
     /*******************************************************************************************/
+    pumpOn_1 = false;
+    pumpOn_2 = false;
 
 #if(PUMPNODE_PUMPS_PARALLEL>0) //PUMPS IN PARALLEL
 
-    pumpOn_1 = true;
-    pumpOn_2 = true;
     DEBUG_PRINTSTR("[PUMPNODE][Status 1]Pump1 and Pump2 will work for maximal ");
     //pump time plus half of roundTripDelay
-    if (OnOff_1 > 0)
+    if (OnOff_1 >= OnOff_2)
     { //which pump time is longer, important for WATCHDOG
       //maximal wait time until both pumps finishes
       waitonPump = OnOff_1 + (WAIT_RESPONSE_INTERVAL >> 1);
@@ -327,38 +326,64 @@ void loop(void) {
       DEBUG_PRINT(OnOff_2);
     }
     DEBUG_PRINTLNSTR("ms in PARALLEL!!!!");
-    digitalWrite(pumpPin_1, HIGH);  // TURN PUMP ON
-    digitalWrite(pumpPin_2, HIGH);  // TURN PUMP ON
+
+    if (OnOff_1 > 0) {
+      pumpOn_1 = true;
+      DEBUG_PRINTSTR("[PUMPNODE][Status 1]Turn on Pump 1 in parallel mode");
+      digitalWrite(pumpPin_1, HIGH);  // TURN PUMP ON
+    }
+    if (OnOff_2 > 0) {
+      pumpOn_2 = true;
+      DEBUG_PRINTSTR("[PUMPNODE][Status 1]Turn on Pump 2 in parallel mode");
+      digitalWrite(pumpPin_2, HIGH);  // TURN PUMP ON
+    }
+
+
 
 #else//------------------------PUMPS IN SERIES
+    if (OnOff_1 > 0) { //maybe its zero, so turn on another pump
+      pumpOn_1 = true;
+      pumpOn_2 = false;
+      DEBUG_PRINTLNSTR("[PUMPNODE][Status 1]Turn on Pump 1 in series mode");
+      digitalWrite(pumpPin_1, HIGH);  // TURN PUMP ON
+    } else if (OnOff_2 > 0) { //maybe its zero, so dont turn on pump
+      pumpOn_1 = false;
+      pumpOn_2 = true;
+      DEBUG_PRINTLNSTR("[PUMPNODE][Status 1]Turn on Pump 2 in series mode");
+      digitalWrite(pumpPin_2, HIGH);  // TURN PUMP ON
+    }
 
-    pumpOn_1 = true;
-    pumpOn_2 = false;
     //pump time plus half of roundTripDelay
     waitonPump = OnOff_1 + OnOff_2  + (WAIT_RESPONSE_INTERVAL >> 1);
-    DEBUG_PRINTSTR("[PUMPNODE][Status 1]Pump1 will work for ");
+    DEBUG_PRINTLNSTR("[PUMPNODE][Status 1]Pump1 will work for ");
     DEBUG_PRINT(OnOff_1);
     DEBUG_PRINTSTR("ms and THEN Pump2 will work for ");
     DEBUG_PRINT(OnOff_2);
     DEBUG_PRINTSTR("ms  in SERIES.");
-    digitalWrite(pumpPin_1, HIGH);  // TURN PUMP ON
+
 #endif
 
     status = PUMPNODE_STATE_2_PUMPOFF;
     started_waiting_at = millis();
     previousTime = millis();//only state change
-    /**************************STATE 2**************************/ 
+    /**************************STATE 2**************************/
     /**************************STATE 2**************************/
   } else if (status == PUMPNODE_STATE_2_PUMPOFF) {
     dif = (currentTime - started_waiting_at);
     if (pumpOn_1)
     {
       if ((dif > OnOff_1)) {
+        DEBUG_PRINTLNSTR("[PUMPNODE][Status 2]Turn OFF Pump 1");
         digitalWrite(pumpPin_1, LOW);
 #if(PUMPNODE_PUMPS_PARALLEL==0) //in case if in SERIES
-        pumpOn_2 = true;
-        started_waiting_at = millis();
-        digitalWrite(pumpPin_2, HIGH);  // TURN PUMP ON
+        if (OnOff_2 > 0)
+        {
+          pumpOn_2 = true;
+          started_waiting_at = millis();
+          DEBUG_PRINTLNSTR("[PUMPNODE][Status 2]Turn on Pump 2 in series mode");
+          digitalWrite(pumpPin_2, HIGH);  // TURN PUMP ON
+          dif = 0; //should no immediately go into next if branch
+        }
 #endif
         pumpOn_1 = false;
         DEBUG_PRINTSTR("[PUMPNODE][Status 2]"); DEBUG_PRINTLNSTR("Turned off the PUMP 1 ");
@@ -367,13 +392,14 @@ void loop(void) {
         DEBUG_PRINTSTR("] greater than Interval[");
         DEBUG_PRINT(OnOff_1);
         DEBUG_PRINTLNSTR("]");
-
+        pump_worktime_1 += OnOff_1;
       }
     }
     if (pumpOn_2)
     {
       if (dif > OnOff_2)
       {
+        DEBUG_PRINTSTR("[PUMPNODE][Status 2]Turn OFF Pump 2");
         digitalWrite(pumpPin_2, LOW);
 
         pumpOn_2 = false;
@@ -383,6 +409,7 @@ void loop(void) {
         DEBUG_PRINTSTR("] greater than Interval[");
         DEBUG_PRINT(OnOff_2);
         DEBUG_PRINTLNSTR("]");
+        pump_worktime_2 += OnOff_2;
       }
     }
     if ((pumpOn_1 == false) && (pumpOn_2 == false)) {
@@ -391,6 +418,7 @@ void loop(void) {
 #if (DEBUG_TIMING_LOOP>0)
         timing_ = micros();
 #endif
+
         /********Receiving ACKNOWLEGMENT**************/
         int recv = recvData();
         /*******************************************/
@@ -440,8 +468,7 @@ void loop(void) {
     DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Status 3]Send last acknowledgment to the pump request.");
     /*******************************************************************************************/
     DEBUG_PRINTLNSTR("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    pump_worktime_1 += OnOff_1;
-    pump_worktime_2 += OnOff_2;
+
     DEBUG_PRINTSTR("[PUMPNODE]");
     DEBUG_PRINTSTR("OVERALL PUMPTIME FOR PUMP 1:");
     DEBUG_PRINT(pump_worktime_1 / 1000);
@@ -471,7 +498,7 @@ void loop(void) {
     write_cnt = RADIO_RESEND_NUMB;
     previousTime = millis(); //A change of state occured here
     digitalWrite(pumpPin_1, LOW);//for security reasons
-    digitalWrite(pumpPin_1, LOW);//for security reasons
+    digitalWrite(pumpPin_2, LOW);//for security reasons
   }
 
   DEBUG_FLUSH;
@@ -552,12 +579,12 @@ int recvData(void)
     //in that case skip it
     if (status == packetstate)
     {
-      uint32_t currentTime = getCombinedData(myResponse.moisture2, myResponse.moisture);
-      setTime(currentTime);
-      displayTimeFromUNIX(currentTime);
+      uint32_t currentTime_ = getCombinedData(myResponse.moisture2, myResponse.moisture);
+      setTime(currentTime_);
+      displayTimeFromUNIX(currentTime_);
       OnOff_1 = myResponse.Time;
       OnOff_2 = myResponse.Time_2;
-                //return myResponse.pumpTime;
+      //return myResponse.pumpTime;
       return 1;
     }
     DEBUG_PRINTLNSTR("[PUMPNODE][RECEIVING]: REDUNDANT MESSAGE");

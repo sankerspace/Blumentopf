@@ -19,7 +19,7 @@
 // sets Particle or photon:
 #define HW_ARDUINO  1
 #define HW_PHOTON   2
-#define USEParticleCloud 1 //sitch only used in case of particle photon
+#define USEParticleCloud 0 //sitch only used in case of particle photon
 
 
 #if defined(SPARK) || defined(PLATFORM_ID)
@@ -814,7 +814,7 @@ class CommandHandler
 /******************************  PUMPNODE HANDLE **************************************/
 /**************************************************************************************/
 //Strateg if two Pumps on ONE PumpNode should work in parallel
-#define PUMPNODE_PUMPS_PARALLEL           0 //[1]-yes [0]-no(work in series)
+#define PUMPNODE_PUMPS_PARALLEL           1 //[1]-yes [0]-no(work in series)
 
 /*
 *  PumpNode defines

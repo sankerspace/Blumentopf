@@ -2131,14 +2131,14 @@ void printFreeRam()
 
 uint32_t getCombinedData(uint16_t HighByte,uint16_t LowByte)
 {
-	uint32_t Value=(uint32_t)(HighByte << 8);
+	uint32_t Value=((uint32_t)HighByte << 16);
 	Value |= (uint32_t)LowByte;
 	return Value;
 }
 void   setCombinedData(uint32_t Data_,uint16_t& HighByte,uint16_t& LowByte)
 {
 
-	HighByte= (uint16_t)((Data_ & (0xffff0000)) >> 8);
+	HighByte= (uint16_t)((Data_ & (0xffff0000)) >> 16);
 	LowByte = (uint16_t)(Data_ & (0xffff));
 }
 
