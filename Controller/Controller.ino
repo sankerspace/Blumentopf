@@ -88,6 +88,7 @@ LinkedList<PumpNode_Handler*> PumpList = LinkedList<PumpNode_Handler*>();
 #if TEST_PUMP
 uint16_t nTestWatering = 1000;
 uint8_t i_=0;
+uint8_t i_2=0;
 #endif
 
 
@@ -527,14 +528,23 @@ void loop(void)
 
           if (myNodeList.isActive(myNodeList.myNodes[i_].ID) == 0)//check if the first node (index=0)in the list is active
           {
-            if(nTestWatering<15000)
+            if(i_2==0){
               ret = doWateringTasks(myNodeList.myNodes[i_].ID, 0,10000, 0); //here a new order to a pump Node has to be planned
-            else if(nTestWatering<25000)
+              if(ret==0)
+                i_2++;
+            }else if(i_2==1){
               ret = doWateringTasks(myNodeList.myNodes[i_].ID, 10000,0, 0);
-            else if(nTestWatering<40000)
-                ret = doWateringTasks(myNodeList.myNodes[i_].ID, 10000,5000, 0);
-            else if(nTestWatering<60000)
-                ret = doWateringTasks(myNodeList.myNodes[i_].ID, 5000,10000, 0);
+              if(ret==0)
+                i_2++;
+            }else if(i_2==2){
+              ret = doWateringTasks(myNodeList.myNodes[i_].ID, 10000,5000, 0);
+              if(ret==0)
+                i_2++;
+            }else if(i_2>=3){
+              ret = doWateringTasks(myNodeList.myNodes[i_].ID, 5000,10000, 0);
+              if(ret==0)
+                i_2=0;
+            }
             #if(DEBUG_MESSAGE>0)
             if (ret > 0) {
 
@@ -1019,8 +1029,9 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint32_t pumpTime_Motor1, uint32_t
 
 void handlePumpCommunications(PumpNode_Handler *handler)
 {
+  #if (DEBUG_TIMESTAMP>0)
   uint32_t currentTime_=getCurrentTime();
-  DEBUG_PRINTSTR("[TIME][getcurrentTime()]:");
+  DEBUG_PRINTSTR("\n[TIME][getcurrentTime()]:");
   DEBUG_PRINTDIG(currentTime_,HEX);
   //send Controller Time over Moisture 1 and Moisture 2
   DEBUG_PRINTSTR("\n[TIME][before]myResponse.moisture2: ");
@@ -1032,6 +1043,7 @@ void handlePumpCommunications(PumpNode_Handler *handler)
   DEBUG_PRINTDIG(myResponse.moisture2,HEX);
   DEBUG_PRINTSTR("\n[TIME][after]myResponse.moisture: ");
   DEBUG_PRINTDIG(myResponse.moisture,HEX);
+  #endif
   setDATA_NO_RegistrationPacket(&myResponse);
   setDATA_PumpPacket(&myResponse);
 

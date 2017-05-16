@@ -68,12 +68,13 @@
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
 #define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
-#define DEBUG_INFO 0         			// 0: disabled		1: show infos
+#define DEBUG_INFO 1         			// 0: disabled		1: show infos
 #define DEBUG_PUMP 1					//DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
 #define DEBUG_PUMP_ROUNDTRIPTIME 1
-#define DEBUG_RF24 0				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
+#define DEBUG_RF24 1				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
 #define DEBUG_TIMING_LOOP 1				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
 #define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function
+#define DEBUG_TIMESTAMP 0
 #ifdef PARTICLE_CLOUD
   #define DEBUG_PARTICLE_CLOUD 1
 #endif
@@ -814,7 +815,7 @@ class CommandHandler
 /******************************  PUMPNODE HANDLE **************************************/
 /**************************************************************************************/
 //Strateg if two Pumps on ONE PumpNode should work in parallel
-#define PUMPNODE_PUMPS_PARALLEL           1 //[1]-yes [0]-no(work in series)
+#define PUMPNODE_PUMPS_PARALLEL           0 //[1]-yes [0]-no(work in series)
 
 /*
 *  PumpNode defines

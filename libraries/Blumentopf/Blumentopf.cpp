@@ -1952,7 +1952,7 @@ void PumpNode_Handler::processPumpstate(uint32_t IncomeData_1,uint32_t IncomeDat
 	       DEBUG_PRINTSTR("][State 2]-SEND CONFIRMATION REQUEST to Node-ID ");
 	       DEBUG_PRINT(this->pumpnode_ID);
 	       DEBUG_PRINTSTR(" with respond_1:");DEBUG_PRINT(this->pumpnode_response_1);
-				 DEBUG_PRINTSTR(" and respond_2:");DEBUG_PRINT(this->pumpnode_response_2);
+				 DEBUG_PRINTSTR(" and respond_2:");DEBUG_PRINTLN(this->pumpnode_response_2);
 
 				 DEBUG_PRINTSTR("[BLUMENTOPF]\t[PumpNode_Handler ");
 	 			 DEBUG_PRINT(pumphandler_ID);
