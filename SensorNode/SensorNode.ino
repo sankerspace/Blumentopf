@@ -121,8 +121,8 @@ void setup()
 
   setup_RF();       // initialize the RF24L01+ module
 
-  // In debug mode, output some stuff
-#if DEBUG
+  // In  mode, output some stuff
+#if DEBUG_
   Serial.begin(BAUD);
 #endif
 
@@ -179,7 +179,7 @@ void setup()
   nRet = registerNode(&nDelay);
   while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
   {
-#ifdef DEBUG
+#ifdef DEBUG_
     Serial.flush();
 #endif
     digitalWrite(sensorPower, LOW);   // turn off the sensor power
@@ -355,7 +355,7 @@ void loop()
   myData.voltage = getBatteryVoltage();   // sollten wir diese Methode verwenden, muss sie adaptiert werden. Sie verändert die ADC-Einstellungen
 
 
-#if DEBUG
+#if DEBUG_
   printValues(nDHT_Status);
 #endif
 
@@ -376,7 +376,7 @@ void loop()
 
   delay(PRE_SLEEP_DELAY);                       // finish the serial communication and RF communication
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off for sleeping
-#ifdef DEBUG
+#ifdef DEBUG_
   Serial.flush();
 #endif
 

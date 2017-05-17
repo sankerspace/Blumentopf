@@ -19,7 +19,7 @@
 // sets Particle or photon:
 #define HW_ARDUINO  1
 #define HW_PHOTON   2
-#define USEParticleCloud 0 //sitch only used in case of particle photon
+#define PARTICLE_USECLOUD 0 //sitch only used in case of particle photon
 
 
 #if defined(SPARK) || defined(PLATFORM_ID)
@@ -38,7 +38,7 @@
 #endif
 
 #if (HW == HW_PHOTON)
-  #if (USEParticleCloud==1)
+  #if (PARTICLE_USECLOUD==1)
     #define PARTICLE_CLOUD
   #endif
   #include <application.h>
@@ -56,8 +56,9 @@
 /****************************** D E B U G **********************************************/
 /**************************************************************************************/
 // General debug messages:
-//Marko@:dont change DEBUG_ i have a warning about redundant definition
+//Marko@:dont change DEBUG_ i have a warning about redundant definition in Particle IDE
 #define DEBUG_ 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
+#if (DEBUG_>0)
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
 #define DEBUG_MESSAGE_HEADER 0			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE_HEADER_2 0		// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
@@ -73,20 +74,24 @@
 #define DEBUG_PUMP_ROUNDTRIPTIME 1
 #define DEBUG_RF24 1				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
 #define DEBUG_TIMING_LOOP 1				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
-#define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function
-#define DEBUG_TIMESTAMP 0
+
+#define DEBUG_TIMESTAMP 0       //show that timestamps are divided into two parts and send corectly to pump Node
 #ifdef PARTICLE_CLOUD
   #define DEBUG_PARTICLE_CLOUD 1
 #endif
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0			// 0: disabled		1: for analysing the EEPROM Data class internals
 #define DEBUG_SENSOR_MESSAGE_HEADER 0	// 0: disabled		1:  //only in SensorNode.ino
+#endif
+
+
+#define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function
 
 // For debugging the pump node
 
 //#define TEST_PUMP 1 //Testcase every 10 seconds turn on first pump in the list
 //#define TEST_PUMPSCHEDULE 1
-#define TEST_PUMP 1 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
+#define TEST_PUMP 2 //Testcase every every 2nd sensor round the pumpnode-condition gets checked
 
 
 // For getting rid of serial communication in the release version:
@@ -355,10 +360,12 @@ DO NOT CHANGE:
 #define WAIT_RESPONSE_INTERVAL       1000//4000// in Milliseconds
 
 //maximal duration for one slot of a pump  [INTERVAL/10] seconds
-#define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]!
+//marko@:doWatering takes that values as a reference
+#define INTERVAL 600	// Duration of one SensorNode/PumpNode timeslots [INTERVAL * 0.1s]!
+
 
 // measurement policy
-#define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s]
+#define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s] //Bernhard@ Brauch ma das???
 
 /*
 * PUMP DEFINE
@@ -376,28 +383,35 @@ DO NOT CHANGE:
 
 
 //PIN definition
-//RF24 PIN
-#define CE_PIN 9
-#define CS_PIN 10
-#define PHOTON_CS_PIN D6
-#define PHOTON_CE_PIN A2
+
 
 //Controller
-#define PHOTON_LED_BUILTIN D7
+
 
 // Values for Sensor Node
 #if (HW == HW_PHOTON)
   #define HW_RTC_PIN  D4			// for turning on/off the RTC at the Particle
+  //RF24 PIN
+  #define PHOTON_CS_PIN D6
+  #define PHOTON_CE_PIN A2
+  #define PHOTON_LED_BUILTIN D7
 #else
+  #define PHOTON_LED_BUILTIN 13
   #define SENSOR_POWER  8
   #define HW_RTC_PIN  SENSOR_POWER				// for turning on/off the RTC at the Arduino
+  //RF24 PIN
+  #define CE_PIN 9
+  #define CS_PIN 10
 #endif
+
+
+
 //SensorNode
 #define randomPIN         A6
-#define BATTERY_SENSE_PIN A3		// Pin for Battery voltage
-#define DHT11PIN 5					// Pin number for temperature/humidity sensor
-#define MOISTURE_PIN      A0
-#define MOISTURE_PIN_2    A2
+#define BATTERY_SENSE_PIN A0		// Pin for Battery voltage
+#define DHT11PIN          5 		// Pin number for temperature/humidity sensor
+#define MOISTURE_PIN      A2
+#define MOISTURE_PIN_2    A3
 #define LIGHT_PIN         A1
 
 #define PUMP1_PIN         3
@@ -691,8 +705,14 @@ struct nodeListElement
   Data nodeData;
   time_t   nextSlot;
   uint16_t ID;
-  uint16_t sensorID1;    // in case it is a motor node, the SensorNode corresponding to the pump1 is stored here.
-  uint16_t sensorID2;    // in case it is a motor node, the SensorNode corresponding to the pump2 is stored here.
+  //Marko@ sensorID1 before but renamed it
+   // in case it is a motor node, the SensorNode corresponding to the pump1 is stored here.
+   // in case it is a sensor node , the PumpNode ID for Moisture Sensor 1 is stored here
+  uint16_t ID_1;
+    //Marko@ sensorID2 before but renamed it
+   // in case it is a motor node, the SensorNode corresponding to the pump2 is stored here.
+   // in case it is a sensor node , the PumpNode ID for Moisture Sensor 2 is stored here
+  uint16_t ID_2;
   uint8_t state;
   String name;  //Moisture 1
   String name2; //Moisture 2
@@ -764,6 +784,9 @@ public:
   *0x01 .. Sensor or Pump Node has performed a registration(and responds always)
   */
   uint8_t isOnline(uint16_t ID); // PumpNode currently active or not
+
+  void setPumpInfos(uint16_t PumpNode_ID,uint32_t last_pumping_1,
+    uint32_t last_pumping_2,uint16_t pump_duration_1,uint16_t pump_duration_2);
 
   void setNodeName(uint16_t ID,String name);
   String getNodeName(uint16_t ID);
@@ -955,6 +978,7 @@ private:
 #define Error_WateringTask_2  "[CONTROLLER][doWateringTasks]ERROR:THIS IS NOT A PUMP NODE!!"
 #define Error_WateringTask_3  "[CONTROLLER][doWateringTasks]ERROR:PUMP IS ALREADY IN USE!!"
 #define Error_WateringTask_4  "[CONTROLLER][doWateringTasks]ERROR:Parameter not correct!!"
+#define Error_WateringTask_5  "[CONTROLLER][doWateringTasks]ERROR:Watering time exceeds maximum allowed period!!"
 
 /***************************************************************************************/
 /******************************  M E M O R Y ******************************************/
