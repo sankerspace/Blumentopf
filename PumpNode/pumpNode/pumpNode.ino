@@ -84,7 +84,7 @@ void setup() {
 
   radio.startListening();                       // Start listening
 
-#if (DEBUG==1)
+#if (DEBUG_==1)
 #if (DEBUG_RF24==1)
   radio.printDetails();
 #endif
@@ -200,8 +200,8 @@ void setup() {
 void loop(void) {
   uint32_t currentTime = millis();
 
-#if (DEBUG_RF24 == 1 && DEBUG==1)
-  if ((millis() - time_) > 20000)
+#if (DEBUG_RF24 == 1 && DEBUG_==1)
+  if ((millis() - time_) > 10000)
   {
     radio.printDetails();
     time_ = millis();
