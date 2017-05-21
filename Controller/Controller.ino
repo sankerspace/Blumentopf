@@ -216,7 +216,7 @@ void setup(void)
   #ifdef PARTICLE_CLOUD
     DEBUG_PRINTLNSTR("\r\n***************with PARTICLE CLOUD********************");
     /**************PARTICLE CLOUD*****************************************/
-    myHomeWatering=new HomeWatering();
+    myHomeWatering=new HomeWatering(&myNodeList);
     /**********************************************************************/
   #endif
 
@@ -482,7 +482,7 @@ void loop(void)
 
     }
     DEBUG_PRINTLNSTR_D("[CONTROLLER] Listening now...", DEBUG_MESSAGE);
-    
+
     write_cnt=1;//reset
   }//  if (radio.available())
 
@@ -640,14 +640,14 @@ void loop(void)
             //or a restart is even not necessary because the moisture didnt increase, maybe that fact is easier
             /*marko@: Check which SensorNode(SensorNode_Pump1) is attached to PUMP 1 on PumpNode with
             *         ID=myNodeList.myNodes[myNodeList.mnActivePump].ID
-            *SENSOR_PUMP1: A Bit related only to SensortNode attached to Pump 1
+            *NODELIST_SENSOR_PUMP1: A Bit related only to SensortNode attached to Pump 1
             *             (1) ... Use Moisture Sensor 2 and (0) ... Use Moisture Sensor 1
             */
             // Pump 1 can be linked to a Moisture Sensor on a SensorNode
             //Check if there exist such a link
             if(SensorNode_Pump1 != 0xffff)//at least there must be a valid SensorNode attached to Pump1
             {
-              if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP1)) == 0)
+              if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<NODELIST_SENSOR_PUMP1)) == 0)
               {
                 DEBUG_PRINTSTR_D("\t\t\tMoisture 1: ",DEBUG_PUMP_SCHEDULING);
                 DEBUG_PRINTLN_D(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture,DEBUG_PUMP_SCHEDULING);
@@ -678,12 +678,12 @@ void loop(void)
             }
             /*marko@: Check which SensorNode(SensorNode_Pump2) is attached to PUMP 2 on PumpNode with
             *         ID=myNodeList.myNodes[myNodeList.mnActivePump].ID
-            * SENSOR_PUMP2: A Bit related only to SensortNode attached to Pump 2
+            * NODELIST_SENSOR_PUMP2: A Bit related only to SensortNode attached to Pump 2
             *              (1) ... Use Moisture Sensor 2 and (0) ... Use Moisture Sensor 1
             */
             if(SensorNode_Pump2 != 0xffff)//at least there must be a valid SensorNode attached to Pump2
             {
-              if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<SENSOR_PUMP2)) == 0) // pump 2 is attached to moisture sensor 1
+              if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<NODELIST_SENSOR_PUMP2)) == 0) // pump 2 is attached to moisture sensor 1
               {
                 DEBUG_PRINTSTR_D("\t\t\tMoisture 1: ",DEBUG_PUMP_SCHEDULING);
                 DEBUG_PRINTLN_D(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture,DEBUG_PUMP_SCHEDULING);
@@ -1288,14 +1288,14 @@ void handleRegistration(void)
     currentNode.state |= (1 << NODELIST_NODETYPE);  // MotorNode
     //Bernhard@(2017.April):Gibts hier eine Prüfung ob ein SensorNode auch da ist?
     currentNode.ID_1 = myNodeList.mnLastAddedSensorNode; // Set sensornode for pump 1
-    currentNode.state &= ~(1<<SENSOR_PUMP1);                  // Set moisture sensor 1 for pump 1
+    currentNode.state &= ~(1<<NODELIST_SENSOR_PUMP1);                  // Set moisture sensor 1 for pump 1
     //Bernhard@: it would not be logical if standard mapping of both pumps on a pumpnode to the same moisture sensor
     //          is performed , One pump should be enough
     //          SensorID2 = SensorID1 so better to divide the pumps on both moisture sensors
     //Thats the standard tactic until now,particle cloud functions could change that
     currentNode.ID_2 = myNodeList.mnLastAddedSensorNode; // Set sensornode for pump 2
-    //currentNode.state &= ~(1<<SENSOR_PUMP2);
-    currentNode.state |= (1<<SENSOR_PUMP2);                  // Set moisture sensor 2 for pump 2
+    //currentNode.state &= ~(1<<NODELIST_SENSOR_PUMP2);
+    currentNode.state |= (1<<NODELIST_SENSOR_PUMP2);                  // Set moisture sensor 2 for pump 2
     DEBUG_PRINTSTR("\t\tUsing current last SensorNode - ID: ");
     DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
   }
@@ -1325,7 +1325,17 @@ void handleRegistration(void)
       DEBUG_PRINTLN(myResponse.Time);
       //now the node is online
       myNodeList.setNodeOnline(myResponse.ID);
+      if((myData.state & (1 << NODE_TYPE)) == 0)
+      {
+        /*******************PARTICLE ***********************************/
+        #ifdef PARTICLE_CLOUD
+          //automatically registrate a Cloud Variable to that SensorNode
+          myHomeWatering->assignSensorToVariable(myData.ID);
+        #endif
+        /*****************************************************************/
+      }
     }
+
   } else
   {
     uint16_t index=0;
@@ -1426,7 +1436,7 @@ void handleDataMessage(void)
 */
 /*******************PARTICLE ***********************************/
 #ifdef PARTICLE_CLOUD
-  myHomeWatering->setParticleVariableString(&myNodeList,nodeIndex);
+  myHomeWatering->setParticleVariableString(nodeIndex);
 #endif
 /*****************************************************************/
 

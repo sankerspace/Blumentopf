@@ -19,7 +19,7 @@
 // sets Particle or photon:
 #define HW_ARDUINO  1
 #define HW_PHOTON   2
-#define PARTICLE_USECLOUD 0 //sitch only used in case of particle photon
+#define PARTICLE_USECLOUD 1 //sitch only used in case of particle photon
 
 
 #if defined(SPARK) || defined(PLATFORM_ID)
@@ -688,8 +688,8 @@ private:
 #define NODELIST_NODETYPE       (0)
 #define NODELIST_PUMPACTIVE     (1)
 #define NODELIST_NODEONLINE     (2)
-#define SENSOR_PUMP1	        (3)		// 0: sensor1		1: sensor2
-#define SENSOR_PUMP2    	    (4)		// 0: sensor1		1: sensor2
+#define NODELIST_SENSOR_PUMP1	        (3)		// 0: choose first Moisture sensor;		1: second Moisture2 sensor
+#define NODELIST_SENSOR_PUMP2    	    (4)		// 0: Moisture1		1: Moisture2
 
 
 
@@ -714,14 +714,14 @@ struct nodeListElement
    // in case it is a sensor node , the PumpNode ID for Moisture Sensor 2 is stored here
   uint16_t ID_2;
   uint8_t state;
-  String name;  //Moisture 1
-  String name2; //Moisture 2
-  String location;//SensorNode
   // Bit 0: NODELIST_NODETYPE:   0...this is a SensorNode, 1...this is a MotorNode
   // Bit 1: NODELIST_PUMPACTIVE: 0...inactive, 1...active (is currently pumping[1] or not[0])
   // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE,  1...ONLINE (the node has performed a registration)
-  // Bit 3: SENSOR_PUMP1:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 1. Every SensorNode has two moisture sensors..)
-  // Bit 4: SENSOR_PUMP2:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 2. Every SensorNode has two moisture sensors..)
+  // Bit 3: NODELIST_SENSOR_PUMP1:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 1. Every SensorNode has two moisture sensors..)
+  // Bit 4: NODELIST_SENSOR_PUMP2:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 2. Every SensorNode has two moisture sensors..)
+  String name;  //Moisture 1
+  String name2; //Moisture 2
+  String location;//SensorNode
   byte     watering_policy;
   /*instead in pumphandler I put it here to count no reachability of a node
   * increases when a connection to a node failed
@@ -1045,16 +1045,24 @@ struct Particle_Node
   uint16_t SensorID;
 };
 
+enum ePump {PUMP1=0,PUMP2};
+enum eSensor {MOISTURE1=0,MOISTURE2};
+
+struct Mapp{
+  uint16_t PumpID;
+  uint16_t SensorID;
+  ePump p;
+  eSensor s;
+};
+
+
 class HomeWatering {
   public:
-    HomeWatering() {
-
-
-
+    HomeWatering(nodeList* myNodeList) {
+      pList=myNodeList;
       bool ret=true;
       for(int i=0;i<MAX_TRACKED_SENSORS;i++)
       {
-
           String name=(String::format("%s_%d",SENSOR_TRACKNAME_PREFIX,i));
 
           int len=name.length()+1;
@@ -1066,27 +1074,34 @@ class HomeWatering {
           DEBUG_PRINTLN_D(buf,DEBUG_PARTICLE_CLOUD);
 
 
-          ret &= Particle.variable(buf_, &(Particle_SensorData[i].SensorTXT),STRING);
+          ret = (ret && Particle.variable(buf_, &(Particle_SensorData[i].SensorTXT),STRING));
           Particle_SensorData[i].SensorID=0;
           DEBUG_PRINTLN_D(ret,DEBUG_PARTICLE_CLOUD);
       }
+      //Check if Cloud Variable is succesfully registered
       if(ret==false)
       {
-        DEBUG_PRINTSTR_D("[PARTICLE]",DEBUG_PARTICLE_CLOUD); DEBUG_PRINTLNSTR_D("VARIABLE NOT REGISTERED.",DEBUG_PARTICLE_CLOUD);
+        DEBUG_PRINTSTR_D("[PARTICLE]",DEBUG_PARTICLE_CLOUD);
+        DEBUG_PRINTLNSTR_D("VARIABLE NOT REGISTERED.",DEBUG_PARTICLE_CLOUD);
       }
-      //Particle.function("brew", &CoffeeMaker::brew, this);
+      //registrate cloud function in the Particle Cloud Service
+      Particle.function("Mapper", &HomeWatering::mapPumpToSensor, this);
+
     }
 
     //int brew(String command) {
       // do stuff
   //    return 1;
   //  }
+
+    int mapPumpToSensor(String mapping);
     int8_t isTrackedSensor(uint16_t ID);//if tracked return number of
-    void setParticleVariableString(nodeList* list,uint16_t index);
+    void setParticleVariableString(uint16_t nodeList_index);
+    bool assignSensorToVariable(uint16_t ID);
+
 
     struct Particle_Node Particle_SensorData[MAX_TRACKED_SENSORS];
-
-
+    nodeList *pList;
 
 };
 

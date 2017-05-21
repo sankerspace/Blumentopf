@@ -82,14 +82,14 @@ const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
     Hardware configuration for DHT11
 */
 
-dht11 DHT11;
+dht11 DHT11;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
 
 void setup_RF();
-int readDHT11();
-void printValues(int DHT11_State);
+int readDHT11();//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void printValues(int DHT11_State);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ISR(WDT_vect)
 {
@@ -127,10 +127,10 @@ void setup()
 #endif
 
 
-  DEBUG_PRINTSTR("SensorNode 0.1, ");
-  DEBUG_PRINTSTR("DHT11 LIBRARY VERSION: ");
-  DEBUG_PRINTLN(DHT11LIB_VERSION);
-  DEBUG_PRINTLNSTR("----------------");
+  DEBUG_PRINTSTR("SensorNode 0.1, ");//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  DEBUG_PRINTSTR("DHT11 LIBRARY VERSION: ");//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  DEBUG_PRINTLN(DHT11LIB_VERSION);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  DEBUG_PRINTLNSTR("----------------");//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   //myEEPROM.unsetHeaders();
   myEEPROM.init();
@@ -346,10 +346,10 @@ void loop()
 
   // read the temperature and humidity sensors:
   //  nDHT_Status = readDHT11();
-  nDHT_Status = DHT11.read(DHT11PIN);
+  nDHT_Status = DHT11.read(DHT11PIN);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  myData.temperature  = DHT11.temperature;
-  myData.humidity = DHT11.humidity;
+  myData.temperature  = DHT11.temperature;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  myData.humidity = DHT11.humidity;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   // getting the battery state:
   myData.voltage = getBatteryVoltage();   // sollten wir diese Methode verwenden, muss sie adaptiert werden. Sie verändert die ADC-Einstellungen
@@ -690,8 +690,7 @@ void burn8Readings(int pin)
   }
 }
 
-
-int readDHT11()
+int readDHT11()//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 {
 
   int chk = DHT11.read(DHT11PIN);
@@ -714,12 +713,36 @@ int readDHT11()
   return 4;
 }
 
-void printValues(int DHT11_State)
+/*
+int readDHT11()//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+{
+
+  int chk = DHT11.read(DHT11PIN);
+
+  switch (chk)
+  {
+    case DHTLIB_OK:
+      return 0;
+    case DHTLIB_ERROR_CHECKSUM:
+      DEBUG_PRINTLNSTR("DHT11 - Checksum error");
+      return 1;
+    case DHTLIB_ERROR_TIMEOUT:
+      DEBUG_PRINTLNSTR("DHT11 - Time out error");
+      return 2;
+    default:
+      DEBUG_PRINTLNSTR("DHT11 - Unknown error");
+      return 3;
+  }
+
+  return 4;
+}
+*/
+void printValues(int DHT11_State)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 {
   char cDegreeSymbol = 176;
-
+/*
   // Print the Temperature and Humidity values:
-  if (DHT11_State == 0)
+  if (DHT11_State == 0)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   {
     DEBUG_PRINTSTR("\tHumidity:    ");
     DEBUG_PRINTDIG((float) myData.humidity , 2);
@@ -733,7 +756,7 @@ void printValues(int DHT11_State)
   }
   else
   {
-    switch (DHT11_State)
+    switch (DHT11_State)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     {
       case DHTLIB_ERROR_CHECKSUM:
         DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Checksum error");
@@ -745,6 +768,37 @@ void printValues(int DHT11_State)
         DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Unknown error");
     }
   }
+*/
+
+// Print the Temperature and Humidity values:
+  if (DHT11_State == 0)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  {
+    DEBUG_PRINTSTR("\tHumidity:    ");
+    DEBUG_PRINTDIG((float) myData.humidity , 2);
+    DEBUG_PRINTLN("%");
+
+    DEBUG_PRINTSTR("\tTemperature: ");
+    DEBUG_PRINTDIG((float) myData.temperature , 2);
+    DEBUG_PRINT(cDegreeSymbol);
+    DEBUG_PRINTLN("C");
+
+  }
+  else
+  {
+    switch (DHT11_State)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    {
+      case DHTLIB_ERROR_CHECKSUM:
+        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Checksum error");
+        break;
+      case DHTLIB_ERROR_TIMEOUT:
+        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Time out error");
+        break;
+      default:
+        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Unknown error");
+    }
+  }
+
+
 
   // Print the light value
   if (myData.brightness < LIGHT_THRESHOLD)
