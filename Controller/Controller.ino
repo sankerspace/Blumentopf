@@ -1448,6 +1448,7 @@ void handleDataMessage(void)
     /*******************PARTICLE ***********************************/
     #ifdef PARTICLE_CLOUD
     myHomeWatering->setParticleVariableString(nodeIndex);
+    myHomeWatering->publish_SensorData(nodeIndex);
     #endif
     /*****************************************************************/
 

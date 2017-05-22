@@ -2502,14 +2502,14 @@ bool HomeWatering::publish_SensorData(uint16_t index)
 				{//MOISTURE 2 + First Pump
 					txt_pump2= PL_TXT_2 + pList->myNodes[index].name2 + "\n\t"
 					+ MOI_TXT_2		+ String(SensorData.moisture2) + "\n\t"
-					+ P_TXT_2 		+ pumpNode_2.ID + "\n\t"
+					+ P_TXT_2 		+ pumpNode_2.ID + "- First Pump\n\t"
 					+ LWAT_TXT_2	 	+ displayTime(pumpNode_2.Time)+"\n\t"
 					+ String(pumpNode_2.moisture) +	DP_TXT +"\n";
 				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 2
 				{//MOISTURE 2 +  Second Pump
 					txt_pump2= PL_TXT_2 + pList->myNodes[index].name2 + "\n\t"
 					+ MOI_TXT_2		+ String(SensorData.moisture2) + "\n\t"
-					+ P_TXT_2 		+ String(pumpNode_2.ID) + "\n\t"
+					+ P_TXT_2 		+ String(pumpNode_2.ID) + "- Second Pump\n\t"
 					+ LWAT_TXT_2	 	+ displayTime(pumpNode_2.Time_2)+"\n\t"
 					+ String(pumpNode_2.moisture2) +	DP_TXT +"\n";
 				}
@@ -2528,7 +2528,7 @@ bool HomeWatering::publish_SensorData(uint16_t index)
 
 												+ txt_pump2;
 
-	return true;
+	return Particle.publish("Sensor",text);
 
 }
 

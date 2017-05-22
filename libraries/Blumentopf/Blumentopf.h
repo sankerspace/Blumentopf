@@ -422,7 +422,7 @@ DO NOT CHANGE:
 #define randomPIN         A6
 #define BATTERY_SENSE_PIN A0		// Pin for Battery voltage
 #define DHTPIN            5 		// Pin number for temperature/humidity sensor
-#define DHTTYPE           DHT11//DHT22 //DHT11
+#define DHTTYPE           DHT11 //DHT22
 #define MOISTURE_PIN      A2
 #define MOISTURE_PIN_2    A3
 #define LIGHT_PIN         A1
