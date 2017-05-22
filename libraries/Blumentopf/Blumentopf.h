@@ -55,6 +55,17 @@
 /***************************************************************************************/
 /****************************** D E B U G **********************************************/
 /**************************************************************************************/
+//DHT.h has defined  DEBUG_PRINTLN AND DEBUG_PRINT
+#ifdef DHT_DEBUG
+  #undef DHT_DEBUG
+#endif
+#ifdef DEBUG_PRINT
+  #undef DEBUG_PRINT
+#endif
+#ifdef DEBUG_PRINTLN
+  #undef DEBUG_PRINTLN
+#endif
+
 // General debug messages:
 //Marko@:dont change DEBUG_ i have a warning about redundant definition in Particle IDE
 #define DEBUG_ 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
@@ -390,6 +401,7 @@ DO NOT CHANGE:
 
 // Values for Sensor Node
 #if (HW == HW_PHOTON)
+
   #define HW_RTC_PIN  D4			// for turning on/off the RTC at the Particle
   //RF24 PIN
   #define PHOTON_CS_PIN D6
@@ -409,7 +421,8 @@ DO NOT CHANGE:
 //SensorNode
 #define randomPIN         A6
 #define BATTERY_SENSE_PIN A0		// Pin for Battery voltage
-#define DHT11PIN          5 		// Pin number for temperature/humidity sensor
+#define DHTPIN            5 		// Pin number for temperature/humidity sensor
+#define DHTTYPE           DHT11//DHT22 //DHT11
 #define MOISTURE_PIN      A2
 #define MOISTURE_PIN_2    A3
 #define LIGHT_PIN         A1
@@ -569,8 +582,8 @@ struct Data
   float temperature;//4byte		// should be shortended to uint16_t
   float humidity;//4byte			// should be shortended to uint16_t
    //used as pumptime on second pump of a pumpnode
-  uint32_t Time;//4byte
-  uint32_t Time_2;// 4byte  //used as pumptime on first pump of a pumpnode
+  time_t Time;//4byte
+  time_t Time_2;// 4byte  //used as pumptime on first pump of a pumpnode
   uint16_t ID; //2 Byte
 
   uint16_t interval; // 2byte
@@ -1007,15 +1020,20 @@ void   setCombinedData(uint32_t Data_,uint16_t& HighByte,uint16_t& LowByte);
 
 
 #define S_ID_TXT      "Sensor NodeID:"
-#define PL_TXT        "PlantName:"
+#define PL_TXT_1        "1.PlantName:"
+#define PL_TXT_2      "2.PlantName:"
 #define LOC_TXT       "Location:"
 #define TEMP_TXT      "Temperature:"
-#define MOI_TXT       "Moisture:"
+#define MOI_TXT_1       "Moisture:"
+#define MOI_TXT_2      "Moisture2:"
 #define HU_TEXT       "Humidity:"
 #define BR_TXT        "Brightness:"
 #define BAT_TXT       "Battery:"
-#define LWAT_TXT      "Last Watering:"
-#define P_TXT         "PumpID:"
+#define LWAT_TXT_1    "1. Last Watering:"
+#define LWAT_TXT_2    "2. Last Watering:"
+#define P_TXT_1       "1. PumpID:"
+#define P_TXT_2       "2. PumpID:"
+#define DP_TXT        " sec. pumped"
 
 #define MAX_TRACKED_SENSORS 3  //mAXIMUM IS 20
 #define SENSOR_TRACKNAME_PREFIX "SensorData"
@@ -1098,7 +1116,7 @@ class HomeWatering {
     int8_t isTrackedSensor(uint16_t ID);//if tracked return number of
     void setParticleVariableString(uint16_t nodeList_index);
     bool assignSensorToVariable(uint16_t ID);
-
+    bool publish_SensorData(uint16_t index);
 
     struct Particle_Node Particle_SensorData[MAX_TRACKED_SENSORS];
     nodeList *pList;

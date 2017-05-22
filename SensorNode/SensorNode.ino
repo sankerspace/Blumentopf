@@ -12,11 +12,12 @@
 
 */
 
-#include "Blumentopf.h"
+
 
 
 #include <JeeLib.h>   // For sleeping
-#include <dht11.h>    // Termperature and humidity sensork
+//#include <dht11.h>    // Termperature and humidity sensork //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#include <DHT.h>
 #include <SPI.h>
 //#include "nRF24L01.h" // radio
 #include "RF24.h"     // radio
@@ -25,6 +26,9 @@
 // For RTC:
 #include <Time.h>
 #include <TimeLib.h>
+
+
+#include "Blumentopf.h"
 
 //Marko@: One datastructure for both
 //easier for Data Logging
@@ -82,14 +86,13 @@ const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
     Hardware configuration for DHT11
 */
 
-dht11 DHT11;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+DHT dht(DHTPIN, DHTTYPE);
 
 
 
 void setup_RF();
-int readDHT11();//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-void printValues(int DHT11_State);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void printValues(int DHT_State);
 
 ISR(WDT_vect)
 {
@@ -126,11 +129,11 @@ void setup()
   Serial.begin(BAUD);
 #endif
 
-
-  DEBUG_PRINTSTR("SensorNode 0.1, ");//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  DEBUG_PRINTSTR("DHT11 LIBRARY VERSION: ");//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  DEBUG_PRINTLN(DHT11LIB_VERSION);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  DEBUG_PRINTLNSTR("----------------");//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
+  
+  
+  DEBUG_PRINTSTR("SensorNode 1.0, ");
+  DEBUG_PRINTLNSTR("----------------");
 
   //myEEPROM.unsetHeaders();
   myEEPROM.init();
@@ -190,6 +193,8 @@ void setup()
     nRet = registerNode(&nDelay);
   }
 
+   //Initialize DHT Sensor
+  dht.begin();
   //  myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
 
   //Marko@
@@ -333,9 +338,10 @@ void loop()
 
 
 
-  delay(1000);    // DHT needs 1s to settle
+  delay(2000);    // DHT needs 1s to settle
 
-
+   //Initialize DHT Sensor
+  dht.begin();
   // The accuracy of the ADCs should be improved as in https://www.youtube.com/watch?v=E8GqHvOK4DI&feature=youtu.be
   // read the input on analog pin 0 (moisture):
   myData.moisture = analogRead(moisturePin);
@@ -344,13 +350,11 @@ void loop()
   // read the input on analog pin 1 (light):
   myData.brightness = analogRead(lightPin);
 
-  // read the temperature and humidity sensors:
-  //  nDHT_Status = readDHT11();
-  nDHT_Status = DHT11.read(DHT11PIN);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  myData.temperature  = DHT11.temperature;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  myData.humidity = DHT11.humidity;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+ 
+  
+  myData.temperature  = dht.readTemperature();
+  myData.humidity = dht.readHumidity();
+  nDHT_Status=isnan((myData.temperature) || isnan( myData.humidity));
   // getting the battery state:
   myData.voltage = getBatteryVoltage();   // sollten wir diese Methode verwenden, muss sie adaptiert werden. Sie verändert die ADC-Einstellungen
 
@@ -690,59 +694,12 @@ void burn8Readings(int pin)
   }
 }
 
-int readDHT11()//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-{
-
-  int chk = DHT11.read(DHT11PIN);
-
-  switch (chk)
-  {
-    case DHTLIB_OK:
-      return 0;
-    case DHTLIB_ERROR_CHECKSUM:
-      DEBUG_PRINTLNSTR("DHT11 - Checksum error");
-      return 1;
-    case DHTLIB_ERROR_TIMEOUT:
-      DEBUG_PRINTLNSTR("DHT11 - Time out error");
-      return 2;
-    default:
-      DEBUG_PRINTLNSTR("DHT11 - Unknown error");
-      return 3;
-  }
-
-  return 4;
-}
-
-/*
-int readDHT11()//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-{
-
-  int chk = DHT11.read(DHT11PIN);
-
-  switch (chk)
-  {
-    case DHTLIB_OK:
-      return 0;
-    case DHTLIB_ERROR_CHECKSUM:
-      DEBUG_PRINTLNSTR("DHT11 - Checksum error");
-      return 1;
-    case DHTLIB_ERROR_TIMEOUT:
-      DEBUG_PRINTLNSTR("DHT11 - Time out error");
-      return 2;
-    default:
-      DEBUG_PRINTLNSTR("DHT11 - Unknown error");
-      return 3;
-  }
-
-  return 4;
-}
-*/
-void printValues(int DHT11_State)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void printValues(int DHT_State)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 {
   char cDegreeSymbol = 176;
-/*
+
   // Print the Temperature and Humidity values:
-  if (DHT11_State == 0)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if (DHT_State == 0)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   {
     DEBUG_PRINTSTR("\tHumidity:    ");
     DEBUG_PRINTDIG((float) myData.humidity , 2);
@@ -756,48 +713,8 @@ void printValues(int DHT11_State)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }
   else
   {
-    switch (DHT11_State)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    {
-      case DHTLIB_ERROR_CHECKSUM:
-        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Checksum error");
-        break;
-      case DHTLIB_ERROR_TIMEOUT:
-        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Time out error");
-        break;
-      default:
-        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Unknown error");
-    }
+    DEBUG_PRINTLNSTR("\t[ERROR] Failed to read from DHT sensor!");
   }
-*/
-
-// Print the Temperature and Humidity values:
-  if (DHT11_State == 0)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  {
-    DEBUG_PRINTSTR("\tHumidity:    ");
-    DEBUG_PRINTDIG((float) myData.humidity , 2);
-    DEBUG_PRINTLN("%");
-
-    DEBUG_PRINTSTR("\tTemperature: ");
-    DEBUG_PRINTDIG((float) myData.temperature , 2);
-    DEBUG_PRINT(cDegreeSymbol);
-    DEBUG_PRINTLN("C");
-
-  }
-  else
-  {
-    switch (DHT11_State)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    {
-      case DHTLIB_ERROR_CHECKSUM:
-        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Checksum error");
-        break;
-      case DHTLIB_ERROR_TIMEOUT:
-        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Time out error");
-        break;
-      default:
-        DEBUG_PRINTLNSTR("\tNo Humidity and Temperature data - Unknown error");
-    }
-  }
-
 
 
   // Print the light value

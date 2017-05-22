@@ -471,9 +471,9 @@ void loop(void)
       }
       radio.startListening();
       #if (DEBUG_TIMING_LOOP>0)
-      DEBUG_PRINTSTR("[TIMING][to PumpNode ID: ");
+      DEBUG_PRINTSTR("[TIMING][to ID: ");
       DEBUG_PRINT(myResponse.ID);
-      DEBUG_PRINTSTR(" ][Duration - before stopListening - after startList.]: ");
+      DEBUG_PRINTSTR(" ][Duration of Send Operation.]: ");
       DEBUG_PRINT(micros() - duration_sending);
       DEBUG_PRINTLNSTR(" microseconds.");
       #endif
@@ -1239,7 +1239,17 @@ void handleRegistration(void)
   uint8_t nRet;
   bool newNode = true;
   struct nodeListElement currentNode;
-
+  currentNode.nodeData={0.0,0.0, 0,0,0,0,0,0,0,0,0};
+  currentNode.ID=0;
+  currentNode.nextSlot=0;
+  currentNode.ID_1=0;
+  currentNode.ID_2=0;
+  currentNode.state=0;
+  currentNode.name="<UNKNOWN>";
+  currentNode.name2="<UNKNOWN>";
+  currentNode.location="<UNKNOWN>";
+  currentNode.watering_policy=0;
+  currentNode.pumpnode_state_error_counter=0;
   myResponse.Time = getCurrentTime();
   DEBUG_PRINTLNSTR("[CONTROLLER][handleRegistration()] Registration request!");
   myResponse.state = (1 << REGISTER_ACK_BIT);
@@ -1373,15 +1383,18 @@ void handleDataMessage(void)
   uint16_t nodeIndex;
   nodeIndex = myNodeList.findNodeByID(myData.ID);
   myResponse.state &= ~(1 << ID_INEXISTENT);     // per default the controller knows the node ID
+  myResponse.ID = myData.ID;
   if (nodeIndex == 0xffff)      // if the node does not exist
   {
     DEBUG_PRINTSTR("\t*ERROR*  Node does not exist in the node list - there seems to be a topology problem.\r\n\tID: ");
     DEBUG_PRINTLN(myData.ID);
 
     myResponse.state |= (1 << ID_INEXISTENT);     // tell the node, the controller doesn't know him.
-  }
-  DEBUG_PRINTLNSTR("\tData message.");
-  #if (DEBUG_DATA_CONTENT > 0)   // show the data contents on the serial interface
+
+  }else
+  {
+    DEBUG_PRINTLNSTR("\tData message.");
+    #if (DEBUG_DATA_CONTENT > 0)   // show the data contents on the serial interface
 
     DEBUG_PRINT("\t\tID: ");
     DEBUG_PRINT(myData.ID);
@@ -1410,46 +1423,44 @@ void handleDataMessage(void)
     DEBUG_PRINTLN(myData.Time);
     //      DEBUG_PRINTSTR("Time: ");
     //      DEBUG_PRINTLN(myResponse.ControllerTime);
-  #endif
+    #endif
 
-  //  myResponse.state &= ~((1 << FETCH_EEPROM_DATA1) | (1 << FETCH_EEPROM_DATA2));   // We do not want to have EEPROM data now
-  myResponse.state |= (1 << FETCH_EEPROM_DATA1);   // We do want to have EEPROM data now
-  myResponse.state &= ~(1 << FETCH_EEPROM_DATA2);
+    //  myResponse.state &= ~((1 << FETCH_EEPROM_DATA1) | (1 << FETCH_EEPROM_DATA2));   // We do not want to have EEPROM data now
+    myResponse.state |= (1 << FETCH_EEPROM_DATA1);   // We do want to have EEPROM data now
+    myResponse.state &= ~(1 << FETCH_EEPROM_DATA2);
 
 
-  myResponse.ID = myData.ID;
+    // copying the data to the nodelist
 
-  // copying the data to the nodelist
+    myNodeList.myNodes[nodeIndex].nodeData=myData;
+    /*
+    myNodeList.myNodes[nodeIndex].nodeData.temperature = myData.temperature;
+    myNodeList.myNodes[nodeIndex].nodeData.humidity = myData.humidity;
+    myNodeList.myNodes[nodeIndex].nodeData.interval = myData.interval;
+    myNodeList.myNodes[nodeIndex].nodeData.voltage = myData.voltage;
+    myNodeList.myNodes[nodeIndex].nodeData.VCC = myData.VCC;
+    myNodeList.myNodes[nodeIndex].nodeData.moisture = myData.moisture;
+    myNodeList.myNodes[nodeIndex].nodeData.moisture2 = myData.moisture2;
+    myNodeList.myNodes[nodeIndex].nodeData.brightness = myData.brightness;
+    myNodeList.myNodes[nodeIndex].nodeData.state = myData.state;
+    myNodeList.myNodes[nodeIndex].nodeData.packetInfo = myData.packetInfo;
+    */
+    /*******************PARTICLE ***********************************/
+    #ifdef PARTICLE_CLOUD
+    myHomeWatering->setParticleVariableString(nodeIndex);
+    #endif
+    /*****************************************************************/
 
-  myNodeList.myNodes[nodeIndex].nodeData=myData;
-  /*
-  myNodeList.myNodes[nodeIndex].nodeData.temperature = myData.temperature;
-  myNodeList.myNodes[nodeIndex].nodeData.humidity = myData.humidity;
-  myNodeList.myNodes[nodeIndex].nodeData.interval = myData.interval;
-  myNodeList.myNodes[nodeIndex].nodeData.voltage = myData.voltage;
-  myNodeList.myNodes[nodeIndex].nodeData.VCC = myData.VCC;
-  myNodeList.myNodes[nodeIndex].nodeData.moisture = myData.moisture;
-  myNodeList.myNodes[nodeIndex].nodeData.moisture2 = myData.moisture2;
-  myNodeList.myNodes[nodeIndex].nodeData.brightness = myData.brightness;
-  myNodeList.myNodes[nodeIndex].nodeData.state = myData.state;
-  myNodeList.myNodes[nodeIndex].nodeData.packetInfo = myData.packetInfo;
-*/
-/*******************PARTICLE ***********************************/
-#ifdef PARTICLE_CLOUD
-  myHomeWatering->setParticleVariableString(nodeIndex);
-#endif
-/*****************************************************************/
-
-  if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
-  {
-    DEBUG_PRINTLNSTR("\tIt was live data...schedule next measurement");
-    myResponse.interval = getNextMeasurementSlot(nodeIndex);
+    if ((myData.state & (1 << EEPROM_DATA_PACKED)) == 0)   // only for live data. EEPROM data doesn't get scheduled
+    {
+      DEBUG_PRINTLNSTR("\tIt was live data...schedule next measurement");
+      myResponse.interval = getNextMeasurementSlot(nodeIndex);
+    }
+    else
+    {
+      DEBUG_PRINTLNSTR("\tIt was EEPROM data...no scheduling needed.");
+    }
   }
-  else
-  {
-    DEBUG_PRINTLNSTR("\tIt was EEPROM data...no scheduling needed.");
-  }
-
 }
 
 /*

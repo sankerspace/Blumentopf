@@ -2448,6 +2448,90 @@ int HomeWatering::mapPumpToSensor(String mapping)
 
 	return ret;
 }
+/*
+#define S_ID_TXT      "Sensor NodeID:"
+#define PL_TXT_1        "1.PlantName:"
+#define PL_TXT_2      "2.PlantName:"
+#define LOC_TXT       "Location:"
+#define TEMP_TXT      "Temperature:"
+#define MOI_TXT_1       "Moisture:"
+#define MOI_TXT_2      "Moisture2:"
+#define HU_TEXT       "Humidity:"
+#define BR_TXT        "Brightness:"
+#define BAT_TXT       "Battery:"
+#define LWAT_TXT_1    "1. Last Watering:"
+#define LWAT_TXT_2    "2. Last Watering:"
+#define P_TXT_1       "1. PumpID:"
+#define P_TXT_2       "2. PumpID:"
+*/
+bool HomeWatering::publish_SensorData(uint16_t index)
+{
+	struct Data SensorData = pList->myNodes[index].nodeData;
+	struct Data pumpNode_1={0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0};//pump linked to Moisture 1
+	struct Data pumpNode_2{0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0};//pump linked to Moisture 2
+	String txt_pump1="";
+	String txt_pump2="";
+	for(int i=0;i<pList->mnNodeCount;i++)
+	{
+		if(pList->myNodes[i].state & (1<< NODELIST_NODETYPE) == 1)
+		{//a pump from current selected pumpnode is linked to Moisture 1 of currrent SensorNode
+			if(pList->myNodes[i].ID==pList->myNodes[index].ID_1)
+			{
+				pumpNode_1=pList->myNodes[i].nodeData;//Moisture 1 connected pump
+				if(pList->myNodes[i].ID_1 == SensorData.ID)//pump1 is definitive linked to Moisture 1
+				{//MOISTURE 1 + First Pump
+					txt_pump1= PL_TXT_1 + pList->myNodes[index].name + "\n\t"
+					+ MOI_TXT_1		+ String(SensorData.moisture) + "\n\t"
+					+ P_TXT_1 		+ String(pumpNode_1.ID) + "- First Pump\n\t"
+					+ LWAT_TXT_1	 	+ displayTime(pumpNode_1.Time)+"\n\t"
+					+ String(pumpNode_1.moisture) +	DP_TXT +"\n";
+				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 1
+				{//MOISTURE 1 +  Second Pump
+					txt_pump1= PL_TXT_1 + pList->myNodes[index].name + "\n\t"
+					+ MOI_TXT_1		+ String(SensorData.moisture) + "\n\t"
+					+ P_TXT_1 		+ String(pumpNode_1.ID) + "- Second Pump\n\t"
+					+ LWAT_TXT_1	 	+ displayTime(pumpNode_1.Time_2)+"\n\t"
+					+ String(pumpNode_1.moisture2) +	DP_TXT +"\n";
+				}
+			}
+			//a pump from current selected pumpnode is linked to Moisture 2 of currrent SensorNode
+			if(pList->myNodes[i].ID==pList->myNodes[index].ID_2)
+			{
+				pumpNode_2=pList->myNodes[i].nodeData;//Moisture 2 connected pump
+				if(pList->myNodes[i].ID_1 == SensorData.ID)//pump1 is definitive linked to Moisture 2
+				{//MOISTURE 2 + First Pump
+					txt_pump2= PL_TXT_2 + pList->myNodes[index].name2 + "\n\t"
+					+ MOI_TXT_2		+ String(SensorData.moisture2) + "\n\t"
+					+ P_TXT_2 		+ pumpNode_2.ID + "\n\t"
+					+ LWAT_TXT_2	 	+ displayTime(pumpNode_2.Time)+"\n\t"
+					+ String(pumpNode_2.moisture) +	DP_TXT +"\n";
+				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 2
+				{//MOISTURE 2 +  Second Pump
+					txt_pump2= PL_TXT_2 + pList->myNodes[index].name2 + "\n\t"
+					+ MOI_TXT_2		+ String(SensorData.moisture2) + "\n\t"
+					+ P_TXT_2 		+ String(pumpNode_2.ID) + "\n\t"
+					+ LWAT_TXT_2	 	+ displayTime(pumpNode_2.Time_2)+"\n\t"
+					+ String(pumpNode_2.moisture2) +	DP_TXT +"\n";
+				}
+			}
+		}
+	}
+	String text=S_ID_TXT 	+ String(SensorData.ID) + "\n"
+												+ LOC_TXT	+ pList->myNodes[index].location  + "\n"
+
+												+ TEMP_TXT	+ String(SensorData.temperature,2) + "Grad Celcius\n"
+												+	HU_TEXT		+ String(SensorData.humidity,2)	+ "% \n"
+												+ BR_TXT		+ String(100.0*(float)SensorData.brightness/1024.0 ,2)+"\n"
+												+ BAT_TXT + String(((float)SensorData.voltage / 100.0),2)	+ "V\n"
+
+												+ txt_pump1
+
+												+ txt_pump2;
+
+	return true;
+
+}
+
 
 /*
 ZUWEISLUNG location
