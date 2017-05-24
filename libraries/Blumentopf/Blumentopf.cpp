@@ -2282,6 +2282,12 @@ uint16_t brightness; //2 Byte
 */
 #ifdef PARTICLE_CLOUD
 
+
+
+
+
+/*HELPER FUNCTIONS*/
+//Extract Information from a String
 struct Mapp extractFromString(String str)
 {
   int pos=0;
@@ -2324,6 +2330,96 @@ struct Mapp extractFromString(String str)
   return ret;
 }
 
+
+/*HELPER FUNCTIONS*/
+void HomeWatering::findSensorLinks(uint16_t index,struct SensorLink *link)
+{
+	struct Data SensorData = pList->myNodes[index].nodeData;
+	struct Data pumpNode_1={0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0};//pump linked to Moisture 1
+	struct Data pumpNode_2={0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0};//pump linked to Moisture 2
+	//String txt_pump2="";
+	//String txt_pump1="";
+	link->name1=pList->myNodes[index].name;
+	link->name2=pList->myNodes[index].name2;
+	link->location=pList->myNodes[index].location;
+	for(int i=0;i<pList->mnNodeCount;i++)
+	{
+		if((pList->myNodes[i].state & (1<< NODELIST_NODETYPE)) == 1)
+		{//a pump from current selected pumpnode is linked to Moisture 1 of currrent SensorNode
+			if(pList->myNodes[i].ID==pList->myNodes[index].ID_1)
+			{
+				link->map1.SensorID=SensorData.ID;
+				link->map1.PumpID=pList->myNodes[i].ID;
+				link->map1.s=MOISTURE1;
+
+				pumpNode_1=pList->myNodes[i].nodeData;//Moisture 1 connected pump
+				if(pList->myNodes[i].ID_1 == SensorData.ID)//pump1 is definitive linked to Moisture 1
+				{//MOISTURE 1 + First Pump
+					link->map1.p=PUMP1;
+					link->map1.lastWatering=pumpNode_1.Time;
+					link->map1.duration=pumpNode_1.moisture;
+					link->map_report_1= PL_TXT_1 + pList->myNodes[index].name + ":::"
+					+ MOI_TXT_1		+ String(SensorData.moisture) + ":::"
+					+ P_TXT_1 		+ String(pumpNode_1.ID) + "- First Pump:::";
+					link->watering_report_1= LWAT_TXT_1
+					+ displayTime(pumpNode_1.Time)+":::"
+					+ String(pumpNode_1.moisture) +	DP_TXT +"\n";
+				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 1
+				{//MOISTURE 1 +  Second Pump
+					link->map1.p=PUMP2;
+					link->map1.lastWatering=pumpNode_1.Time_2;
+					link->map1.duration=pumpNode_1.moisture2;
+					link->map_report_1= PL_TXT_1 + pList->myNodes[index].name + ":::"
+					+ MOI_TXT_1		+ String(SensorData.moisture) + ":::"
+					+ P_TXT_1 		+ String(pumpNode_1.ID) + "- Second Pump:::";
+
+					link->watering_report_1 = LWAT_TXT_1
+					+ displayTime(pumpNode_1.Time_2)+":::"
+					+ String(pumpNode_1.moisture2) +	DP_TXT +"\n";
+				}
+			}
+
+			//a pump from current selected pumpnode is linked to Moisture 2 of currrent SensorNode
+			if(pList->myNodes[i].ID==pList->myNodes[index].ID_2)
+			{
+				link->map2.SensorID=SensorData.ID;
+				link->map2.PumpID=pList->myNodes[i].ID;
+				link->map2.s=MOISTURE2;
+				pumpNode_2=pList->myNodes[i].nodeData;//Moisture 2 connected pump
+				if(pList->myNodes[i].ID_1 == SensorData.ID)//pump1 is definitive linked to Moisture 2
+				{//MOISTURE 2 + First Pump
+					link->map2.p=PUMP1;
+					link->map2.lastWatering=pumpNode_2.Time;
+					link->map2.duration=pumpNode_2.moisture;
+					link->map_report_2= PL_TXT_2 + pList->myNodes[index].name2 + ":::"
+					+ MOI_TXT_2		+ String(SensorData.moisture2) + ":::"
+					+ P_TXT_2 		+ pumpNode_2.ID + "- First Pump:::";
+					link->watering_report_1 = LWAT_TXT_2
+					+ displayTime(pumpNode_2.Time)+":::"
+					+ String(pumpNode_2.moisture) +	DP_TXT +"\n";
+				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 2
+				{//MOISTURE 2 +  Second Pump
+					link->map2.p=PUMP2;
+					link->map2.lastWatering=pumpNode_2.Time_2;
+					link->map2.duration=pumpNode_2.moisture2;
+					link->map_report_2 = PL_TXT_2 + pList->myNodes[index].name2 + ":::"
+					+ MOI_TXT_2		+ String(SensorData.moisture2) + ":::"
+					+ P_TXT_2 		+ String(pumpNode_2.ID) + "- Second Pump:::";
+					link->watering_report_1 = LWAT_TXT_2
+					+ displayTime(pumpNode_2.Time_2)+":::"
+					+ String(pumpNode_2.moisture2) +	DP_TXT +"\n";
+				}
+			}
+
+		}
+	}
+}
+
+
+
+
+
+
 void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 {
 
@@ -2337,15 +2433,26 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 		break;
 	}
 
+
 	if(isTracked)
 	{
+		struct SensorLink link;
+		findSensorLinks(nodeList_index,&link);
 		struct nodeListElement *node = &(pList->myNodes[nodeList_index]);
-		(*tmp) = String(node->ID)+ ","+String(node->name)+ ","+String(node->location)
-		+ ","+String(node->nodeData.temperature)+ ","+String(node->nodeData.moisture)
-		+ ","+String(node->nodeData.moisture2)+ ","+String(node->nodeData.moisture)
-		+ ","+String(node->nodeData.humidity)+ ","+String(node->nodeData.brightness)
-		+ ","+String(node->nodeData.voltage)+ ","+String(node->nodeData.Time)
-		+ ","+String(node->nodeData.ID);
+		(*tmp) = String(node->ID)
+		+ ","+ String(node->nodeData.temperature,2)+ ","+String(node->nodeData.brightness)
+		+ ","+ String(node->nodeData.humidity,2) + ","+String(node->nodeData.voltage)
+		+ "," +link.location
+
+		+ "," +link.name1 + ","+ String(node->nodeData.moisture)
+		+ "," + String(link.map1.PumpID) + "," + String(link.map1.p)
+		+ "," + String(link.map1.lastWatering)+ "," + String(link.map1.duration)
+
+		+ "," +link.name2 + ","+ String(node->nodeData.moisture2)
+		+ "," + String(link.map2.PumpID) + "," + String(link.map2.p)
+		+ "," + String(link.map2.lastWatering)+ "," + String(link.map2.duration);
+		DEBUG_PRINTSTR_D("[HOMEWATERING][send Variable]:",DEBUG_PARTICLE_CLOUD);
+		DEBUG_PRINTLN_D((*tmp),DEBUG_PARTICLE_CLOUD);
 	}
 }
 
@@ -2374,6 +2481,7 @@ bool HomeWatering::assignSensorToVariable(uint16_t ID)
 	return false;
 }
 
+//One pump from one PumpNode is connected to one Moisture Sensor from one SensorNode
 int HomeWatering::mapPumpToSensor(String mapping)
 {
 	int ret=-2;
@@ -2448,89 +2556,27 @@ int HomeWatering::mapPumpToSensor(String mapping)
 
 	return ret;
 }
-/*
-#define S_ID_TXT      "Sensor NodeID:"
-#define PL_TXT_1        "1.PlantName:"
-#define PL_TXT_2      "2.PlantName:"
-#define LOC_TXT       "Location:"
-#define TEMP_TXT      "Temperature:"
-#define MOI_TXT_1       "Moisture:"
-#define MOI_TXT_2      "Moisture2:"
-#define HU_TEXT       "Humidity:"
-#define BR_TXT        "Brightness:"
-#define BAT_TXT       "Battery:"
-#define LWAT_TXT_1    "1. Last Watering:"
-#define LWAT_TXT_2    "2. Last Watering:"
-#define P_TXT_1       "1. PumpID:"
-#define P_TXT_2       "2. PumpID:"
-*/
-bool HomeWatering::publish_SensorData(uint16_t index)
-{
-	struct Data SensorData = pList->myNodes[index].nodeData;
-	struct Data pumpNode_1={0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0};//pump linked to Moisture 1
-	struct Data pumpNode_2{0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0};//pump linked to Moisture 2
-	String txt_pump1="";
-	String txt_pump2="";
-	for(int i=0;i<pList->mnNodeCount;i++)
-	{
-		if(pList->myNodes[i].state & (1<< NODELIST_NODETYPE) == 1)
-		{//a pump from current selected pumpnode is linked to Moisture 1 of currrent SensorNode
-			if(pList->myNodes[i].ID==pList->myNodes[index].ID_1)
-			{
-				pumpNode_1=pList->myNodes[i].nodeData;//Moisture 1 connected pump
-				if(pList->myNodes[i].ID_1 == SensorData.ID)//pump1 is definitive linked to Moisture 1
-				{//MOISTURE 1 + First Pump
-					txt_pump1= PL_TXT_1 + pList->myNodes[index].name + "\n\t"
-					+ MOI_TXT_1		+ String(SensorData.moisture) + "\n\t"
-					+ P_TXT_1 		+ String(pumpNode_1.ID) + "- First Pump\n\t"
-					+ LWAT_TXT_1	 	+ displayTime(pumpNode_1.Time)+"\n\t"
-					+ String(pumpNode_1.moisture) +	DP_TXT +"\n";
-				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 1
-				{//MOISTURE 1 +  Second Pump
-					txt_pump1= PL_TXT_1 + pList->myNodes[index].name + "\n\t"
-					+ MOI_TXT_1		+ String(SensorData.moisture) + "\n\t"
-					+ P_TXT_1 		+ String(pumpNode_1.ID) + "- Second Pump\n\t"
-					+ LWAT_TXT_1	 	+ displayTime(pumpNode_1.Time_2)+"\n\t"
-					+ String(pumpNode_1.moisture2) +	DP_TXT +"\n";
-				}
-			}
-			//a pump from current selected pumpnode is linked to Moisture 2 of currrent SensorNode
-			if(pList->myNodes[i].ID==pList->myNodes[index].ID_2)
-			{
-				pumpNode_2=pList->myNodes[i].nodeData;//Moisture 2 connected pump
-				if(pList->myNodes[i].ID_1 == SensorData.ID)//pump1 is definitive linked to Moisture 2
-				{//MOISTURE 2 + First Pump
-					txt_pump2= PL_TXT_2 + pList->myNodes[index].name2 + "\n\t"
-					+ MOI_TXT_2		+ String(SensorData.moisture2) + "\n\t"
-					+ P_TXT_2 		+ pumpNode_2.ID + "- First Pump\n\t"
-					+ LWAT_TXT_2	 	+ displayTime(pumpNode_2.Time)+"\n\t"
-					+ String(pumpNode_2.moisture) +	DP_TXT +"\n";
-				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 2
-				{//MOISTURE 2 +  Second Pump
-					txt_pump2= PL_TXT_2 + pList->myNodes[index].name2 + "\n\t"
-					+ MOI_TXT_2		+ String(SensorData.moisture2) + "\n\t"
-					+ P_TXT_2 		+ String(pumpNode_2.ID) + "- Second Pump\n\t"
-					+ LWAT_TXT_2	 	+ displayTime(pumpNode_2.Time_2)+"\n\t"
-					+ String(pumpNode_2.moisture2) +	DP_TXT +"\n";
-				}
-			}
-		}
-	}
-	String text=S_ID_TXT 	+ String(SensorData.ID) + "\n"
-												+ LOC_TXT	+ pList->myNodes[index].location  + "\n"
 
-												+ TEMP_TXT	+ String(SensorData.temperature,2) + "Grad Celcius\n"
+
+
+//Generate String to publish Sensor Information
+bool HomeWatering::publish_SensorData(uint16_t Sensor_index)
+{
+	struct Data SensorData = pList->myNodes[Sensor_index].nodeData;
+
+	String text=S_ID_TXT 	+ String(SensorData.ID) + "\n"
+												+ LOC_TXT	+ pList->myNodes[Sensor_index].location  + "\n"
+
+												+ TEMP_TXT	+ String(SensorData.temperature,2) + "\xB0 \n"
 												+	HU_TEXT		+ String(SensorData.humidity,2)	+ "% \n"
 												+ BR_TXT		+ String(100.0*(float)SensorData.brightness/1024.0 ,2)+"\n"
-												+ BAT_TXT + String(((float)SensorData.voltage / 100.0),2)	+ "V\n"
-
-												+ txt_pump1
-
-												+ txt_pump2;
+												+ BAT_TXT + String(((float)SensorData.voltage / 100.0),2)	+ "V\n";
 
 	return Particle.publish("Sensor",text);
 
 }
+
+
 
 
 /*
