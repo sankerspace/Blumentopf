@@ -361,6 +361,7 @@ void loop()
 
 #if DEBUG_
   printValues(nDHT_Status);
+  printFreeRam();
 #endif
 
   myData.state &= ~(1 << EEPROM_DATA_PACKED); // this is live data
