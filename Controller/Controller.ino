@@ -1340,7 +1340,9 @@ void handleRegistration(void)
         /*******************PARTICLE ***********************************/
         #ifdef PARTICLE_CLOUD
           //automatically registrate a Cloud Variable to that SensorNode
-          myHomeWatering->assignSensorToVariable(myData.ID);
+
+        bool ret= myHomeWatering->assignSensorToVariable(myData.ID);
+        DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Variable registration not succesfull", (ret==false));
         #endif
         /*****************************************************************/
       }

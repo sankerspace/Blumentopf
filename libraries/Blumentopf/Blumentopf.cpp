@@ -2471,9 +2471,11 @@ bool HomeWatering::assignSensorToVariable(uint16_t ID)
 	for(int8_t i=0;i<MAX_TRACKED_SENSORS;i++)
 	{
 		if(Particle_SensorData[i].SensorID==ID)//maybe an old registration
-		return true;
+			return true;
 		if(Particle_SensorData[i].SensorID==0)
 		{
+			DEBUG_PRINTSTR_D("[HOMEWATERING][Registrate Variable]:Sensor ID ",DEBUG_PARTICLE_CLOUD);
+			DEBUG_PRINTLN_D(ID,DEBUG_PARTICLE_CLOUD);
 			Particle_SensorData[i].SensorID=ID;	//if we find a empty slot
 			return true;
 		}

@@ -503,6 +503,7 @@ void loop(void) {
     previousTime = millis(); //A change of state occured here
     digitalWrite(pumpPin_1, LOW);//for security reasons
     digitalWrite(pumpPin_2, LOW);//for security reasons
+    printFreeRam();
   }
 
   DEBUG_FLUSH;

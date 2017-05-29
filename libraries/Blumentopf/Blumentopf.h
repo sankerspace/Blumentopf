@@ -425,7 +425,7 @@ DO NOT CHANGE:
 #define DHTTYPE           DHT11 //DHT22
 #define MOISTURE_PIN      A2
 #define MOISTURE_PIN_2    A3
-#define LIGHT_PIN         A1
+#define LIGHT_PIN         A1 //R1(Fotoresitor[1kohm-100kohm]) R2=20 kOhm-(Marko@ 0-3,3V) R2=18kOhm
 
 #define PUMP1_PIN         3
 #define PUMP2_PIN         2
