@@ -1,12 +1,24 @@
-% Introduction about the project etc...
-The requirements come here..
 
-It should water the flowers...
+The system should substitute the need for human interaction. Therefore it has to sense as much information relevant to the task of watering as possible and it needs the possibility of adding water to the flower pots. Furthermore it should be reliable, so it doesn't have to be supervised.
+
+
 \begin{itemize}
-\item Reliable flower watering
-\item It should be quiet
-\item An efficient solution
-\item The hardware solution should be visually appealing
-\item Data should be logged to perform statistical analysis on it.
-\item The data connection should be wirelessly
+\item \textbf{All data containing information vital for the watering task has to be tracked.}
+This contains ambient temperature, ambient humidity, soil moisture and brightness.
+The data has to be logged in a database.
+
+\item \textbf{Reliable flower watering through pumps or valves.}
+Based on the sensor data the system has to make decision when to water the plants and for how long.
+It is critical that this part is fail safe. If there are a failures of any components of the system, the water supply has to be automatically cut off to avoid damage.
+
+\item \textbf{Any influence to the flower or surrounding through the system has to be avoided.}
+This in particular concerns the choice of sensors, pipes, pumps and water tanks to not pollute the soil, keep the noise level low, being an efficient solution and not disturbing other electronic devices nearby.
+
+\item \textbf{The hardware solution should be visually appealing.}
+Since the system should be usable in living areas, it has to be as unobtrusive as possible.
+As a result the data communication should be wireless and the sensor nodes run on battery.
+
+\item \textbf{Battery powered low power sensor nodes.}
+The sensor nodes should be powered by batteries, not the power grid. However the batteries also should last long time to decrease the maintenance work, what means the power supply is not trivial and needs to be paid attention to while developing the sensor node.
+
 \end{itemize}
