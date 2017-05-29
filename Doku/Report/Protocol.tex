@@ -1,0 +1,39 @@
+For registering nodes and perform data exchanges a protocol has been developed. The developed library provides access to the protocol registers to use the functionality of the protocol.
+
+
+Status register in the node --> controller message:
+
+\begin{table}[htbp]
+        \small
+        \setlength\tabcolsep{2pt}
+\begin{tabular}{ l c c c c c c r }
+%  Test ID & measurement base frequency [MHz] & measurement scale factor & PLL factors (m/d) & measurement frequency [MHz] & PISO base frequency [MHz] & PISO scale factor & PISO frequency [MHz]\\ \hline
+  Bit & name & description & 0 - meaning & 1 - meaning\\ \hline
+  0 & RTC\_RUNNING\_BIT & RTC is paired on the node & no RTC & RTC paired \\ \hline
+  1 & MSG\_TYPE\_BIT & type of message & registration request & data \\ \hline
+  2 & NEW\_NODE\_BIT & new or known node & known node & new node \\ \hline
+  3 & EEPROM\_DATA\_AVAILABLE & is data in the EEPROM & no data & data available\\ \hline
+  4 & EEPROM\_DATA\_PACKED & kind of data & live data & EEPROM data\\ \hline
+  5 & EEPROM\_DATA\_LAST & more EEPROM data pending & more data & not more data \\ \hline
+  6 & NODE\_TYPE & type of node & sensor node & pump node\\ \hline
+\end{tabular}\\
+\end{table}
+
+
+Status register in the controller --> node message:
+
+
+\begin{table}[htbp]
+        \small
+        \setlength\tabcolsep{2pt}
+\begin{tabular}{ l c c c c c c r }
+%  Test ID & measurement base frequency [MHz] & measurement scale factor & PLL factors (m/d) & measurement frequency [MHz] & PISO base frequency [MHz] & PISO scale factor & PISO frequency [MHz]\\ \hline
+  Bit & name & description & 0 - meaning & 1 - meaning\\ \hline
+  0 & REGISTER\_ACK\_BIT & registration acknowledge & no reg & registration\\ \hline
+  1 & FETCH\_EEPROM\_DATA1 & &  &  \\ \hline
+  2 & FETCH\_EEPROM\_DATA2 &  & &  \\ \hline
+  3 & ID\_INEXISTENT & id invalid & id valid & id invalid\\ \hline
+\end{tabular}\\
+\end{table}
+
+Further the combination ``00'' in the FETCH\_EEPROM\_DATA1/2 bits indicates the EEPROM data shouldn't be transmitted now, ``01'' means the sensor node should send the data now and ``10'' means the node should delete the stored EEPROM data.
