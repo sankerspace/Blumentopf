@@ -1,22 +1,33 @@
 %about the sensor node...
 
-The sensor node provides the current state of the flower environment to the controller.
-It is a low power device which guarantees long battery duration.
+The sensor node provides data about the current state of the flower environment to the controller.
+It has been developed as a low power device which guarantees long battery duration.
+Arduino has been chosen as platform for this node because of its powerful libraries and support. Also the microcontroller has to offer sufficient ADCs and GPIO pins to access all required modules such as communication chip, real time clock and sensors. Other platforms such as XBee could not be used, as they do not directly support protocols such as TWI. Also they are expensive.
+In particular we chose the Arduino Mini 3.3V 8MHz board, as it is the most basic board and therefore offering the lowest power consumption. Further details about minimizing the power consumption are explained in \ref{sec:lowpower}.
+
+
 
 The sensors used are:
 \begin{itemize}
 
-\item Temperature sensor
-It shows the temperature...
+\item \textbf{DHT11 - Temperature and humidity sensor}
+The datasheet claims this sensor reaches a repeatability of $\pm0.2°C$ for the temperature and an accuracy of $\pm 5\%$ for humidity. It seems to be a widely used sensor for arduino projects, however in operation its humidity accuracy was far worse than promised by the manufacturer and a cumbersome calibration of the sensor is needed. Further research showed that it is not always a reliable humidity sensor and probably should be replaced by the more expensive DHT22 or other alternatives. We kept the sensor in the setup, however no decision has been based on its data.
 
-\item The second sensor is a moisture sensor. It consists of two parts, a resistance probe (YL-69) and a control board (YL-38). The probe will be put into the measured soil, while the board should stay dry. The Arduino nano has a 10 bit ADC, so the result read from the ADC is an integer between 0 and 1023.\\
+\item \textbf{Moisture sensor}
+We tried two moisture sensors. One resistance based sensor and one capacitive sensor. The electrodes used for the resistance sensors interact with the water in the soil if a current flows. This pollutes the soil and destroys the sensor over time. Making just sporadic measurements postpones this effect, however they cannot be avoided. Capacitive sensors do not interact with the soil as they measure the humidity through the capacity of the soil, not its resistance. So no current flows through the soil and there are no metallic or corrosive electrodes.\\
 
+The resistance based sensor consists of two parts, the resistance probe (YL-69) and a control board (YL-38). The probe will be put into the measured soil, while the board should stay dry. It provides an analog signal. The ATMega328 has a 10 bit ADC, so the result read from the ADC is an integer between 0 and 1023.\\
 
 The test showed that in a dry state the sensor shows 1023. Connecting the electrodes with a finger leads to a value around 1000.\\
 Also in dry soil the readout is 1023, but as we pour water into the pot, it continuously decreases down to a few hundred. (I did not want to drown the flower, but I assume it goes to 0 if we put the probe into water...)\\
 
 We might have to calibrate the moisture levels for different flower or soil types, but in general the sensor seems to do the job very well and also is usable with a XBee board because of its analog output. The only downside is that it's written in forums that after some weeks this type of sensor will be corroded, so we cleaned it as well as possible after the test. For developing and testing it is fine, in a real environment one might want to use another sensor like a capacitive one or with other electrode materials. Also turning off the sensor when not using it is a good approach to avoid this problem.\\
 % Man könnt hier noch einen konkreten Sensorvorschlag machen, der auch mit ADC funktioniert 
+
+The capacitive sensor used is the SEN0193. It is handled the same way as the YL-69 sensor.
+
+
+
 
 \item
 The last sensor to test was a photoresistor which is a semiconductor that reacts to light. It was also provided in the Arduino kit. The manual suggested the range of the photoresistor is between 500$\Omega$ (bright) and 50$k\Omega$ (dark). 
@@ -39,4 +50,60 @@ The test worked very well, close to a light bulb we get values over 950 and if w
 We can conclude that this sensor is easy to work with and compatible with XBee, as no special protocols are required.
 
 \end{itemize}
+
+
+\subsubsection{Low Power Capability}
+\label{sec:lowpower}
+
+As mentioned before, the Arduino Mini 3.3V 8MHz is the basis of our sensor node platform. However the Arduino uses about 6 mA in standby. With this current consumption a set of batteries (assuming a capacity of 2000mAh) would be empty within 14 days. In a network consisting of 7 sensor nodes, every second day batteries would be needed to be changed. This motivates to look into further power saving techniques for the Arduino.\\
+
+\subsubsection{Power supply}
+
+One of the obvious questions is the supply of the operating voltage. It has been looked into the following options:
+
+\begin{itemize}
+\item \textbf{Using the Arduino voltage regulator}
+The Arduino board can be powered directly from the battery and generate its own supply voltage.
+However this regulator is very inefficient.
+
+\item \textbf{Using an external voltage regulator}
+A more efficient external regulator can be used instead of the onboard regulator. The original regulator will still consume a small current, even if not used. Therefore it should be removed in this case. The external regulator will require a supply voltage of typically 100-200mV above the output voltage. The regulator tested by us, MCP1700-3302E, needs 3.5V, so in case of three batteries this is 1.17V per battery.\\
+During the discharge process of a battery its output voltage drops. Once the voltage drops under the required supply voltage of a voltage regulator, the output voltage of the regulator will not match 3.3V anymore.\\
+Figure \ref{fig:dischage_curve} illustrates the battery voltage of a AA NiMH battery over different loads. %It is important to notice that with a low load the battery voltage stays above 1.17V for a longer period.
+It is important to notice that with a low load the ampere hours obtained from the battery increases. So decreasing the current used by the system by half results in more than just doubled battery life.
+In our application the load is less than 1mA with some 15mA pulses during data transmission. This is even far less than the uppermost line indicates. It can be concluded that the energy remaining in the battery once its voltage drops below 1.17V is less than 400mA.
+
+\item \textbf{Using a buck-boost converter}
+A conventional voltage regulator needs a supply voltage of at least little over 3.3V to provide a 3.3V output.
+A buck-boost converter like the Pololu reg 12a which we tested, can convert voltages above 0.5V to constant 3.3V.\\
+This is beneficial because of the dropping battery voltage during the discharge process. 
+A buck-boost converter has a lower required supply voltage (0.5V) and therefore gets nearly all energy out of the battery. However it turned out that for very low currents, like in our sensor node, the power consumed by the Pololu is much higher than for the linear voltage regulator. This diminishes the advantage of the Pololu and even turns it into the worse choice in terms of energy efficiency. Regarding costs the linear power regulator beats the pololu by an order of magnitude.
+
+\end{itemize}
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=1.0\columnwidth]{images/discharge_curves.jpg}
+\end{center}
+\caption{Discharge curves over different currents}
+\label{fig:dischage_curve}
+\end{figure}
+
+
+We tried all solutions in our tests, however for the final solution we recommend the linear voltage regulator with adequate batteries.
+
+\subsubsection{Power consumption optimizations}
+To make the batteries last as long as possible, the node should use as little power as possible.\\
+The biggest power safer is to put the microcontroller and all peripheral devices into sleep mode as much as possible.\\
+This reduces the power of the system to around 1.5mA and gives 8 weeks of battery life per node. This is a big improvement, however far away from a convenient solution and the technical limits.\\
+One further optimization is to remove the power LED used to indicate the Arduino is running, as there is no need for it and the LED uses a lot of power. The LED can be removed by adding tin to connect both legs, heating them up uniformly and pulling away the LED with tweezers. This decreases the consumption to about 0.26 mA (45 weeks). \\
+Disabling TWI before sleep saved another 170µA.\\
+Removing the parasiting onboard voltage regulator saved further 75µA. However de-soldering of medium sized SMD components requires special equipment, skills or patience.\\
+The resulting consumption for the design including all final components and using the external voltage regulator is 15µA. (4.5V ==> 67.5µW)
+Using the Pololu the same design needs 90µA (4.5V ==> 405µW).
+It can be concluded that in this situation an appropriate voltage regulator is more efficient than a Pololu. Also the voltage divider is a far cheaper solution.\\
+It must be mentioned that three 1.5V batteries are assumed in the calculations, resulting in 4.5V total. Using rechargeable batteries with 1.2V each, the resulting total 3.6V are just slightly above the threshold for the voltage regulator to operate. In this case the Pololu would have the better performance. For operation with the voltage regulator 3x1.5V batteries or 4x1.2V rechargeable batteries are suggested.
+
+
 
