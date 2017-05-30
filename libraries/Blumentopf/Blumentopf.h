@@ -69,7 +69,7 @@
 // General debug messages:
 //Marko@:dont change DEBUG_ i have a warning about redundant definition in Particle IDE
 #define DEBUG_ 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
-#if (DEBUG_>0)
+#if (DEBUG_>0)/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
 #define DEBUG_MESSAGE_HEADER 0			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE_HEADER_2 0		// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
@@ -78,22 +78,25 @@
 #define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
 #define DEBUG_SENSOR_SCHEDULING 1		// 0 : disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
+#define DEBUG_LIST_PUMP_SCHEDULING 1 //1: lists all scheduled pump nodes
+#define DEBUG_LIST_ALL_NODES_REGULAR 1 //after DEBUG_CYCLE outputs a compact list of all online nodes
 #define DEBUG_FREE_MEMORY 1				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
 #define DEBUG_INFO 1         			// 0: disabled		1: show infos
 #define DEBUG_PUMP 1					//DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
-#define DEBUG_PUMP_ROUNDTRIPTIME 1
-#define DEBUG_RF24 1				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
-#define DEBUG_TIMING_LOOP 1				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
+#define DEBUG_PUMP_ROUNDTRIPTIME 0 //show Time information about sending data in one state and receiving in another state [PumpHandler]
+#define DEBUG_RF24 0				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
+#define DEBUG_TIMING_LOOP 0				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
 
 #define DEBUG_TIMESTAMP 0       //show that timestamps are divided into two parts and send corectly to pump Node
 #ifdef PARTICLE_CLOUD
-  #define DEBUG_PARTICLE_CLOUD 1
+  #define DEBUG_PARTICLE_CLOUD 1 //1: essential debug messages in the class of Homewatering
+  #define DEBUG_HOMEWATERING_MAP 1 //1: additional DEBUG MESSAGEs in Homewatering::mapPumpToSensor()
 #endif
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0			// 0: disabled		1: for analysing the EEPROM Data class internals
 #define DEBUG_SENSOR_MESSAGE_HEADER 0	// 0: disabled		1:  //only in SensorNode.ino
-#endif
+#endif/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 #define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function

@@ -282,8 +282,9 @@ void loop(void)
   //  DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
 
   #if (DEBUG_==1)
+  #if(DEBUG_TIMING_LOOP>1)
   duration_loop=micros();
-
+  #endif
   #if(DEBUG_INFO>0)
   if((millis()-time_)>20000)
   {
@@ -291,7 +292,7 @@ void loop(void)
 
     DEBUG_PRINTLNSTR("<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>");
     radio.printDetails();
-    time_=millis();
+
     DEBUG_PRINTLNSTR("RF24-Settings:");
     DEBUG_PRINTSTR("\tRADIO_CHANNEL: ");DEBUG_PRINTLN(RADIO_CHANNEL);
     DEBUG_PRINTSTR("\tRADIO_DELAY: ");DEBUG_PRINTLN(RADIO_DELAY);
@@ -310,6 +311,7 @@ void loop(void)
     #endif
   }//if((millis()-time_)>20000)
   #endif//#if(DEBUG_INFO>0)
+  time_=millis();
   #endif//#if (DEBUG_==1)
 
   //uint8_t nPipenum;
@@ -588,10 +590,10 @@ void loop(void)
         if (myNodeList.mnPumpSlot <= myCurrentTime)      // The sensorNode-slots are over. Now it's time to go through the pumps and activate them if needed.
         {
 
-          #if (DEBUG_MESSAGE>0)
+          #if (DEBUG_LIST_PUMP_SCHEDULING>0)
           DEBUG_PRINTLNSTR("\r\n[TEST_PUMP=2]\tAll data arrived. Activating the pumps...");
           DEBUG_PRINTLNSTR("-----------------------------------------------------------");
-          DEBUG_PRINTLNSTR("ACTIVE PUMPS:");
+          DEBUG_PRINTLNSTR("ONLINE PUMPS:");
           for(int i=0;i<myNodeList.mnNodeCount;i++)
           {
             if(myNodeList.getNodeType(myNodeList.myNodes[i].ID)==1)
@@ -907,6 +909,26 @@ if ((nTestWatering % DEBUG_CYCLE) == 0) {
   //    DEBUG_PRINTSTR("\r\n\t[CONTROLLER]"); DEBUG_PRINTSTR("nTestWatering="); DEBUG_PRINTLN(nTestWatering);     // It is sufficient and clearer to just print the time.
   DEBUG_PRINTSTR_D("\t", DEBUG_FREE_MEMORY);
   #endif
+
+  #if (DEBUG_LIST_ALL_NODES_REGULAR>0)
+
+  DEBUG_PRINTLNSTR_D("NODE LIST :",myNodeList.mnNodeCount);
+  DEBUG_PRINTSTR_D("\t",myNodeList.mnNodeCount);
+  for(int i=0;i<myNodeList.mnNodeCount;i++)
+  {
+    if(myNodeList.getNodeType(myNodeList.myNodes[i].ID)==1)
+    {
+      DEBUG_PRINTSTR("  Pump::");
+      DEBUG_PRINT(myNodeList.myNodes[i].ID);
+    }
+    if(myNodeList.getNodeType(myNodeList.myNodes[i].ID)==0)
+    {
+      DEBUG_PRINTSTR("  Sensor::");
+      DEBUG_PRINT(myNodeList.myNodes[i].ID);
+    }
+  }
+
+  #endif
   printFreeRam();
 }
 #endif
@@ -1050,7 +1072,7 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint32_t pumpTime_Motor1, uint32_t
         DEBUG_PRINTLNSTR("START PUMP START PUMP START PUMP START PUMP START PUMP START PUMP START PUMP START PUMP START PUMP  START PUMP START PUMP START PUMP");
         handler->processPumpstate(pumpTime_Motor1,pumpTime_Motor2);
 
-        DEBUG_PRINTSTR("[CONTROLLER]");
+        DEBUG_PRINTSTR("\n[CONTROLLER]");
         DEBUG_PRINTSTR("[doWateringTasks()]Sending pump request to Node-ID: ");
         DEBUG_PRINT(PumpNode_ID);
         DEBUG_PRINTSTR(" and turn on PUMP 1 with ");

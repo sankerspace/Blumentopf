@@ -2517,6 +2517,11 @@ int HomeWatering::mapPumpToSensor(String mapping)
 		{
 			if(pumpIndex!=0xffff && sensorIndex!=0xffff)
 			{
+				DEBUG_PRINTLNSTR_D("[HOMEWATERING][mapPumpToSensor]:Try to build new Sensor(",DEBUG_HOMEWATERING_MAP);
+				DEBUG_PRINT_D(m.SensorID,DEBUG_HOMEWATERING_MAP);
+				DEBUG_PRINTLNSTR_D(") - Pump(",DEBUG_HOMEWATERING_MAP);
+				DEBUG_PRINT_D(m.PumpID,DEBUG_HOMEWATERING_MAP);
+				DEBUG_PRINTLNSTR_D(") Connection",DEBUG_HOMEWATERING_MAP);
 				//Map pump1 or pump2 to a SensorNode
 				if(m.p==PUMP1)
 				{
@@ -2537,17 +2542,29 @@ int HomeWatering::mapPumpToSensor(String mapping)
 				{
 					pList->myNodes[sensorIndex].ID_1=m.PumpID;
 					if(m.p==PUMP1)
+					{
 						pList->myNodes[pumpIndex].state &= ~(1<<NODELIST_SENSOR_PUMP1);
+						DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING][mapPumpToSensor]:MOISTURE 1 connected to PUMP 1",DEBUG_PARTICLE_CLOUD);
+					}
 					else if(m.p==PUMP2)
+					{
 						pList->myNodes[pumpIndex].state &= ~(1<<NODELIST_SENSOR_PUMP2);
+						DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING][mapPumpToSensor]:MOISTURE 1 connected to PUMP 2",DEBUG_PARTICLE_CLOUD);
+					}
 				}
 				else if(m.s==MOISTURE2)
 				{
 					pList->myNodes[sensorIndex].ID_2=m.PumpID;
 					if(m.p==PUMP1)
+					{
 						pList->myNodes[pumpIndex].state |= (1<<NODELIST_SENSOR_PUMP1);
+						DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING][mapPumpToSensor]:MOISTURE 2 connected to PUMP 1",DEBUG_PARTICLE_CLOUD);
+					}
 					else if(m.p==PUMP2)
+					{
 						pList->myNodes[pumpIndex].state |= (1<<NODELIST_SENSOR_PUMP2);
+						DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING][mapPumpToSensor]:MOISTURE 2 connected to PUMP 2",DEBUG_PARTICLE_CLOUD);
+					}
 				}
 				else
 				{
