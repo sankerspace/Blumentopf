@@ -588,10 +588,21 @@ void loop(void)
         if (myNodeList.mnPumpSlot <= myCurrentTime)      // The sensorNode-slots are over. Now it's time to go through the pumps and activate them if needed.
         {
 
-          DEBUG_PRINTLNSTR_D("\r\n[TEST_PUMP=2]\tAll data arrived. Activating the pumps...", DEBUG_MESSAGE);
-
+          #if (DEBUG_MESSAGE>0)
+          DEBUG_PRINTLNSTR("\r\n[TEST_PUMP=2]\tAll data arrived. Activating the pumps...");
+          DEBUG_PRINTLNSTR("-----------------------------------------------------------");
+          DEBUG_PRINTLNSTR("ACTIVE PUMPS:");
+          for(int i=0;i<myNodeList.mnNodeCount;i++)
+          {
+            if(myNodeList.getNodeType(myNodeList.myNodes[i].ID)==1)
+              DEBUG_PRINTSTR("PumpNode ID ");
+              DEBUG_PRINTLN(myNodeList.myNodes[i].ID);
+          }
+            DEBUG_PRINTLNSTR("-----------------------------------------------------------");
+          #endif
           bProcessPumps = true;
           myNodeList.mnActivePump = 0;
+
 
         }
         #if(DEBUG_MESSAGE>0)
@@ -1340,8 +1351,9 @@ void handleRegistration(void)
         /*******************PARTICLE ***********************************/
         #ifdef PARTICLE_CLOUD
           //automatically registrate a Cloud Variable to that SensorNode
-
-        bool ret= myHomeWatering->assignSensorToVariable(myData.ID);
+        DEBUG_PRINTSTR_D("[ERROR][HOMEWATERING]Variable registration for SensorID ",DEBUG_PARTICLE_CLOUD);
+        DEBUG_PRINTLN_D(myData.ID,DEBUG_PARTICLE_CLOUD);
+        bool ret= myHomeWatering->assignSensorToVariable(myResponse.ID);
         DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Variable registration not succesfull", (ret==false));
         #endif
         /*****************************************************************/

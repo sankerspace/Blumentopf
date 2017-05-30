@@ -2428,9 +2428,14 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 	for(int i=0;i<MAX_TRACKED_SENSORS;i++)
 	{
 		if(Particle_SensorData[i].SensorID==pList->myNodes[nodeList_index].ID)
-		isTracked=true;
-		tmp=&(Particle_SensorData[i].SensorTXT);
-		break;
+		{
+			isTracked=true;
+			tmp=&(Particle_SensorData[i].SensorTXT);
+			DEBUG_PRINTSTR_D("[HOMEWATERING][setParticleVariableString()]:SENSORNODE WITH ID ",DEBUG_PARTICLE_CLOUD);
+			DEBUG_PRINT_D(Particle_SensorData[i].SensorID,DEBUG_PARTICLE_CLOUD);
+			DEBUG_PRINTLNSTR_D(" IS TRACKED BY A VARIABLE!! ",DEBUG_PARTICLE_CLOUD);
+			break;
+		}
 	}
 
 
@@ -2440,8 +2445,8 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 		findSensorLinks(nodeList_index,&link);
 		struct nodeListElement *node = &(pList->myNodes[nodeList_index]);
 		(*tmp) = String(node->ID)
-		+ ","+ String(node->nodeData.temperature,2)+ ","+String(node->nodeData.brightness)
-		+ ","+ String(node->nodeData.humidity,2) + ","+String(node->nodeData.voltage)
+		+ ","+ String(node->nodeData.temperature,2)+ ","+String(((100 * node->nodeData.brightness)/1024))
+		+ ","+ String(node->nodeData.humidity,2) + ","+String((100 * node->nodeData.voltage)/1024)
 		+ "," +link.location
 
 		+ "," +link.name1 + ","+ String(node->nodeData.moisture)
@@ -2451,10 +2456,18 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 		+ "," +link.name2 + ","+ String(node->nodeData.moisture2)
 		+ "," + String(link.map2.PumpID) + "," + String(link.map2.p)
 		+ "," + String(link.map2.lastWatering)+ "," + String(link.map2.duration);
-		DEBUG_PRINTSTR_D("[HOMEWATERING][send Variable]:",DEBUG_PARTICLE_CLOUD);
+		DEBUG_PRINTSTR_D("[HOMEWATERING][setParticleVariableString()]:",DEBUG_PARTICLE_CLOUD);
 		DEBUG_PRINTLN_D((*tmp),DEBUG_PARTICLE_CLOUD);
 	}
+	#if (DEBUG_PARTICLE_CLOUD>0)
+	else
+	{
+		DEBUG_PRINTLNSTR("[HOMEWATERING][setParticleVariableString()]iS NOT TRACKED!");
+	}
 }
+
+
+#endif
 
 int8_t HomeWatering::isTrackedSensor(uint16_t ID)
 {
@@ -2471,7 +2484,12 @@ bool HomeWatering::assignSensorToVariable(uint16_t ID)
 	for(int8_t i=0;i<MAX_TRACKED_SENSORS;i++)
 	{
 		if(Particle_SensorData[i].SensorID==ID)//maybe an old registration
+		{
+			DEBUG_PRINTSTR_D("[HOMEWATERING][Registrate Variable]:Sensor ID ",DEBUG_PARTICLE_CLOUD);
+			DEBUG_PRINT_D(ID,DEBUG_PARTICLE_CLOUD);
+			DEBUG_PRINTLNSTR_D(" was already registered!!!!",DEBUG_PARTICLE_CLOUD);
 			return true;
+		}
 		if(Particle_SensorData[i].SensorID==0)
 		{
 			DEBUG_PRINTSTR_D("[HOMEWATERING][Registrate Variable]:Sensor ID ",DEBUG_PARTICLE_CLOUD);
@@ -2480,6 +2498,9 @@ bool HomeWatering::assignSensorToVariable(uint16_t ID)
 			return true;
 		}
 	}
+	DEBUG_PRINTSTR_D("[HOMEWATERING][Registrate Variable][ERROR]:Sensor ID ",DEBUG_PARTICLE_CLOUD);
+	DEBUG_PRINT_D(ID,DEBUG_PARTICLE_CLOUD);
+	DEBUG_PRINTLNSTR_D(" COULD NOT BE REGISTRATED!!!!!",DEBUG_PARTICLE_CLOUD);
 	return false;
 }
 

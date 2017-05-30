@@ -1102,7 +1102,7 @@ class HomeWatering {
           name.toCharArray(buf,len);
           buf[len-1]='\0';
           const char* buf_=buf;
-          DEBUG_PRINTSTR_D("[PARTICLE][Variable]:",DEBUG_PARTICLE_CLOUD);
+          DEBUG_PRINTSTR_D("[HOMEWATERING][CONSTRUCTOR]:",DEBUG_PARTICLE_CLOUD);
           DEBUG_PRINTLN_D(buf,DEBUG_PARTICLE_CLOUD);
 
 
@@ -1113,7 +1113,7 @@ class HomeWatering {
       //Check if Cloud Variable is succesfully registered
       if(ret==false)
       {
-        DEBUG_PRINTSTR_D("[PARTICLE]",DEBUG_PARTICLE_CLOUD);
+        DEBUG_PRINTSTR_D("[HOMEWATERING][CONSTRUCTOR]",DEBUG_PARTICLE_CLOUD);
         DEBUG_PRINTLNSTR_D("VARIABLE NOT REGISTERED.",DEBUG_PARTICLE_CLOUD);
       }
       //registrate cloud function in the Particle Cloud Service
