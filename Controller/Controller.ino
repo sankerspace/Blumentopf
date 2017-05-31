@@ -637,11 +637,6 @@ void loop(void)
           {
 
             uint32_t pump1_duration=0,pump2_duration=0;
-            #if(DEBUG_MESSAGE>0)
-            DEBUG_PRINTSTR("\t\t Node ID: ");
-            DEBUG_PRINT(myNodeList.mnActivePump);
-            DEBUG_PRINTLNSTR(" is a pump node.\r\n\t\tActivating the pump...");
-            #endif
 
             // if commands are sent to active pumps only, an inactive pump will never become active again, except if it registers itself again through a manual restart.
             // Therefore it seems also inactive pumpnodes should be addressed here.
@@ -658,6 +653,10 @@ void loop(void)
             */
             // Pump 1 can be linked to a Moisture Sensor on a SensorNode
             //Check if there exist such a link
+            DEBUG_PRINTSTR("SensorNode-INDEX for Pump 1: ");
+            DEBUG_PRINTLN(SensorNode_Pump1);
+            DEBUG_PRINTSTR("SensorNode-INDEX for Pump 1: ");
+            DEBUG_PRINTLN(SensorNode_Pump2);
             if(SensorNode_Pump1 != 0xffff)//at least there must be a valid SensorNode attached to Pump1
             {
               if ((myNodeList.myNodes[myNodeList.mnActivePump].state & (1<<NODELIST_SENSOR_PUMP1)) == 0)
@@ -668,7 +667,7 @@ void loop(void)
                 {
                   sens1_mo1=true;
                   pump1_duration= POL_WATERING_DEFAULT_DURATION*1000;
-                  myNodeList.myNodes[SensorNode_Pump1].ID_1=myNodeList.myNodes[myNodeList.mnActivePump].ID;//marko@:PumpNode ID -> Moisture 1
+                  //myNodeList.myNodes[SensorNode_Pump1].ID_1=myNodeList.myNodes[myNodeList.mnActivePump].ID;//marko@:PumpNode ID -> Moisture 1
                   //Marko@: All other information are stored in nodeData data structure of the PumpNode,
                   //        handled in doWateringtasks()
                   DEBUG_PRINTSTR_D("\t\t\tMoisture 1:Watering have to be activated!!!!", DEBUG_PUMP_SCHEDULING)
@@ -682,7 +681,7 @@ void loop(void)
                 {
                   sens1_mo2=true;
                   pump1_duration= POL_WATERING_DEFAULT_DURATION*1000;
-                  myNodeList.myNodes[SensorNode_Pump1].ID_2=myNodeList.myNodes[myNodeList.mnActivePump].ID;
+                  //myNodeList.myNodes[SensorNode_Pump1].ID_2=myNodeList.myNodes[myNodeList.mnActivePump].ID;
                   //Marko@: All other information are stored in nodeData data structure of the PumpNode,
                   //        handled in doWateringtasks()
                     DEBUG_PRINTSTR_D("\t\t\tMoisture 2:Watering have to be activated!!!!", DEBUG_PUMP_SCHEDULING)
@@ -704,7 +703,7 @@ void loop(void)
                 {
                   sens2_mo1=true;
                   pump2_duration= POL_WATERING_DEFAULT_DURATION*1000;
-                  myNodeList.myNodes[SensorNode_Pump2].ID_1=myNodeList.myNodes[myNodeList.mnActivePump].ID;
+                  //myNodeList.myNodes[SensorNode_Pump2].ID_1=myNodeList.myNodes[myNodeList.mnActivePump].ID;
                   //Marko@: All other information are stored in nodeData data structure of the PumpNode,
                   //        handled in doWateringtasks()
                   DEBUG_PRINTSTR_D("\t\t\tMoisture 1:Watering have to be activated!!!!", DEBUG_PUMP_SCHEDULING)
@@ -718,7 +717,7 @@ void loop(void)
                 {
                   sens2_mo2=true;
                   pump2_duration=POL_WATERING_DEFAULT_DURATION*1000;
-                  myNodeList.myNodes[SensorNode_Pump2].ID_2=myNodeList.myNodes[myNodeList.mnActivePump].ID;
+                  //myNodeList.myNodes[SensorNode_Pump2].ID_2=myNodeList.myNodes[myNodeList.mnActivePump].ID;
                   //Marko@: All other information are stored in nodeData data structure of the PumpNode,
                   //        handled in doWateringtasks()
                   DEBUG_PRINTSTR_D("\t\t\tMoisture 2:Watering have to be activated!!!!", DEBUG_PUMP_SCHEDULING)
@@ -1291,6 +1290,7 @@ void handleRegistration(void)
   { //a node with ID = 0x0 is valid????
     myResponse.ID = myData.ID;
     currentNode.ID = myResponse.ID;
+    currentNode.nodeData.ID=myResponse.ID;
     newNode = false;
   }
   else                                    // new node
@@ -1301,6 +1301,7 @@ void handleRegistration(void)
     myResponse.ID = myResponse.interval * myResponse.Time / 100;
     //newNode=true;
     currentNode.ID = myResponse.ID;
+    currentNode.nodeData.ID=myResponse.ID;
 
   }
 
@@ -1330,18 +1331,21 @@ void handleRegistration(void)
     DEBUG_PRINTLN(myData.VCC);
     setDATA_PumpPacket(&myResponse);
     currentNode.state |= (1 << NODELIST_NODETYPE);  // MotorNode
-    //Bernhard@(2017.April):Gibts hier eine Prüfung ob ein SensorNode auch da ist?
-    currentNode.ID_1 = myNodeList.mnLastAddedSensorNode; // Set sensornode for pump 1
-    currentNode.state &= ~(1<<NODELIST_SENSOR_PUMP1);                  // Set moisture sensor 1 for pump 1
-    //Bernhard@: it would not be logical if standard mapping of both pumps on a pumpnode to the same moisture sensor
-    //          is performed , One pump should be enough
-    //          SensorID2 = SensorID1 so better to divide the pumps on both moisture sensors
-    //Thats the standard tactic until now,particle cloud functions could change that
-    currentNode.ID_2 = myNodeList.mnLastAddedSensorNode; // Set sensornode for pump 2
+
+
+    //currentNode.ID_1 = myNodeList.mnLastAddedSensorNode; // Set sensornode for pump 1
+    //currentNode.state &= ~(1<<NODELIST_SENSOR_PUMP1);                  // Set moisture sensor 1 for pump 1
+
+
+
+    //currentNode.ID_2 = myNodeList.mnLastAddedSensorNode; // Set sensornode for pump 2
+    //currentNode.state |= (1<<NODELIST_SENSOR_PUMP2);
+
     //currentNode.state &= ~(1<<NODELIST_SENSOR_PUMP2);
-    currentNode.state |= (1<<NODELIST_SENSOR_PUMP2);                  // Set moisture sensor 2 for pump 2
-    DEBUG_PRINTSTR("\t\tUsing current last SensorNode - ID: ");
-    DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
+               // Set moisture sensor 2 for pump 2
+    //DEBUG_PRINTSTR("\t\tUsing current last SensorNode - ID: ");
+    //DEBUG_PRINTLN(myNodeList.mnLastAddedSensorNode);
+    DEBUG_PRINTSTR("\t\tPUMPNODE IS NOT MAPPED TO ANY SENSORNODE NOW!!!!!! ");
   }
   DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]Storing node..");
 
@@ -1375,7 +1379,7 @@ void handleRegistration(void)
         #ifdef PARTICLE_CLOUD
           //automatically registrate a Cloud Variable to that SensorNode
         DEBUG_PRINTSTR_D("[ERROR][HOMEWATERING]Variable registration for SensorID ",DEBUG_PARTICLE_CLOUD);
-        DEBUG_PRINTLN_D(myData.ID,DEBUG_PARTICLE_CLOUD);
+        DEBUG_PRINTLN_D(myResponse.ID,DEBUG_PARTICLE_CLOUD);
         bool ret= myHomeWatering->assignSensorToVariable(myResponse.ID);
         DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Variable registration not succesfull", (ret==false));
         #endif
@@ -1405,9 +1409,11 @@ void handleRegistration(void)
       DEBUG_PRINTLN(myResponse.Time);
       //now the node is online
       myNodeList.setNodeOnline(myResponse.ID);
-      //myNodeList.myNodes[index].pumpnode_state_error_counter=0;
-      myNodeList.myNodes[index]=currentNode;//Bernhard@: It should be defined which values a node has if he re-registrate
+      //Bernhard@: It should be defined which values a node has if he re-registrate
       //           to avoid undefined states if program runs
+      //reset connections between senor and pump nodes
+      myNodeList.myNodes[index].ID_1=currentNode.ID_1;
+      myNodeList.myNodes[index].ID_2=currentNode.ID_2;
 
     }
   }

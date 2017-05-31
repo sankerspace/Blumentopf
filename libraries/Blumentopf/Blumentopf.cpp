@@ -1424,6 +1424,8 @@ void nodeList::clearEEPROM_Nodelist()
 uint16_t nodeList::findNodeByID(uint16_t ID)
 {
 	uint16_t i;
+	if(ID==0xffff)
+		return 0xffff;
 	for(i = 0; i < NODELISTSIZE; i++)
 	{
 		if (myNodes[i].ID == ID)    // element exists already
@@ -2370,9 +2372,10 @@ void HomeWatering::findSensorLinks(uint16_t index,struct SensorLink *link)
 					link->map_report_1= PL_TXT_1 + pList->myNodes[index].name + ":::"
 					+ MOI_TXT_1		+ String(SensorData.moisture) + ":::"
 					+ P_TXT_1 		+ String(pumpNode_1.ID) + "- First Pump:::";
-					link->watering_report_1= LWAT_TXT_1
+					link->watering_report_1 = LWAT_TXT_1 + String('(' + MOI_TXT_1 + ')')
 					+ displayTime(pumpNode_1.Time)+":::"
-					+ String(pumpNode_1.moisture) +	DP_TXT +"\n";
+					+ String(pumpNode_1.moisture) +	DP_TXT
+					+ P_TXT_1 + String(pumpNode_1.ID)+"\n";
 				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 1
 				{//MOISTURE 1 +  Second Pump
 					link->map1.p=PUMP2;
@@ -2382,9 +2385,10 @@ void HomeWatering::findSensorLinks(uint16_t index,struct SensorLink *link)
 					+ MOI_TXT_1		+ String(SensorData.moisture) + ":::"
 					+ P_TXT_1 		+ String(pumpNode_1.ID) + "- Second Pump:::";
 
-					link->watering_report_1 = LWAT_TXT_1
-					+ displayTime(pumpNode_1.Time_2)+":::"
-					+ String(pumpNode_1.moisture2) +	DP_TXT +"\n";
+					link->watering_report_1 = LWAT_TXT_1 + String('(' + MOI_TXT_1 + ')')
+					+ displayTime(pumpNode_1.Time_2)+ ":::"
+					+ String(pumpNode_1.moisture2) +	DP_TXT
+					+ P_TXT_1 + String(pumpNode_1.ID)+"\n";
 				}
 			}
 
@@ -2403,9 +2407,10 @@ void HomeWatering::findSensorLinks(uint16_t index,struct SensorLink *link)
 					link->map_report_2= String(PL_TXT_2 + pList->myNodes[index].name2 + ":::"
 					+ MOI_TXT_2		+ String(SensorData.moisture2) + ":::"
 					+ P_TXT_2 		+ pumpNode_2.ID + "- First Pump:::");
-					link->watering_report_1 = LWAT_TXT_2
+					link->watering_report_1 = LWAT_TXT_2 + String('(' + MOI_TXT_2 + ')')
 					+ displayTime(pumpNode_2.Time)+":::"
-					+ String(pumpNode_2.moisture) +	DP_TXT +"\n";
+					+ String(pumpNode_2.moisture) +	DP_TXT
+					+ P_TXT_2 + String(pumpNode_2.ID)+"\n";
 				}else if(pList->myNodes[i].ID_2 == SensorData.ID)//pump2 is definitive linked to Moisture 2
 				{//MOISTURE 2 +  Second Pump
 					link->map2.p=PUMP2;
@@ -2414,9 +2419,10 @@ void HomeWatering::findSensorLinks(uint16_t index,struct SensorLink *link)
 					link->map_report_2 = PL_TXT_2 + pList->myNodes[index].name2 + ":::"
 					+ MOI_TXT_2		+ String(SensorData.moisture2) + ":::"
 					+ P_TXT_2 		+ String(pumpNode_2.ID) + "- Second Pump:::";
-					link->watering_report_1 = LWAT_TXT_2
+					link->watering_report_1 = LWAT_TXT_2 + String('(' + MOI_TXT_2 + ')')
 					+ displayTime(pumpNode_2.Time_2)+":::"
-					+ String(pumpNode_2.moisture2) +	DP_TXT +"\n";
+					+ String(pumpNode_2.moisture2) +	DP_TXT
+					+ P_TXT_2 + String(pumpNode_2.ID)+"\n";
 				}
 			}
 
@@ -2457,11 +2463,11 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 		+ ","+ String(node->nodeData.temperature,2)+ ","+String(((100 * node->nodeData.brightness)/1024))
 		+ ","+ String(node->nodeData.humidity,2) + ","+String((100 * node->nodeData.voltage)/1024)
 		+ "," +link.location
-
+		//INFOS MOISTURE 1
 		+ "," +link.name1 + ","+ String(node->nodeData.moisture)
 		+ "," + String(link.map1.PumpID) + "," + String(link.map1.p)
 		+ "," + String(link.map1.lastWatering)+ "," + String(link.map1.duration)
-
+		//INFOS MOISTURE 2
 		+ "," +link.name2 + ","+ String(node->nodeData.moisture2)
 		+ "," + String(link.map2.PumpID) + "," + String(link.map2.p)
 		+ "," + String(link.map2.lastWatering)+ "," + String(link.map2.duration);
@@ -2469,10 +2475,10 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 		DEBUG_PRINTLN_D((*tmp),DEBUG_PARTICLE_CLOUD);
 
 		DEBUG_PRINTLNSTR_D("[HOMEWATERING][setParticleVariableString()]:REPORT,",DEBUG_HOMEWATERING_REPORT_VARIABLE);
-		DEBUG_PRINTLNSTR_D("\tFIRST MAP DATA:::::::,",DEBUG_HOMEWATERING_REPORT_VARIABLE);
+		DEBUG_PRINTLNSTR_D("\t:::::::::FIRST MAP DATA:::::::::",DEBUG_HOMEWATERING_REPORT_VARIABLE);
 		DEBUG_PRINTLNSTR_D(link.map_report_1,DEBUG_HOMEWATERING_REPORT_VARIABLE);
 		DEBUG_PRINTLNSTR_D(link.watering_report_1,DEBUG_HOMEWATERING_REPORT_VARIABLE);
-		DEBUG_PRINTLNSTR_D("\t SECOND MAP DATA:::::::,",DEBUG_HOMEWATERING_REPORT_VARIABLE);
+		DEBUG_PRINTLNSTR_D("\t :::::::::SECOND MAP DATA:::::::",DEBUG_HOMEWATERING_REPORT_VARIABLE);
 		DEBUG_PRINTLNSTR_D(link.map_report_2,DEBUG_HOMEWATERING_REPORT_VARIABLE);
 		DEBUG_PRINTLNSTR_D(link.watering_report_2,DEBUG_HOMEWATERING_REPORT_VARIABLE);
 
@@ -2552,7 +2558,7 @@ int HomeWatering::mapPumpToSensor(String mapping)
 				DEBUG_PRINT_D(m.PumpID,DEBUG_HOMEWATERING_MAP);
 				DEBUG_PRINTLNSTR_D(") Connection",DEBUG_HOMEWATERING_MAP);
 				//Map pump1 or pump2 to a SensorNode
-				if(m.p==PUMP1)
+				if(m.p==PUMP1)   //Mapping on Pump side
 				{
 					pList->myNodes[pumpIndex].ID_1=m.SensorID;
 
@@ -2569,29 +2575,29 @@ int HomeWatering::mapPumpToSensor(String mapping)
 				//Map Moisture 1 or Moisture 2 to a Pump Node
 				if(m.s==MOISTURE1)
 				{
-					pList->myNodes[sensorIndex].ID_1=m.PumpID;
+					pList->myNodes[sensorIndex].ID_1=m.PumpID;//Mapping on sensor side
 					if(m.p==PUMP1)
 					{
-						pList->myNodes[pumpIndex].state &= ~(1<<NODELIST_SENSOR_PUMP1);
+						pList->myNodes[pumpIndex].state &= ~(1<<NODELIST_SENSOR_PUMP1);//Mapping on Pump side
 						DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING][mapPumpToSensor]:MOISTURE 1 connected to PUMP 1",DEBUG_PARTICLE_CLOUD);
 					}
 					else if(m.p==PUMP2)
 					{
-						pList->myNodes[pumpIndex].state &= ~(1<<NODELIST_SENSOR_PUMP2);
+						pList->myNodes[pumpIndex].state &= ~(1<<NODELIST_SENSOR_PUMP2);//Mapping on Pump side
 						DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING][mapPumpToSensor]:MOISTURE 1 connected to PUMP 2",DEBUG_PARTICLE_CLOUD);
 					}
 				}
 				else if(m.s==MOISTURE2)
 				{
-					pList->myNodes[sensorIndex].ID_2=m.PumpID;
+					pList->myNodes[sensorIndex].ID_2=m.PumpID;//Mapping on sensor side
 					if(m.p==PUMP1)
 					{
-						pList->myNodes[pumpIndex].state |= (1<<NODELIST_SENSOR_PUMP1);
+						pList->myNodes[pumpIndex].state |= (1<<NODELIST_SENSOR_PUMP1);//Mapping on Pump side
 						DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING][mapPumpToSensor]:MOISTURE 2 connected to PUMP 1",DEBUG_PARTICLE_CLOUD);
 					}
 					else if(m.p==PUMP2)
 					{
-						pList->myNodes[pumpIndex].state |= (1<<NODELIST_SENSOR_PUMP2);
+						pList->myNodes[pumpIndex].state |= (1<<NODELIST_SENSOR_PUMP2);//Mapping on Pump side
 						DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING][mapPumpToSensor]:MOISTURE 2 connected to PUMP 2",DEBUG_PARTICLE_CLOUD);
 					}
 				}

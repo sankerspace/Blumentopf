@@ -129,9 +129,9 @@ void setup()
   Serial.begin(BAUD);
 #endif
 
- 
-  
-  
+
+
+
   DEBUG_PRINTSTR("SensorNode 1.0, ");
   DEBUG_PRINTLNSTR("----------------");
 
@@ -182,9 +182,6 @@ void setup()
   nRet = registerNode(&nDelay);
   while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
   {
-#ifdef DEBUG_
-    Serial.flush();
-#endif
     digitalWrite(sensorPower, LOW);   // turn off the sensor power
     hibernate(myResponse.interval);
     //    Sleepy::loseSomeTime(myResponse.interval*100);
@@ -192,8 +189,8 @@ void setup()
     delay(500);     // RTC needs 500ms startup time in total
     nRet = registerNode(&nDelay);
   }
-
-   //Initialize DHT Sensor
+  DEBUG_PRINTLNSTR("Initializing DHT Sensor.........");
+  //Initialize DHT Sensor
   dht.begin();
   //  myRTC.adjustRTC(nDelay, &myData.state, myResponse.ControllerTime);
 
@@ -202,7 +199,11 @@ void setup()
   DEBUG_PRINTSTR("[SENSORNODE]");
   DEBUG_PRINTSTR("[MYDATA PACKETINFO]:");
   DEBUG_PRINTDIG(myData.packetInfo, BIN);
-  DEBUG_PRINTLNSTR("");
+  DEBUG_PRINTLNSTR("SETUP END SETUP END SETUP END SETUP END SETUP END SETUP END SETUP END SETUP END ");
+  
+#ifdef DEBUG_
+  Serial.flush();
+#endif
 }
 
 
@@ -333,14 +334,14 @@ void loop()
   digitalWrite(sensorPower, HIGH);   // turn on the sensor power and wait some time to stabilize
   delay(10);
   // initialises the RTC to save power
-  DEBUG_PRINTSTR("\r\nPreparing a data message:\r\n\t");
+  DEBUG_PRINTLNSTR("\nPreparing a data message:");
   myRTC.init(&myData.state);
 
 
 
   delay(2000);    // DHT needs 1s to settle
 
-   //Initialize DHT Sensor
+  //Initialize DHT Sensor
   dht.begin();
   // The accuracy of the ADCs should be improved as in https://www.youtube.com/watch?v=E8GqHvOK4DI&feature=youtu.be
   // read the input on analog pin 0 (moisture):
@@ -350,11 +351,11 @@ void loop()
   // read the input on analog pin 1 (light):
   myData.brightness = analogRead(lightPin);
 
- 
-  
+
+
   myData.temperature  = dht.readTemperature();
   myData.humidity = dht.readHumidity();
-  nDHT_Status=isnan((myData.temperature) || isnan( myData.humidity));
+  nDHT_Status = isnan((myData.temperature) || isnan( myData.humidity));
   // getting the battery state:
   myData.voltage = getBatteryVoltage();   // sollten wir diese Methode verwenden, muss sie adaptiert werden. Sie verändert die ADC-Einstellungen
 
