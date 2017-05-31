@@ -14,23 +14,22 @@ The sensors used are:
 The datasheet claims this sensor reaches a repeatability of $\pm0.2°C$ for the temperature and an accuracy of $\pm 5\%$ for humidity. It seems to be a widely used sensor for arduino projects, however in operation its humidity accuracy was far worse than promised by the manufacturer and a cumbersome calibration of the sensor is needed. Further research showed that it is not always a reliable humidity sensor and probably should be replaced by the more expensive DHT22 or other alternatives. We kept the sensor in the setup, however no decision has been based on its data.
 
 \item \textbf{Moisture sensor}
-We tried two moisture sensors. One resistance based sensor and one capacitive sensor. The electrodes used for the resistance sensors interact with the water in the soil if a current flows. This pollutes the soil and destroys the sensor over time. Making just sporadic measurements postpones this effect, however they cannot be avoided. Capacitive sensors do not interact with the soil as they measure the humidity through the capacity of the soil, not its resistance. So no current flows through the soil and there are no metallic or corrosive electrodes.\\
+We tried two types of moisture sensors. A resistance based sensor and a capacitive sensor. The electrodes used for the resistance sensors interact with the water in the soil as current flows. This pollutes the soil and destroys the sensor over time. Performing only sporadic measurements postpones this effect, however it cannot be avoided. Capacitive sensors do not interact with the soil as they measure the humidity through the capacity of the soil, not its resistance. So no current flows through the soil and there are no metallic or corrosive electrodes.\\
 
 The resistance based sensor consists of two parts, the resistance probe (YL-69) and a control board (YL-38). The probe will be put into the measured soil, while the board should stay dry. It provides an analog signal. The ATMega328 has a 10 bit ADC, so the result read from the ADC is an integer between 0 and 1023.\\
 
 The test showed that in a dry state the sensor shows 1023. Connecting the electrodes with a finger leads to a value around 1000.\\
-Also in dry soil the readout is 1023, but as we pour water into the pot, it continuously decreases down to a few hundred. (I did not want to drown the flower, but I assume it goes to 0 if we put the probe into water...)\\
+Also in dry soil the readout is 1023, but as we pour water into the pot, it continuously decreases down to a few hundred.\\
 
-We might have to calibrate the moisture levels for different flower or soil types, but in general the sensor seems to do the job very well and also is usable with a XBee board because of its analog output. The only downside is that it's written in forums that after some weeks this type of sensor will be corroded, so we cleaned it as well as possible after the test. For developing and testing it is fine, in a real environment one might want to use another sensor like a capacitive one or with other electrode materials. Also turning off the sensor when not using it is a good approach to avoid this problem.\\
-% Man könnt hier noch einen konkreten Sensorvorschlag machen, der auch mit ADC funktioniert 
+We might have to calibrate the moisture levels for different flower or soil types, but in general the sensor seems to do the job very well.\\
 
-The capacitive sensor used is the SEN0193. It is handled the same way as the YL-69 sensor.
-
+The capacitive sensor used is the SEN0193. It is handled the same way as the YL-69 sensor on the software side, however it does not influence the soil.
 
 
 
-\item
-The last sensor to test was a photoresistor which is a semiconductor that reacts to light. It was also provided in the Arduino kit. The manual suggested the range of the photoresistor is between 500$\Omega$ (bright) and 50$k\Omega$ (dark). 
+
+\item \textbf{Brightness sensor}
+To gather information about the brightness in the environment, a photoresistor has been used. This is a semiconductor that reacts to light. The manual of the sensor suggested the range of the photoresistor is between 500$\Omega$ (bright) and 50$k\Omega$ (dark). 
 Further it suggested to use a 1$k\Omega$ resistor for the voltage divider. An arduino tutorial \citep{misc:photoresistor_tutorial} suggested 10 $k\Omega$. So we decided to measure the actual resistor values and use the formula from the lecture to calculate the matching resistor of the voltage divider. % , 26$k\Omega$ was a good choice  
 
 The measurements showed that the actual photoresistor range is 500$\Omega$ to 1.7$M\Omega$.\\
@@ -40,14 +39,22 @@ R_1 = \sqrt{R_{max}*R_{max}} = \sqrt{500*1700000} = \sqrt{850000000} = 29k\Omega
 
 
 The closest resistor available to us was 26$k\Omega$.\\
-These values differ to those suggested by the tutorials, but since also the photoresistor has different values, our choice seems feasible. Also we are convinced a higher resistor will not harm the components in contrast to a low resistor.\\
-So we connected the chosen pulldown resistor between ground and the A1 pin of the Arduino Nano. To complete the voltage divider the photoresistor was connected between VCC and the A1 pin.\\
+These values differ to those suggested by the tutorials, but since also the photoresistor has different values, our choice seems feasible. Also we are convinced a higher resistor will not harm the components and result in lower power consumption in contrast to a small resistor.\\
+So we connected the chosen pulldown resistor between ground and an ADC pin of the Arduino. To complete the voltage divider the photoresistor was connected between VCC and the ADC pin.\\
 
-Sketches again are provided by online tutorials and the Arduino kit producer. Although it is very similar to the one for the moisture sensor, just another pin is used.\\
+The sensor worked very well in the tests and showed a value between 30 (covered sensor) and 950 (next to a light bulb). That confirmed our choice of the resistor.\\
 
-The test worked very well, close to a light bulb we get values over 950 and if we cover the photoresistor it drops to under 30. That confirmed our choice of the resistor.\\
 
-We can conclude that this sensor is easy to work with and compatible with XBee, as no special protocols are required.
+\item \textbf{Battery Voltage Sensor}
+As the sensor node is powered by a battery it is good to have information about the battery status.
+This can be done by measuring the voltage of the battery via a voltage divider. There are two common ways of measuring the battery voltage:
+The voltage reference of the ADC unit can either be set to the VCC of the ATMega or the internal reference voltage of 1.1V.
+The former has the advantage of higher accuracy, assuming a stable supply voltage. However a supply voltage lower than 3.3V cannot be measured correctly. The latter has the advantage that also supply voltages below 3.3V can be measured, however it is less precise.
+
+%The ATMega offers multiple ADC modes for sampling analog signals. The most accurate one is to use the analog signal as reference voltage and the internal voltage regulator of the ADC unit as the voltage to measure. This is a 
+
+
+
 
 \end{itemize}
 
@@ -91,7 +98,7 @@ A buck-boost converter has a lower required supply voltage (0.5V) and therefore 
 \end{figure}
 
 
-We tried all solutions in our tests, however for the final solution we recommend the linear voltage regulator with adequate batteries.
+We tried all solutions in our tests, however for the final solution we recommend the linear voltage regulator with adequate batteries (3 x 1.5V or 4 x 1.2V).
 
 \subsubsection{Power consumption optimizations}
 To make the batteries last as long as possible, the node should use as little power as possible.\\
