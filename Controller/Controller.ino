@@ -927,7 +927,7 @@ if ((nTestWatering % DEBUG_CYCLE) == 0) {
       DEBUG_PRINT(myNodeList.myNodes[i].ID);
     }
   }
-
+  DEBUG_PRINTLNSTR("");
   #endif
   printFreeRam();
 }
@@ -1290,6 +1290,7 @@ void handleRegistration(void)
   if ((myData.state & (1 << NEW_NODE_BIT)) == false)                    // known node
   { //a node with ID = 0x0 is valid????
     myResponse.ID = myData.ID;
+    currentNode.ID = myResponse.ID;
     newNode = false;
   }
   else                                    // new node

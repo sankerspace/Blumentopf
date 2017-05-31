@@ -92,6 +92,7 @@
 #ifdef PARTICLE_CLOUD
   #define DEBUG_PARTICLE_CLOUD 1 //1: essential debug messages in the class of Homewatering
   #define DEBUG_HOMEWATERING_MAP 1 //1: additional DEBUG MESSAGEs in Homewatering::mapPumpToSensor()
+  #define DEBUG_HOMEWATERING_REPORT_VARIABLE 1
 #endif
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0			// 0: disabled		1: for analysing the EEPROM Data class internals
@@ -425,7 +426,7 @@ DO NOT CHANGE:
 #define randomPIN         A6
 #define BATTERY_SENSE_PIN A0		// Pin for Battery voltage
 #define DHTPIN            5 		// Pin number for temperature/humidity sensor
-#define DHTTYPE           DHT11 //DHT22
+#define DHTTYPE           DHT22//DHT11 //DHT22
 #define MOISTURE_PIN      A2
 #define MOISTURE_PIN_2    A3
 #define LIGHT_PIN         A1 //R1(Fotoresitor[1kohm-100kohm]) R2=20 kOhm-(Marko@ 0-3,3V) R2=18kOhm

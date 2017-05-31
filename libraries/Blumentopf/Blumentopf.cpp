@@ -2308,7 +2308,11 @@ struct Mapp extractFromString(String str)
         break;
       case 1:
         part=str.substring(last,pos);
-        ret.p=(ePump)part.toInt();
+				if(part.compareTo("PUMP1")==0)
+        	ret.p=PUMP1;
+				else if(part.compareTo("PUMP2")==0)
+					ret.p=PUMP2;
+				else ret.p=(ePump)part.toInt();
         break;
       case 2:
         part=str.substring(last,pos);
@@ -2322,7 +2326,12 @@ struct Mapp extractFromString(String str)
     }else if(c=='\0')
     {
       part=str.substring(last,pos);
-      ret.s=(eSensor)part.toInt();
+			if(part.compareTo("MOISTURE1")==0)
+				ret.s=MOISTURE1;
+			else if(part.compareTo("MOISTURE2")==0)
+				ret.s=MOISTURE2;
+			else ret.s=(eSensor)part.toInt();
+
       break;
     }
     pos++;
@@ -2391,9 +2400,9 @@ void HomeWatering::findSensorLinks(uint16_t index,struct SensorLink *link)
 					link->map2.p=PUMP1;
 					link->map2.lastWatering=pumpNode_2.Time;
 					link->map2.duration=pumpNode_2.moisture;
-					link->map_report_2= PL_TXT_2 + pList->myNodes[index].name2 + ":::"
+					link->map_report_2= String(PL_TXT_2 + pList->myNodes[index].name2 + ":::"
 					+ MOI_TXT_2		+ String(SensorData.moisture2) + ":::"
-					+ P_TXT_2 		+ pumpNode_2.ID + "- First Pump:::";
+					+ P_TXT_2 		+ pumpNode_2.ID + "- First Pump:::");
 					link->watering_report_1 = LWAT_TXT_2
 					+ displayTime(pumpNode_2.Time)+":::"
 					+ String(pumpNode_2.moisture) +	DP_TXT +"\n";
@@ -2458,16 +2467,27 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 		+ "," + String(link.map2.lastWatering)+ "," + String(link.map2.duration);
 		DEBUG_PRINTSTR_D("[HOMEWATERING][setParticleVariableString()]:",DEBUG_PARTICLE_CLOUD);
 		DEBUG_PRINTLN_D((*tmp),DEBUG_PARTICLE_CLOUD);
+
+		DEBUG_PRINTLNSTR_D("[HOMEWATERING][setParticleVariableString()]:REPORT,",DEBUG_HOMEWATERING_REPORT_VARIABLE);
+		DEBUG_PRINTLNSTR_D("\tFIRST MAP DATA:::::::,",DEBUG_HOMEWATERING_REPORT_VARIABLE);
+		DEBUG_PRINTLNSTR_D(link.map_report_1,DEBUG_HOMEWATERING_REPORT_VARIABLE);
+		DEBUG_PRINTLNSTR_D(link.watering_report_1,DEBUG_HOMEWATERING_REPORT_VARIABLE);
+		DEBUG_PRINTLNSTR_D("\t SECOND MAP DATA:::::::,",DEBUG_HOMEWATERING_REPORT_VARIABLE);
+		DEBUG_PRINTLNSTR_D(link.map_report_2,DEBUG_HOMEWATERING_REPORT_VARIABLE);
+		DEBUG_PRINTLNSTR_D(link.watering_report_2,DEBUG_HOMEWATERING_REPORT_VARIABLE);
+
 	}
 	#if (DEBUG_PARTICLE_CLOUD>0)
 	else
 	{
 		DEBUG_PRINTLNSTR("[HOMEWATERING][setParticleVariableString()]iS NOT TRACKED!");
 	}
+	#endif
+
 }
 
 
-#endif
+
 
 int8_t HomeWatering::isTrackedSensor(uint16_t ID)
 {
@@ -2507,19 +2527,28 @@ bool HomeWatering::assignSensorToVariable(uint16_t ID)
 //One pump from one PumpNode is connected to one Moisture Sensor from one SensorNode
 int HomeWatering::mapPumpToSensor(String mapping)
 {
+
 	int ret=-2;
 	struct Mapp m=extractFromString(mapping);
 	uint16_t pumpIndex = pList->findNodeByID(m.PumpID);
 	uint16_t sensorIndex=pList->findNodeByID(m.SensorID);
-	if((pList->myNodes[pumpIndex].state & (1 << NODE_TYPE))== 1)
+
+	DEBUG_PRINTLNSTR_D("[HOMEWATERING][mapPumpToSensor]:MAPPING IS REQUESTED:",DEBUG_HOMEWATERING_MAP);
+	DEBUG_PRINTSTR_D("SensorID:",DEBUG_HOMEWATERING_MAP);DEBUG_PRINTLN_D(m.SensorID,DEBUG_HOMEWATERING_MAP);
+	DEBUG_PRINTSTR_D("Moisture:",DEBUG_HOMEWATERING_MAP);DEBUG_PRINTLN_D(m.s,DEBUG_HOMEWATERING_MAP);
+	DEBUG_PRINTSTR_D("PumpID:",DEBUG_HOMEWATERING_MAP);DEBUG_PRINTLN_D(m.PumpID,DEBUG_HOMEWATERING_MAP);
+	DEBUG_PRINTSTR_D("pump:",DEBUG_HOMEWATERING_MAP);DEBUG_PRINTLN_D(m.p,DEBUG_HOMEWATERING_MAP);
+
+
+	if((pList->myNodes[pumpIndex].state & (1 << NODELIST_NODETYPE))== 1)
 	{
-		if((pList->myNodes[sensorIndex].state & (1 << NODE_TYPE))== 0)
+		if((pList->myNodes[sensorIndex].state & (1 << NODELIST_NODETYPE))== 0)
 		{
 			if(pumpIndex!=0xffff && sensorIndex!=0xffff)
 			{
-				DEBUG_PRINTLNSTR_D("[HOMEWATERING][mapPumpToSensor]:Try to build new Sensor(",DEBUG_HOMEWATERING_MAP);
+				DEBUG_PRINTSTR_D("[HOMEWATERING][mapPumpToSensor]:Try to build new Sensor(",DEBUG_HOMEWATERING_MAP);
 				DEBUG_PRINT_D(m.SensorID,DEBUG_HOMEWATERING_MAP);
-				DEBUG_PRINTLNSTR_D(") - Pump(",DEBUG_HOMEWATERING_MAP);
+				DEBUG_PRINTSTR_D(") - Pump(",DEBUG_HOMEWATERING_MAP);
 				DEBUG_PRINT_D(m.PumpID,DEBUG_HOMEWATERING_MAP);
 				DEBUG_PRINTLNSTR_D(") Connection",DEBUG_HOMEWATERING_MAP);
 				//Map pump1 or pump2 to a SensorNode
