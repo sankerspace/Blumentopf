@@ -591,14 +591,28 @@ void loop(void)
         {
 
           #if (DEBUG_LIST_PUMP_SCHEDULING>0)
+          time_t nextpumpSlot=myCurrentTime;
+          time_t nextpumpSlot2= myNodeList.myNodes[myNodeList.getLastScheduledSensorNode()].nextSlot
+                                + myNodeList.getNumberOfNodesByType(SENSORNODE) * (INTERVAL /10) * myNodeList.mnCycleCount;
+
           DEBUG_PRINTLNSTR("\r\n[TEST_PUMP=2]\tAll data arrived. Activating the pumps...");
           DEBUG_PRINTLNSTR("-----------------------------------------------------------");
           DEBUG_PRINTLNSTR("ONLINE PUMPS:");
           for(int i=0;i<myNodeList.mnNodeCount;i++)
           {
             if(myNodeList.getNodeType(myNodeList.myNodes[i].ID)==1)
+            {
               DEBUG_PRINTSTR("PumpNode ID ");
-              DEBUG_PRINTLN(myNodeList.myNodes[i].ID);
+              DEBUG_PRINT(myNodeList.myNodes[i].ID);
+              DEBUG_PRINT(" - ");
+              displayTimeFromUNIX(nextpumpSlot, 1);
+              DEBUG_PRINT(" ");
+              DEBUG_PRINT(" - ");
+              displayTimeFromUNIX(nextpumpSlot2, 1);
+              DEBUG_PRINTLN(" ");
+              nextpumpSlot += INTERVAL / 10;
+              nextpumpSlot2 += INTERVAL / 10;
+            }
           }
             DEBUG_PRINTLNSTR("-----------------------------------------------------------");
           #endif
@@ -637,7 +651,7 @@ void loop(void)
           {
 
             uint32_t pump1_duration=0,pump2_duration=0;
-
+            bool manually_activation=false;
             // if commands are sent to active pumps only, an inactive pump will never become active again, except if it registers itself again through a manual restart.
             // Therefore it seems also inactive pumpnodes should be addressed here.
             //ID of the SensorNode is attached to pump1 of Pumpnode
@@ -724,10 +738,23 @@ void loop(void)
                 }
               }
             }
+            //there was an error in the previous cycle
             if(myNodeList.myNodes[myNodeList.mnActivePump].pumpnode_state_error_counter>0)
             {
               pump1_duration=myNodeList.myNodes[myNodeList.mnActivePump].nodeData.moisture*1000;
               pump2_duration=myNodeList.myNodes[myNodeList.mnActivePump].nodeData.moisture2*1000;
+            }
+            if(myNodeList.myNodes[myNodeList.mnActivePump].nodeData.voltage>0)
+            {
+                pump1_duration=myNodeList.myNodes[myNodeList.mnActivePump].nodeData.voltage*1000;
+                myNodeList.myNodes[myNodeList.mnActivePump].nodeData.voltage=0;
+                manually_activation=true;
+            }
+            if(myNodeList.myNodes[myNodeList.mnActivePump].nodeData.brightness>0)
+            {
+                pump2_duration=myNodeList.myNodes[myNodeList.mnActivePump].nodeData.brightness*1000;
+                myNodeList.myNodes[myNodeList.mnActivePump].nodeData.brightness=0;
+                manually_activation=true;
             }
 
             /* Here is the actual watering logic:
@@ -736,7 +763,7 @@ void loop(void)
             *  and transmits the watering instructions.
             */
             //Marko@ I adapted for alle sensornodes and moisture sensors configiration, hope thats correct
-            if ( sens1_mo1 || sens1_mo2 || sens2_mo1 || sens2_mo2 ||
+            if ( sens1_mo1 || sens1_mo2 || sens2_mo1 || sens2_mo2 || manually_activation ||
               (myNodeList.myNodes[myNodeList.mnActivePump].pumpnode_state_error_counter>0)) //Marko@: here is my restart mechanism of a pump
             {
 
@@ -1015,11 +1042,21 @@ uint8_t doWateringTasks(uint16_t PumpNode_ID, uint32_t pumpTime_Motor1, uint32_t
   #if (PUMPNODE_PUMPS_PARALLEL > 0)//pumps parallel
   if((pumpTime_Motor1 > Max_Watering_Time) || (pumpTime_Motor2 > Max_Watering_Time) )
   {
+    DEBUG_PRINTSTR("pumpTime_Motor1=");
+    DEBUG_PRINTLN(pumpTime_Motor1);
+    DEBUG_PRINTSTR("pumpTime_Motor2=");
+    DEBUG_PRINTLN(pumpTime_Motor2);
+    DEBUG_PRINTSTR("MaxWatering=");
+    DEBUG_PRINTLN(Max_Watering_Time);
     return 50;
   }
   #elif (PUMPNODE_PUMPS_PARALLEL  == 0)//pumps in series
   if(((pumpTime_Motor1+pumpTime_Motor2) > Max_Watering_Time))
   {
+    DEBUG_PRINTSTR("pumpTime_Motor1+pumpTime_Motor2=");
+    DEBUG_PRINTLN(pumpTime_Motor1+pumpTime_Motor2);
+    DEBUG_PRINTSTR("MaxWatering=");
+    DEBUG_PRINTLN(Max_Watering_Time);
     return 50;
   }
   #endif

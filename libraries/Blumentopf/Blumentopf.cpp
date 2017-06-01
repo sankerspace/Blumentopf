@@ -2288,6 +2288,7 @@ uint16_t brightness; //2 Byte
 
 
 
+
 /*HELPER FUNCTIONS*/
 //Extract Information from a String
 struct Mapp extractFromString(String str)
@@ -2461,7 +2462,7 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 		struct nodeListElement *node = &(pList->myNodes[nodeList_index]);
 		(*tmp) = String(node->ID)
 		+ ","+ String(node->nodeData.temperature,2)+ ","+String(((100 * node->nodeData.brightness)/1024))
-		+ ","+ String(node->nodeData.humidity,2) + ","+String((100 * node->nodeData.voltage)/1024)
+		+ ","+ String(node->nodeData.humidity,2) + ","+String((node->nodeData.voltage)/100)
 		+ "," +link.location
 		//INFOS MOISTURE 1
 		+ "," +link.name1 + ","+ String(node->nodeData.moisture)
@@ -2529,6 +2530,191 @@ bool HomeWatering::assignSensorToVariable(uint16_t ID)
 	DEBUG_PRINTLNSTR_D(" COULD NOT BE REGISTRATED!!!!!",DEBUG_PARTICLE_CLOUD);
 	return false;
 }
+
+int HomeWatering::assignNameToSensor(String assignment)
+{
+	uint16_t Sensor_ID;
+	eSensor s;
+	String Plant_Name;
+
+	int pos=0;
+  int last=0;
+  int cnt=0;
+
+  while(true)
+  {
+    String part;
+    char c=assignment.charAt(pos);
+    if(c==',')
+    {
+			if(cnt==0)
+			{
+				part=assignment.substring(last,pos);
+				Sensor_ID=(uint16_t)part.toInt();
+				if(Sensor_ID==0)return -5;
+				cnt++;
+			}else if(cnt==1)
+			{
+				part=assignment.substring(last,pos);
+				if(part.compareTo("MOISTURE1")==0)
+				{
+					s=MOISTURE1;
+				}else if(part.compareTo("MOISTURE2")==0)
+				{
+					s=MOISTURE2;
+				}else
+					return -1;
+
+				cnt++;
+			}
+
+      last=pos+1;
+
+    }else if(c=='\0')
+    {
+      part=assignment.substring(last,pos);
+			Plant_Name=part;
+			break;
+    }
+    pos++;
+  }
+
+	for(int i=0;i<pList->mnNodeCount;i++)
+	{
+		if((pList->myNodes[i].state & (1<< NODELIST_NODETYPE)) == 0)
+		{
+			if(pList->myNodes[i].ID  == Sensor_ID)
+			{
+				if(s==MOISTURE1)
+				{
+					pList->myNodes[i].name=Plant_Name;
+					return 0;
+				}else if(s==MOISTURE2)
+				{
+					pList->myNodes[i].name2=Plant_Name;
+					return 0;
+				}
+			}
+		}
+	}
+	return -2;
+}
+
+int HomeWatering::assignLocation(String location)
+{
+	uint16_t Sensor_ID;
+	String Location_name;
+
+	int pos=0;
+  int last=0;
+  int cnt=0;
+
+  while(true)
+  {
+    String part;
+    char c=location.charAt(pos);
+    if(c==',')
+    {
+			if(cnt==0)
+			{
+				part=location.substring(last,pos);
+				Sensor_ID=(uint16_t)part.toInt();
+				if(Sensor_ID==0)return -5;
+				cnt++;
+			}
+
+      last=pos+1;
+
+    }else if(c=='\0')
+    {
+      part=location.substring(last,pos);
+			Location_name=part;
+			break;
+    }
+    pos++;
+  }
+
+	for(int i=0;i<pList->mnNodeCount;i++)
+	{
+		if((pList->myNodes[i].state & (1<< NODELIST_NODETYPE)) == 0)
+		{
+			if(pList->myNodes[i].ID  == Sensor_ID)
+			{
+				pList->myNodes[i].location=location;
+				return 0;
+			}
+		}
+	}
+	return -2;
+}
+// pump_request = pumpnode ID, duration pump1, duration pump 2
+int HomeWatering::startPump(String pump_request)
+{
+	uint16_t pumpID;
+	uint16_t duration1;
+	uint16_t duration2;
+	int pos=0;
+  int last=0;
+  int cnt=0;
+
+  while(true)
+  {
+    String part;
+    char c=pump_request.charAt(pos);
+    if(c==',')
+    {
+			if(cnt==0)
+			{
+				part=pump_request.substring(last,pos);
+				pumpID=(uint16_t)part.toInt();
+				if(pumpID==0)return -5;
+				cnt++;
+			}
+			else if(cnt==1)
+			{
+				part=pump_request.substring(last,pos);
+				duration1=(uint16_t)part.toInt();
+				//If no valid conversion could be performed because the string doesn't
+				//start with a integral number, a zero is returned
+				cnt++;
+			}
+      last=pos+1;
+
+    }else if(c=='\0')
+    {
+      part=pump_request.substring(last,pos);
+			duration2=(uint16_t)part.toInt();
+			//If no valid conversion could be performed because the string doesn't
+			//start with a integral number, a zero is returned
+			break;
+    }
+    pos++;
+  }
+	DEBUG_PRINTSTR_D("[HomeWatering][startPump()]:Activate Pump with ID ",DEBUG_PARTICLE_CLOUD);
+	DEBUG_PRINT_D(pumpID,DEBUG_PARTICLE_CLOUD);
+	DEBUG_PRINTSTR_D(" with pump1:",DEBUG_PARTICLE_CLOUD);
+	DEBUG_PRINT_D(duration1,DEBUG_PARTICLE_CLOUD);
+	DEBUG_PRINTSTR_D(" and pump2: ",DEBUG_PARTICLE_CLOUD);
+	DEBUG_PRINTLN_D(duration2,DEBUG_PARTICLE_CLOUD);
+	for(int i=0;i<pList->mnNodeCount;i++)
+	{
+		if((pList->myNodes[i].state & (1<< NODELIST_NODETYPE)) == 1)
+		{
+			if(pList->myNodes[i].ID  == pumpID)
+			{
+				pList->myNodes[i].nodeData.voltage=duration1;// IN SECONDS
+				pList->myNodes[i].nodeData.brightness=duration2;//in seconds
+				return 0;
+			}
+		}
+	}
+	return -2;
+
+
+
+
+}
+
 
 //One pump from one PumpNode is connected to one Moisture Sensor from one SensorNode
 int HomeWatering::mapPumpToSensor(String mapping)
@@ -2650,6 +2836,7 @@ bool HomeWatering::publish_SensorData(uint16_t Sensor_index)
 	return Particle.publish("Sensor",text);
 
 }
+
 
 
 

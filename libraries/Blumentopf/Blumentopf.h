@@ -324,7 +324,7 @@ byte bcdToDec(byte);
 /****************************** W A T E R I N G **********************************************/
 /**************************************************************************************/
 // watering policy:
-#define POL_WATERING_DEFAULT_DURATION 10      // per default it should give water for 10 seconds every day after 19:00
+#define POL_WATERING_DEFAULT_DURATION 1000      // per default it should give water for 10 seconds every day after 19:00
 #define WATERING_START_HOUR    23    // Start of the watering (hour)
 #define WATERING_START_MINUTE  24    // Start of the watering (minute)
 
@@ -719,7 +719,30 @@ private:
  */
 struct nodeListElement
 {
-  Data nodeData;
+
+  /*
+  *Decription of Usage of nodeData
+  *Used for Sensornodes one to one as inidcated by element names
+  *except:
+  * Time      - last Pump Time regarding Moisture1 (myNodeList)
+  *           - current Time (myData? and myResponse)
+  * pumptime  - last Pump Time regarding Moisture2(myNodeList)
+  *
+  *Used for PumpNodes in a different way:
+  * Time      - last pumptime of pump1 (myNodeList)
+  *           - pump_diuration for pump 1 (myResponse)
+  * pumptime  - last pumptime of pump2 (myNodeList)
+  *           - pump_diuration for pump 1 (myResponse)
+  * voltage   - contains pump duration of pump1 in case of manually activation of the pump(myNodeList)
+  * VCC       - stores numbers of registrations attempt of the according PumpNode
+  * moisture  - Low Byte of the 4Byte currentTime (myResponse)
+  *           - last Pump Duration of pump1 of the according Pump Node (myNodeList)
+  * moisture2 - High Byte of the 4Byte currentTime (myResponse)
+  *           - last Pump Duration of pump2 of the according Pump Node (myNodeList)
+  * brightness- contains pump duration of pump2 in case of manually activation of the pump(myNodeList)
+  *(all other variables and cases which are no noted are not used- ex: brightness NOT used In mydata or myReponse regarding pumpNodes)
+  */
+  Data nodeData; //used for myData , myResponse and myNodeList in different ways,because of the lack of storage
   time_t   nextSlot;
   uint16_t ID;
   //Marko@ sensorID1 before but renamed it
@@ -1122,6 +1145,11 @@ class HomeWatering {
       }
       //registrate cloud function in the Particle Cloud Service
       Particle.function("Mapper", &HomeWatering::mapPumpToSensor, this);
+      Particle.function("PlantName", &HomeWatering::assignNameToSensor, this);
+      Particle.function("Location", &HomeWatering::assignLocation, this);
+      Particle.function("TurnOn", &HomeWatering::startPump, this);
+
+
 
     }
 
@@ -1129,11 +1157,16 @@ class HomeWatering {
       // do stuff
   //    return 1;
   //  }
-
+    //Cloud functions
     int mapPumpToSensor(String mapping);
+    int assignNameToSensor(String assignment);
+    int assignLocation(String location);
+    int startPump(String pump_request);
+    //Class member methods
     int8_t isTrackedSensor(uint16_t ID);//if tracked return number of
     void setParticleVariableString(uint16_t nodeList_index);
     bool assignSensorToVariable(uint16_t ID);
+
     bool publish_SensorData(uint16_t index);
 
     struct Particle_Node Particle_SensorData[MAX_TRACKED_SENSORS];
