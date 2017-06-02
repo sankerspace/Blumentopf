@@ -10,13 +10,13 @@ In particular we chose the Arduino Mini 3.3V 8MHz board, as it is the most basic
 The sensors used are:
 \begin{itemize}
 
-\item \textbf{DHT11 - Temperature and humidity sensor}
+\item \textbf{DHT11 - Temperature and humidity sensor}\\
 The datasheet claims this sensor reaches a repeatability of $\pm0.2°C$ for the temperature and an accuracy of $\pm 5\%$ for humidity. It seems to be a widely used sensor for arduino projects, however in operation its humidity accuracy was far worse than promised by the manufacturer and a cumbersome calibration of the sensor is needed. Further research showed that it is not always a reliable humidity sensor and probably should be replaced by the more expensive DHT22 or other alternatives. We kept the sensor in the setup, however no decision has been based on its data.
 
-\item \textbf{Moisture sensor}
+\item \textbf{Moisture sensor}\\
 We tried two types of moisture sensors. A resistance based sensor and a capacitive sensor. The electrodes used for the resistance sensors interact with the water in the soil as current flows. This pollutes the soil and destroys the sensor over time. Performing only sporadic measurements postpones this effect, however it cannot be avoided. Capacitive sensors do not interact with the soil as they measure the humidity through the capacity of the soil, not its resistance. So no current flows through the soil and there are no metallic or corrosive electrodes.\\
 
-The resistance based sensor consists of two parts, the resistance probe (YL-69) and a control board (YL-38). The probe will be put into the measured soil, while the board should stay dry. It provides an analog signal. The ATMega328 has a 10 bit ADC, so the result read from the ADC is an integer between 0 and 1023.\\
+The resistance based sensor consists of two parts, the resistance probe (YL-69) and a control board (YL-38). The probe will be put into the measured soil, while the board should stay dry. It provides an analog signal. The ATmega328 has a 10 bit ADC, so the result read from the ADC is an integer between 0 and 1023.\\
 
 The test showed that in a dry state the sensor shows 1023. Connecting the electrodes with a finger leads to a value around 1000.\\
 Also in dry soil the readout is 1023, but as we pour water into the pot, it continuously decreases down to a few hundred.\\
@@ -28,7 +28,7 @@ The capacitive sensor used is the SEN0193. It is handled the same way as the YL-
 
 
 
-\item \textbf{Brightness sensor}
+\item \textbf{Brightness sensor}\\
 To gather information about the brightness in the environment, a photoresistor has been used. This is a semiconductor that reacts to light. The manual of the sensor suggested the range of the photoresistor is between 500$\Omega$ (bright) and 50$k\Omega$ (dark). 
 Further it suggested to use a 1$k\Omega$ resistor for the voltage divider. An arduino tutorial \citep{misc:photoresistor_tutorial} suggested 10 $k\Omega$. So we decided to measure the actual resistor values and use the formula from the lecture to calculate the matching resistor of the voltage divider. % , 26$k\Omega$ was a good choice  
 
@@ -45,13 +45,20 @@ So we connected the chosen pulldown resistor between ground and an ADC pin of th
 The sensor worked very well in the tests and showed a value between 30 (covered sensor) and 950 (next to a light bulb). That confirmed our choice of the resistor.\\
 
 
-\item \textbf{Battery Voltage Sensor}
+\item \textbf{Battery Voltage Sensor}\\
 As the sensor node is powered by a battery it is good to have information about the battery status.
-This can be done by measuring the voltage of the battery via a voltage divider. There are two common ways of measuring the battery voltage:
-The voltage reference of the ADC unit can either be set to the VCC of the ATMega or the internal reference voltage of 1.1V.
-The former has the advantage of higher accuracy, assuming a stable supply voltage. However a supply voltage lower than 3.3V cannot be measured correctly. The latter has the advantage that also supply voltages below 3.3V can be measured, however it is less precise.
+This can be done by measuring the voltage of the battery via a voltage divider. There are two ways of setting the voltage reference of the ADC unit. Either the VCC of the ATmega or the internal reference voltage of 1.1V can be used.
+The former has the advantage of higher accuracy, assuming a stable supply voltage. However a supply voltage lower than 3.3V cannot be measured correctly. Notice that the ATmega328 will continue to operate even at a supply voltage as low as 2.7V, although some external components might fail.
+ The second version has the advantage that also supply voltages below 3.3V can be measured, however it has to be calibrated for each ATmega individually to be as precise.
 
-%The ATMega offers multiple ADC modes for sampling analog signals. The most accurate one is to use the analog signal as reference voltage and the internal voltage regulator of the ADC unit as the voltage to measure. This is a 
+In any case a voltage divider is needed to convert the voltage from 0-6V to 0-3.3V respectively 0-1.1V. The design of the voltage divider is a trade\-off between measurement precision and power consumption. \cite{misc:battery_voltage_measurement} If its total resistance is low, the power consumption of the voltage divider is too high for a low power device. If the resistance is too high, the measurement will become unstable and a capacitor becomes necessary to smooth the measurements. We decided to use a resistance of $100k\Omega$ between GND and the ADC pin as well as $500k\Omega$ between VCC and the ADC pin. This seemed to be a good trade-off without requiring a capacitor.
+
+% Ezio: 
+% VCC - 1MO - ADC - 39kO - (1MO / 470kO) - 22kO - GND (1MO / 381kO)
+
+% Ours:
+% VCC - 500kO - ADC - 108kO - GND 			(500kO / 100kO)
+
 
 
 
