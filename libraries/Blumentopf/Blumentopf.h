@@ -23,7 +23,7 @@
 
 
 #if defined(SPARK) || defined(PLATFORM_ID)
-  #define HW  HW_PHOTON  // tells whether to compile for Arduino or Photon
+  #define HW HW_PHOTON  // tells whether to compile for Arduino or Photon
 #else
   #define HW HW_ARDUINO
 #endif

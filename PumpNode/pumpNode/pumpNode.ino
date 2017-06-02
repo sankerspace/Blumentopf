@@ -655,7 +655,7 @@ void registration(bool refreshID)
   myResponse.interval = 100;
   while (registerNode() > 0)                         //register PumpNode at the controller
   {
-    DEBUG_PRINTLNSTR("[PUMPNODE][Setup()]Registration failed,pause 2 seconds then start again.");
+    DEBUG_PRINTLNSTR("[PUMPNODE][Setup()]Registration failed, pause some time and start again.");
     buttonstate = digitalRead(buttonPin);
     if (buttonstate == HIGH) {
       DEBUG_PRINTLNSTR("[PUMPNODE][Setup()]BUTTON PRESSED IN SETUP MODE!!!!!!!");
@@ -663,7 +663,7 @@ void registration(bool refreshID)
       myData.ID = myEEPROMData.ID;
       EEPROM.put(EEPROM_ID_ADDRESS, myEEPROMData);
     }
-    delay(2000);
+    delay(1000 * (analogRead(randomPIN) % 60));
   }
   DEBUG_PRINTSTR("[PUMPNODE]"); DEBUG_PRINTLNSTR("[Setup()]REGISTRATION SUCCEDD!!!");
   //set standard values

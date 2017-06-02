@@ -175,15 +175,16 @@ void setup()
   setDATA_NormalDatapacket(&myData); //from SensorNode to Controller
   setDATA_RegistrationPacket(&myData);
 
-  //Marko@  The controller must be online before ANY Registration can be performed, otherwise undefined states
+  //Marko@  The controller must be online before ANY Registration can be performed, otherwise undefined states // remark 2.6.2017: that shouldn't be the case!
   nRet = registerNode(&nDelay);
-  while (nRet > 0)      // if the registration was not successful, retry the until it is. Sleep inbetween
+  while (nRet > 0)      // if the registration was not successful, retry until it is. Sleep inbetween
   {
 #ifdef DEBUG
     Serial.flush();
 #endif
     digitalWrite(sensorPower, LOW);   // turn off the sensor power
-    hibernate(myResponse.interval);
+//    hibernate(myResponse.interval);
+    hibernate(100 * (analogRead(randomPIN) % 60));  // sleep a random duration (< 60s) to avoid collisions
     //    Sleepy::loseSomeTime(myResponse.interval*100);
     digitalWrite(sensorPower, HIGH);   // turn on the sensor power
     delay(500);     // RTC needs 500ms startup time in total
