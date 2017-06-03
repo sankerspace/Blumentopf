@@ -1,12 +1,33 @@
+To quickly change the role of an ardunino, it is a good idea to have a standardized pinout for all sketches. The following tables summarize the pinout.\\
+
+Digital Pins:
+
 \begin{table}[htbp]
         \small
         \setlength\tabcolsep{2pt}
-\begin{tabular}{ l|c|c|c|c|c|c|c|r }
+\begin{tabular}{ |l|*{7}{c|}r| }
 %  Test ID & measurement base frequency [MHz] & measurement scale factor & PLL factors (m/d) & measurement frequency [MHz] & PISO base frequency [MHz] & PISO scale factor & PISO frequency [MHz]\\ \hline
-    & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9-13 \\ \hline
-  Controller & DS\_1302 & DS\_1302 & DS\_1302 & . & . & Button  & RTC\_PWR &  RF24   \\ \hline
+  \hline   & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9-13 \\ \hline
+  Controller & DS\_1302 & DS\_1302 & DS\_1302 &  &  & Button  & RTC\_PWR &  RF24   \\ \hline
   SensorNode & DS\_1302 & DS\_1302 & DS\_1302 &  DHT11  &         & Button  &SENS\_PWR &  RF24  \\ \hline
-  PumpNode & DS\_1302 & DS\_1302 & DS\_1302 &  Pump1  &  Pump2  & Button  &         &  RF24   \\ \hline
-  Particle & ??\\ \hline
+%  PumpNode & DS\_1302 & DS\_1302 & DS\_1302 &  Pump1  &  Pump2  & Button  &         &  RF24   \\ \hline
+  PumpNode & & & &  Pump1  &  Pump2  & Button  &         &  RF24   \\ \hline
+  Particle & ?? & & & & & & &  \\ \hline
+\end{tabular}\\
+\end{table}
+
+Analog Pins:
+
+\begin{table}[htbp]
+        \small
+        \setlength\tabcolsep{2pt}
+\begin{tabular} { |l|*{7}{c|}r| }
+%  Test ID & measurement base frequency [MHz] & measurement scale factor & PLL factors (m/d) & measurement frequency [MHz] & PISO base frequency [MHz] & PISO scale factor & PISO frequency [MHz]\\ \hline
+  \hline   & A0 & A1 & A2 & A3 & A4 & A5 & A6 & A7 \\ \hline
+  Controller & & & & & DS\_3231 & DS\_3231 & &  \\ \hline
+  SensorNode & Battery & Light & Moisture1 & Moisture2 & DS\_3231 & DS\_3231 &  &  \\ \hline
+%  PumpNode &  & & & & DS\_3231 & DS\_3231 & &  \\ \hline
+  PumpNode &  & & & & & & &  \\ \hline
+  Particle & & & & & & & &  \\ \hline
 \end{tabular}\\
 \end{table}
