@@ -681,6 +681,12 @@ void loop(void)
                 {
                   sens1_mo1=true;
                   pump1_duration= POL_WATERING_DEFAULT_DURATION*1000;
+                  /**************PARTICLE CLOUD*****************************************/
+                  #ifdef PARTICLE_CLOUD
+                  bool ret=myHomeWatering->publish_PlantAlert(SensorNode_Pump1,MOISTURE1,WATERING_THRESHOLD);
+                  DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Plant status was not successfull!", (ret==false));
+                  #endif
+                  /********************************************************************/
                   //myNodeList.myNodes[SensorNode_Pump1].ID_1=myNodeList.myNodes[myNodeList.mnActivePump].ID;//marko@:PumpNode ID -> Moisture 1
                   //Marko@: All other information are stored in nodeData data structure of the PumpNode,
                   //        handled in doWateringtasks()
@@ -695,6 +701,12 @@ void loop(void)
                 {
                   sens1_mo2=true;
                   pump1_duration= POL_WATERING_DEFAULT_DURATION*1000;
+                  /**************PARTICLE CLOUD*****************************************/
+                  #ifdef PARTICLE_CLOUD
+                  bool ret=myHomeWatering->publish_PlantAlert(SensorNode_Pump1,MOISTURE2,WATERING_THRESHOLD);
+                  DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Plant status was not successfull!", (ret==false));
+                  #endif
+                  /********************************************************************/
                   //myNodeList.myNodes[SensorNode_Pump1].ID_2=myNodeList.myNodes[myNodeList.mnActivePump].ID;
                   //Marko@: All other information are stored in nodeData data structure of the PumpNode,
                   //        handled in doWateringtasks()
@@ -717,6 +729,12 @@ void loop(void)
                 {
                   sens2_mo1=true;
                   pump2_duration= POL_WATERING_DEFAULT_DURATION*1000;
+                  /**************PARTICLE CLOUD*****************************************/
+                  #ifdef PARTICLE_CLOUD
+                  bool ret=myHomeWatering->publish_PlantAlert(SensorNode_Pump2,MOISTURE1,WATERING_THRESHOLD);
+                  DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Plant status was not successfull!", (ret==false));
+                  #endif
+                  /********************************************************************/
                   //myNodeList.myNodes[SensorNode_Pump2].ID_1=myNodeList.myNodes[myNodeList.mnActivePump].ID;
                   //Marko@: All other information are stored in nodeData data structure of the PumpNode,
                   //        handled in doWateringtasks()
@@ -731,6 +749,12 @@ void loop(void)
                 {
                   sens2_mo2=true;
                   pump2_duration=POL_WATERING_DEFAULT_DURATION*1000;
+                  /**************PARTICLE CLOUD*****************************************/
+                  #ifdef PARTICLE_CLOUD
+                  bool ret=myHomeWatering->publish_PlantAlert(SensorNode_Pump2,MOISTURE2,WATERING_THRESHOLD);
+                  DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Plant status was not successfull!", (ret==false));
+                  #endif
+                  /********************************************************************/
                   //myNodeList.myNodes[SensorNode_Pump2].ID_2=myNodeList.myNodes[myNodeList.mnActivePump].ID;
                   //Marko@: All other information are stored in nodeData data structure of the PumpNode,
                   //        handled in doWateringtasks()
@@ -882,6 +906,7 @@ if (PumpList.size() > 0)
 
     if (handler->getState() == PUMPNODE_STATE_4_FINISHED)
     {
+      uint16_t pump_index=myNodeList.findNodeByID(handler->getID());
       #if(DEBUG_MESSAGE>0)
       DEBUG_PRINTSTR("[TIME] : ");
       displayTimeFromUNIX(getCurrentTime(), 1);
@@ -890,7 +915,16 @@ if (PumpList.size() > 0)
       DEBUG_PRINTLN(handler->getID());
       #endif
       //reset error counter for that node
-      myNodeList.myNodes[myNodeList.findNodeByID(handler->getID())].pumpnode_state_error_counter=0;
+      #ifdef PARTICLE_CLOUD
+
+      /**************PARTICLE CLOUD*****************************************/
+      bool ret=myHomeWatering->publish_Pump(handler->getID(),(handler->getFirstPumpTime()/1000),(handler->getSecondPumpTime()/1000));
+      DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Pump event event was not successfull", (ret==false));
+      /**********************************************************************/
+      #endif
+
+
+      myNodeList.myNodes[pump_index].pumpnode_state_error_counter=0;
       removePumphandler(i, handler);
       i--;
 
@@ -1306,6 +1340,7 @@ The function still has to be extended.
 void handleRegistration(void)
 {
   uint8_t nRet;
+  uint8_t node_type;
   bool newNode = true;
   struct nodeListElement currentNode;
   currentNode.nodeData={0.0,0.0, 0,0,0,0,0,0,0,0,0};
@@ -1354,6 +1389,7 @@ void handleRegistration(void)
     *           ,the session ID is not a valid time schedule
     *           Until SensorNode sends his new Data it has to wait for its regular schedule, think thats wrong
     */
+    node_type=SENSORNODE;
     setDATA_SensorPacket(&myResponse);
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]SensorNode");
     currentNode.state &= ~(1 << NODELIST_NODETYPE);  // SensorNode
@@ -1363,6 +1399,7 @@ void handleRegistration(void)
   }
   else
   {
+    node_type=PUMPNODE;
     DEBUG_PRINTSTR("[CONTROLLER]"); DEBUG_PRINTLNSTR("[handleRegistration()]PumpNode");
     DEBUG_PRINTSTR("\t How many registration attempts from that node: ");
     DEBUG_PRINTLN(myData.VCC);
@@ -1418,10 +1455,14 @@ void handleRegistration(void)
         DEBUG_PRINTSTR_D("[ERROR][HOMEWATERING]Variable registration for SensorID ",DEBUG_PARTICLE_CLOUD);
         DEBUG_PRINTLN_D(myResponse.ID,DEBUG_PARTICLE_CLOUD);
         bool ret= myHomeWatering->assignSensorToVariable(myResponse.ID);
-        DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Variable registration not succesfull", (ret==false));
+        DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Variable registration was unsuccessfull!!!", (ret==false));
         #endif
         /*****************************************************************/
       }
+      /*******************PARTICLE ***********************************/
+      bool ret=myHomeWatering->publish_Registration(currentNode.ID,node_type);
+      DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Registration event not successfull", (ret==false));
+      /*****************************************************************/
     }
 
   } else
@@ -1451,9 +1492,14 @@ void handleRegistration(void)
       //reset connections between senor and pump nodes
       myNodeList.myNodes[index].ID_1=currentNode.ID_1;
       myNodeList.myNodes[index].ID_2=currentNode.ID_2;
-
+      /*******************PARTICLE ***********************************/
+      bool ret=myHomeWatering->publish_Registration(currentNode.ID,node_type);
+      DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Registration event not successfull", (ret==false));
+      /*****************************************************************/
     }
   }
+
+
 
 }
 
@@ -1528,7 +1574,11 @@ void handleDataMessage(void)
     /*******************PARTICLE ***********************************/
     #ifdef PARTICLE_CLOUD
     myHomeWatering->setParticleVariableString(nodeIndex);
-    myHomeWatering->publish_SensorData(nodeIndex);
+    bool ret= myHomeWatering->publish_SensorData(nodeIndex);
+    DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Sensor Data was not successfull!", (ret==false));
+    ret= myHomeWatering->publish_BatteryAlert(myNodeList.myNodes[nodeIndex].ID,
+      myNodeList.myNodes[nodeIndex].nodeData.voltage,V_min);
+    DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Battery  Alert was not successfull!", (ret==false));
     #endif
     /*****************************************************************/
 

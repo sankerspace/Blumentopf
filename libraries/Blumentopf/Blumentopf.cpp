@@ -712,7 +712,7 @@ void DataStorage::findQueueEnd()
 
 	uint16_t nAddressOfOldestElement=0;
 	uint16_t nAddressBeforeOldestElement=0;
-	uint16_t nPreviousOldestElement=0;
+	//uint16_t nPreviousOldestElement=0;
 	struct Data currentElement;
 
 
@@ -732,7 +732,7 @@ void DataStorage::findQueueEnd()
 		if (firstItemTimestamp > currentElement.Time)		// remember the timestamp and address of the oldest element
 		{
 			firstItemTimestamp = currentElement.Time;
-			nPreviousOldestElement = firstItemTimestamp;
+			//nPreviousOldestElement = firstItemTimestamp;
 			nAddressOfOldestElement = nCurrentAddress;
 			nAddressBeforeOldestElement = nPreviousAddress;
 		}
@@ -2531,6 +2531,26 @@ bool HomeWatering::assignSensorToVariable(uint16_t ID)
 	return false;
 }
 
+int HomeWatering::clearSensorVariables(String strID)
+{
+	uint16_t ID = strID.toInt();
+	int success=-2;
+	for(int i=0;i<MAX_TRACKED_SENSORS;i++)
+	{
+		success=-1;
+		if(ID==0 || ID==Particle_SensorData[i].SensorID)
+		{
+			Particle_SensorData[i].SensorID=0;
+			Particle_SensorData[i].SensorTXT=String("");
+			success=0;
+		}
+		DEBUG_PRINTSTR_D("[HOMEWATERING][CLEAR] Cloud Variables cleared.",DEBUG_PARTICLE_CLOUD);
+	}
+	return success;
+}
+
+
+
 int HomeWatering::assignNameToSensor(String assignment)
 {
 	uint16_t Sensor_ID;
@@ -2640,7 +2660,7 @@ int HomeWatering::assignLocation(String location)
 		{
 			if(pList->myNodes[i].ID  == Sensor_ID)
 			{
-				pList->myNodes[i].location=location;
+				pList->myNodes[i].location=Location_name;
 				return 0;
 			}
 		}
@@ -2709,9 +2729,6 @@ int HomeWatering::startPump(String pump_request)
 		}
 	}
 	return -2;
-
-
-
 
 }
 
@@ -2820,25 +2837,106 @@ int HomeWatering::mapPumpToSensor(String mapping)
 
 
 
+
+
 //Generate String to publish Sensor Information
 bool HomeWatering::publish_SensorData(uint16_t Sensor_index)
 {
 	struct Data SensorData = pList->myNodes[Sensor_index].nodeData;
 
-	String text=S_ID_TXT 	+ String(SensorData.ID) + "\n"
-												+ LOC_TXT	+ pList->myNodes[Sensor_index].location  + "\n"
+	String text=S_ID_TXT 	+ String(SensorData.ID) + " "
+												+ LOC_TXT	+ pList->myNodes[Sensor_index].location  + " "
 
-												+ TEMP_TXT	+ String(SensorData.temperature,2) + "\xB0 \n"
-												+	HU_TEXT		+ String(SensorData.humidity,2)	+ "% \n"
-												+ BR_TXT		+ String(100.0*(float)SensorData.brightness/1024.0 ,2)+"\n"
-												+ BAT_TXT + String(((float)SensorData.voltage / 100.0),2)	+ "V\n";
+												+ TEMP_TXT	+ String(SensorData.temperature,2) + "\xB0 "
+												+	HU_TEXT		+ String(SensorData.humidity,2)	+ "%  "
+												+ BR_TXT		+ String(100.0*(float)SensorData.brightness/1024.0 ,2)+" "
+												+ BAT_TXT + String(((float)SensorData.voltage / 100.0),2)	+ "V ";
 
 	return Particle.publish("Sensor",text);
 
 }
+bool HomeWatering::publish_Registration(uint16_t ID,uint8_t type)
+{
+	String text = Reg_Text + String(" ");
+
+	if(type == PUMPNODE)
+	{
+		text += P_Node;
+		text +=String(" ");
+	}else
+	{
+			text += S_Node ;
+			text +=String(" ");;
+	}
+	text += Reg_Text_2;
+	text +=String(" ");;
+	text += String(ID);
+	text +=String(" ");;
+	text += Reg_Text_3;
+
+	return Particle.publish("Registration",text);
+
+}
+
+bool HomeWatering::publish_BatteryAlert(uint16_t ID,float voltage,float minimum_voltage)
+{
+	if((voltage/100) <= minimum_voltage)
+	{
+		String text = Bat_Text + String(" ") + String(ID) + " "
+												+Bat_Text_2 + " " + String((voltage/100),2) + " "
+												+Bat_Text_3 + " " + String(minimum_voltage,2) + " "
+												+Bat_Text_4;
+		return Particle.publish("Battery",text);
+	}
+
+}
+
+bool HomeWatering::publish_Pump(uint16_t ID,uint16_t duration_1,uint16_t duration_2)
+{
 
 
+	String text = PUMP_TXT+ String(" ") + String(ID)
+												+ String(" ") + PUMP_TXT_2 + duration_1
+	  										+ String(" ") + PUMP_TXT_3 +  duration_2
+												+ String(" ") + PUMP_TXT_4;
+	return Particle.publish("Pump",text);
 
+}
+
+bool HomeWatering::publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float minimum_moisture)
+{
+
+
+		String text = MOI_TXT + " ";
+		float min_ = (100*minimum_moisture)/1024;
+
+		if(s == MOISTURE1)
+		{
+			float m = (100*pList->myNodes[Sensorindex].nodeData.moisture)/1024;
+			text += pList->myNodes[Sensorindex].name +String(" ");
+			text += MOI_TXT_6 + pList->myNodes[Sensorindex].location + String(" ");
+			text+=MOI_TXT_3 + String(" ");
+			text+=S_ID_TXT + String(" ") + String(pList->myNodes[Sensorindex].ID);
+			text+=MOI_TXT_4 +String(" ") + MOI_TXT_1 + String(" ");
+			text+=String(m,2) + String("% ");
+			text+=MOI_TXT_5 + String(" ") + String(min_) + String("%.");
+
+
+		}else if(s == MOISTURE2)
+		{
+			float m = (100*pList->myNodes[Sensorindex].nodeData.moisture2)/1024;
+			text += pList->myNodes[Sensorindex].name2 +String(" ");
+			text += MOI_TXT_6 + pList->myNodes[Sensorindex].location + String(" ");
+			text+=MOI_TXT_3 + String(" ");
+			text+=S_ID_TXT + String(" ") + String(pList->myNodes[Sensorindex].ID)+String(" ");
+			text+=MOI_TXT_4 +String(" ") + MOI_TXT_2 + String(" ");
+			text+=String(m,2) + String("% ");
+			text+=MOI_TXT_5 + String(" ") + String(min_,2) + String(" %.");
+		}else
+			return false;
+
+		return Particle.publish("Plant",text);
+}
 
 
 /*

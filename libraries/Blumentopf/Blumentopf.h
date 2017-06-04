@@ -324,7 +324,7 @@ byte bcdToDec(byte);
 /****************************** W A T E R I N G **********************************************/
 /**************************************************************************************/
 // watering policy:
-#define POL_WATERING_DEFAULT_DURATION 1000      // per default it should give water for 10 seconds every day after 19:00
+#define POL_WATERING_DEFAULT_DURATION 10      // per default it should give water for 10 seconds every day after 19:00
 #define WATERING_START_HOUR    23    // Start of the watering (hour)
 #define WATERING_START_MINUTE  24    // Start of the watering (minute)
 
@@ -466,9 +466,11 @@ DO NOT CHANGE:
 #define RTC_SYNC_THRESHOLD (10)		// How many seconds the Controller and Node clocks can drift apart before resynchronization
 #define REF_VAL	(1.1)				// actual voltage of the 1.1 regulator
 #define V_max (6.6) //Marko@: to reach V_ADC_max=1,1V : Failure between measured and read value now only ~ 1%
+#define V_min (4.0)//(1.8)
 #define R1 (109300.0)
 #define R2 (497000.0)
 #define V_ADC_max (R1*V_max / ((R1+R2))) //marko@: should be 1,1 V because of analog internal reference, which is the max
+
 #define VOLTAGE_GAP (IREF - V_ADC_max)
 #define MAX_OFFSET (VOLTAGE_GAP / (IREF - V_ADC_max))
 #define VOLTS_PER_SCALE (IREF / 1024.0)
@@ -1044,15 +1046,32 @@ void   setCombinedData(uint32_t Data_,uint16_t& HighByte,uint16_t& LowByte);
 /**************************************************************************************/
 
 #ifdef PARTICLE_CLOUD
-
-
+#define MOI_TXT       "Plant"
+#define MOI_TXT_1      "Moisture Sensor 1:"
+#define MOI_TXT_2      "Moisture Sensor 2:"
+#define MOI_TXT_3     "is dry and must be watered."
+#define MOI_TXT_4     "measured on"
+#define MOI_TXT_5     "moisture in the soil and the minimum moisture must be"
+#define MOI_TXT_6     "at location"
+#define PUMP_TXT      "[PUMPING]A Pump Node with ID"
+#define PUMP_TXT_2    "finished pumping with Pump1:"
+#define PUMP_TXT_3    "sec. and Pump2:"
+#define PUMP_TXT_4    "sec."
+#define Bat_Text      "[BATTERY ALERT] Sensornode with ID"
+#define Bat_Text_2    "has only"
+#define Bat_Text_3    "Volt but the minimum Voltage is"
+#define Bat_Text_4    "Volt!"
+#define Reg_Text      "[REGISTRATION] A new"
+#define Reg_Text_2    "with ID"
+#define Reg_Text_3    "has been registrated!"
+#define P_Node        "Pump Node"
+#define S_Node        "Sensor Node"
 #define S_ID_TXT      "Sensor NodeID:"
 #define PL_TXT_1        "1.PlantName:"
 #define PL_TXT_2      "2.PlantName:"
 #define LOC_TXT       "Location:"
 #define TEMP_TXT      "Temperature:"
-#define MOI_TXT_1       "Moisture:"
-#define MOI_TXT_2      "Moisture2:"
+
 #define HU_TEXT       "Humidity:"
 #define BR_TXT        "Brightness:"
 #define BAT_TXT       "Battery:"
@@ -1148,8 +1167,7 @@ class HomeWatering {
       Particle.function("PlantName", &HomeWatering::assignNameToSensor, this);
       Particle.function("Location", &HomeWatering::assignLocation, this);
       Particle.function("TurnOn", &HomeWatering::startPump, this);
-
-
+      Particle.function("ClearSensors", &HomeWatering::clearSensorVariables, this);
 
     }
 
@@ -1162,13 +1180,17 @@ class HomeWatering {
     int assignNameToSensor(String assignment);
     int assignLocation(String location);
     int startPump(String pump_request);
+    int clearSensorVariables(String strID);
     //Class member methods
     int8_t isTrackedSensor(uint16_t ID);//if tracked return number of
     void setParticleVariableString(uint16_t nodeList_index);
     bool assignSensorToVariable(uint16_t ID);
 
     bool publish_SensorData(uint16_t index);
-
+    bool publish_Registration(uint16_t ID,uint8_t type);
+    bool publish_BatteryAlert(uint16_t ID,float voltage,float minimum_voltage);
+    bool publish_Pump(uint16_t ID,uint16_t duration_1,uint16_t duration_2);
+    bool publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float minimum_moisture);
     struct Particle_Node Particle_SensorData[MAX_TRACKED_SENSORS];
     nodeList *pList;
   private:
