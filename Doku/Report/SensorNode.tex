@@ -109,7 +109,7 @@ We tried all solutions in our tests, however for the final solution we recommend
 
 \subsubsection{Power consumption optimizations}
 To make the batteries last as long as possible, the node should use as little power as possible.\\
-The biggest power safer is to put the microcontroller and all peripheral devices into sleep mode as much as possible.\\
+The biggest power safer is to put the microcontroller and all peripheral devices including all sensors into sleep mode as much as possible.\\
 This reduces the power of the system to around 1.5mA and gives 8 weeks of battery life per node. This is a big improvement, however far away from a convenient solution and the technical limits.\\
 One further optimization is to remove the power LED used to indicate the Arduino is running, as there is no need for it and the LED uses a lot of power. The LED can be removed by adding tin to connect both legs, heating them up uniformly and pulling away the LED with tweezers. This decreases the consumption to about 0.26 mA (45 weeks). \\
 Disabling TWI before sleep saved another 170µA.\\
@@ -117,7 +117,36 @@ Removing the parasiting onboard voltage regulator saved further 75µA. However d
 The resulting consumption for the design including all final components and using the external voltage regulator is 15µA. (4.5V ==> 67.5µW)
 Using the Pololu the same design needs 90µA (4.5V ==> 405µW).
 It can be concluded that in this situation an appropriate voltage regulator is more efficient than a Pololu. Also the voltage divider is a far cheaper solution.\\
-It must be mentioned that three 1.5V batteries are assumed in the calculations, resulting in 4.5V total. Using rechargeable batteries with 1.2V each, the resulting total 3.6V are just slightly above the threshold for the voltage regulator to operate. In this case the Pololu would have the better performance. For operation with the voltage regulator 3x1.5V batteries or 4x1.2V rechargeable batteries are suggested.
+
+\paragraph{Battery}
+One crucial factor obviously is the kind of battery itself. The following summarizes the key issues of batteries in our application.
+\begin{itemize}
+\item \textbf{Voltage}\\
+It must be mentioned that every battery type operates at a different voltage, what has to be considered at the choice of battery.
+Three 1.5V alkaline batteries have been assumed in the calculations above, resulting in 4.5V total. Using rechargeable batteries with 1.2V each, like nickel metal hydride batteries, the resulting total 3.6V are just slightly above the threshold for the voltage regulator to operate, so they will fail very soon. In this case the Pololu would have the better performance. For operation with the voltage regulator 3x1.5V LSD NiMH batteries or 4x1.2V rechargeable alkaline batteries are recommended.
+
+\item \textbf{Capacity}\\
+Obviously batteries with higher capacity last longer without replacing them.
+
+\item \textbf{Temperature range}\\
+Not all batteries withstand extreme temperatures. For example conventional NiMH batteries are not supposed to be used in cold environments, while their self-discharge rate drastically increases at high temperatures. LSD NiMH however can resist cold temperatures.
+
+\item \textbf{Self discharge rate}\\
+Conventional NiMH batteries have a high self discharge rate. Even if not used, they loose half their energy after one month. Low self discharge NiMH (LSD NiMH) batteries loose only a fraction of this energy per month $(<3\%)$ and can be used for several years without recharging.
+\end{itemize}
 
 
 
+\subsubsection{Data storage}
+As the communication between a sensor node and the controller might be faulty, the data shouldn't get lost. If the sensor node sends data to the controller and doesn't get a response, the data is stored in the EEPROM of the sensor node until the controller requests the data.
+
+
+\subsubsection{State diagram}
+
+\begin{figure}[h!]
+	\begin{center}
+	\includegraphics[scale=0.18]{images/SensorNode_0_4.pdf}
+	\caption{State diagram of the sensor node.}
+	\label{Setup_overview}
+	\end{center}
+\end{figure}

@@ -1,13 +1,15 @@
-The controller keeps track of all nodes and handles their registration.
-It executes the watering policy that the user has selected for each flower.
-For this task it wirelessly communicates with the sensor node situated in the flower pot and the pump node situated next to the water tank. The sensor node provides the controller with the most recent measurement values, whereas the pump node executes the pump commands received from the controller.
+The controller keeps track of all nodes and handles their registration. It coordinates the communication of the sensor and pump nodes and maintains a schedule of which node is allowed to transmit at which time.
+The controller also executes the watering policy that the user has selected for each flower.
+For this task it wirelessly communicates with the sensor nodes situated in the flower pots and the pump nodes situated next to the water tanks. The sensor nodes provide the controller with the most recent measurement values, whereas the pump nodes executes the pump commands received from the controller.
+The controller also provides an interface for the front end to get the newest data and to perform certain actions.
+It was a restriction to use the Particle Photon as controller hardware.
 
 \subsubsection{State diagram}
 
 \begin{figure}[h!]
 	\begin{center}
-	\includegraphics[scale=0.24]{../ControlNode_Diagramm.pdf}
-	\caption{Overview of the chosen setup.}
+	\includegraphics[scale=0.24]{images/ControlNode_Diagramm.pdf}
+	\caption{State diagram of the controller.}
 	\label{Setup_overview}
 	\end{center}
 \end{figure}

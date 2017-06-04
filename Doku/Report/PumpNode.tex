@@ -1,5 +1,10 @@
-The purpose of the pump node is to serve as an actuator and activate a pump for a specified time on request of the controller. It was required that the pump node supports two pumps which can be activated individually. Since the ATmega itself cannot provide sufficient current to power the pumps, a relay is used for each pump. % which relay shield do we use here?
-A specific protocol takes care about the reliable communication between the pump node and the controller. It has been carefully designed to avoid freezing of the node.
+The purpose of the pump node is to serve as an actuator and activate a pump for a specified time on request of the controller. An early draft involved a 3d printed reservoir where the electronics would be incorporated. However it turned out to be inflexible and therefore only the pump mountings have been printed and the mountings are attached to a bucket. From that bucket a hose leads to the pump and further to the flower.
+It was required that the pump node supports two pumps which can be activated individually. Since the ATmega itself cannot provide sufficient current to power the pumps, a relay is used for each pump. % which relay shield do we use here?
+A specific protocol takes care about the reliable communication between the pump node and the controller. It has been carefully designed to avoid freezing of the node and to ensure reliable operation of the pumps.\\
+
+\subsubsection{Actuator}
+As the task of the pump node is to water flowers, it is equipped with two pumps. Alternatively solenoid valves have been considered, however pumps are easier to use and a reliable solution. The chosen peristaltic pumps require high currents around 200mA and a voltage of 12V. Therefore they cannot be powered by Arduino pins, but have to be powered from an own power source like a voltage booster or an additional power supply. The Arduino switches two relays which in turn power the pumps. As the current is high, the pumps are not activated concurrently, but sequentially. They typically will be active for around 30 seconds.
+
 
 \subsubsection{Fall-back Mode}
 To guarantee a dependable solution resistant to external factors such as a failing internet connection or wireless jamming attacks, a fall-back mode has been implemented to water the flowers reliably, even if the control node is unavailable.
