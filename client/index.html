@@ -6,7 +6,7 @@
 </head>
 
 <style type="text/css">
- textarea.fixed {
+ textarea {
    overflow-x:hidden;
    height: 60em;
   }
@@ -32,7 +32,7 @@
 
 
  <div id="div_main" style="display:none;">
-<textarea name="outputtext" label="Events" form=""class="fixed" rows="4" cols="160"  autofocus="true" readonly="true" id="outputtext" ></textarea>
+<textarea name="outputtext" label="Events" form=""  rows="4" cols="160"  autofocus="true" readonly="true" id="outputtext" ></textarea>
 </div>
 
 
@@ -50,15 +50,14 @@
 var timeoptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
 //var Particle = require('particle-api-js');
 var particle = new Particle();
-var token;
-var device;
-
-
+var token_ = 0;
+var device = 0;
 function login()
 {
    var username;
    var password;
    document.getElementById("div_main").style.visibility="visible";
+   document.getElementById("div_main").style.display="block";
    document.getElementById("div_login").style.visibility="hidden";
    document.getElementById("div_login").style.display="none";
    username=document.getElementById("user").value;
@@ -67,23 +66,27 @@ function login()
    particle.login({username: username,password: password}).then(
      function(data){
         console.log('API call completed on promise resolve: ', data.body.access_token);
-        token = data.body.access_token;
+        token_ = data.body.access_token;
         device = data.body.id;
-        console.log('token data: ', token);
+        console.log('token data: ', token_);
         console.log('device data: ', device);
+        
      },
      function (err) {
       console.log('Particle Login failed: ', err);
      }
    )   
-   showDevices();
-   //document.getElementById("div_main").innerHTML=token;
+   //showDevices();
+   
+   document.getElementById("outputtext").innerHTML +=token_;
+   
 }
+
 
 
 function showDevices()
 {
-   var devicesPr = particle.listDevices({ auth: data.body.access_token });
+   var devicesPr = particle.listDevices({ auth: token_ });
 
    devicesPr.then(
       function(devices){
