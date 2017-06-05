@@ -136,14 +136,27 @@ Conventional NiMH batteries have a high self discharge rate. Even if not used, t
 \end{itemize}
 
 
+\subsubsection{PCB}
+In order to incorporate all components into a small box, a PCB has been designed by our supervisor using the Fritzing tool. The yellow traces are on the top side and the orange traces on the bottom. To offer flexibility with the power supply of the sensors, it can be selected whether they should be powered by the normal VCC pin or powered by an arduino pin to be able to deactivate all sensors during low power phases.
+The board has been produced by the Fritzing company tested with our software. It works as expected.
+\begin{figure}[h!]
+	\begin{center}
+%	\includegraphics[scale=2]{images/PlantSensorPCB.pdf}
+	\includegraphics[scale=0.3]{images/SensorNode_small.png}
+	
+	\caption{PCB design of the sensor node.}
+	\label{Setup_overview}
+	\end{center}
+\end{figure}
 
 \subsubsection{Data storage}
 As the communication between a sensor node and the controller might be faulty, the data shouldn't get lost. If the sensor node sends data to the controller and doesn't get a response, the data is stored in the EEPROM of the sensor node until the controller requests the data.
-
+The size of the EEPROM is limited to 1KB, therefore only around 25 data sets fit into the storage.
+Another issue with using EEPROM as storage is that the write cycles it endures are limited. Therefore an algorithm has been developed to ensure equal wearout of the EEPROM cells. In case the controller does not request the data and the EEPROM memory is full, the oldest data in the storage is replaced with the most recent data. 
 
 \subsubsection{State diagram}
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.18]{images/SensorNode_0_4.pdf}
 	\caption{State diagram of the sensor node.}
