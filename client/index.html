@@ -1,0 +1,105 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Particle Promise Login Example</title>
+  <script src="https://cdn.jsdelivr.net/particle-api-js/5.2.6/particle.min.js"></script>
+</head>
+
+<style type="text/css">
+ textarea.fixed {
+   overflow-x:hidden;
+   height: 60em;
+  }
+</style>
+
+
+
+
+<body>
+
+
+<div id="div_login">
+ <form action="Particle-Client.html">
+  User name:<br>
+  <input type="text" name="username" id="user"><br>
+  User password:<br>
+  <input type="password" name="psw" id="pass">
+  <input type="button" onclick="login()" value="Request Token">
+  <!-- <input type="submit" onclick="login()" value="Submit"> -->
+</form>
+</div>
+
+
+
+ <div id="div_main" style="display:none;">
+<textarea name="outputtext" label="Events" form=""class="fixed" rows="4" cols="160"  autofocus="true" readonly="true" id="outputtext" ></textarea>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+var timeoptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+//var Particle = require('particle-api-js');
+var particle = new Particle();
+var token;
+var device;
+
+
+function login()
+{
+   var username;
+   var password;
+   document.getElementById("div_main").style.visibility="visible";
+   document.getElementById("div_login").style.visibility="hidden";
+   document.getElementById("div_login").style.display="none";
+   username=document.getElementById("user").value;
+   password=document.getElementById("pass").value;
+   //alert(username + " " + password);
+   particle.login({username: username,password: password}).then(
+     function(data){
+        console.log('API call completed on promise resolve: ', data.body.access_token);
+        token = data.body.access_token;
+        device = data.body.id;
+        console.log('token data: ', token);
+        console.log('device data: ', device);
+     },
+     function (err) {
+      console.log('Particle Login failed: ', err);
+     }
+   )   
+   showDevices();
+   //document.getElementById("div_main").innerHTML=token;
+}
+
+
+function showDevices()
+{
+   var devicesPr = particle.listDevices({ auth: data.body.access_token });
+
+   devicesPr.then(
+      function(devices){
+         console.log('Devices: ', devices);
+      },
+      function(err) {
+      console.log('List devices call failed: ', err);
+      }
+   );
+}
+
+
+
+
+
+</script>
+
+</body>
+</html>
