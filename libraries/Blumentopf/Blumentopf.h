@@ -1136,8 +1136,9 @@ struct SensorLink{
 
 class HomeWatering {
   public:
-    HomeWatering(nodeList* myNodeList) {
+    HomeWatering(nodeList* myNodeList,RTCLayer* myRTC) {
       pList=myNodeList;
+      this->myRTC=myRTC;
       bool ret=true;
       for(int i=0;i<MAX_TRACKED_SENSORS;i++)
       {
@@ -1195,6 +1196,7 @@ class HomeWatering {
     nodeList *pList;
   private:
     void findSensorLinks(uint16_t index,struct SensorLink *link);
+    RTCLayer* myRTC;
 };
 
 #endif //#ifdef PARTICLE_CLOUD

@@ -216,7 +216,7 @@ void setup(void)
   #ifdef PARTICLE_CLOUD
     DEBUG_PRINTLNSTR("\r\n***************with PARTICLE CLOUD********************");
     /**************PARTICLE CLOUD*****************************************/
-    myHomeWatering=new HomeWatering(&myNodeList);
+    myHomeWatering=new HomeWatering(&myNodeList,&myRTC);
     /**********************************************************************/
   #endif
 

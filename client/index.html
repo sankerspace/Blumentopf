@@ -1,15 +1,26 @@
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Particle Promise Login Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HomeWatering Dashboard</title>
+  
   <script src="https://cdn.jsdelivr.net/particle-api-js/5.2.6/particle.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 
 <style type="text/css">
- textarea {
+ #outputtext {
    overflow-x:hidden;
    height: 60em;
+   bottom: 17px;
   }
+  #infoarea {
+   overflow-x:hidden;
+   height: 10em;
+   
+  }
+  
+  
 </style>
 
 
@@ -29,10 +40,15 @@
 </form>
 </div>
 
+<div id="div_main" style="display:none;">
+   <div> 
+   <textarea name="infoarea" label="Info Output" form="" rows="2" cols="160" placeholder="Particle Photon Cloud Function Output shown here" readonly="true" id="infoarea">
+   </textarea>
+   </div>
 
-
- <div id="div_main" style="display:none;">
-<textarea name="outputtext" label="Events" form=""  rows="4" cols="160"  autofocus="true" readonly="true" id="outputtext" ></textarea>
+   <div>
+   <textarea name="outputtext" label="Events" form=""  rows="4" cols="160" placeholder="Particle Photon Events shown here" autofocus="true" readonly="true" id="outputtext" ></textarea>
+   </div>
 </div>
 
 
@@ -45,15 +61,25 @@
 
 
 
-
 <script type="text/javascript">
+ 
 var timeoptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
-//var Particle = require('particle-api-js');
-var particle = new Particle();
-var token_ = 0;
-var device = 0;
-function login()
+
+ var particle = new Particle();
+ var token_ = 0;
+ var device = 0;
+
+function resolve()
 {
+   document.getElementById("outputtext").innerHTML +=token_;
+    document.getElementById("outputtext").innerHTML +="\n";
+    
+}
+
+
+function login()
+{  
+   
    var username;
    var password;
    document.getElementById("div_main").style.visibility="visible";
@@ -65,20 +91,34 @@ function login()
    //alert(username + " " + password);
    particle.login({username: username,password: password}).then(
      function(data){
-        console.log('API call completed on promise resolve: ', data.body.access_token);
-        token_ = data.body.access_token;
-        device = data.body.id;
-        console.log('token data: ', token_);
-        console.log('device data: ', device);
-        
+       console.log('API call completed on promise resolve: ', data.body.access_token);
+      token_ = data.body.access_token;
+      device = data.body.id;
+      console.log('token data: ', token_);
+      console.log('device data: ', device); 
+      showDevices();  
+      //resolve();
+      
+      //Registrate for Particle Events
+      particle.getEventStream({ deviceId: 'mine', auth: token_ }).then(function(stream) {
+                  stream.on('event', function(data) {
+                     console.log("Event: " + data);
+                     document.getElementById("outputtext").innerHTML +=JSON.stringify(data.data) + "\n";
+                        //JSON.stringify(new Date(data.published_at).toLocaleString('en-US', timeoptions)) +
+                        //"   " + JSON.stringify(data.data) + "\n";
+                  });
+      });      
+      
+      
      },
      function (err) {
       console.log('Particle Login failed: ', err);
      }
    )   
-   //showDevices();
+
+   //setTimeout(resolve,2000);
    
-   document.getElementById("outputtext").innerHTML +=token_;
+   
    
 }
 
@@ -90,7 +130,10 @@ function showDevices()
 
    devicesPr.then(
       function(devices){
-         console.log('Devices: ', devices);
+         console.log('Name: ', devices.body[0].name);
+         console.log('ID: ', devices.body[0].id);
+         console.log('Last IP: ', devices.body[0].last_ip_address);
+         console.log('lastUse: ', devices.body[0].last_heard);  
       },
       function(err) {
       console.log('List devices call failed: ', err);

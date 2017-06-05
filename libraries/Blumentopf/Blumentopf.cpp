@@ -2843,11 +2843,11 @@ int HomeWatering::mapPumpToSensor(String mapping)
 bool HomeWatering::publish_SensorData(uint16_t Sensor_index)
 {
 	struct Data SensorData = pList->myNodes[Sensor_index].nodeData;
-
-	String text=S_ID_TXT 	+ String(SensorData.ID) + " "
+	String t = String("[") + displayTime(myRTC->getTime()) + String("]");
+	String text=t + S_ID_TXT 	+ String(SensorData.ID) + " "
 												+ LOC_TXT	+ pList->myNodes[Sensor_index].location  + " "
 
-												+ TEMP_TXT	+ String(SensorData.temperature,2) + "\xB0 "
+												+ TEMP_TXT	+ String(SensorData.temperature,2) + "&#xB0 "
 												+	HU_TEXT		+ String(SensorData.humidity,2)	+ "%  "
 												+ BR_TXT		+ String(100.0*(float)SensorData.brightness/1024.0 ,2)+" "
 												+ BAT_TXT + String(((float)SensorData.voltage / 100.0),2)	+ "V ";
@@ -2857,7 +2857,8 @@ bool HomeWatering::publish_SensorData(uint16_t Sensor_index)
 }
 bool HomeWatering::publish_Registration(uint16_t ID,uint8_t type)
 {
-	String text = Reg_Text + String(" ");
+	String t = String("[") + displayTime(myRTC->getTime()) + String("]");
+	String text = t + Reg_Text + String(" ");
 
 	if(type == PUMPNODE)
 	{
@@ -2880,9 +2881,11 @@ bool HomeWatering::publish_Registration(uint16_t ID,uint8_t type)
 
 bool HomeWatering::publish_BatteryAlert(uint16_t ID,float voltage,float minimum_voltage)
 {
+
 	if((voltage/100) <= minimum_voltage)
 	{
-		String text = Bat_Text + String(" ") + String(ID) + " "
+		String t = String("[") + displayTime(myRTC->getTime()) + String("]");
+		String text = t 		+Bat_Text + String(" ") + String(ID) + " "
 												+Bat_Text_2 + " " + String((voltage/100),2) + " "
 												+Bat_Text_3 + " " + String(minimum_voltage,2) + " "
 												+Bat_Text_4;
@@ -2894,8 +2897,8 @@ bool HomeWatering::publish_BatteryAlert(uint16_t ID,float voltage,float minimum_
 bool HomeWatering::publish_Pump(uint16_t ID,uint16_t duration_1,uint16_t duration_2)
 {
 
-
-	String text = PUMP_TXT+ String(" ") + String(ID)
+ 	String t = String("[") + displayTime(myRTC->getTime()) + String("]");
+	String text = t + PUMP_TXT+ String(" ") + String(ID)
 												+ String(" ") + PUMP_TXT_2 + duration_1
 	  										+ String(" ") + PUMP_TXT_3 +  duration_2
 												+ String(" ") + PUMP_TXT_4;
@@ -2906,8 +2909,8 @@ bool HomeWatering::publish_Pump(uint16_t ID,uint16_t duration_1,uint16_t duratio
 bool HomeWatering::publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float minimum_moisture)
 {
 
-
-		String text = MOI_TXT + " ";
+		String t = String("[") + displayTime(myRTC->getTime()) + String("]");
+		String text = t + MOI_TXT + String(" ");
 		float min_ = (100*minimum_moisture)/1024;
 
 		if(s == MOISTURE1)
