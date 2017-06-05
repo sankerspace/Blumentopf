@@ -30,7 +30,8 @@
 
 
 <div id="div_login">
- <form action="Particle-Client.html">
+
+ <form>
   User name:<br>
   <input type="text" name="username" id="user"><br>
   User password:<br>
@@ -38,9 +39,19 @@
   <input type="button" onclick="login()" value="Request Token">
   <!-- <input type="submit" onclick="login()" value="Submit"> -->
 </form>
+<p>You can Login and get a new token automatically or you insert your own Token without Login</p>
+<form>
+  Token:<br>
+  <input type="text" name="TOKEN" id="form_token"><br>
+  <input type="button" onclick="login2()" value="Start Dashboard">
+  <!-- <input type="submit" onclick="login()" value="Submit"> -->
+</form>
 </div>
 
 <div id="div_main" style="display:none;">
+   
+   <div> <select name="Node Selection" size="1"></select></div>
+   
    <div> 
    <textarea name="infoarea" label="Info Output" form="" rows="2" cols="160" placeholder="Particle Photon Cloud Function Output shown here" readonly="true" id="infoarea">
    </textarea>
@@ -116,9 +127,28 @@ function login()
      }
    )   
 
-   //setTimeout(resolve,2000);
-   
-   
+   //setTimeout(resolve,2000); 
+}
+
+
+function login2()
+{
+  document.getElementById("div_main").style.visibility="visible";
+  document.getElementById("div_main").style.display="block";
+  document.getElementById("div_login").style.visibility="hidden";
+  document.getElementById("div_login").style.display="none";
+  token_= document.getElementById("form_token").value;
+  console.log('token data: ', token_); 
+  showDevices(); 
+    //Registrate for Particle Events
+  particle.getEventStream({ deviceId: 'mine', auth: token_ }).then(function(stream) {
+               stream.on('event', function(data) {
+                  console.log("Event: " + data);
+                  document.getElementById("outputtext").innerHTML +=JSON.stringify(data.data) + "\n";
+                     //JSON.stringify(new Date(data.published_at).toLocaleString('en-US', timeoptions)) +
+                     //"   " + JSON.stringify(data.data) + "\n";
+               });
+   });      
    
 }
 
