@@ -50,12 +50,20 @@
 
 <div id="div_main" style="display:none;">
    
-   <div> <select name="Node Selection" size="1"></select></div>
-   
-   <div> 
-   <textarea name="infoarea" label="Info Output" form="" rows="2" cols="160" placeholder="Particle Photon Cloud Function Output shown here" readonly="true" id="infoarea">
-   </textarea>
+   <div>
+	<select name="Node Selection" size="1">
+	</select>
+	<input type="text" id="pump_duration1">
+	<input type="text" id="pump_duration2">
+	<input type="button" onclick="pump()" value="Start Pumping">
    </div>
+   
+	<div> 
+		<textarea name="infoarea" label="Info Output" form="" rows="2" cols="160" placeholder="Particle Photon Cloud Function Output shown here" readonly="true" id="infoarea">
+		</textarea>
+	</div>
+
+
 
    <div>
    <textarea name="outputtext" label="Events" form=""  rows="4" cols="160" placeholder="Particle Photon Events shown here" autofocus="true" readonly="true" id="outputtext" ></textarea>
@@ -138,6 +146,7 @@ function login2()
   document.getElementById("div_login").style.visibility="hidden";
   document.getElementById("div_login").style.display="none";
   token_= document.getElementById("form_token").value;
+  token_ = "77dc1f0ce4d5abf2fefda017e499ba4332915057";
   console.log('token data: ', token_); 
   showDevices(); 
     //Registrate for Particle Events
@@ -162,6 +171,7 @@ function showDevices()
       function(devices){
          console.log('Name: ', devices.body[0].name);
          console.log('ID: ', devices.body[0].id);
+		 device = devices.body[0].id;
          console.log('Last IP: ', devices.body[0].last_ip_address);
          console.log('lastUse: ', devices.body[0].last_heard);  
       },
@@ -172,8 +182,87 @@ function showDevices()
 }
 
 
+/*
+*  Checks the durations entered in the formula and sends a pump command to the controller if the durations are valid.
+*/
+function pump()
+{
 
+	var p_duration1 = document.getElementById("pump_duration1").value;
+	var p_duration2 = document.getElementById("pump_duration2").value;
+	var p_nodeId = 6723;	// This is the pump node ID. This should be retrieved from the dropdown list and the data structure.
+	var p_state = 0;
+	
+// checking duration 1 for feasibility
+	if (isNumeric(p_duration1) == false)	// duration 1 isn't a number
+	{
+		if(p_duration1 != "")				// duration 1 isn't empty
+		{
+			alert("Pump duration 1 invalid!");
+			console.log('Pump duration 1 invalid!');
+			p_state = 1;					// do not pump!
+		}
+		else
+		{
+			p_duration1 = 0;
+		}
+	}
+	else if(p_duration1 > 60)				// this is too long!
+	{
+		alert("Pump duration 1 is too long!");
+		p_state = 1;					// do not pump!
+	}
+	
 
+// checking duration 2 for feasibility	
+	if (isNumeric(p_duration2) == false)	// duration 2 isn't a number
+	{
+		if(p_duration2 != "")				// duration 2 isn't empty
+		{
+			alert("Pump duration 2 invalid!");
+			console.log('Pump duration 2 invalid!');
+			p_state = 1;					// do not pump!
+		}
+		else
+		{
+			p_duration2 = 0;
+		}
+	}
+	else if(p_duration2 > 60)				// this is too long!
+	{
+		alert("Pump duration 2 is too long!");
+		p_state = 1;					// do not pump!
+	}
+	
+// no duration is specified?
+	if ((p_duration1 == 0) && (p_duration2 == 0))
+	{
+		alert("There is no pump duration specified!");
+		p_state = 1;					// do not pump!
+	}
+	
+	if (p_state == 0)	// all fine! Let's pump!
+	{
+
+	var request = String(p_nodeId) + "," + String(p_duration1) + "," + String(p_duration2);
+	
+// according to Blumentopf.cpp the arguments are: pumpnode ID, duration pump1, duration pump 2
+	var fnPr = particle.callFunction({ deviceId: device, name: 'TurnOn', argument: request, auth: token_ });
+
+fnPr.then(
+  function(data) {
+    console.log('Function called succesfully:', data);
+	alert("done");
+  }, function(err) {
+    console.log('An error occurred:', err);
+  });
+
+}
+}
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
 </script>
 
