@@ -1,4 +1,5 @@
 For the topology of the network multiple options have been considered. Eventually we decided to split up the sensing and pumping functionality into separate nodes, the sensor node and the pump node.
 There can be up to $%2^{16}$ nodes of both types to offer flexibility with the size of the system. A controller node coordinates the communication of the nodes and the front-end.
 The front-end should offer access to the main functions of the system. In particular it has to display the sensor values and offer the possibility to activate individual pumps.
-Additionally a dater logger was requested to record all communication  and store it into a database.
+Additionally a dater logger was requested to record all communication  and store it into a database.\\
+To reset the nodes a button has been implemented to reset the devices. It has to be pressed during restart. Instead of a button it also is sufficient to pull the digital pin 4 high some seconds during restart.
