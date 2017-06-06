@@ -19,7 +19,7 @@
 // sets Particle or photon:
 #define HW_ARDUINO  1
 #define HW_PHOTON   2
-#define USEParticleCloud 1 //sitch only used in case of particle photon
+#define PARTICLE_USECLOUD 1 //sitch only used in case of particle photon
 
 
 #if defined(SPARK) || defined(PLATFORM_ID)
@@ -38,7 +38,7 @@
 #endif
 
 #if (HW == HW_PHOTON)
-  #if (USEParticleCloud==1)
+  #if (PARTICLE_USECLOUD==1)
     #define PARTICLE_CLOUD
   #endif
   #include <application.h>
@@ -55,9 +55,21 @@
 /***************************************************************************************/
 /****************************** D E B U G **********************************************/
 /**************************************************************************************/
+//DHT.h has defined  DEBUG_PRINTLN AND DEBUG_PRINT
+#ifdef DHT_DEBUG
+  #undef DHT_DEBUG
+#endif
+#ifdef DEBUG_PRINT
+  #undef DEBUG_PRINT
+#endif
+#ifdef DEBUG_PRINTLN
+  #undef DEBUG_PRINTLN
+#endif
+
 // General debug messages:
-//Marko@:dont change DEBUG_ i have a warning about redundant definition
+//Marko@:dont change DEBUG_ i have a warning about redundant definition in Particle IDE
 #define DEBUG_ 1//1						// DEBUG messages master switch				(0: no debug messages at all		1: the settings below apply)
+#if (DEBUG_>0)/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define DEBUG_NODE_LIST 0				// 0: disabled		1: show messages about what is going on when a node ID is stored, etc. (for debugging storage)
 #define DEBUG_MESSAGE_HEADER 0			// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
 #define DEBUG_MESSAGE_HEADER_2 0		// 0: disabled		1: show the protocol details of incoming messages (for debugging the protocol)
@@ -66,17 +78,29 @@
 #define DEBUG_DATA_CONTENT 1			// 0: disabled		1: show the content of the data messages (for debugging data handling)
 #define DEBUG_SENSOR_SCHEDULING 1		// 0 : disabled		1: show details about the sensor node scheduling (for debugging the scheduling)
 #define DEBUG_LIST_SENSOR_SCHEDULING 1	// 0: disabled		1: lists all scheduled sensor nodes (for debugging the scheduling and communication)
-#define DEBUG_FREE_MEMORY 0				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
+#define DEBUG_LIST_PUMP_SCHEDULING 1 //1: lists all scheduled pump nodes
+#define DEBUG_LIST_ALL_NODES_REGULAR 1 //after DEBUG_CYCLE outputs a compact list of all online nodes
+#define DEBUG_FREE_MEMORY 1				// 0: disabled		1: show the amount of memory still available (for debugging memory issues)
 #define DEBUG_RTC 1						// 0: disabled		1: show RTC infos
-#define DEBUG_INFO 0         			// 0: disabled		1: show infos
+#define DEBUG_INFO 1         			// 0: disabled		1: show infos
 #define DEBUG_PUMP 1					//DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
-#define DEBUG_PUMP_ROUNDTRIPTIME 1
+#define DEBUG_PUMP_ROUNDTRIPTIME 0 //show Time information about sending data in one state and receiving in another state [PumpHandler]
 #define DEBUG_RF24 0				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
-#define DEBUG_TIMING_LOOP 1				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
-#define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function
+#define DEBUG_TIMING_LOOP 0				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
+
+#define DEBUG_TIMESTAMP 0       //show that timestamps are divided into two parts and send corectly to pump Node
+#ifdef PARTICLE_CLOUD
+  #define DEBUG_PARTICLE_CLOUD 1 //1: essential debug messages in the class of Homewatering
+  #define DEBUG_HOMEWATERING_MAP 1 //1: additional DEBUG MESSAGEs in Homewatering::mapPumpToSensor()
+  #define DEBUG_HOMEWATERING_REPORT_VARIABLE 1
+#endif
 // For debugging the sensor node
 #define DEBUG_DATA_STORAGE 0			// 0: disabled		1: for analysing the EEPROM Data class internals
 #define DEBUG_SENSOR_MESSAGE_HEADER 0	// 0: disabled		1:  //only in SensorNode.ino
+#endif/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+#define DEBUG_CYCLE 10000				// Debug information after all X ms in the loop() function
 
 // For debugging the pump node
 
@@ -351,10 +375,12 @@ DO NOT CHANGE:
 #define WAIT_RESPONSE_INTERVAL       1000//4000// in Milliseconds
 
 //maximal duration for one slot of a pump  [INTERVAL/10] seconds
-#define INTERVAL 600	// Duration between two protocol - timeslots [0.1s]!
+//marko@:doWatering takes that values as a reference
+#define INTERVAL 600	// Duration of one SensorNode/PumpNode timeslots [INTERVAL * 0.1s]!
+
 
 // measurement policy
-#define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s]
+#define TIMESLOT_DURATION  (300)      // distance between two timeslots in [0.1s] //Bernhard@ Brauch ma das???
 
 /*
 * PUMP DEFINE
@@ -369,6 +395,45 @@ DO NOT CHANGE:
 /***************************************************************************************/
 /******************************  P R O T O C O L ***************************************/
 /**************************************************************************************/
+
+
+//PIN definition
+
+
+//Controller
+
+
+// Values for Sensor Node
+#if (HW == HW_PHOTON)
+
+  #define HW_RTC_PIN  D4			// for turning on/off the RTC at the Particle
+  //RF24 PIN
+  #define PHOTON_CS_PIN D6
+  #define PHOTON_CE_PIN A2
+  #define PHOTON_LED_BUILTIN D7
+#else
+  #define PHOTON_LED_BUILTIN 13
+  #define SENSOR_POWER  8
+  #define HW_RTC_PIN  SENSOR_POWER				// for turning on/off the RTC at the Arduino
+  //RF24 PIN
+  #define CE_PIN 9
+  #define CS_PIN 10
+#endif
+
+
+
+//SensorNode
+#define randomPIN         A6
+#define BATTERY_SENSE_PIN A0		// Pin for Battery voltage
+#define DHTPIN            5 		// Pin number for temperature/humidity sensor
+#define DHTTYPE           DHT22//DHT11 //DHT22
+#define MOISTURE_PIN      A2
+#define MOISTURE_PIN_2    A3
+#define LIGHT_PIN         A1 //R1(Fotoresitor[1kohm-100kohm]) R2=20 kOhm-(Marko@ 0-3,3V) R2=18kOhm
+
+#define PUMP1_PIN         3
+#define PUMP2_PIN         2
+#define BUTTON_PIN        4
 // SD Availability check
 #define SD_AVAILABLE  (0)
 #if (SD_AVAILABLE ==1)
@@ -392,20 +457,7 @@ DO NOT CHANGE:
 
 
 
-// Values for Sensor Node
-#if (HW == HW_PHOTON)
-  #define HW_RTC_PIN  D4			// for turning on/off the RTC at the Particle
-#else
-  #define SENSOR_POWER  8
-  #define HW_RTC_PIN  SENSOR_POWER				// for turning on/off the RTC at the Arduino
-#endif
 
-#define randomPIN         A6
-#define BATTERY_SENSE_PIN A3		// Pin for Battery voltage
-#define DHT11PIN 5					// Pin number for temperature/humidity sensor
-#define MOISTURE_PIN      A0
-#define MOISTURE_PIN_2    A2
-#define LIGHT_PIN         A1
 #define MOISTURE_THRESHOLD (1000)	// wet/dry threshold
 #define LIGHT_THRESHOLD (512)		// day/nigth threshold
 #define BAUD (57600)				// serial BAUD rate
@@ -414,9 +466,11 @@ DO NOT CHANGE:
 #define RTC_SYNC_THRESHOLD (10)		// How many seconds the Controller and Node clocks can drift apart before resynchronization
 #define REF_VAL	(1.1)				// actual voltage of the 1.1 regulator
 #define V_max (6.6) //Marko@: to reach V_ADC_max=1,1V : Failure between measured and read value now only ~ 1%
+#define V_min (4.0)//(1.8)
 #define R1 (109300.0)
 #define R2 (497000.0)
 #define V_ADC_max (R1*V_max / ((R1+R2))) //marko@: should be 1,1 V because of analog internal reference, which is the max
+
 #define VOLTAGE_GAP (IREF - V_ADC_max)
 #define MAX_OFFSET (VOLTAGE_GAP / (IREF - V_ADC_max))
 #define VOLTS_PER_SCALE (IREF / 1024.0)
@@ -459,9 +513,9 @@ DO NOT CHANGE:
 #define FETCH_EEPROM_DATA1    (1)
 #define FETCH_EEPROM_DATA2    (2)
 #define ID_INEXISTENT         (3)       // there is no such ID
-#define ID_REGISTRATION_ERROR (7)
-
-
+#define ID_REGISTRATION_ERROR (4)
+#define PUMP1_USED            (5)
+#define PUMP2_USED            (6)
 
 #define FETCH_EEPROM_REG_SKIP     (0)
 #define FETCH_EEPROM_REG_SEND     (2)
@@ -533,8 +587,9 @@ struct Data
 
   float temperature;//4byte		// should be shortended to uint16_t
   float humidity;//4byte			// should be shortended to uint16_t
+   //used as pumptime on second pump of a pumpnode
   time_t Time;//4byte
-  uint32_t pumpTime;// 4byte    ---> interval
+  time_t Time_2;// 4byte  //used as pumptime on first pump of a pumpnode
   uint16_t ID; //2 Byte
 
   uint16_t interval; // 2byte
@@ -652,8 +707,8 @@ private:
 #define NODELIST_NODETYPE       (0)
 #define NODELIST_PUMPACTIVE     (1)
 #define NODELIST_NODEONLINE     (2)
-#define SENSOR_PUMP1	        (3)		// 0: sensor1		1: sensor2
-#define SENSOR_PUMP2    	    (4)		// 0: sensor1		1: sensor2
+#define NODELIST_SENSOR_PUMP1	        (3)		// 0: choose first Moisture sensor;		1: second Moisture2 sensor
+#define NODELIST_SENSOR_PUMP2    	    (4)		// 0: Moisture1		1: Moisture2
 
 
 
@@ -666,20 +721,49 @@ private:
  */
 struct nodeListElement
 {
-  Data nodeData;
+
+  /*
+  *Decription of Usage of nodeData
+  *Used for Sensornodes one to one as inidcated by element names
+  *except:
+  * Time      - last Pump Time regarding Moisture1 (myNodeList)
+  *           - current Time (myData? and myResponse)
+  * pumptime  - last Pump Time regarding Moisture2(myNodeList)
+  *
+  *Used for PumpNodes in a different way:
+  * Time      - last pumptime of pump1 (myNodeList)
+  *           - pump_diuration for pump 1 (myResponse)
+  * pumptime  - last pumptime of pump2 (myNodeList)
+  *           - pump_diuration for pump 1 (myResponse)
+  * voltage   - contains pump duration of pump1 in case of manually activation of the pump(myNodeList)
+  * VCC       - stores numbers of registrations attempt of the according PumpNode
+  * moisture  - Low Byte of the 4Byte currentTime (myResponse)
+  *           - last Pump Duration of pump1 of the according Pump Node (myNodeList)
+  * moisture2 - High Byte of the 4Byte currentTime (myResponse)
+  *           - last Pump Duration of pump2 of the according Pump Node (myNodeList)
+  * brightness- contains pump duration of pump2 in case of manually activation of the pump(myNodeList)
+  *(all other variables and cases which are no noted are not used- ex: brightness NOT used In mydata or myReponse regarding pumpNodes)
+  */
+  Data nodeData; //used for myData , myResponse and myNodeList in different ways,because of the lack of storage
   time_t   nextSlot;
   uint16_t ID;
-  uint16_t sensorID1;    // in case it is a motor node, the SensorNode corresponding to the pump1 is stored here.
-  uint16_t sensorID2;    // in case it is a motor node, the SensorNode corresponding to the pump2 is stored here.
+  //Marko@ sensorID1 before but renamed it
+   // in case it is a motor node, the SensorNode corresponding to the pump1 is stored here.
+   // in case it is a sensor node , the PumpNode ID for Moisture Sensor 1 is stored here
+  uint16_t ID_1;
+    //Marko@ sensorID2 before but renamed it
+   // in case it is a motor node, the SensorNode corresponding to the pump2 is stored here.
+   // in case it is a sensor node , the PumpNode ID for Moisture Sensor 2 is stored here
+  uint16_t ID_2;
   uint8_t state;
-  String name;  //Moisture 1
-  String name2; //Moisture 2
-  String location;//SensorNode
   // Bit 0: NODELIST_NODETYPE:   0...this is a SensorNode, 1...this is a MotorNode
   // Bit 1: NODELIST_PUMPACTIVE: 0...inactive, 1...active (is currently pumping[1] or not[0])
   // Bit 2: NODELIST_NODEONLINE: 0...OFFLINE,  1...ONLINE (the node has performed a registration)
-  // Bit 3: SENSOR_PUMP1:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 1. Every SensorNode has two moisture sensors..)
-  // Bit 4: SENSOR_PUMP2:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 2. Every SensorNode has two moisture sensors..)
+  // Bit 3: NODELIST_SENSOR_PUMP1:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 1. Every SensorNode has two moisture sensors..)
+  // Bit 4: NODELIST_SENSOR_PUMP2:    0...Sensor 1, 1...Sensor 2 (Moisture sensor for Pump 2. Every SensorNode has two moisture sensors..)
+  String name;  //Moisture 1
+  String name2; //Moisture 2
+  String location;//SensorNode
   byte     watering_policy;
   /*instead in pumphandler I put it here to count no reachability of a node
   * increases when a connection to a node failed
@@ -743,6 +827,9 @@ public:
   */
   uint8_t isOnline(uint16_t ID); // PumpNode currently active or not
 
+  void setPumpInfos(uint16_t PumpNode_ID,uint32_t last_pumping_1,
+    uint32_t last_pumping_2,uint16_t pump_duration_1,uint16_t pump_duration_2);
+
   void setNodeName(uint16_t ID,String name);
   String getNodeName(uint16_t ID);
   void setNodeName2(uint16_t ID,String name2);
@@ -792,6 +879,9 @@ class CommandHandler
 /***************************************************************************************/
 /******************************  PUMPNODE HANDLE **************************************/
 /**************************************************************************************/
+//Strateg if two Pumps on ONE PumpNode should work in parallel
+#define PUMPNODE_PUMPS_PARALLEL           0 //[1]-yes [0]-no(work in series)
+
 /*
 *  PumpNode defines
 */
@@ -824,9 +914,12 @@ public:
     PumpNode_Handler(uint16_t pumpNodeID)
     {
         pumpnode_ID=pumpNodeID;
-        OnOff=0;
+        OnOff_1=0;
+        OnOff_2=0;
+
         pumpnode_status=PUMPNODE_STATE_0_PUMPREQUEST;
-        pumpnode_response=0;
+        pumpnode_response_1=0;
+        pumpnode_response_2=0;
         pumpnode_started_waiting_at=millis();
         pumpnode_previousTime=millis();
         pumpnode_waitforPump=0;
@@ -855,19 +948,23 @@ public:
       #endif
     }
 
-    uint16_t getPumpTime(void);
+
+    uint32_t getFirstPumpTime(void);
+    uint32_t getSecondPumpTime(void);
     int      getState(void);
     int      getPacketState(void);
     uint16_t getID(void);
-    uint16_t getResponseData(void);
-    void     processPumpstate(uint16_t IncomeData);
+    uint32_t getResponseData_1(void);
+    uint32_t getResponseData_2(void);
+    void     processPumpstate(uint32_t IncomeData_1,uint32_t IncomeData_2);
     void     reset(void);
     void     setPumpHandlerID(uint16_t ID_);
     uint16_t getPumpHandlerID(void);
     /*How many times I reached the state error*/
     //uint8_t  getStateErrorCount(void);
     bool     getResponseAvailability(void);
-
+    //bool     isPump1_active(void);
+    //bool     isPump2_active(void);
 private:
     #if (DEBUG_PUMP>0)
     uint32_t pumpnode_HandlerGenerationTime;
@@ -883,8 +980,10 @@ private:
    // static uint8_t counter;
     /*state variable*/
     uint16_t pumpnode_ID;
-    uint16_t OnOff;                     //duration of pumping[sec]
-    uint16_t pumpnode_response;         //response Data (Controller send to PumpNode)
+    uint32_t OnOff_1;                     //duration of pumping[sec]
+    uint32_t OnOff_2;
+    uint32_t pumpnode_response_1;         //response Data (Controller send to PumpNode)
+    uint32_t pumpnode_response_2;         //response Data (Controller send to PumpNode)
     /*some timers for state observations*/
 
     uint16_t pumpnode_debugCounter;
@@ -898,7 +997,8 @@ private:
     */
     int8_t pumpnode_status_packet;
     bool pumpnode_reponse_available;
-
+    //bool activate_pump_1;
+    //bool activate_pump_2;
 };//5*2byte,4*1byte,5*4byte
 //34byte
 
@@ -920,6 +1020,7 @@ private:
 #define Error_WateringTask_2  "[CONTROLLER][doWateringTasks]ERROR:THIS IS NOT A PUMP NODE!!"
 #define Error_WateringTask_3  "[CONTROLLER][doWateringTasks]ERROR:PUMP IS ALREADY IN USE!!"
 #define Error_WateringTask_4  "[CONTROLLER][doWateringTasks]ERROR:Parameter not correct!!"
+#define Error_WateringTask_5  "[CONTROLLER][doWateringTasks]ERROR:Watering time exceeds maximum allowed period!!"
 
 /***************************************************************************************/
 /******************************  M E M O R Y ******************************************/
@@ -932,10 +1033,11 @@ int freeRam(void);
 void printFreeRam();
 
 /***************************************************************************************/
-/******************************  B U T T O N ******************************************/
+/************* H E L P E R F U N T I O N / T O O L S ***********************************/
 /**************************************************************************************/
-// standard routine
 
+uint32_t getCombinedData(uint16_t HighByte,uint16_t LowByte);
+void   setCombinedData(uint32_t Data_,uint16_t& HighByte,uint16_t& LowByte);
 
 
 
@@ -944,20 +1046,42 @@ void printFreeRam();
 /**************************************************************************************/
 
 #ifdef PARTICLE_CLOUD
-
-
+#define MOI_TXT       "Plant"
+#define MOI_TXT_1      "Moisture Sensor 1:"
+#define MOI_TXT_2      "Moisture Sensor 2:"
+#define MOI_TXT_3     "is dry and must be watered."
+#define MOI_TXT_4     "measured on"
+#define MOI_TXT_5     "moisture in the soil and the minimum moisture must be"
+#define MOI_TXT_6     "at location"
+#define PUMP_TXT      "[PUMPING]A Pump Node with ID"
+#define PUMP_TXT_2    "finished pumping with Pump1:"
+#define PUMP_TXT_3    "sec. and Pump2:"
+#define PUMP_TXT_4    "sec."
+#define Bat_Text      "[BATTERY ALERT] Sensornode with ID"
+#define Bat_Text_2    "has only"
+#define Bat_Text_3    "Volt but the minimum Voltage is"
+#define Bat_Text_4    "Volt!"
+#define Reg_Text      "[REGISTRATION] A new"
+#define Reg_Text_2    "with ID"
+#define Reg_Text_3    "has been registrated!"
+#define P_Node        "Pump Node"
+#define S_Node        "Sensor Node"
 #define S_ID_TXT      "Sensor NodeID:"
-#define PL_TXT        "PlantName:"
+#define PL_TXT_1        "1.PlantName:"
+#define PL_TXT_2      "2.PlantName:"
 #define LOC_TXT       "Location:"
 #define TEMP_TXT      "Temperature:"
-#define MOI_TXT       "Moisture:"
+
 #define HU_TEXT       "Humidity:"
 #define BR_TXT        "Brightness:"
 #define BAT_TXT       "Battery:"
-#define LWAT_TXT      "Last Watering:"
-#define P_TXT         "PumpID:"
+#define LWAT_TXT_1    "1. Last Watering:"
+#define LWAT_TXT_2    "2. Last Watering:"
+#define P_TXT_1       "1. PumpID:"
+#define P_TXT_2       "2. PumpID:"
+#define DP_TXT        " sec. pumped"
 
-#define MAX_TRACKED_SENSORS 2  //mAXIMUM IS 20
+#define MAX_TRACKED_SENSORS 3  //mAXIMUM IS 20-1 (last is for the Nodelist)
 #define SENSOR_TRACKNAME_PREFIX "SensorData"
 /*
 struct SensorD {
@@ -985,44 +1109,101 @@ struct Particle_Node
   uint16_t SensorID;
 };
 
+enum ePump {PUMP1=0,PUMP2};
+enum eSensor {MOISTURE1=0,MOISTURE2};
+
+struct Mapp{ //pump x/y  -> moisture x/y
+  uint16_t PumpID;
+  uint16_t SensorID;
+  ePump p;
+  eSensor s;
+
+  time_t lastWatering;
+  uint16_t duration;
+};
+//
+struct SensorLink{
+  struct Mapp map1;
+  struct Mapp map2;
+  String name1;
+  String name2;
+  String location;
+  String map_report_1;
+  String watering_report_1;
+  String map_report_2;
+  String watering_report_2;
+};
+
 class HomeWatering {
   public:
-    HomeWatering() {
-
-
-
+    HomeWatering(nodeList* myNodeList,RTCLayer* myRTC) {
+      pList=myNodeList;
+      this->myRTC=myRTC;
       bool ret=true;
       for(int i=0;i<MAX_TRACKED_SENSORS;i++)
       {
+          String name=(String::format("%s_%d",SENSOR_TRACKNAME_PREFIX,i));
 
-          String name=(String::format("%s%d",SENSOR_TRACKNAME_PREFIX,i));
           int len=name.length()+1;
           char buf[len];
           name.toCharArray(buf,len);
           buf[len-1]='\0';
           const char* buf_=buf;
+          DEBUG_PRINTSTR_D("[HOMEWATERING][CONSTRUCTOR]:",DEBUG_PARTICLE_CLOUD);
+          DEBUG_PRINTLN_D(buf,DEBUG_PARTICLE_CLOUD);
 
 
-
-          ret&=Particle.variable(buf_, &(Particle_SensorData[i].SensorTXT),STRING);
+          ret = (ret && Particle.variable(buf_, &(Particle_SensorData[i].SensorTXT),STRING));
           Particle_SensorData[i].SensorID=0;
+          DEBUG_PRINTLN_D(ret,DEBUG_PARTICLE_CLOUD);
       }
-      if(!ret)
-        DEBUG_PRINTSTR("[PARTICLE]"); DEBUG_PRINTLNSTR("VARIABLE NOT REGISTERED.");
-      //Particle.function("brew", &CoffeeMaker::brew, this);
+      //Check if Cloud Variable is succesfully registered
+      if(ret==false)
+      {
+        DEBUG_PRINTSTR_D("[HOMEWATERING][CONSTRUCTOR]",DEBUG_PARTICLE_CLOUD);
+        DEBUG_PRINTLNSTR_D("VARIABLE NOT REGISTERED.",DEBUG_PARTICLE_CLOUD);
+      }
+      //THERE MUST BE A CLOUD VARIABLE WHICH STORES A NODE LIST
+      Particle.variable("NODELIST", &Particle_nodeList,STRING);
+      //registrate cloud function in the Particle Cloud Service
+      Particle.function("Mapper", &HomeWatering::mapPumpToSensor, this);
+      Particle.function("PlantName", &HomeWatering::assignNameToSensor, this);
+      Particle.function("Location", &HomeWatering::assignLocation, this);
+      Particle.function("TurnOn", &HomeWatering::startPump, this);
+      Particle.function("ClearSensors", &HomeWatering::clearSensorVariables, this);
+
     }
 
     //int brew(String command) {
       // do stuff
   //    return 1;
   //  }
+    //Cloud functions
+    int mapPumpToSensor(String mapping);
+    int assignNameToSensor(String assignment);
+    int assignLocation(String location);
+    int startPump(String pump_request);
+    int clearSensorVariables(String strID);
+    //Class member methods
     int8_t isTrackedSensor(uint16_t ID);//if tracked return number of
-    void setParticleVariableString(nodeList* list,uint16_t index);
+    void setParticleVariableString(uint16_t nodeList_index);
+    bool assignSensorToVariable(uint16_t ID);
 
+    bool publish_SensorData(uint16_t index);
+    bool publish_Registration(uint16_t ID,uint8_t type);
+    bool publish_BatteryAlert(uint16_t ID,float voltage,float minimum_voltage);
+    bool publish_Pump(uint16_t ID,uint16_t duration_1,uint16_t duration_2);
+    bool publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float minimum_moisture);
+
+    void storeParticleNode(uint16_t ID,uint8_t node_type);
     struct Particle_Node Particle_SensorData[MAX_TRACKED_SENSORS];
+    nodeList *pList;
 
 
-
+  private:
+    void findSensorLinks(uint16_t index,struct SensorLink *link);
+    RTCLayer* myRTC;
+    String Particle_nodeList;
 };
 
 #endif //#ifdef PARTICLE_CLOUD

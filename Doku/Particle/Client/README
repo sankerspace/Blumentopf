@@ -4,3 +4,12 @@ Prequesite:
 
   1) Make sure you have node.js installed
   2) Install: "npm install particle-api-js"
+  
+  
+  
+How to get PUBLISHED EVENTS:
+GET /v1/events/{EVENT_NAME}
+
+# EXAMPLE REQUEST
+curl -H "Authorization: Bearer {ACCESS_TOKEN_GOES_HERE}" \
+    https://api.particle.io/v1/events/motion-detected

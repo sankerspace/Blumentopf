@@ -1,0 +1,33 @@
+Usefull Information to Memory:
+
+
+
+Compilation Arduino:
+
+17.05.2017(DEBUG DISABLED)
+--------------------------
+Sketch uses 15,038 bytes (48%) of program storage space. Maximum is 30,720 bytes.
+Global variables use 931 bytes (45%) of dynamic memory, leaving 1,117 bytes for local variables. Maximum is 2,048 bytes.
+
+17.05.2017(DEBUG ENABLED)
+--------------------------
+Sketch uses 33,406 bytes (108%) of program storage space. Maximum is 30,720 bytes.
+Global variables use 1,662 bytes (81%) of dynamic memory, leaving 386 bytes for local variables. Maximum is 2,048 bytes.
+
+
+
+Compilation Photon(particle-cli):
+
+17.05.2017(DEBUG ENABLED)
+--------------------------
+Memory use: 
+   text	   data	    bss	    dec	    hex	filename
+  32972	     16	  26144	  59132	   e6fc	/workspace/target/workspace.elf
+17.05.2017(DEBUG DISABLED)
+--------------------------
+Memory use: 
+   text	   data	    bss	    dec	    hex	filename
+  15468	     12	  26116	  41596	   a27c	/workspace/target/workspace.elf
+
+
+

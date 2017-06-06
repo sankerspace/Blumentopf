@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <title>Particle Promise Login Example</title>
+  <script src="https://cdn.jsdelivr.net/particle-api-js/5.2.6/particle.min.js"></script>
+</head>
+
+
+
+
+
+
+<body>
+  <style type="text/css">
+  textarea.fixed {
+      overflow-x:hidden;
+      height: 60em;
+      }
+  </style>
+
+<div id="super">
+
+</div>
+
+ <!-- <div id=""> -->
+ <!--<textarea name="outputtext" label="MyDevices" form=""class="fixed" rows="4" cols="160"  autofocus="true" readonly="true" id="outputtext" ></textarea>-->
+ <!--</div>-->
+
+
+
+
+
+
+/******************************************************************************************************************************************/
+/*****************************************************J A V A S C R I P T******************************************************************/
+/******************************************************************************************************************************************/
+<script type="text/javascript">
+
+var timeoptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+//var Particle = require('particle-api-js');
+var particle = new Particle();
+var token;
+var device;
+var username;
+var password;
+
+// Login to particle
+    particle.login({username: 'mar@chello.at',password: '******'}).then(
+      function(data){
+         console.log('API call completed on promise resolve: ', data.body.access_token);
+         token = data.body.access_token;
+         device = data.body.id;
+         console.log('token data: ', token);
+         console.log('device data: ', device);
+      },
+      function (err) {
+      	console.log('Particle Login failed: ', err);
+      }
+    )
+   
+    // list all the devices that is accossiated with the token that we got from the login
+    /*
+    var devicesPr = particle.listDevices({ auth: token });//get list of devices
+
+    devicesPr.then(
+
+
+    function(devices){
+      console.log('Devices: ', devices);
+    },
+    function(err) {
+      console.log('List devices call failed: ', err);
+    }
+    
+   );
+   
+   particle.getEventStream({ deviceId: 'mine', auth: token }).then(
+      function(stream) {
+        stream.on('event', function(data) {
+           console.log("Event: " + data.name);
+//         console.log("Event: " + JSON.stringify(data));
+           document.getElementById("outputtext").innerHTML +=
+           JSON.stringify(new Date(data.published_at).toLocaleString('en-US', timeoptions)) +
+           "   " + JSON.stringify(data.data) + "\n";
+        });//stream
+      },// function(stream)
+        //);
+      
+      // if login fails
+      function(err) {
+        console.log('API call completed on promise fail: ', err);
+       }
+   );
+	*/
+  </script>
+</body>
+</html>

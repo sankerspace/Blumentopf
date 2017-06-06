@@ -1,0 +1,9 @@
+It happen arbitrarily that, the photon has an unstable voltage state.
+I notice that , when the RF24 doesnt work , all setting values are 0xff,
+when i measure the voltage on the board with power cable unplugged i see 
+how remaing voltage goes down, maybe from some condensators, it is unclear why that happens.
+Normally after "measuring" voltage it worked immediately.
+
+Once it happend that when I measured voltage and power cable is plugged, the 
+measured voltage was not higher than 1 Volt. It is still unclear why that
+happen, maybe some error in fabrication or a unusual state. 

@@ -1,0 +1,596 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HomeWatering Dashboard</title>
+
+	<link rel="stylesheet" type="text/css" href="design.css">
+	
+  <script src="https://cdn.jsdelivr.net/particle-api-js/5.2.6/particle.min.js"></script>
+  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+
+
+<body>
+
+
+<div id="div_login">
+
+ <form>
+  User name:<br>
+  <input type="text" name="username" id="user"><br>
+  User password:<br>
+  <input type="password" name="psw" id="pass">
+  <input type="button" onclick="login()" value="Request Token">
+  <!-- <input type="submit" onclick="login()" value="Submit"> -->
+</form>
+<p>You can Login and get a new token automatically or you insert your own Token without Login</p>
+<form>
+  Token:<br>
+  <input type="text" name="TOKEN" id="form_token"><br>
+  <input type="button" onclick="login2()" value="Start Dashboard">
+  <!-- <input type="submit" onclick="login()" value="Submit"> -->
+</form>
+</div>
+
+
+
+
+
+<div id="div_main" style="display:none;">
+   
+ <!------------------------------------------------------>
+   <!--PUMP CONTROL -->
+  	<div id="d_control">
+		<div> Pump Control</div>
+		<select name="control_pumplist" size="1" id="Select_Pump_List">
+		</select>
+		<input type="text" id="pump_duration1" placeholder="Duration Pump 1.">
+		<input type="text" id="pump_duration2" placeholder="Duration Pump 2.">
+		<input type="button" onclick="pump()" value="Start Pumping">
+
+   </div>
+   
+
+<!------------------------------------------------------>
+   <!--MAPPING -->
+ 
+   <div class="section" id="d_mapping">
+	<div> Mapping</div>
+	<input type="button" onclick="do_mapping()" value="Map" class="alLeft">
+	
+		<div id="d_mapping_sensors">
+			<select id="mapping_sensor" size="1">
+			</select>
+			
+			<fieldset class="d_mapping_sensor_m">
+				<div class="hor">
+					<input type="radio" id="mapping_moisture1" name="map_moisture" value="Moisture1">
+					<label for="mapping_moisture1"> Moisture 1.</label><br>
+				</div>
+				<div class="hor">
+					<input type="radio" id="mapping_moisture2" name="map_moisture" value="Moisture2">
+					<label for="mapping_moisture2"> Moisture 2.</label>
+				</div>
+			</fieldset>
+		</div>
+
+		
+		<div id="d_mapping_pumps">
+			<select id="mapping_pump" size="1">
+			</select>
+			<fieldset class="d_mapping_pump_p">
+				<div class="hor">
+					<input type="radio" id="mapping_pump1" name="map_pump" value="Pump1">
+					<label for="mapping_pump1"> Pump 1.</label><br>
+				</div>
+				<div class="hor">
+					<input type="radio" id="mapping_pump2" name="map_pump" value="Pump2">
+					<label for="mapping_pump2"> Pump 2.</label>
+				</div
+			</fieldset>
+		</div>
+		
+
+	</div>
+	
+
+<!------------------------------------------------------>
+	<!-- Sensor Config -->
+	<div class="section" id="d_config">
+	<div> Sensor Configuration</div>
+	
+		<div id="d_configure_sensors">
+			<select id="configure_sensor" size="1">
+			</select>
+		</div>
+		<div class="text_and_button">
+			<input type="text" id="configure_name_text" placeholder="Name">
+			<button type="button" onclick="set_name()">Set Name</button>
+		</div>
+		<div class="text_and_button">
+			<input type="text" id="configure_location_text" placeholder="Location">
+			<button type="button" onclick="set_location()">Set Location</button>
+		</div>
+			
+	</div>
+	
+	
+
+   <!------------------------------------------------------>
+   <!--INFORMATION AREA -->
+   <div id="d_info">
+      <!-- <span> <select name="Node Selection" id="Select_Sensor_List" size="1"></select></span> -->
+      <span></span>
+      <span><input type="button" name="Load" value="Load Nodes" size="1" onclick="loadNodeList()"></span>
+   </div>
+   <!------------------------------------------------------>
+   <div> 
+   <span>
+   <textarea name="infoarea" label="Info Output" form=""  placeholder="Particle Photon Cloud Function Output shown here" readonly="true" id="infoarea">
+   </textarea>
+   <textarea name="infoarea_2" label="Info Output" form="" placeholder="Particle Photon Pump to Sensor Maps shown here" readonly="true" id="infoarea_2">
+   </textarea>
+   </span>
+   </div>  
+
+   <div>
+   <textarea name="outputtext" label="Events" form=""  rows="4" cols="160" placeholder="Particle Photon Events shown here" autofocus="true" readonly="true" id="outputtext" ></textarea>
+   </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+//3c9c8f504c6d5695b8367cdcf387be1bee50782c 
+ 
+var timeoptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+
+ var particle = new Particle();
+ var token_ = 0;
+ var device = 0;
+ var nodeList=[];
+/*
+$('textarea').each(function () {
+  this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+}).on('input', function () {
+  this.style.height = 'auto';
+  this.style.height = (this.scrollHeight) + 'px';
+});
+ */
+ 
+function loadNodeList() {
+   particle.getVariable({ deviceId: device.toString(), name: 'NODELIST', auth: token_ }).then(function(data) {
+      console.log('Device variable retrieved successfully:', data);
+      console.log('Data:', data.body.result);
+      var str=data.body.result.split(',');
+      document.getElementById("infoarea").innerHTML="";
+      for(i=0;i<str.length;i++)
+      {
+           var el = str[i].split(':');
+           nodeList[i]=[el[0],el[1]];
+           document.getElementById("infoarea").innerHTML+= nodeList[i][0] + " " + nodeList[i][1] + "\n";
+      }
+      
+     // var sel_1 = document.getElementById('Select_Sensor_List');
+      var sel_2 = document.getElementById('Select_Pump_List');
+      var sel_3 = document.getElementById('mapping_sensor');
+      var sel_4 = document.getElementById('mapping_pump');
+      var sel_5 = document.getElementById('configure_sensor');
+   	  
+   	  
+   	//sel_1.innerHTML = "";
+   	sel_2.innerHTML = "";
+   	sel_3.innerHTML = "";
+   	sel_4.innerHTML = "";
+   	sel_5.innerHTML = "";
+      for(i=0;i<nodeList.length;i++)
+      {
+         if(nodeList[i][1].localeCompare("SENSOR")==0)
+         {
+           // sel_1.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+			   sel_3.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+			   sel_5.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+         }
+         else
+         {
+            sel_2.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+			   sel_4.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+         }
+          
+      }
+   }, 
+   function(err) {
+      console.log('An error occurred while getting attrs:', err);
+   });
+}
+
+function login()
+{  
+   
+   var username;
+   var password;
+   document.getElementById("div_main").style.visibility="visible";
+   document.getElementById("div_main").style.display="block";
+   document.getElementById("div_login").style.visibility="hidden";
+   document.getElementById("div_login").style.display="none";
+   username=document.getElementById("user").value;
+   password=document.getElementById("pass").value;
+   //alert(username + " " + password);
+   particle.login({username: username,password: password}).then(
+     function(data){
+       console.log('API call completed on promise resolve: ', data.body.access_token);
+      token_ = data.body.access_token;
+      device = data.body.id;
+      console.log('token data: ', token_);
+      console.log('device data: ', device); 
+      showDevices();  
+      //resolve();
+      
+      //Registrate for Particle Events
+      particle.getEventStream({ deviceId: 'mine', auth: token_ }).then(function(stream) {
+                  stream.on('event', function(data) {
+                     console.log("Event: " + data);
+                     document.getElementById("outputtext").innerHTML +=JSON.stringify(data.data) + "\n";
+                        //JSON.stringify(new Date(data.published_at).toLocaleString('en-US', timeoptions)) +
+                        //"   " + JSON.stringify(data.data) + "\n";
+                  });
+      });      
+      
+      
+     },
+     function (err) {
+      console.log('Particle Login failed: ', err);
+     }
+   )   
+
+   //setTimeout(resolve,2000); 
+}
+
+
+function login2()
+{
+  document.getElementById("div_main").style.visibility="visible";
+  document.getElementById("div_main").style.display="block";
+  document.getElementById("div_login").style.visibility="hidden";
+  document.getElementById("div_login").style.display="none";
+  token_= document.getElementById("form_token").value;
+  token_ = "77dc1f0ce4d5abf2fefda017e499ba4332915057";
+  console.log('token data: ', token_); 
+  showDevices(); 
+    //Registrate for Particle Events
+  particle.getEventStream({ deviceId: 'mine', auth: token_ }).then(function(stream) {
+               stream.on('event', function(data) {
+                  console.log("Event: " + data);
+                  document.getElementById("outputtext").innerHTML +=JSON.stringify(data.data) + "\n";
+                     //JSON.stringify(new Date(data.published_at).toLocaleString('en-US', timeoptions)) +
+                     //"   " + JSON.stringify(data.data) + "\n";
+               });
+   });      
+   
+}
+
+
+
+function showDevices()
+{
+   var devicesPr = particle.listDevices({ auth: token_ });
+
+   devicesPr.then(
+      function(devices){
+         console.log('Name: ', devices.body[0].name);
+         console.log('ID: ', devices.body[0].id);
+         device=devices.body[0].id;
+		 loadNodeList();
+         console.log('Last IP: ', devices.body[0].last_ip_address);
+         console.log('lastUse: ', devices.body[0].last_heard);  
+      },
+      function(err) {
+      console.log('List devices call failed: ', err);
+      }
+   );
+}
+
+
+/*
+*  Checks the durations entered in the formula and sends a pump command to the controller if the durations are valid.
+*/
+function pump()
+{
+
+	var p_duration1 = document.getElementById("pump_duration1").value;
+	var p_duration2 = document.getElementById("pump_duration2").value;
+	var p_nodeId = document.getElementById("Select_Pump_List").value;	// This is the pump node ID retrieved from the dropdown list.
+	var p_state = 0;
+	
+// checking duration 1 for feasibility
+	if (isNumeric(p_duration1) == false)	// duration 1 isn't a number
+	{
+		if(p_duration1 != "")				// duration 1 isn't empty
+		{
+			showMsg("Pump duration 1 invalid!");
+			console.log('Pump duration 1 invalid!');
+			p_state = 1;					// do not pump!
+		}
+		else
+		{
+			p_duration1 = 0;
+		}
+	}
+	else if(p_duration1 > 60)				// this is too long!
+	{
+		showMsg("Pump duration 1 is too long!");
+		p_state = 1;					// do not pump!
+	}
+	
+
+// checking duration 2 for feasibility	
+	if (isNumeric(p_duration2) == false)	// duration 2 isn't a number
+	{
+		if(p_duration2 != "")				// duration 2 isn't empty
+		{
+			showMsg("Pump duration 2 invalid!");
+			console.log('Pump duration 2 invalid!');
+			p_state = 1;					// do not pump!
+		}
+		else
+		{
+			p_duration2 = 0;
+		}
+	}
+	else if(p_duration2 > 60)				// this is too long!
+	{
+		showMsg("Pump duration 2 is too long!");
+		p_state = 1;					// do not pump!
+	}
+	
+// no duration is specified?
+	if ((p_duration1 == 0) && (p_duration2 == 0))
+	{
+		showMsg("There is no pump duration specified!");
+		p_state = 1;					// do not pump!
+	}
+	
+	if (p_state == 0)	// all fine! Let's pump!
+	{
+
+		var request = String(p_nodeId) + "," + String(p_duration1) + "," + String(p_duration2);
+		console.log('Sending TurnOn-request: ', request);
+		
+	// according to Blumentopf.cpp the arguments are: pumpnode ID, duration pump1, duration pump 2
+		var fnPr = particle.callFunction({ deviceId: device, name: 'TurnOn', argument: request, auth: token_ });
+
+		fnPr.then(
+			function(data)
+			{
+				console.log('Function called succesfully:', data);
+			}, function(err) {
+			console.log('An error occurred:', err);
+			}
+		);
+	}
+}
+
+/*
+* This function maps a pump to a moisture sensor (and the corresponding nodes).
+*/
+function do_mapping()
+{
+	var m_pump = 0;
+	var m_sensor = 0;
+	var m_pumpNodeId = document.getElementById("mapping_pump").value;	// This is the pump node ID retrieved from the dropdown list.
+	
+// checking input values for feasibility
+	m_pump = get_pump();
+	m_sensor = get_moisture();
+	
+// checking if the sensor node ID and pump node ID are feasible
+// We do however not check here whether nodes with this IDs exists!! This is done in the controller.
+	m_sensorNodeId = getSensorNodebyID("mapping_sensor");
+	m_pumpNodeId = getPumpNodebyID("mapping_pump");
+	
+	
+
+	
+	// The syntax of the call should be:  PumpID,"PUMP1",SENSORID,"MOISTURE1"
+	if ((m_pump > 0) && (m_sensor > 0) && (m_pumpNodeId > 0) && (m_sensorNodeId > 0))		// all fine! Let's map!
+	{
+		var request = String(m_pumpNodeId) + ",PUMP" + String(m_pump) + "," + String(m_sensorNodeId) + ",MOISTURE" + String(m_sensor);
+		console.log('Sending Mapper Request: ', request);
+		
+		
+		var fnPr = particle.callFunction({ deviceId: device, name: 'Mapper', argument: request, auth: token_ });
+
+		fnPr.then(
+			function(data)
+			{
+			   var p = ((m_pump==1) ? "PUMP 1" : "PUMP 2");
+			   var s = ((m_sensor==1) ? "MOISTURE SENSOR 1" : "MOISTURE SENSOR 2");
+			   var text= p + " of PumpNode with ID " + m_pumpNodeId + " is connected to " + s + " of SensorNode with ID " + m_sensorNodeId + "\n";
+			   document.getElementById("infoarea_2").innerHTML+=text;
+				console.log('Function called succesfully:', data);
+
+			}, function(err) {
+			console.log('An error occurred:', err);
+			}
+		);
+	}
+	
+}
+
+/*
+* calls the particle function to change the name of a flower
+*/
+function set_name()
+{
+// check the input variables:
+	var n_flowerName = document.getElementById("configure_name_text").value;	// This is the new name of the flower
+	var n_sensor = get_moisture();
+	var n_sensorNodeID = getSensorNodebyID("configure_sensor");
+	
+// the controller also accepts longer texts, but it looks stupid then.
+	if (n_flowerName.length > 63)
+	{
+		showMsg("Flower name is too long!");
+		n_flowerName = 0;
+	}
+	
+	
+// if everything is fine..set name!
+	if ((n_flowerName != 0) && (n_sensor != 0) && (n_sensorNodeID != 0))
+	{
+	
+	// format of parameter: SensorID,MOISTURE1,Plant_Name
+		request = n_sensorNodeID + ",MOISTURE" + n_sensor + "," + n_flowerName;
+		console.log('Sending PlantName request: ', request);
+		
+		var fnPr = particle.callFunction({ deviceId: device, name: 'PlantName', argument: request, auth: token_ });
+
+
+		fnPr.then(
+			function(data)
+			{
+				console.log('Function called succesfully:', data);
+			}, function(err) {
+				console.log('An error occurred:', err);
+			}
+		);
+	}
+	
+}
+
+/*
+* calls the particle function to change the location of a flower
+*/
+function set_location()
+{
+// check the input variables:
+	var n_flowerLocation = document.getElementById("configure_location_text").value;	// This is the new location of the flower
+	var n_sensor = get_moisture();
+	var n_sensorNodeID = getSensorNodebyID("configure_sensor");
+	
+// the controller also accepts longer texts, but it looks stupid then.
+	if (n_flowerLocation.length > 63)
+	{
+		showMsg("Flower location text is too long!");
+		n_flowerLocation = 0;
+	}
+	
+	
+// if everything is fine..set name!
+	if ((n_flowerLocation != 0) && (n_sensor != 0) && (n_sensorNodeID != 0))
+	{
+	
+	// format of parameter: SensorID,MOISTURE1,Plant_Name
+		request = n_sensorNodeID + ",MOISTURE" + n_sensor + "," + n_flowerLocation;
+		console.log('Sending Location-request: ', request);
+		
+		var fnPr = particle.callFunction({ deviceId: device, name: 'Location', argument: request, auth: token_ });
+
+		fnPr.then(
+			function(data)
+			{
+				console.log('Function called succesfully:', data);
+			}, function(err) {
+			console.log('An error occurred:', err);
+			}
+		);
+	}
+}
+
+
+
+/****************    HELPER FUNCTIONS    ****************/
+
+/*
+* This function checks whether the moisture radio buttons have a valid selection
+*/
+function get_moisture()
+{
+	var m_sensor = 0;
+	if( document.getElementById("mapping_moisture1").checked)	// moisture sensor 1 is checked
+	{
+		m_sensor = 1;
+	}
+	
+	if( document.getElementById("mapping_moisture2").checked)	// pump1 is checked
+	{
+		m_sensor = 2;
+	}
+	
+	if (m_sensor == 0)
+	{
+		showMsg("No moisture sensor selected!");
+	}
+	return m_sensor;
+}
+
+/*
+* This function checks whether the pump radio buttons have a valid selection
+*/
+function get_pump()
+{
+	var m_pump = 0;
+	if( document.getElementById("mapping_pump1").checked)	// pump1 is checked
+	{
+		m_pump = 1;
+	}
+	
+	if( document.getElementById("mapping_pump2").checked)	// pump1 is checked
+	{
+		m_pump = 2;
+	}
+	
+	if (m_pump == 0)
+	{
+		showMsg("No pump selected!");
+	}
+	return m_pump;
+}
+
+function getSensorNodebyID(nodeID)
+{
+	var n_sensorNodeID = document.getElementById(nodeID).value;
+	if ((n_sensorNodeID == 0) || (n_sensorNodeID > 65531))
+	{
+		showMsg("An invalid sensor node ID has been chosen!");
+		n_sensorNodeID = 0;
+	}
+	return n_sensorNodeID;
+}
+
+function getPumpNodebyID(nodeID)
+ {
+	var n_pumpNodeID = document.getElementById(nodeID).value;
+	if ((n_pumpNodeID == 0) || (n_pumpNodeID > 65531))
+	{
+		showMsg("An invalid pump node ID has been chosen!");
+		n_pumpNodeID = 0;
+	}
+	return n_pumpNodeID;
+ }
+ 
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+
+// shows an info Text to the user
+function showMsg(textStr)
+{
+	document.getElementById("infoarea").innerHTML += textStr + "\n";
+}
+
+</script>
+
+</body>
+</html>
