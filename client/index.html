@@ -59,17 +59,29 @@
 
 
 <div id="div_main" style="display:none;">
-   
+  <!------------------------------------------------------>
+   <!--PUMP CONTROL -->
+  <div> 
+    <!--Bernhard-->
+	<select name="Node Selection" size="1" id="Select_Pump_List">
+	</select>
+	<input type="text" id="pump_duration1" placeholder="Duration Pump 1.">
+	<input type="text" id="pump_duration2" placeholder="Duration Pump 2.">
+	<input type="button" onclick="pump()" value="Start Pumping">
+	<!--Bernhard-->   
+   </div>
+   <!------------------------------------------------------>
+   <!--INFORMATION AREA -->
    <div>
-      <span> <select name="Node Selection" id="Select_List" size="1"></select></span>
+      <span> <select name="Node Selection" id="Select_Sensor_List" size="1"></select></span>
       <span></span>
       <span><input type="button" name="Load" value="Load Nodes" size="1" onclick="loadNodeList()"></input></span>
-    
    </div>
+   <!------------------------------------------------------>
    <div> 
    <textarea name="infoarea" label="Info Output" form="" rows="2" cols="160" placeholder="Particle Photon Cloud Function Output shown here" readonly="true" id="infoarea">
    </textarea>
-   </div>
+   </div>  
 
    <div>
    <textarea name="outputtext" label="Events" form=""  rows="4" cols="160" placeholder="Particle Photon Events shown here" autofocus="true" readonly="true" id="outputtext" ></textarea>
@@ -111,38 +123,32 @@ function loadNodeList() {
      
       for(i=0;i<str.length;i++)
       {
-          var el=str[i].split(':');
-          /*nodeList.push({
-               id:parseInt(el[0]),
-               nodetype:el[1]
-               });*/
+           var el = str[i].split(':');
            nodeList[i]=[el[0],el[1]];
            document.getElementById("infoarea").innerHTML+= nodeList[i][0] + " " + nodeList[i][1] + "\n";
-          //console.log("Nodes: ",);
-          
       }
       
-      var sel = document.getElementById('Select_List');
-      //var fragment = document.createDocumentFragment();
-      sel.innerHTML = "<option>"+nodeList[0][0]+":"+nodeList[0][1];
-      for(i=1;i<nodeList.length;i++)
+      var sel_1 = document.getElementById('Select_Sensor_List');
+      var sel_2 = document.getElementById('Select_Pump_List');
+      sel_1.innerHTML = "";
+      sel_2.innerHTML = "";
+      for(i=0;i<nodeList.length;i++)
       {
-         sel.innerHTML += "<option>"+nodeList[i][0]+":"+nodeList[i][1] + "</option>";
+         if(nodeList[i][1].localeCompare("SENSOR")==0)
+         {
+            sel_1.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+         }
+         else
+         {
+            sel_2.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+         }
+          
       }
    }, 
    function(err) {
       console.log('An error occurred while getting attrs:', err);
    });
 }
- 
-
-function resolve()
-{
-   document.getElementById("outputtext").innerHTML +=token_;
-    document.getElementById("outputtext").innerHTML +="\n";
-    
-}
-
 
 function login()
 {  
@@ -194,6 +200,7 @@ function login2()
   document.getElementById("div_login").style.visibility="hidden";
   document.getElementById("div_login").style.display="none";
   token_= document.getElementById("form_token").value;
+  token_ = "77dc1f0ce4d5abf2fefda017e499ba4332915057";
   console.log('token data: ', token_); 
   showDevices(); 
     //Registrate for Particle Events
@@ -229,8 +236,87 @@ function showDevices()
 }
 
 
+/*
+*  Checks the durations entered in the formula and sends a pump command to the controller if the durations are valid.
+*/
+function pump()
+{
 
+	var p_duration1 = document.getElementById("pump_duration1").value;
+	var p_duration2 = document.getElementById("pump_duration2").value;
+	var p_nodeId = 6723;	// This is the pump node ID. This should be retrieved from the dropdown list and the data structure.
+	var p_state = 0;
+	
+// checking duration 1 for feasibility
+	if (isNumeric(p_duration1) == false)	// duration 1 isn't a number
+	{
+		if(p_duration1 != "")				// duration 1 isn't empty
+		{
+			alert("Pump duration 1 invalid!");
+			console.log('Pump duration 1 invalid!');
+			p_state = 1;					// do not pump!
+		}
+		else
+		{
+			p_duration1 = 0;
+		}
+	}
+	else if(p_duration1 > 60)				// this is too long!
+	{
+		alert("Pump duration 1 is too long!");
+		p_state = 1;					// do not pump!
+	}
+	
 
+// checking duration 2 for feasibility	
+	if (isNumeric(p_duration2) == false)	// duration 2 isn't a number
+	{
+		if(p_duration2 != "")				// duration 2 isn't empty
+		{
+			alert("Pump duration 2 invalid!");
+			console.log('Pump duration 2 invalid!');
+			p_state = 1;					// do not pump!
+		}
+		else
+		{
+			p_duration2 = 0;
+		}
+	}
+	else if(p_duration2 > 60)				// this is too long!
+	{
+		alert("Pump duration 2 is too long!");
+		p_state = 1;					// do not pump!
+	}
+	
+// no duration is specified?
+	if ((p_duration1 == 0) && (p_duration2 == 0))
+	{
+		alert("There is no pump duration specified!");
+		p_state = 1;					// do not pump!
+	}
+	
+	if (p_state == 0)	// all fine! Let's pump!
+	{
+
+	var request = String(p_nodeId) + "," + String(p_duration1) + "," + String(p_duration2);
+	
+// according to Blumentopf.cpp the arguments are: pumpnode ID, duration pump1, duration pump 2
+	var fnPr = particle.callFunction({ deviceId: device, name: 'TurnOn', argument: request, auth: token_ });
+
+fnPr.then(
+  function(data) {
+    console.log('Function called succesfully:', data);
+	alert("done");
+  }, function(err) {
+    console.log('An error occurred:', err);
+  });
+
+}
+}
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
 </script>
 
