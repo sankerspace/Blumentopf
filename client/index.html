@@ -360,7 +360,7 @@ function pump()
 	{
 		if(p_duration1 != "")				// duration 1 isn't empty
 		{
-			alert("Pump duration 1 invalid!");
+			showMsg("Pump duration 1 invalid!");
 			console.log('Pump duration 1 invalid!');
 			p_state = 1;					// do not pump!
 		}
@@ -371,7 +371,7 @@ function pump()
 	}
 	else if(p_duration1 > 60)				// this is too long!
 	{
-		alert("Pump duration 1 is too long!");
+		showMsg("Pump duration 1 is too long!");
 		p_state = 1;					// do not pump!
 	}
 	
@@ -381,7 +381,7 @@ function pump()
 	{
 		if(p_duration2 != "")				// duration 2 isn't empty
 		{
-			alert("Pump duration 2 invalid!");
+			showMsg("Pump duration 2 invalid!");
 			console.log('Pump duration 2 invalid!');
 			p_state = 1;					// do not pump!
 		}
@@ -392,14 +392,14 @@ function pump()
 	}
 	else if(p_duration2 > 60)				// this is too long!
 	{
-		alert("Pump duration 2 is too long!");
+		showMsg("Pump duration 2 is too long!");
 		p_state = 1;					// do not pump!
 	}
 	
 // no duration is specified?
 	if ((p_duration1 == 0) && (p_duration2 == 0))
 	{
-		alert("There is no pump duration specified!");
+		showMsg("There is no pump duration specified!");
 		p_state = 1;					// do not pump!
 	}
 	
@@ -478,7 +478,7 @@ function set_name()
 // the controller also accepts longer texts, but it looks stupid then.
 	if (n_flowerName.length > 63)
 	{
-		alert("Flower name is too long!");
+		showMsg("Flower name is too long!");
 		n_flowerName = 0;
 	}
 	
@@ -519,7 +519,7 @@ function set_location()
 // the controller also accepts longer texts, but it looks stupid then.
 	if (n_flowerLocation.length > 63)
 	{
-		alert("Flower location text is too long!");
+		showMsg("Flower location text is too long!");
 		n_flowerLocation = 0;
 	}
 	
@@ -567,7 +567,7 @@ function get_moisture()
 	
 	if (m_sensor == 0)
 	{
-		alert("No moisture sensor selected!");
+		showMsg("No moisture sensor selected!");
 	}
 	return m_sensor;
 }
@@ -590,7 +590,7 @@ function get_pump()
 	
 	if (m_pump == 0)
 	{
-		alert("No pump selected!");
+		showMsg("No pump selected!");
 	}
 	return m_pump;
 }
@@ -600,7 +600,7 @@ function getSensorNodebyID(nodeID)
 	var n_sensorNodeID = document.getElementById(nodeID).value;
 	if ((n_sensorNodeID == 0) || (n_sensorNodeID > 65531))
 	{
-		alert("An invalid sensor node ID has been chosen!");
+		showMsg("An invalid sensor node ID has been chosen!");
 		n_sensorNodeID = 0;
 	}
 	return n_sensorNodeID;
@@ -611,7 +611,7 @@ function getPumpNodebyID(nodeID)
 	var n_pumpNodeID = document.getElementById(nodeID).value;
 	if ((n_pumpNodeID == 0) || (n_pumpNodeID > 65531))
 	{
-		alert("An invalid pump node ID has been chosen!");
+		showMsg("An invalid pump node ID has been chosen!");
 		n_pumpNodeID = 0;
 	}
 	return n_pumpNodeID;
@@ -619,6 +619,13 @@ function getPumpNodebyID(nodeID)
  
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+
+// shows an info Text to the user
+function showMsg(textStr)
+{
+	document.getElementById("infoarea").innerHTML += textStr + "\n";
 }
 
 </script>
