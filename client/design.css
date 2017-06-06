@@ -1,0 +1,116 @@
+#d_control{
+	min-width: 35%;
+	
+	float: both;
+	margin-top: 20px;
+	margin-left: 20px;
+	border-style: none;
+	border-width: 2px;
+	border-color: #DDDDDD;
+	padding: 10px;
+	margin-bottom: 20px;
+
+}
+
+#d_mapping{
+	
+	
+	
+}
+
+#d_mapping_pumps{
+  float: left;
+	margin: 3px;
+	min-width: 180px;
+}
+
+#mapping_pump{
+	float:none;
+	width: 90%;
+}
+
+
+#d_mapping_sensors{
+	float: left;
+	margin: 3px;
+	
+
+}
+
+#mapping_sensor{
+  float: none;
+	width: 90%;
+}
+
+
+#d_mapping.p{
+	float: right;
+}
+
+select{
+	float: none;
+	min-width: 80px;
+	margin: 10px;
+	
+}
+
+.d_mapping_sensor_m{
+	float: none;
+	margin: 10px;
+}
+
+.d_mapping_pump_p{
+	float: none;
+	margin: 10px;
+}
+
+.hor{
+	float: left;
+}
+
+.clearBoth {
+    clear:both;
+}
+
+.hor{
+float: left;
+	margin-left: 10px;
+}
+
+.section{
+	
+	min-height: 140px;
+	
+	float: both;
+	margin-top: 20px;
+	margin-left: 20px;
+	border-style: none;
+	border-width: 2px;
+	border-color: #DDDDDD;
+	padding: 10px;
+	margin-bottom: 20px;
+	
+	
+}
+#d_configure_sensors{
+	float: left;
+	margin: 10px;
+}
+
+#d_config{
+	margin-top: 120px;
+}
+
+
+.text_and_button{
+	float: both;
+	padding: 10px;
+}
+
+.alLeft{
+	float: left;
+}
+
+.config{
+	margin-top: 100px;
+}
