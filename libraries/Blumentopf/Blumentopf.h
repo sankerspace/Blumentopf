@@ -1081,7 +1081,7 @@ void   setCombinedData(uint32_t Data_,uint16_t& HighByte,uint16_t& LowByte);
 #define P_TXT_2       "2. PumpID:"
 #define DP_TXT        " sec. pumped"
 
-#define MAX_TRACKED_SENSORS 3  //mAXIMUM IS 20
+#define MAX_TRACKED_SENSORS 3  //mAXIMUM IS 20-1 (last is for the Nodelist)
 #define SENSOR_TRACKNAME_PREFIX "SensorData"
 /*
 struct SensorD {
@@ -1163,6 +1163,8 @@ class HomeWatering {
         DEBUG_PRINTSTR_D("[HOMEWATERING][CONSTRUCTOR]",DEBUG_PARTICLE_CLOUD);
         DEBUG_PRINTLNSTR_D("VARIABLE NOT REGISTERED.",DEBUG_PARTICLE_CLOUD);
       }
+      //THERE MUST BE A CLOUD VARIABLE WHICH STORES A NODE LIST
+      Particle.variable("NODELIST", &Particle_nodeList,STRING);
       //registrate cloud function in the Particle Cloud Service
       Particle.function("Mapper", &HomeWatering::mapPumpToSensor, this);
       Particle.function("PlantName", &HomeWatering::assignNameToSensor, this);
@@ -1192,11 +1194,16 @@ class HomeWatering {
     bool publish_BatteryAlert(uint16_t ID,float voltage,float minimum_voltage);
     bool publish_Pump(uint16_t ID,uint16_t duration_1,uint16_t duration_2);
     bool publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float minimum_moisture);
+
+    void storeParticleNode(uint16_t ID,uint8_t node_type);
     struct Particle_Node Particle_SensorData[MAX_TRACKED_SENSORS];
     nodeList *pList;
+
+
   private:
     void findSensorLinks(uint16_t index,struct SensorLink *link);
     RTCLayer* myRTC;
+    String Particle_nodeList;
 };
 
 #endif //#ifdef PARTICLE_CLOUD

@@ -1462,6 +1462,7 @@ void handleRegistration(void)
       /*******************PARTICLE ***********************************/
       bool ret=myHomeWatering->publish_Registration(currentNode.ID,node_type);
       DEBUG_PRINTLNSTR_D("[ERROR][HOMEWATERING]Publishing Registration event not successfull", (ret==false));
+      myHomeWatering->storeParticleNode(currentNode.ID,node_type);
       /*****************************************************************/
     }
 

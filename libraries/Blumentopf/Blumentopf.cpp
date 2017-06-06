@@ -2291,6 +2291,9 @@ uint16_t brightness; //2 Byte
 
 /*HELPER FUNCTIONS*/
 //Extract Information from a String
+/* It seems like the syntax of the call is the following:
+*  PumpID,"PUMP1",SENSORID,"MOISTURE1"
+*/
 struct Mapp extractFromString(String str)
 {
   int pos=0;
@@ -2311,11 +2314,11 @@ struct Mapp extractFromString(String str)
         break;
       case 1:
         part=str.substring(last,pos);
-				if(part.compareTo("PUMP1")==0)
+		if(part.compareTo("PUMP1")==0)
         	ret.p=PUMP1;
-				else if(part.compareTo("PUMP2")==0)
-					ret.p=PUMP2;
-				else ret.p=(ePump)part.toInt();
+		else if(part.compareTo("PUMP2")==0)
+			ret.p=PUMP2;
+		else ret.p=(ePump)part.toInt();
         break;
       case 2:
         part=str.substring(last,pos);
@@ -2550,7 +2553,7 @@ int HomeWatering::clearSensorVariables(String strID)
 }
 
 
-
+// format of parameter: SensorID,MOISTURE1,Plant_Name
 int HomeWatering::assignNameToSensor(String assignment)
 {
 	uint16_t Sensor_ID;
@@ -2941,6 +2944,14 @@ bool HomeWatering::publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float mini
 		return Particle.publish("Plant",text);
 }
 
+
+void HomeWatering::storeParticleNode(uint16_t ID,uint8_t node_type)
+{
+	if(Particle_nodeList.length() > 0)
+		Particle_nodeList += ",";
+	String t = (node_type==PUMPNODE) ? String("PUMP") : String("SENSOR");
+	Particle_nodeList +=  String(ID) + ":" + String(t);
+}
 
 /*
 ZUWEISLUNG location
