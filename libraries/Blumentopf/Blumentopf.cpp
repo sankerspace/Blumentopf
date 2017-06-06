@@ -2623,6 +2623,7 @@ int HomeWatering::assignNameToSensor(String assignment)
 	return -2;
 }
 
+// parameter: SensorID,LocationName
 int HomeWatering::assignLocation(String location)
 {
 	uint16_t Sensor_ID;

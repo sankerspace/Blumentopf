@@ -491,7 +491,7 @@ function set_location()
 	{
 	
 	// format of parameter: SensorID,MOISTURE1,Plant_Name
-		request = n_sensorNodeID + ",MOISTURE" + n_sensor + "," + n_flowerLocation;
+		request = n_sensorNodeID + "," + n_flowerLocation;
 		console.log('Sending Location-request: ', request);
 		
 		var fnPr = particle.callFunction({ deviceId: device, name: 'Location', argument: request, auth: token_ });

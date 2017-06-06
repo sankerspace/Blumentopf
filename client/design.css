@@ -1,3 +1,7 @@
+body{
+background-color:#AAD9AA;
+}
+
 #outputtext {
    overflow-x:hidden;
    height: 60em;
@@ -23,7 +27,9 @@
 }
 
  #d_info{
-   background-color:#FA5858; 
+   background-color:#A5DF00; 
+   padding: 5px;
+   margin-left: 20px;
   }
 
 #d_control{
@@ -32,17 +38,17 @@
 	float: both;
 	margin-top: 20px;
 	margin-left: 20px;
-	border-style: none;
+	border-style: solid;
 	border-width: 2px;
-	border-color: #DDDDDD;
+	border-color: #AACCAA;
 	padding: 10px;
 	margin-bottom: 20px;
-   background-color:#01A9DB; 
+   background-color:#A5DF00; 
 }
 
 #d_mapping{
 	
-	background-color:#FE642E; 
+	background-color:#A5DF00; 
 	
 }
 
@@ -112,9 +118,9 @@ float: left;
 	float: both;
 	margin-top: 20px;
 	margin-left: 20px;
-	border-style: none;
+	border-style: solid;
 	border-width: 2px;
-	border-color: #DDDDDD;
+	border-color: #AACCAA;
 	padding: 10px;
 	margin-bottom: 20px;
 	
@@ -127,7 +133,7 @@ float: left;
 
 #d_config{
 	margin-top: 120px;
-	background-color:#A5DF00; 
+	background-color:#A5DF00;
 }
 
 
