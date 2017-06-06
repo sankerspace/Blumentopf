@@ -5,7 +5,15 @@ A specific protocol takes care of the reliable communication between the pump no
 \subsubsection{Actuator}
 As the task of the pump node is to water flowers, it is equipped with two pumps. Alternatively solenoid valves have been considered, however pumps are easier to use and a reliable solution. The chosen peristaltic pumps require high currents around 200mA and a voltage of 12V. Therefore they cannot be powered by Arduino pins, but have to be powered from an own power source like a voltage booster or an additional power supply. We chose an external 12V power supply to power the node.
 The Arduino switches two relays which in turn power the pumps. As high current is needed, the pumps are not activated concurrently, but sequentially. They typically will be active for around 30 seconds.
+Figure \ref{fig:pumpnode} illustrates a pumpnode with one pump.
 
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.6]{images/PlantPump.png}
+	\caption{Breadboard schematic of the pump node.}
+	\label{fig:pumpnode}
+	\end{center}
+\end{figure}
 
 \subsubsection{Fall-back Mode}
 To guarantee a dependable solution resistant to external factors such as a failing internet connection or wireless jamming attacks, a fall-back mode has been implemented to water the flowers reliably, even if the control node is unavailable.

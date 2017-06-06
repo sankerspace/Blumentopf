@@ -116,7 +116,7 @@ void setup()
   pinMode(BATTERY_SENSE_PIN, INPUT);
 
   myResponse.interval = 100;  // at default repeat measurement every 2 seconds
-  killID();
+//  killID();
   //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
   delay(100);
