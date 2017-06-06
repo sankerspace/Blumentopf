@@ -3,7 +3,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HomeWatering Dashboard</title>
-  
+
+	<link rel="stylesheet" type="text/css" href="design.css">
+	
   <script src="https://cdn.jsdelivr.net/particle-api-js/5.2.6/particle.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
@@ -50,12 +52,51 @@
 
 <div id="div_main" style="display:none;">
    
-   <div>
-	<select name="Node Selection" size="1">
-	</select>
-	<input type="text" id="pump_duration1">
-	<input type="text" id="pump_duration2">
-	<input type="button" onclick="pump()" value="Start Pumping">
+	<div id="d_control">
+		Pump Control
+		<select name="Node Selection" size="1">
+		</select>
+		duration 1: <input type="text" id="pump_duration1">
+		duration 2: <input type="text" id="pump_duration2">
+		<input type="button" onclick="pump()" value="Start Pumping">
+	</div>
+   
+   <div id="d_mapping">
+	Mapping
+	
+		<div id="d_mapping_sensors">
+			<select id="mapping_sensor" size="1">
+			</select>
+			
+			<fieldset class="d_mapping_sensor_m">
+				<div class="hor">
+					<input type="radio" id="mapping_moisture1" name="map_moisture" value="Moisture1">
+				</div>
+				<div class="hor">
+					<label for="mapping_moisture1"> Moisture 1.</label><br>
+				</div>
+				<input type="radio" id="mapping_moisture2" name="map_moisture" value="Moisture2">
+				<label for="mapping_moisture2"> Moisture 2.</label>
+			</fieldset>
+		</div>
+
+		
+		<div id="d_mapping_pumps">
+			<select id="mapping_pump" size="1">
+			</select>
+			<fieldset class="d_mapping_pump_p">
+				<div class="hor">
+					<input type="radio" id="mapping_pump1" name="map_pump" value="Pump1">
+				</div>
+				<div class="hor">
+					<label for="mapping_pump1"> Pump 1.</label><br>
+				</div>
+				<input type="radio" id="mapping_pump2" name="map_pump" value="Pump2">
+				<label for="mapping_pump2"> Pump 2.</label>
+			</fieldset>
+		</div>
+
+	
    </div>
    
 	<div> 
@@ -244,21 +285,31 @@ function pump()
 	if (p_state == 0)	// all fine! Let's pump!
 	{
 
-	var request = String(p_nodeId) + "," + String(p_duration1) + "," + String(p_duration2);
+		var request = String(p_nodeId) + "," + String(p_duration1) + "," + String(p_duration2);
+		
+	// according to Blumentopf.cpp the arguments are: pumpnode ID, duration pump1, duration pump 2
+		var fnPr = particle.callFunction({ deviceId: device, name: 'TurnOn', argument: request, auth: token_ });
+
+		fnPr.then(
+			function(data)
+			{
+				console.log('Function called succesfully:', data);
+				alert("done");
+			}, function(err) {
+			console.log('An error occurred:', err);
+			}
+		);
+	}
+}
+
+/*
+* This function maps a pump to a moisture sensor (and the corresponding nodes).
+*/
+function mapping()
+{
 	
-// according to Blumentopf.cpp the arguments are: pumpnode ID, duration pump1, duration pump 2
-	var fnPr = particle.callFunction({ deviceId: device, name: 'TurnOn', argument: request, auth: token_ });
-
-fnPr.then(
-  function(data) {
-    console.log('Function called succesfully:', data);
-	alert("done");
-  }, function(err) {
-    console.log('An error occurred:', err);
-  });
-
 }
-}
+
 
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
