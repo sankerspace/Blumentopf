@@ -5,7 +5,8 @@
   <title>HomeWatering Dashboard</title>
   
   <script src="https://cdn.jsdelivr.net/particle-api-js/5.2.6/particle.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 </head>
 
 <style type="text/css">
@@ -13,13 +14,18 @@
    overflow-x:hidden;
    height: 60em;
    bottom: 17px;
+   width:100%;
+   color:yellow;
+   background-color:#38BC55;
   }
   #infoarea {
    overflow-x:hidden;
    height: 10em;
-   
-  }
+   width:100%;
   
+   background-color:#B6CFFC;
+  }
+
   
 </style>
 
@@ -48,10 +54,18 @@
 </form>
 </div>
 
+
+
+
+
 <div id="div_main" style="display:none;">
    
-   <div> <select name="Node Selection" size="1"></select></div>
-   
+   <div>
+      <span> <select name="Node Selection" id="Select_List" size="1"></select></span>
+      <span></span>
+      <span><input type="button" name="Load" value="Load Nodes" size="1" onclick="loadNodeList()"></input></span>
+    
+   </div>
    <div> 
    <textarea name="infoarea" label="Info Output" form="" rows="2" cols="160" placeholder="Particle Photon Cloud Function Output shown here" readonly="true" id="infoarea">
    </textarea>
@@ -73,12 +87,54 @@
 
 
 <script type="text/javascript">
+//3c9c8f504c6d5695b8367cdcf387be1bee50782c 
  
 var timeoptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
 
  var particle = new Particle();
  var token_ = 0;
  var device = 0;
+ var nodeList=[];
+/*
+$('textarea').each(function () {
+  this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+}).on('input', function () {
+  this.style.height = 'auto';
+  this.style.height = (this.scrollHeight) + 'px';
+});
+ */
+ 
+function loadNodeList() {
+   particle.getVariable({ deviceId: device.toString(), name: 'NODELIST', auth: token_ }).then(function(data) {
+      console.log('Device variable retrieved successfully:', data);
+      var str=data.body.result.split(',');
+     
+      for(i=0;i<str.length;i++)
+      {
+          var el=str[i].split(':');
+          /*nodeList.push({
+               id:parseInt(el[0]),
+               nodetype:el[1]
+               });*/
+           nodeList[i]=[el[0],el[1]];
+           document.getElementById("infoarea").innerHTML+= nodeList[i][0] + " " + nodeList[i][1] + "\n";
+          //console.log("Nodes: ",);
+          
+      }
+      
+      var sel = document.getElementById('Select_List');
+      //var fragment = document.createDocumentFragment();
+      sel.innerHTML = "<option>"+nodeList[0][0]+":"+nodeList[0][1];
+      for(i=1;i<nodeList.length;i++)
+      {
+         sel.innerHTML += "<option>"+nodeList[i][0]+":"+nodeList[i][1] + "</option>";
+      }
+   }, 
+   function(err) {
+      console.log('An error occurred while getting attrs:', err);
+   });
+}
+ 
 
 function resolve()
 {
@@ -162,6 +218,7 @@ function showDevices()
       function(devices){
          console.log('Name: ', devices.body[0].name);
          console.log('ID: ', devices.body[0].id);
+         device=devices.body[0].id;
          console.log('Last IP: ', devices.body[0].last_ip_address);
          console.log('lastUse: ', devices.body[0].last_heard);  
       },

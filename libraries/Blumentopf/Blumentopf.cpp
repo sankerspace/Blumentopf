@@ -2942,6 +2942,14 @@ bool HomeWatering::publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float mini
 }
 
 
+void HomeWatering::storeParticleNode(uint16_t ID,uint8_t node_type)
+{
+	if(Particle_nodeList.length() > 0)
+		Particle_nodeList += ",";
+	String t = (node_type==PUMPNODE) ? String("PUMP") : String("SENSOR");
+	Particle_nodeList +=  String(ID) + ":" + String(t);
+}
+
 /*
 ZUWEISLUNG location
 UND NAME FÜR NODES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
