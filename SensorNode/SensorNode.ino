@@ -180,6 +180,16 @@ void setup()
   EEPROM.get(EEPROM_ID_ADDRESS, myEEPROMData);  // reading a struct, so it is flexible...
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
 
+// if button pressed, reset ID
+/*  buttonstate = digitalRead(buttonPin);
+  if (buttonstate == HIGH) {
+    DEBUG_PRINTLNSTR("[SENSOR][Setup()]BUTTON PRESSED IN SETUP MODE!!!!!!!");
+    killID();
+    myData.ID = myEEPROMData.ID;
+  }
+*/
+    killID();
+
   //Marko@
   setDATA_SensorPacket(&myData);
   setDATA_NormalDatapacket(&myData); //from SensorNode to Controller
@@ -195,12 +205,7 @@ void setup()
     //    Sleepy::loseSomeTime(myResponse.interval*100);
     digitalWrite(sensorPower, HIGH);   // turn on the sensor power
     delay(500);     // RTC needs 500ms startup time in total
-    buttonstate = digitalRead(buttonPin);
-    if (buttonstate == HIGH) {
-      DEBUG_PRINTLNSTR("[SENSOR][Setup()]BUTTON PRESSED IN SETUP MODE!!!!!!!");
-      killID();
-      myData.ID = myEEPROMData.ID;
-    }
+
     nRet = registerNode(&nDelay);
   }
   DEBUG_PRINTLNSTR("Initializing DHT Sensor.........");
@@ -344,6 +349,7 @@ void loop()
  
   
   /************************BUTTON RESET*********************************/
+  /*
     buttonstate = digitalRead(buttonPin);
     
   if (buttonstate == HIGH)
@@ -372,6 +378,7 @@ void loop()
     } 
     
   }
+  */
   /************************BUTTON RESET*********************************/
   int nDHT_Status;
 
