@@ -32,7 +32,7 @@
    height: 10em;
    width:60%;
   
-   background-color:#393CEB;
+   background-color:#F5ECCE;
   }
 
   #d_control {
@@ -457,8 +457,13 @@ function do_mapping()
 		fnPr.then(
 			function(data)
 			{
+			   var p = ((m_pump==1) ? "PUMP 1" : "PUMP 2");
+			   var s = ((m_sensor==1) ? "MOISTURE SENSOR 1" : "MOISTURE SENSOR 2");
+			   var text= p + " of PumpNode with ID " + m_pumpNodeId + " is connected to " + s + " of SensorNode with ID " + m_sensorNodeId + "\n";
+			   document.getElementById("infoarea_2").innerHTML+=text;
 				console.log('Function called succesfully:', data);
 				alert("done");
+				
 			}, function(err) {
 			console.log('An error occurred:', err);
 			}
