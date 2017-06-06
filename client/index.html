@@ -11,49 +11,6 @@
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 </head>
 
-<style type="text/css">
- #outputtext {
-   overflow-x:hidden;
-   height: 60em;
-   bottom: 17px;
-   width:100%;
-   color:yellow;
-   background-color:#38BC55;
-  }
-  #infoarea {
-   overflow-x:hidden;
-   height: 10em;
-   width:39.5%;
-  
-   background-color:#B6CFFC;
-  }
-  #infoarea_2 {
-   overflow-x:hidden;
-   height: 10em;
-   width:60%;
-  
-   background-color:#F5ECCE;
-  }
-
-  #d_control {
-    background-color:#01A9DB; 
-  }
-  
-  #d_mapping {
-   background-color:#FE642E; 
-  }
-  
-  #d_config{
-   background-color:#A5DF00; 
-  }
-  
-  #d_info{
-   background-color:#FA5858; 
-  }
-</style>
-
-
-
 
 <body>
 
@@ -360,7 +317,7 @@ function pump()
 	{
 		if(p_duration1 != "")				// duration 1 isn't empty
 		{
-			alert("Pump duration 1 invalid!");
+			showMsg("Pump duration 1 invalid!");
 			console.log('Pump duration 1 invalid!');
 			p_state = 1;					// do not pump!
 		}
@@ -371,7 +328,7 @@ function pump()
 	}
 	else if(p_duration1 > 60)				// this is too long!
 	{
-		alert("Pump duration 1 is too long!");
+		showMsg("Pump duration 1 is too long!");
 		p_state = 1;					// do not pump!
 	}
 	
@@ -381,7 +338,7 @@ function pump()
 	{
 		if(p_duration2 != "")				// duration 2 isn't empty
 		{
-			alert("Pump duration 2 invalid!");
+			showMsg("Pump duration 2 invalid!");
 			console.log('Pump duration 2 invalid!');
 			p_state = 1;					// do not pump!
 		}
@@ -392,14 +349,14 @@ function pump()
 	}
 	else if(p_duration2 > 60)				// this is too long!
 	{
-		alert("Pump duration 2 is too long!");
+		showMsg("Pump duration 2 is too long!");
 		p_state = 1;					// do not pump!
 	}
 	
 // no duration is specified?
 	if ((p_duration1 == 0) && (p_duration2 == 0))
 	{
-		alert("There is no pump duration specified!");
+		showMsg("There is no pump duration specified!");
 		p_state = 1;					// do not pump!
 	}
 	
@@ -407,6 +364,7 @@ function pump()
 	{
 
 		var request = String(p_nodeId) + "," + String(p_duration1) + "," + String(p_duration2);
+		console.log('Sending TurnOn-request: ', request);
 		
 	// according to Blumentopf.cpp the arguments are: pumpnode ID, duration pump1, duration pump 2
 		var fnPr = particle.callFunction({ deviceId: device, name: 'TurnOn', argument: request, auth: token_ });
@@ -415,7 +373,6 @@ function pump()
 			function(data)
 			{
 				console.log('Function called succesfully:', data);
-				alert("done");
 			}, function(err) {
 			console.log('An error occurred:', err);
 			}
@@ -448,8 +405,7 @@ function do_mapping()
 	if ((m_pump > 0) && (m_sensor > 0) && (m_pumpNodeId > 0) && (m_sensorNodeId > 0))		// all fine! Let's map!
 	{
 		var request = String(m_pumpNodeId) + ",PUMP" + String(m_pump) + "," + String(m_sensorNodeId) + ",MOISTURE" + String(m_sensor);
-		
-		alert(request);
+		console.log('Sending Mapper Request: ', request);
 		
 		
 		var fnPr = particle.callFunction({ deviceId: device, name: 'Mapper', argument: request, auth: token_ });
@@ -462,8 +418,7 @@ function do_mapping()
 			   var text= p + " of PumpNode with ID " + m_pumpNodeId + " is connected to " + s + " of SensorNode with ID " + m_sensorNodeId + "\n";
 			   document.getElementById("infoarea_2").innerHTML+=text;
 				console.log('Function called succesfully:', data);
-				alert("done");
-				
+
 			}, function(err) {
 			console.log('An error occurred:', err);
 			}
@@ -485,7 +440,7 @@ function set_name()
 // the controller also accepts longer texts, but it looks stupid then.
 	if (n_flowerName.length > 63)
 	{
-		alert("Flower name is too long!");
+		showMsg("Flower name is too long!");
 		n_flowerName = 0;
 	}
 	
@@ -496,17 +451,17 @@ function set_name()
 	
 	// format of parameter: SensorID,MOISTURE1,Plant_Name
 		request = n_sensorNodeID + ",MOISTURE" + n_sensor + "," + n_flowerName;
-		alert(request);
+		console.log('Sending PlantName request: ', request);
 		
 		var fnPr = particle.callFunction({ deviceId: device, name: 'PlantName', argument: request, auth: token_ });
+
 
 		fnPr.then(
 			function(data)
 			{
 				console.log('Function called succesfully:', data);
-				alert("done");
 			}, function(err) {
-			console.log('An error occurred:', err);
+				console.log('An error occurred:', err);
 			}
 		);
 	}
@@ -526,7 +481,7 @@ function set_location()
 // the controller also accepts longer texts, but it looks stupid then.
 	if (n_flowerLocation.length > 63)
 	{
-		alert("Flower location text is too long!");
+		showMsg("Flower location text is too long!");
 		n_flowerLocation = 0;
 	}
 	
@@ -537,7 +492,7 @@ function set_location()
 	
 	// format of parameter: SensorID,MOISTURE1,Plant_Name
 		request = n_sensorNodeID + ",MOISTURE" + n_sensor + "," + n_flowerLocation;
-		alert(request);
+		console.log('Sending Location-request: ', request);
 		
 		var fnPr = particle.callFunction({ deviceId: device, name: 'Location', argument: request, auth: token_ });
 
@@ -545,7 +500,6 @@ function set_location()
 			function(data)
 			{
 				console.log('Function called succesfully:', data);
-				alert("done");
 			}, function(err) {
 			console.log('An error occurred:', err);
 			}
@@ -575,7 +529,7 @@ function get_moisture()
 	
 	if (m_sensor == 0)
 	{
-		alert("No moisture sensor selected!");
+		showMsg("No moisture sensor selected!");
 	}
 	return m_sensor;
 }
@@ -598,7 +552,7 @@ function get_pump()
 	
 	if (m_pump == 0)
 	{
-		alert("No pump selected!");
+		showMsg("No pump selected!");
 	}
 	return m_pump;
 }
@@ -608,7 +562,7 @@ function getSensorNodebyID(nodeID)
 	var n_sensorNodeID = document.getElementById(nodeID).value;
 	if ((n_sensorNodeID == 0) || (n_sensorNodeID > 65531))
 	{
-		alert("An invalid sensor node ID has been chosen!");
+		showMsg("An invalid sensor node ID has been chosen!");
 		n_sensorNodeID = 0;
 	}
 	return n_sensorNodeID;
@@ -619,7 +573,7 @@ function getPumpNodebyID(nodeID)
 	var n_pumpNodeID = document.getElementById(nodeID).value;
 	if ((n_pumpNodeID == 0) || (n_pumpNodeID > 65531))
 	{
-		alert("An invalid pump node ID has been chosen!");
+		showMsg("An invalid pump node ID has been chosen!");
 		n_pumpNodeID = 0;
 	}
 	return n_pumpNodeID;
@@ -627,6 +581,13 @@ function getPumpNodebyID(nodeID)
  
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+
+// shows an info Text to the user
+function showMsg(textStr)
+{
+	document.getElementById("infoarea").innerHTML += textStr + "\n";
 }
 
 </script>
