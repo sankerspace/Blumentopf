@@ -28,7 +28,21 @@
    background-color:#B6CFFC;
   }
 
+  #d_control {
+    background-color:#393CEB; 
+  }
   
+  #d_mapping {
+   background-color:#FE642E; 
+  }
+  
+  #d_config{
+   background-color:#A5DF00; 
+  }
+  
+  #d_info{
+   background-color:#FA5858; 
+  }
 </style>
 
 
@@ -142,8 +156,8 @@
 
    <!------------------------------------------------------>
    <!--INFORMATION AREA -->
-   <div>
-      <span> <select name="Node Selection" id="Select_Sensor_List" size="1"></select></span>
+   <div id="d_info">
+      <!-- <span> <select name="Node Selection" id="Select_Sensor_List" size="1"></select></span> -->
       <span></span>
       <span><input type="button" name="Load" value="Load Nodes" size="1" onclick="loadNodeList()"></span>
    </div>
@@ -189,9 +203,9 @@ $('textarea').each(function () {
 function loadNodeList() {
    particle.getVariable({ deviceId: device.toString(), name: 'NODELIST', auth: token_ }).then(function(data) {
       console.log('Device variable retrieved successfully:', data);
-	  console.log('Data:', data.body.result);
+      console.log('Data:', data.body.result);
       var str=data.body.result.split(',');
-     
+      document.getElementById("infoarea").innerHTML="";
       for(i=0;i<str.length;i++)
       {
            var el = str[i].split(':');
@@ -199,30 +213,30 @@ function loadNodeList() {
            document.getElementById("infoarea").innerHTML+= nodeList[i][0] + " " + nodeList[i][1] + "\n";
       }
       
-      var sel_1 = document.getElementById('Select_Sensor_List');
+     // var sel_1 = document.getElementById('Select_Sensor_List');
       var sel_2 = document.getElementById('Select_Pump_List');
-	  var sel_3 = document.getElementById('mapping_sensor');
-	  var sel_4 = document.getElementById('mapping_pump');
-	  var sel_5 = document.getElementById('configure_sensor');
-	  
-	  
-	sel_1.innerHTML = "";
-	sel_2.innerHTML = "";
-	sel_3.innerHTML = "";
-	sel_4.innerHTML = "";
-	sel_5.innerHTML = "";
-      for(i=0;i<nodeList.length-1;i++)
+      var sel_3 = document.getElementById('mapping_sensor');
+      var sel_4 = document.getElementById('mapping_pump');
+      var sel_5 = document.getElementById('configure_sensor');
+   	  
+   	  
+   	//sel_1.innerHTML = "";
+   	sel_2.innerHTML = "";
+   	sel_3.innerHTML = "";
+   	sel_4.innerHTML = "";
+   	sel_5.innerHTML = "";
+      for(i=0;i<nodeList.length;i++)
       {
          if(nodeList[i][1].localeCompare("SENSOR")==0)
          {
-            sel_1.innerHTML += "<option>"+nodeList[i][0] + "</option>";
-			sel_3.innerHTML += "<option>"+nodeList[i][0] + "</option>";
-			sel_5.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+           // sel_1.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+			   sel_3.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+			   sel_5.innerHTML += "<option>"+nodeList[i][0] + "</option>";
          }
          else
          {
             sel_2.innerHTML += "<option>"+nodeList[i][0] + "</option>";
-			sel_4.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+			   sel_4.innerHTML += "<option>"+nodeList[i][0] + "</option>";
          }
           
       }
