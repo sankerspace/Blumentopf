@@ -23,7 +23,7 @@
 
 
 #if defined(SPARK) || defined(PLATFORM_ID)
-  #define HW  HW_PHOTON  // tells whether to compile for Arduino or Photon
+  #define HW HW_PHOTON  // tells whether to compile for Arduino or Photon
 #else
   #define HW HW_ARDUINO
 #endif
@@ -324,12 +324,12 @@ byte bcdToDec(byte);
 /****************************** W A T E R I N G **********************************************/
 /**************************************************************************************/
 // watering policy:
-#define POL_WATERING_DEFAULT_DURATION 10      // per default it should give water for 10 seconds every day after 19:00
+#define POL_WATERING_DEFAULT_DURATION 20      // per default it should give water for 10 seconds every day after 19:00
 #define WATERING_START_HOUR    23    // Start of the watering (hour)
 #define WATERING_START_MINUTE  24    // Start of the watering (minute)
 
 #define WATERING_CYCLES_TO_WAIT 2
-#define WATERING_THRESHOLD		950	// if no sensor is connected: 300, with photoresistor: 950
+#define WATERING_THRESHOLD		450	// if no sensor is connected: 300, with photoresistor: 950
 
 /* Table 5 - watering policy flags
 DO NOT CHANGE:
@@ -426,7 +426,8 @@ DO NOT CHANGE:
 #define randomPIN         A6
 #define BATTERY_SENSE_PIN A0		// Pin for Battery voltage
 #define DHTPIN            5 		// Pin number for temperature/humidity sensor
-#define DHTTYPE           DHT22//DHT11 //DHT22
+
+#define DHTTYPE           DHT11 // DHT22//DHT11
 #define MOISTURE_PIN      A2
 #define MOISTURE_PIN_2    A3
 #define LIGHT_PIN         A1 //R1(Fotoresitor[1kohm-100kohm]) R2=20 kOhm-(Marko@ 0-3,3V) R2=18kOhm
@@ -1081,7 +1082,7 @@ void   setCombinedData(uint32_t Data_,uint16_t& HighByte,uint16_t& LowByte);
 #define P_TXT_2       "2. PumpID:"
 #define DP_TXT        " sec. pumped"
 
-#define MAX_TRACKED_SENSORS 3  //mAXIMUM IS 20-1 (last is for the Nodelist)
+#define MAX_TRACKED_SENSORS 10  //mAXIMUM IS 20-1 (last is for the Nodelist)
 #define SENSOR_TRACKNAME_PREFIX "SensorData"
 /*
 struct SensorD {

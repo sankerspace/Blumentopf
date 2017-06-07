@@ -2611,10 +2611,18 @@ int HomeWatering::assignNameToSensor(String assignment)
 				if(s==MOISTURE1)
 				{
 					pList->myNodes[i].name=Plant_Name;
+					DEBUG_PRINTSTR_D("[HOMEWATERING][PLANTNAME] SensorID ",DEBUG_PARTICLE_CLOUD);
+					DEBUG_PRINT_D(Sensor_ID,DEBUG_PARTICLE_CLOUD);
+					DEBUG_PRINTSTR_D(" has been assigned a new Plant name: ",DEBUG_PARTICLE_CLOUD);
+					DEBUG_PRINTLN_D(Plant_Name,DEBUG_PARTICLE_CLOUD);
 					return 0;
 				}else if(s==MOISTURE2)
 				{
 					pList->myNodes[i].name2=Plant_Name;
+					DEBUG_PRINTSTR_D("[HOMEWATERING][PLANTNAME] SensorID ",DEBUG_PARTICLE_CLOUD);
+					DEBUG_PRINT_D(Sensor_ID,DEBUG_PARTICLE_CLOUD);
+					DEBUG_PRINTSTR_D(" has been assigned a new Plant name: ",DEBUG_PARTICLE_CLOUD);
+					DEBUG_PRINTLN_D(Plant_Name,DEBUG_PARTICLE_CLOUD);
 					return 0;
 				}
 			}
@@ -2665,6 +2673,10 @@ int HomeWatering::assignLocation(String location)
 			if(pList->myNodes[i].ID  == Sensor_ID)
 			{
 				pList->myNodes[i].location=Location_name;
+				DEBUG_PRINTSTR_D("[HOMEWATERING][LOCATION] SensorID ",DEBUG_PARTICLE_CLOUD);
+				DEBUG_PRINT_D(Sensor_ID,DEBUG_PARTICLE_CLOUD);
+				DEBUG_PRINTSTR_D(" has been assigned a new Location name ",DEBUG_PARTICLE_CLOUD);
+				DEBUG_PRINTLN_D(Location_name,DEBUG_PARTICLE_CLOUD);
 				return 0;
 			}
 		}

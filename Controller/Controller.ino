@@ -191,7 +191,7 @@ void setup(void)
   displayTimeFromUNIX(myRTC.getTime());   // if there is a RTC --> display the time independently of the RTC type
   #endif
 
-  myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //myNodeList.clearEEPROM_Nodelist();    // deletes the node list!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   myNodeList.getNodeList();
 
   //mark every response as Controller packet
@@ -677,7 +677,7 @@ void loop(void)
               {
                 DEBUG_PRINTSTR_D("\t\t\tMoisture 1: ",DEBUG_PUMP_SCHEDULING);
                 DEBUG_PRINTLN_D(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture,DEBUG_PUMP_SCHEDULING);
-                if (myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture <= WATERING_THRESHOLD)
+                if (myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture >= WATERING_THRESHOLD)
                 {
                   sens1_mo1=true;
                   pump1_duration= POL_WATERING_DEFAULT_DURATION*1000;
@@ -697,7 +697,7 @@ void loop(void)
               {
                 DEBUG_PRINTSTR_D("\t\t\tMoisture 2: ",DEBUG_PUMP_SCHEDULING);
                 DEBUG_PRINTLN_D(myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2,DEBUG_PUMP_SCHEDULING);
-                if (myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2 <= WATERING_THRESHOLD)
+                if (myNodeList.myNodes[SensorNode_Pump1].nodeData.moisture2 >= WATERING_THRESHOLD)
                 {
                   sens1_mo2=true;
                   pump1_duration= POL_WATERING_DEFAULT_DURATION*1000;
@@ -725,7 +725,7 @@ void loop(void)
               {
                 DEBUG_PRINTSTR_D("\t\t\tMoisture 1: ",DEBUG_PUMP_SCHEDULING);
                 DEBUG_PRINTLN_D(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture,DEBUG_PUMP_SCHEDULING);
-                if (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture <= WATERING_THRESHOLD)
+                if (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture >= WATERING_THRESHOLD)
                 {
                   sens2_mo1=true;
                   pump2_duration= POL_WATERING_DEFAULT_DURATION*1000;
@@ -745,7 +745,7 @@ void loop(void)
               {
                 DEBUG_PRINTSTR_D("\t\t\tMoisture 2: ",DEBUG_PUMP_SCHEDULING);
                 DEBUG_PRINTLN_D(myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2,DEBUG_PUMP_SCHEDULING);
-                if (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2 <= WATERING_THRESHOLD)
+                if (myNodeList.myNodes[SensorNode_Pump2].nodeData.moisture2 >= WATERING_THRESHOLD)
                 {
                   sens2_mo2=true;
                   pump2_duration=POL_WATERING_DEFAULT_DURATION*1000;
