@@ -1,0 +1,4 @@
+Passive Moisture Sensor(DF) Robot
+    Dry: (520 430]
+    Wet: (430 350]
+    Water: (350 260]
