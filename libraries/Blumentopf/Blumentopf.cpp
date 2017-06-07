@@ -2262,7 +2262,20 @@ bool    isRegistrationPacket(struct Data *packet)
 	return false;
 }
 
-
+float getHumidityPercentage(uint16_t humidity_value)
+{
+	/*
+	100% wet ........350
+    0%       ........744
+	*/
+	float value = (100.00/(MOISTURE_MAX-MOISTURE_MIN))*(MOISTURE_MAX-humidity_value);
+	DEBUG_PRINTSTR("[CONTROLLER][getHumidityPercentage]");
+	DEBUG_PRINT(humidity_value);
+		DEBUG_PRINTSTR("-");
+	DEBUG_PRINTDIG(value,2);
+	DEBUG_PRINTLNSTR("%");
+	return value;
+}
 
 
 
@@ -2468,11 +2481,11 @@ void HomeWatering::setParticleVariableString(uint16_t nodeList_index)
 		+ ","+ String(node->nodeData.humidity,2) + ","+String((node->nodeData.voltage)/100)
 		+ "," +link.location
 		//INFOS MOISTURE 1
-		+ "," +link.name1 + ","+ String(node->nodeData.moisture)
+		+ "," +link.name1 + ","+ String(getHumidityPercentage(node->nodeData.moisture),2)
 		+ "," + String(link.map1.PumpID) + "," + String(link.map1.p)
 		+ "," + String(link.map1.lastWatering)+ "," + String(link.map1.duration)
 		//INFOS MOISTURE 2
-		+ "," +link.name2 + ","+ String(node->nodeData.moisture2)
+		+ "," +link.name2 + ","+ String(getHumidityPercentage(node->nodeData.moisture2),2)
 		+ "," + String(link.map2.PumpID) + "," + String(link.map2.p)
 		+ "," + String(link.map2.lastWatering)+ "," + String(link.map2.duration);
 		DEBUG_PRINTSTR_D("[HOMEWATERING][setParticleVariableString()]:",DEBUG_PARTICLE_CLOUD);
@@ -2927,11 +2940,11 @@ bool HomeWatering::publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float mini
 
 		String t = String("[") + displayTime(myRTC->getTime()) + String("]");
 		String text = t + MOI_TXT + String(" ");
-		float min_ = (100*minimum_moisture)/1024;
+		float min_ = getHumidityPercentage(minimum_moisture);//(100*minimum_moisture)/1024;
 
 		if(s == MOISTURE1)
 		{
-			float m = (100*pList->myNodes[Sensorindex].nodeData.moisture)/1024;
+			float m = getHumidityPercentage(pList->myNodes[Sensorindex].nodeData.moisture);//(100*pList->myNodes[Sensorindex].nodeData.moisture)/1024;
 			text += pList->myNodes[Sensorindex].name +String(" ");
 			text += MOI_TXT_6 + pList->myNodes[Sensorindex].location + String(" ");
 			text+=MOI_TXT_3 + String(" ");
@@ -2943,7 +2956,7 @@ bool HomeWatering::publish_PlantAlert(uint16_t Sensorindex ,eSensor s,float mini
 
 		}else if(s == MOISTURE2)
 		{
-			float m = (100*pList->myNodes[Sensorindex].nodeData.moisture2)/1024;
+			float m = getHumidityPercentage(pList->myNodes[Sensorindex].nodeData.moisture2);//(100*pList->myNodes[Sensorindex].nodeData.moisture2)/1024;
 			text += pList->myNodes[Sensorindex].name2 +String(" ");
 			text += MOI_TXT_6 + pList->myNodes[Sensorindex].location + String(" ");
 			text+=MOI_TXT_3 + String(" ");

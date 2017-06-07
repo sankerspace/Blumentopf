@@ -85,7 +85,7 @@
 #define DEBUG_INFO 1         			// 0: disabled		1: show infos
 #define DEBUG_PUMP 1					//DEBUG_INFO=1 must be enabled , PUMPHANDLER infos
 #define DEBUG_PUMP_ROUNDTRIPTIME 0 //show Time information about sending data in one state and receiving in another state [PumpHandler]
-#define DEBUG_RF24 0				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
+#define DEBUG_RF24 1				//DEBUG_INFO=1 must be enabled, 0: disabled		1: show nRF24L01 infos
 #define DEBUG_TIMING_LOOP 0				//DEBUG_INFO=1 must be enabled, 1: show how much it takes tp process one loop
 
 #define DEBUG_TIMESTAMP 0       //show that timestamps are divided into two parts and send corectly to pump Node
@@ -427,7 +427,7 @@ DO NOT CHANGE:
 #define BATTERY_SENSE_PIN A0		// Pin for Battery voltage
 #define DHTPIN            5 		// Pin number for temperature/humidity sensor
 
-#define DHTTYPE           DHT11 // DHT22//DHT11
+#define DHTTYPE           DHT22 ////DHT11
 #define MOISTURE_PIN      A2
 #define MOISTURE_PIN_2    A3
 #define LIGHT_PIN         A1 //R1(Fotoresitor[1kohm-100kohm]) R2=20 kOhm-(Marko@ 0-3,3V) R2=18kOhm
@@ -477,7 +477,8 @@ DO NOT CHANGE:
 #define VOLTS_PER_SCALE (IREF / 1024.0)
 #define SCALE_OFFSET (VOLTAGE_GAP / VOLTS_PER_SCALE)
 #define VOLTAGE_DIVIDER_FACTOR ((R1+R2)/R1)	// division factor by the resistors
-
+#define MOISTURE_MAX 750
+#define MOISTURE_MIN 350
 
 
 

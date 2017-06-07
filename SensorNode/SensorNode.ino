@@ -116,7 +116,7 @@ void setup()
   pinMode(BATTERY_SENSE_PIN, INPUT);
 
   myResponse.interval = 100;  // at default repeat measurement every 2 seconds
-//  killID();
+  killID();
   //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
   delay(100);
@@ -399,8 +399,9 @@ void loop()
 uint16_t getMyID()
 {
   struct EEPROM_Data myEEPROMData;
-  
+  DEBUG_PRINTLNSTR("BEFORE EEPROM READ..............................");
   EEPROM.get(EEPROM_ID_ADDRESS, myEEPROMData);  // reading a struct, so it is flexible...
+  DEBUG_PRINTLNSTR("AFTER EEPROM READ..............................");
   return myEEPROMData.ID;                  // passing the ID to the RF24 message
 }
   

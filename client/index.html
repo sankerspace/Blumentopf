@@ -198,19 +198,22 @@ function loadNodeList() {
    	sel_5.innerHTML = "";
       for(i=0;i<nodeList.length;i++)
       {
-         if(nodeList[i][1].localeCompare("SENSOR")==0)
-         {
-           // sel_1.innerHTML += "<option>"+nodeList[i][0] + "</option>";
-			   sel_3.innerHTML += "<option>"+nodeList[i][0] + "</option>";
-			   sel_5.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+      	if(nodeList[i][1]!= "undefined")
+      	{
+	         if(nodeList[i][1].localeCompare("SENSOR")==0)
+	         {
+	           // sel_1.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+				   sel_3.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+				   sel_5.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+	         }
+	         else
+	         {
+	            sel_2.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+				   sel_4.innerHTML += "<option>"+nodeList[i][0] + "</option>";
+         	}
          }
-         else
-         {
-            sel_2.innerHTML += "<option>"+nodeList[i][0] + "</option>";
-			   sel_4.innerHTML += "<option>"+nodeList[i][0] + "</option>";
-         }
-          
       }
+      
    }, 
    function(err) {
       console.log('An error occurred while getting attrs:', err);
@@ -595,8 +598,9 @@ function showMsg(textStr)
 
 
 
-function timeConverter(UNIX_timestamp){
-  var a = new Date(UNIX_timestamp * 1000);
+function timeConverter(UNIX_timestamp)
+{ console.log("Unix timestamp: ",UNIX_timestamp);
+  var a = new Date(UNIX_timestamp*1000);
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var year = a.getFullYear();
   var month = months[a.getMonth()];
@@ -631,53 +635,55 @@ function evaluateVariableString(str_msg) {
 				text+="Humidity:"+str[3]+"%--";
 			break;
 			case 4:
-				text+="Humidity:"+str[4]+"%--";
+				text+="Battery:"+str[4]+"Volt--";
 			break;
 			case 5:
-				text+="Battery:"+str[5]+"Volt--";
+				text+="Location:"+str[5]+"--\n";
 			break;
 			case 6:
-				text+="Location:"+str[6]+"--";
+				text+="Plant-1:"+str[6]+"--";
 			break;
 			case 7:
-				text+="Plant:"+str[7]+"--";
+				text+="Moisture-1:"+str[7]+"%--";
 			break;
 			case 8:
-				text+="Moisture:"+str[8]+"--";
+				text+="PumpNodeID:"+str[8]+"--";
 			break;
 			case 9:
-				text+="PumpNodeID:"+str[9]+"--\n";
+				var p=((str[9]==0)? "PUMP-1":"PUMP-2");
+				text+="by "+p+"--";
 			break;
 			case 10:
-				var p=((str[10]==0)? "PUMP-1":"PUMP-2");
-				text+="by "+p+"--";
-			break;
-			case 11:
-				var t=timeConverter(str[11]);
+				console.log("case 10: ",str[10]);
+				var t=timeConverter(parseInt(str[10]));
 				text+="lastWatering:["+t+"]--";
 			break;
+			case 11:
+				text+="duration:"+str[11]+"--\n";
+			break;
 			case 12:
-				text+="duration:"+str[12]+"--";
+				text+="Plant-2:"+str[12]+"--";
 			break;
 			case 13:
-				text+="Plant-2:"+str[13]+"--";
+				text+="Moisture-2:"+str[13]+"%--";
 			break;
 			case 14:
-				text+="Moisture-2:"+str[14]+"--";
+				text+="PumpNodeID:"+str[14]+"--";
 			break;
 			case 15:
-				text+="PumpNodeID:"+str[15]+"--";
-			break;
-			case 16:
-				var p=((str[16]==0)? "PUMP-1":"PUMP-2");
+				var p=((str[15]==0)? "PUMP-1":"PUMP-2");
 				text+="by "+p+"--";
 			break;
-			case 18:
-				var t=timeConverter(str[18]);
+			case 16:
+			console.log("case 10: ",str[16]);
+				var t=timeConverter(parseInt(str[16]));
 				text+="lastWatering-2:["+t+"]--";
 			break;
-			case 19:
-				text+="duration-2:"+str[19]+"";
+			case 17:
+				text+="duration-2:"+str[17]
+				+"\n-------------------------------------------------------------------------\n";
+			break;
+			default:
 			break;
 		}
 	}
