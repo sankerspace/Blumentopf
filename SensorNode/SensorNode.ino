@@ -120,7 +120,10 @@ void setup()
   pinMode(buttonPin, INPUT);
 
   myResponse.interval = 100;  // at default repeat measurement every 2 seconds
+
+
   //killID();
+
   //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
   delay(100);
@@ -419,6 +422,7 @@ void loop()
 
 
 
+  myData.ID = getMyID();        // 20170607 - in case wrong EEPROM data is read (what shouldn't happen of course, but might), the ID is overwritten. So make sure to always transmit the correct ID!
   sendData();
 
 
@@ -437,6 +441,14 @@ void loop()
 
 }
 
+uint16_t getMyID()
+{
+  struct EEPROM_Data myEEPROMData;
+  
+  EEPROM.get(EEPROM_ID_ADDRESS, myEEPROMData);  // reading a struct, so it is flexible...
+  return myEEPROMData.ID;                  // passing the ID to the RF24 message
+}
+  
 /*
    If the RTC pins are not turned off, they will consume 170µA during sleep
 */

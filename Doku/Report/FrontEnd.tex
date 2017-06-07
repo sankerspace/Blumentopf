@@ -1,0 +1,42 @@
+In order to adjust, maintain and control the system, it is necessary to have direct access to certain features. As it is not feasible to interact with the Photon or an Arduino a front-end has been developed. Note that the functions offered by the front-end are also accessible through console.particle.io or the Particle app. However the front-end is more user friendly. The front end offers the possibility to mate a sensor node with a pump node, to see the sensor data of a particular node and to manually start the watering of a flower pot.
+This chapter can be considered as a user guide for operating the whole system.
+In the following the features are introduced with an example each.
+
+\subsubsection{Mapping}
+For watering the flowers the system needs to know which sensors monitor which flowers. This is called the mapping and can be done via the front end.
+Each pump node can support up to two pumps and every sensor node can own up to two moisture sensors. \textbf{A word of warning}: It is important to make sure to chose the right pump and the right sensor, otherwise the flower might not be watered, but the floor instead.\\
+A pump does not need to be mapped and a moisture sensor does not need to be mapped to.
+To map a pump node to a sensor node they have to be selected in the drop down list. Further the user has to chose which moisture sensor should be and which pump should be mapped. An example is shown in the following figure.
+
+\begin{figure}[h!]
+	\begin{center}
+	\includegraphics[scale=0.18]{images/dummy.png}
+	\caption{How to map a pump to a moisture sensor.}
+	\label{fig:mapping}
+	\end{center}
+\end{figure}
+
+
+\subsubsection{Sensor View}
+To monitor the most recent environment values, all sensor data can be listed in the front end.
+
+\begin{figure}[h!]
+	\begin{center}
+	\includegraphics[scale=0.18]{images/dummy.png}
+	\caption{Overview of the sensor data.}
+	\label{fig:sensor_overview}
+	\end{center}
+\end{figure}
+
+\subsubsection{Manual Watering}
+Under special circumstances one might decide to manually add some water to a flower. In this case the front end offers a comfortable way to do so.
+The user only has to chose the flower from the drop down menu and how long the water should be running. (in seconds)
+The following figure shows an example.
+
+\begin{figure}[h!]
+	\begin{center}
+	\includegraphics[scale=0.18]{images/dummy.png}
+	\caption{How to manually water a flower.}
+	\label{fig:manual_watering}
+	\end{center}
+\end{figure}
