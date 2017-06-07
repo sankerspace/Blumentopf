@@ -13,7 +13,7 @@
 */
 
 
-
+ 
 
 #include <JeeLib.h>   // For sleeping
 //#include <dht11.h>    // Termperature and humidity sensork //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -76,14 +76,11 @@ int moisturePin = MOISTURE_PIN;//A0
 int moisturePin2 = MOISTURE_PIN_2;//A2
 int lightPin = LIGHT_PIN;//A1
 int sensorPower = SENSOR_POWER;//8
-const uint8_t buttonPin = BUTTON_PIN;//4
 
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[3] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL, 0xE8E8F0F0E1LL};
-/*****************BUTTON RESET*************************/
-  bool bounce = false;
-  int buttonstate = 0;
-  uint32_t previousTime = 0, dif = 0;
+
+
 
 /*
     Hardware configuration for DHT11
@@ -117,13 +114,9 @@ void setup()
   pinMode(lightPin, INPUT);
   pinMode(sensorPower, OUTPUT);
   pinMode(BATTERY_SENSE_PIN, INPUT);
-  pinMode(buttonPin, INPUT);
 
   myResponse.interval = 100;  // at default repeat measurement every 2 seconds
-
-
-  //killID();
-
+//  killID();
   //  digitalWrite(sensorPower, LOW);   // turn off the sensor power
   digitalWrite(sensorPower, HIGH);   // turn off the sensor power
   delay(100);
@@ -180,16 +173,6 @@ void setup()
   EEPROM.get(EEPROM_ID_ADDRESS, myEEPROMData);  // reading a struct, so it is flexible...
   myData.ID = myEEPROMData.ID;                  // passing the ID to the RF24 message
 
-// if button pressed, reset ID
-/*  buttonstate = digitalRead(buttonPin);
-  if (buttonstate == HIGH) {
-    DEBUG_PRINTLNSTR("[SENSOR][Setup()]BUTTON PRESSED IN SETUP MODE!!!!!!!");
-    killID();
-    myData.ID = myEEPROMData.ID;
-  }
-*/
-    killID();
-
   //Marko@
   setDATA_SensorPacket(&myData);
   setDATA_NormalDatapacket(&myData); //from SensorNode to Controller
@@ -205,7 +188,6 @@ void setup()
     //    Sleepy::loseSomeTime(myResponse.interval*100);
     digitalWrite(sensorPower, HIGH);   // turn on the sensor power
     delay(500);     // RTC needs 500ms startup time in total
-
     nRet = registerNode(&nDelay);
   }
   DEBUG_PRINTLNSTR("Initializing DHT Sensor.........");
@@ -346,40 +328,6 @@ int registerNode(int *pnDelay)
 // the loop function runs over and over again forever
 void loop()
 {
- 
-  
-  /************************BUTTON RESET*********************************/
-  /*
-    buttonstate = digitalRead(buttonPin);
-    
-  if (buttonstate == HIGH)
-  {
-    dif = 0;
-    DEBUG_PRINTLNSTR("[SENSORNODE]BUTTON PRESSED!!!!!!!!!!!!");
-    if (!bounce)
-      previousTime = millis();
-    bounce = true;
-
-  } else if (bounce == true) {
-
-    dif = millis() - previousTime;
-    if (dif > 2000)
-    {
-      DEBUG_PRINTLNSTR("[SENSORNODE]REGISTRATION RESET WITH REQUESTING A NEW ID");
-      int nRet=0;
-      while(nRet==0)
-      {
-        int nDelay;
-        nRet = registerNode(&nDelay);
-        delay(2000);
-      }
-      bounce = false;
-      previousTime = millis();
-    } 
-    
-  }
-  */
-  /************************BUTTON RESET*********************************/
   int nDHT_Status;
 
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on to indicate action
